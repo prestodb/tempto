@@ -1,0 +1,73 @@
+/*
+ * Teradata Testing Library
+ *
+ * Copyright 2012-2015, Teradata, Inc. All rights reserved.
+ */
+
+apply plugin: "idea"
+apply plugin: "java"
+
+buildscript {
+  // buildscript is executed before anything, so ext variable is not yet configured
+  // and some values has to be set here
+  ext.teradataNexusRepositories = {
+    maven {
+      url 'http://jenkins.eng.hadapt.com:8081/nexus/content/groups/hadapt-deps'
+    }
+    maven {
+      url "http://jenkins.eng.hadapt.com:8081/nexus/content/repositories/build/"
+    }
+  }
+  repositories teradataNexusRepositories
+}
+
+repositories teradataNexusRepositories
+
+ext.versions = [
+  fest_assert:          '1.4',
+  guava:                '11.0.2',
+  guice:                '3.0',
+  log4j:                '1.2.17',
+  testng:               '6.8'
+]
+
+ext.libraries = [
+  fest_assert:          "org.easytesting:fest-assert:${versions.fest_assert}",
+  guava:                "com.google.guava:guava:${versions.guava}",
+  guice:                "com.google.inject:guice:${versions.guice}",
+  log4j:                "log4j:log4j:${versions.log4j}",
+  testng:               "org.testng:testng:${versions.testng}"
+]
+
+dependencies {
+  compile libraries.fest_assert
+  compile libraries.guava
+  compile libraries.guice
+  compile libraries.log4j
+  compile libraries.testng
+  compile files("libs/tdgssconfig.jar", "libs/terajdbc4.jar")
+}
+
+task testWithJunit(type: Test) {
+  reports.html.destination = file("$buildDir/reports/test-junit")
+  reports.html.enabled = true
+  testLogging {
+    exceptionFormat 'full'
+  }
+}
+
+test {
+  //TODO: remove separate task for junit testing once testng mixed moge get implemented in gradle
+  dependsOn testWithJunit
+  useTestNG()
+  reports.html.destination = file("$buildDir/reports/test-testng")
+  reports.html.enabled = true
+  testLogging {
+    exceptionFormat 'full'
+  }
+  options.parallel = 'tests'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.3'
+}

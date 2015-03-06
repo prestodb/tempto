@@ -1,0 +1,9 @@
+# Build files
+.gradle/
+build/
+
+# Ignore IntelliJ files
+.idea/
+out/
+*.iml
+*.eml
