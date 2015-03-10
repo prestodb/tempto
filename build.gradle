@@ -34,7 +34,7 @@ allprojects {
 ext.versions = [
   fest_assert:          '1.4',
   guava:                '11.0.2',
-  guice:                '3.0',
+  guice:                '4.0-beta5',
   log4j:                '1.2.17',
   testng:               '6.8',
   spock:                '0.7-groovy-2.0',
