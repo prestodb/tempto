@@ -6,6 +6,12 @@
 
 apply plugin: "idea"
 apply plugin: "java"
+apply plugin: "groovy"
+
+plugins.withType(JavaPlugin) {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
 
 buildscript {
   // buildscript is executed before anything, so ext variable is not yet configured
@@ -28,7 +34,8 @@ ext.versions = [
   guava:                '11.0.2',
   guice:                '3.0',
   log4j:                '1.2.17',
-  testng:               '6.8'
+  testng:               '6.8',
+  spock:                '0.7-groovy-2.0',
 ]
 
 ext.libraries = [
@@ -36,7 +43,8 @@ ext.libraries = [
   guava:                "com.google.guava:guava:${versions.guava}",
   guice:                "com.google.inject:guice:${versions.guice}",
   log4j:                "log4j:log4j:${versions.log4j}",
-  testng:               "org.testng:testng:${versions.testng}"
+  testng:               "org.testng:testng:${versions.testng}",
+  spock:                "org.spockframework:spock-core:0.7-groovy-2.0",
 ]
 
 dependencies {
@@ -46,6 +54,8 @@ dependencies {
   compile libraries.log4j
   compile libraries.testng
   compile files("libs/tdgssconfig.jar", "libs/terajdbc4.jar")
+
+  testCompile libraries.spock
 }
 
 task testWithJunit(type: Test) {
