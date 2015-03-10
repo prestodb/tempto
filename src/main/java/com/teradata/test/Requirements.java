@@ -3,27 +3,45 @@
  */
 package com.teradata.test;
 
-import java.util.List;
-import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Sets.newHashSet;
+import java.util.List;
+
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.Lists.transform;
 import static java.util.Arrays.asList;
 
 /**
  * An utility class for composing requirements.
  */
-public class Requirements {
+public final class Requirements {
 
-    public static RequirementsInfo compose(Requirement... requirements) {
+    public static Requirement compose(Requirement... requirements) {
         return compose(asList(requirements));
     }
 
-    public static RequirementsInfo compose(List<Requirement> requirements) {
-        return () -> newHashSet(transform(requirements, Requirements::wrapInSet));
+    public static Requirement compose(List<Requirement> requirements) {
+        return new MultiCompositeRequirement(ImmutableSet.of(copyOf(wrapAsCompositeRequirement(requirements))));
     }
 
-    private static Set<Requirement> wrapInSet(Requirement requirement) {
-        return newHashSet(requirement);
+    public static Requirement allOf(Requirement... requirements) {
+        return allOf(asList(requirements));
+    }
+
+    public static Requirement allOf(List<Requirement> requirements) {
+        return new MultiCompositeRequirement(copyOf(transform(wrapAsCompositeRequirement(requirements), ImmutableSet::<CompositeRequirement>of)));
+    }
+
+    private static List<CompositeRequirement> wrapAsCompositeRequirement(List<Requirement> requirements) {
+        return transform(requirements, (Requirement requirement) -> {
+            if (requirement instanceof CompositeRequirement) {
+                return (CompositeRequirement) requirement;
+            } else {
+                return new SingletonCompositeRequirement(requirement);
+            }
+        });
+    }
+
+    private Requirements() {
     }
 }
