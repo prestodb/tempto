@@ -8,7 +8,8 @@ import java.util.Set;
 /**
  * Specifies a sets of requirements.
  */
-public interface CompositeRequirement extends Requirement {
-
+public interface CompositeRequirement
+        extends Requirement
+{
     Set<Set<Requirement>> getRequirementsSets();
 }

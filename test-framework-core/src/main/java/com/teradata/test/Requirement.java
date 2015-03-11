@@ -6,5 +6,6 @@ package com.teradata.test;
 /**
  * Specifies a test requirement.
  */
-public interface Requirement {
+public interface Requirement
+{
 }

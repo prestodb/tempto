@@ -16,9 +16,10 @@ import static com.teradata.test.Requirements.compose;
 /**
  * This class gathers requirements for a given test method.
  */
-public final class RequirementsCollector {
-
-    public static Set<Set<Requirement>> collectRequirementsFor(Method method) {
+public final class RequirementsCollector
+{
+    public static Set<Set<Requirement>> collectRequirementsFor(Method method)
+    {
         Requires methodRequiresAnnotation = method.getAnnotation(Requires.class);
         CompositeRequirement methodCompositeRequirement = getCompositeRequirement(methodRequiresAnnotation);
 
@@ -28,26 +29,31 @@ public final class RequirementsCollector {
         return compose(methodCompositeRequirement, classCompositeRequirement).getRequirementsSets();
     }
 
-    private static CompositeRequirement getCompositeRequirement(Requires requires) {
+    private static CompositeRequirement getCompositeRequirement(Requires requires)
+    {
         if (requires != null) {
             checkArgument(requires.value() != null);
             return compose(toRequirements(requires.value()));
-        } else {
+        }
+        else {
             return compose();
         }
     }
 
-    private static List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers) {
+    private static List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers)
+    {
         return Lists.transform(Arrays.asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
             try {
                 RequirementsProvider provider = providerClass.newInstance();
                 return provider.getRequirements();
-            } catch (InstantiationException | IllegalAccessException e) {
+            }
+            catch (InstantiationException | IllegalAccessException e) {
                 throw new IllegalArgumentException("Could not instantiate provider class", e);
             }
         });
     }
 
-    private RequirementsCollector() {
+    private RequirementsCollector()
+    {
     }
 }

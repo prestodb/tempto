@@ -4,6 +4,7 @@
 package com.teradata.test;
 
 @FunctionalInterface
-public interface RequirementsProvider {
-  Requirement getRequirements();
+public interface RequirementsProvider
+{
+    Requirement getRequirements();
 }

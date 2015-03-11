@@ -10,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-public @interface Requires {
-  Class<? extends RequirementsProvider>[] value();
+public @interface Requires
+{
+    Class<? extends RequirementsProvider>[] value();
 }

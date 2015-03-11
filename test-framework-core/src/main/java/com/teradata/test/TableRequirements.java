@@ -3,12 +3,14 @@
  */
 package com.teradata.test;
 
-public final class TableRequirements {
-
-    public static Requirement table(String tableName) {
+public final class TableRequirements
+{
+    public static Requirement table(String tableName)
+    {
         throw new RuntimeException("not implemented");
     }
 
-    private TableRequirements() {
+    private TableRequirements()
+    {
     }
 }
