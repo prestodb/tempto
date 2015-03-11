@@ -27,7 +27,9 @@ buildscript {
   repositories teradataNexusRepositories
 }
 
-repositories teradataNexusRepositories
+allprojects {
+  repositories teradataNexusRepositories
+}
 
 ext.versions = [
   fest_assert:          '1.4',
@@ -47,16 +49,8 @@ ext.libraries = [
   spock:                "org.spockframework:spock-core:0.7-groovy-2.0",
 ]
 
-dependencies {
-  compile libraries.fest_assert
-  compile libraries.guava
-  compile libraries.guice
-  compile libraries.log4j
-  compile libraries.testng
-  compile files("libs/tdgssconfig.jar", "libs/terajdbc4.jar")
-
-  testCompile libraries.spock
-}
+ext.test_framework_core = project(":test-framework-core")
+ext.test_framework_examples = project(":test-framework-examples")
 
 task testWithJunit(type: Test) {
   reports.html.destination = file("$buildDir/reports/test-junit")

@@ -1,0 +1,12 @@
+/**
+ * Examples of test framework usage
+ *
+ * Copyright 2015, Teradata Inc.
+ */
+
+apply plugin: "java"
+
+dependencies {
+  compile test_framework_core
+  compile libraries.testng
+}
