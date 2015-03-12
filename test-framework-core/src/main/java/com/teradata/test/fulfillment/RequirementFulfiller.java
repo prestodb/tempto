@@ -9,11 +9,11 @@ import com.teradata.test.context.State;
 
 import java.util.List;
 
-public interface RequirementFulfiller
+public interface RequirementFulfiller<S extends State>
 {
     // todo do more thinking on this
 
-    List<State> fulfill(List<Requirement> requirements);
+    List<S> fulfill(List<Requirement> requirements);
 
     void cleanup();
 }

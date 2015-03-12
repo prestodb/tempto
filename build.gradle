@@ -44,6 +44,7 @@ ext.libraries = [
   guice:                "com.google.inject:guice:${versions.guice}",
   log4j:                "log4j:log4j:${versions.log4j}",
   testng:               "org.testng:testng:${versions.testng}",
+  commons_lang3:        "org.apache.commons:commons-lang3:3.3.2",
   spock:                "org.spockframework:spock-core:0.7-groovy-2.0",
 ]
 
