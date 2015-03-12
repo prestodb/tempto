@@ -9,7 +9,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.teradata.test.Requirement;
+import com.teradata.test.context.GuiceTestContext;
 import com.teradata.test.context.State;
+import com.teradata.test.context.TestContext;
+import com.teradata.test.context.ThreadLocalTestContextHolder;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
@@ -22,6 +25,7 @@ import java.util.Optional;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.util.Modules.combine;
 import static com.google.inject.util.Modules.override;
@@ -87,7 +91,7 @@ public class TestInitializationListener
 
     private void doCleanup(List<RequirementFulfiller> fulfillers)
     {
-        for (RequirementFulfiller fulfiller : fulfillers) {
+        for (RequirementFulfiller fulfiller : reverse(fulfillers)) {
             fulfiller.cleanup();
         }
     }
@@ -113,17 +117,18 @@ public class TestInitializationListener
         List<Class<? extends RequirementFulfiller>> testLevelFulfillers = ImmutableList.<Class<? extends RequirementFulfiller>>of();
         setTestFulfillmentResult(doFulfillment(testGuiceModule, testLevelFulfillers, testSpecificRequirements));
 
-        // todo create TestContext here and set it in test
-        // todo store TestContext in some ThreadLocal for static helpers
+        TestContext testContext = new GuiceTestContext(testFulfillmentResult.get().getGuiceModule(), testFulfillmentResult.get().getGuiceInjector());
+        ThreadLocalTestContextHolder.setTestContext(testContext);
     }
 
     @Override
     public void afterTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
     {
+        ThreadLocalTestContextHolder.clearTestContext();
+
         if (testFulfillmentResult.isPresent()) {
             doCleanup(testFulfillmentResult.get());
         }
-        // todo remove TestContext from ThreadLocal
 
         unsetTestFulfillmentResult();
     }
