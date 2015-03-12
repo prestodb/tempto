@@ -1,7 +1,5 @@
-/**
- * Examples of test framework usage
- *
- * Copyright 2015, Teradata Inc.
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
 apply plugin: "java"

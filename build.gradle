@@ -1,7 +1,5 @@
 /*
- * Teradata Testing Library
- *
- * Copyright 2012-2015, Teradata, Inc. All rights reserved.
+ * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
 apply plugin: "idea"

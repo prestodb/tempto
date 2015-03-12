@@ -1,3 +1,7 @@
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
+ */
+
 package com.teradata.test.examples;
 
 import com.teradata.test.Requirement;

@@ -1,7 +1,5 @@
-/**
- * Core, backend independent part of test-framework
- *
- * Copyright 2015, Teradata Inc.
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
 apply plugin: "java"
