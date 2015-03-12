@@ -8,12 +8,13 @@ import com.teradata.test.Requirement;
 import com.teradata.test.context.State;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RequirementFulfiller<S extends State>
 {
     // todo do more thinking on this
 
-    List<S> fulfill(List<Requirement> requirements);
+    Set<S> fulfill(Set<Requirement> requirements);
 
     void cleanup();
 }

@@ -44,10 +44,10 @@ class JdbcConnectivityFulfillerTest
     def fulfiller = new JdbcConnectivityFulfiller(mockedConfiguration)
 
     when:
-    fulfiller.fulfill([new JdbcConnectivityRequirement()])
+    fulfiller.fulfill([new JdbcConnectivityRequirement()] as Set)
 
     then:
-    fulfiller.fulfill([new JdbcConnectivityRequirement()]) == [new JdbcConnectivityState(DRIVER_CLASSNAME, DRIVER_URL, DRIVER_USER, DRIVER_PASSWORD)]
+    fulfiller.fulfill([new JdbcConnectivityRequirement()] as Set) == [new JdbcConnectivityState(DRIVER_CLASSNAME, DRIVER_URL, DRIVER_USER, DRIVER_PASSWORD)] as Set
   }
 
   def "should throw exception for unreachable JDBC server"()
@@ -56,7 +56,7 @@ class JdbcConnectivityFulfillerTest
     def fulfiller = new JdbcConnectivityFulfiller(invalidConfiguration)
 
     when:
-    fulfiller.fulfill([new JdbcConnectivityRequirement()])
+    fulfiller.fulfill([new JdbcConnectivityRequirement()] as Set)
 
     then:
     thrown(RuntimeException)
@@ -68,7 +68,7 @@ class JdbcConnectivityFulfillerTest
     def fulfiller = new JdbcConnectivityFulfiller(invalidConfiguration)
 
     expect:
-    fulfiller.fulfill([]) isEmpty()
+    fulfiller.fulfill([] as Set) isEmpty()
   }
 
   def getInvalidConfiguration()

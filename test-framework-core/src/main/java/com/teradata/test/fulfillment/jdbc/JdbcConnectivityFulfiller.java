@@ -10,12 +10,13 @@ import com.teradata.test.fulfillment.RequirementFulfiller;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Set;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.sql.DriverManager.getConnection;
+import static java.util.Collections.emptySet;
 
 /**
  * Produces {@link JdbcConnectivityState} from {@link }.
@@ -37,15 +38,15 @@ public class JdbcConnectivityFulfiller
     }
 
     @Override
-    public List<JdbcConnectivityState> fulfill(List<Requirement> requirements)
+    public Set<JdbcConnectivityState> fulfill(Set<Requirement> requirements)
     {
         if (isEmpty(filter(requirements, JdbcConnectivityRequirement.class))) {
-            return newArrayList();
+            return emptySet();
         }
 
         checkConnection();
 
-        return newArrayList(new JdbcConnectivityState(
+        return newHashSet(new JdbcConnectivityState(
                 configuration.getStringMandatory(JDBC_DRIVER_CLASS),
                 configuration.getStringMandatory(JDBC_URL_KEY),
                 configuration.getStringMandatory(JDBC_USER_KEY),

@@ -4,9 +4,11 @@
 package com.teradata.test.fulfillment.jdbc;
 
 import com.teradata.test.context.State;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 
 /**
  * Contains configuration required to connect to a JDBC server.
@@ -37,5 +39,11 @@ public class JdbcConnectivityState
     public int hashCode()
     {
         return reflectionHashCode(this);
+    }
+
+    @Override
+    public String toString()
+    {
+        return reflectionToString(this);
     }
 }

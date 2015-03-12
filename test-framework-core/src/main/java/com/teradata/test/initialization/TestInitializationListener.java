@@ -4,6 +4,7 @@
 
 package com.teradata.test.initialization;
 
+import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -18,17 +19,23 @@ import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
 import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
+import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.Guice.createInjector;
 import static com.google.inject.util.Modules.combine;
 import static com.google.inject.util.Modules.override;
+import static com.teradata.test.RequirementsCollector.collectRequirementsFor;
 
 public class TestInitializationListener
         extends TestSuiteAwareTestInvocationListener
@@ -40,7 +47,7 @@ public class TestInitializationListener
     @Override
     public void beforeSuite(ITestContext context)
     {
-        List<Requirement> allTestsRequirements = getAllTestsRequirements(context);
+        Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
 
         // todo maybe list of modules and/or fulfiller should depend of test framework configuration provided by user
         List<Module> suiteModules = ImmutableList.of(
@@ -55,7 +62,7 @@ public class TestInitializationListener
 
     private FulfillmentResult doFulfillment(Module baseModule,
             List<Class<? extends RequirementFulfiller>> fulillerClasses,
-            List<Requirement> requirements)
+            Set<Requirement> requirements)
     {
         Module currentModule = baseModule;
         List<RequirementFulfiller> successfulFulfillers = newArrayList();
@@ -63,7 +70,7 @@ public class TestInitializationListener
             for (Class<? extends RequirementFulfiller> fulillerClass : fulillerClasses) {
                 Injector currentInjector = createInjector(currentModule);
                 RequirementFulfiller fulfiller = currentInjector.getInstance(fulillerClass);
-                List<State> states = fulfiller.fulfill(requirements);
+                Set<State> states = fulfiller.fulfill(requirements);
                 currentModule = override(currentModule).with(new AbstractModule()
                 {
                     @Override
@@ -107,7 +114,7 @@ public class TestInitializationListener
     @Override
     public void beforeTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
     {
-        List<Requirement> testSpecificRequirements = getTestSpecificRequirements(method);
+        Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
 
         Module suiteGuiceModule = suiteFulfillmentResult.get().getGuiceModule();
         // todo do we actually need to extend list of guice modules here
@@ -133,16 +140,28 @@ public class TestInitializationListener
         unsetTestFulfillmentResult();
     }
 
-    private List<Requirement> getAllTestsRequirements(ITestContext context)
+    private Set<Requirement> getAllTestsRequirements(ITestContext context)
     {
-        // todo implement
-        throw new RuntimeException("not implemented");
+        Set<Requirement> allTestsRequirements = Sets.newHashSet();
+        for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
+            Set<Set<Requirement>> requirementSets = collectRequirementsFor(getJavaMethodFetTestMethod(iTestNGMethod));
+            for (Set<Requirement> requirementSet : requirementSets) {
+                allTestsRequirements.addAll(requirementSet);
+            }
+        }
+        return allTestsRequirements;
     }
 
-    private List<Requirement> getTestSpecificRequirements(IInvokedMethod method)
+    private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod)
     {
-        // todo implement
-        throw new RuntimeException("not implemented");
+        Set<Set<Requirement>> requirementSets = collectRequirementsFor(getJavaMethodFetTestMethod(testMethod));
+        checkArgument(requirementSets.size() == 1, "multiple sets of requirements per test are not supported yet");
+        return getOnlyElement(requirementSets);
+    }
+
+    private Method getJavaMethodFetTestMethod(ITestNGMethod method)
+    {
+        return method.getConstructorOrMethod().getMethod();
     }
 
     private void setSuiteFullmentResult(FulfillmentResult fulfillmentResult)

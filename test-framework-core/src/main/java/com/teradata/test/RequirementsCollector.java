@@ -13,6 +13,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.test.Requirements.compose;
+import static java.util.Arrays.asList;
 
 /**
  * This class gathers requirements for a given test method.
@@ -43,7 +44,7 @@ public final class RequirementsCollector
 
     private static List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers)
     {
-        return Lists.transform(Arrays.asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
+        return Lists.transform(asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
             try {
                 RequirementsProvider provider = providerClass.newInstance();
                 return provider.getRequirements();
