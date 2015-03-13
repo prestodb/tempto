@@ -58,7 +58,7 @@ public class TestInitializationListener
             List<Requirement> requirements)
     {
         Module currentModule = baseModule;
-        List<RequirementFulfiller> fulfillers = newArrayList();
+        List<RequirementFulfiller> successfulFulfillers = newArrayList();
         try {
             for (Class<? extends RequirementFulfiller> fulillerClass : fulillerClasses) {
                 Injector currentInjector = createInjector(currentModule);
@@ -74,12 +74,12 @@ public class TestInitializationListener
                         }
                     }
                 });
-                fulfillers.add(fulfiller);
+                successfulFulfillers.add(fulfiller);
             }
-            return new FulfillmentResult(fulfillers, createInjector(currentModule), currentModule);
+            return new FulfillmentResult(successfulFulfillers, createInjector(currentModule), currentModule);
         }
         catch (RuntimeException e) {
-            doCleanup(fulfillers);
+            doCleanup(successfulFulfillers);
             throw e;
         }
     }
