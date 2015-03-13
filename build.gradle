@@ -36,6 +36,7 @@ ext.versions = [
   log4j:                '1.2.17',
   testng:               '6.8',
   spock:                '0.7-groovy-2.0',
+  slf4j:                '1.7.5'
 ]
 
 ext.libraries = [
@@ -46,30 +47,12 @@ ext.libraries = [
   testng:               "org.testng:testng:${versions.testng}",
   commons_lang3:        "org.apache.commons:commons-lang3:3.3.2",
   spock:                "org.spockframework:spock-core:0.7-groovy-2.0",
+  slf4j:                ["org.slf4j:slf4j-api:${versions.slf4j}",
+                         "org.slf4j:slf4j-log4j12:${versions.slf4j}"]
 ]
 
 ext.test_framework_core = project(":test-framework-core")
 ext.test_framework_examples = project(":test-framework-examples")
-
-task testWithJunit(type: Test) {
-  reports.html.destination = file("$buildDir/reports/test-junit")
-  reports.html.enabled = true
-  testLogging {
-    exceptionFormat 'full'
-  }
-}
-
-test {
-  //TODO: remove separate task for junit testing once testng mixed moge get implemented in gradle
-  dependsOn testWithJunit
-  useTestNG()
-  reports.html.destination = file("$buildDir/reports/test-testng")
-  reports.html.enabled = true
-  testLogging {
-    exceptionFormat 'full'
-  }
-  options.parallel = 'tests'
-}
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'

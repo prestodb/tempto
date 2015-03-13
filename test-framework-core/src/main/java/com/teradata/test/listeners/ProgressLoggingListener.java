@@ -4,37 +4,55 @@
 
 package com.teradata.test.listeners;
 
+import com.google.common.base.Joiner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
 class ProgressLoggingListener implements ITestListener {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ProgressLoggingListener.class);
 
-  @Override
-  public void onStart(ITestContext context) {
-  }
+    private int current;
+    private int total;
+    private int succeeded;
+    private int skipped;
+    private int failed;
 
-  @Override
-  public void onTestStart(ITestResult testCase) {
-  }
+    @Override
+    public void onStart(ITestContext context) {
+        current = 1;
+        total = context.getAllTestMethods().length;
 
-  @Override
-  public void onTestSuccess(ITestResult testCase) {
-  }
+        succeeded = skipped = failed = 0;
+    }
 
-  @Override
-  public void onTestFailure(ITestResult testCase) {
-  }
+    @Override
+    public void onTestStart(ITestResult testCase) {
+        String qualifiedTestName = testCase.getInstanceName() + "." + testCase.getName();
+        LOGGER.info("[{} of {}] {} (Groups: {})",
+                    current++, total++, qualifiedTestName, Joiner.on(' ').join(testCase.getMethod().getGroups()));
+    }
 
-  @Override
-  public void onTestSkipped(ITestResult testCase) {
-  }
+    @Override
+    public void onTestSuccess(ITestResult testCase) {
+        succeeded++;
+    }
 
-  @Override
-  public void onTestFailedButWithinSuccessPercentage(ITestResult testCase) {
-  }
+    @Override
+    public void onTestFailure(ITestResult testCase) {
+    }
 
-  @Override
-  public void onFinish(ITestContext context) {
-  }
+    @Override
+    public void onTestSkipped(ITestResult testCase) {
+    }
+
+    @Override
+    public void onTestFailedButWithinSuccessPercentage(ITestResult testCase) {
+    }
+
+    @Override
+    public void onFinish(ITestContext context) {
+    }
 }

@@ -7,3 +7,9 @@ build/
 out/
 *.iml
 *.eml
+
+*.pyc
+
+# vi temp files
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
