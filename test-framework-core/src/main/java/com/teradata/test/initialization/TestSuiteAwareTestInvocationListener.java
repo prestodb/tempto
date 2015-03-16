@@ -36,13 +36,13 @@ public abstract class TestSuiteAwareTestInvocationListener
 
     private boolean isFirstTestMethod(IInvokedMethod method, ITestContext context)
     {
-        return context.getAllTestMethods()[0].equals(method);
+        return context.getAllTestMethods()[0].equals(method.getTestMethod());
     }
 
     private boolean isLastTestMethod(IInvokedMethod method, ITestContext context)
     {
         ITestNGMethod[] allTestMethods = context.getAllTestMethods();
-        return allTestMethods[allTestMethods.length - 1].equals(method);
+        return allTestMethods[allTestMethods.length - 1].equals(method.getTestMethod());
     }
 
     @Override

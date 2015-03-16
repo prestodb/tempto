@@ -4,8 +4,11 @@
 
 package com.teradata.test;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -46,11 +49,16 @@ public final class RequirementsCollector
     {
         return Lists.transform(asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
             try {
-                RequirementsProvider provider = providerClass.newInstance();
+                Constructor<? extends RequirementsProvider> constructor = providerClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                RequirementsProvider provider = constructor.newInstance();
                 return provider.getRequirements();
             }
-            catch (InstantiationException | IllegalAccessException e) {
+            catch (InstantiationException  | InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalArgumentException("Could not instantiate provider class", e);
+            }
+            catch (NoSuchMethodException e) {
+                throw new IllegalArgumentException("No parameterless constructor for " + providerClass, e);
             }
         });
     }

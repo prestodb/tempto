@@ -13,3 +13,6 @@ out/
 # vi temp files
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
+
+# tests logging output
+testlogs

@@ -4,6 +4,8 @@
 
 package com.teradata.test.context;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -28,6 +30,11 @@ public final class ThreadLocalTestContextHolder
         checkState(testContextThreadLocal.get() == null);
     }
 
+    public static void assertTestContextSet()
+    {
+        checkState(testContextThreadLocal.get() != null);
+    }
+
     public static void clearTestContext()
     {
         testContextThreadLocal.set(null);
@@ -43,5 +50,11 @@ public final class ThreadLocalTestContextHolder
         TestContext testContext = testContextThreadLocal.get();
         checkState(testContext != null, "test context not set for current thread");
         return testContext;
+    }
+
+    public static Optional<TestContext> testContextIfSet()
+    {
+        TestContext testContext = testContextThreadLocal.get();
+        return Optional.ofNullable(testContext);
     }
 }

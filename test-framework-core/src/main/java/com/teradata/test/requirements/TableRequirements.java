@@ -2,13 +2,15 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test;
+package com.teradata.test.requirements;
+
+import com.teradata.test.Requirement;
 
 public final class TableRequirements
 {
     public static Requirement table(String tableName)
     {
-        throw new RuntimeException("not implemented");
+        return new TableRequirement(tableName);
     }
 
     private TableRequirements()

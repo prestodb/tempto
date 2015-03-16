@@ -8,15 +8,23 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
+import com.teradata.test.TestInfo;
+import com.teradata.test.context.TestContext;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.io.Files.createParentDirs;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 
 /**
  * This class is a custom log appender that is responsible for two things:
@@ -36,8 +44,11 @@ public class TestFrameworkLoggingAppender
 
     private static final PatternLayout FILE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n");
     private static final Level MINIMUM_FILE_LEVEL = Level.TRACE;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'_'HH-mm-ss");
 
     private LoadingCache<String, PrintWriter> printWriterCache = buildPrintWriterCache();
+
+    private final String logsDirectory = selectLogsDirectory();
 
     private LoadingCache<String, PrintWriter> buildPrintWriterCache()
     {
@@ -50,9 +61,16 @@ public class TestFrameworkLoggingAppender
                     public PrintWriter load(String fileName)
                             throws Exception
                     {
-                        return new PrintWriter(new FileOutputStream(fileName, true));
+                        File file = new File(fileName);
+                        createParentDirs(file);
+                        return new PrintWriter(new FileOutputStream(file, true));
                     }
                 });
+    }
+
+    private String selectLogsDirectory()
+    {
+        return "testlogs/" + DATE_FORMAT.format(new Date());
     }
 
     @Override
@@ -60,43 +78,64 @@ public class TestFrameworkLoggingAppender
     {
         checkState(!closed, "Cannot append to a closed TestFrameworkLoggingAppender");
 
-        Level eventLevel = event.getLevel();
-
-        ifAboveMinimumWriteToConsole(CONSOLE_OUTPUT_FORMAT.format(event), eventLevel);
-        ifAboveMinimumWriteToFile(FILE_OUTPUT_FORMAT.format(event), eventLevel);
-
-        String[] throwableStack = event.getThrowableStrRep();
-        if (throwableStack != null) {
-            for (String throwableElement : throwableStack) {
-                if (CONSOLE_OUTPUT_FORMAT.ignoresThrowable()) {
-                    ifAboveMinimumWriteToConsole(throwableElement, eventLevel);
+        if (shouldWriteToConsole(event)) {
+            writeToConsole(CONSOLE_OUTPUT_FORMAT.format(event));
+            String[] throwableStack = event.getThrowableStrRep();
+            if (throwableStack != null) {
+                for (String throwableElement : throwableStack) {
+                    if (CONSOLE_OUTPUT_FORMAT.ignoresThrowable()) {
+                        writeToConsole(throwableElement);
+                    }
                 }
-                if (FILE_OUTPUT_FORMAT.ignoresThrowable()) {
-                    ifAboveMinimumWriteToFile(throwableElement, eventLevel);
+            }
+        }
+
+        if (shouldWriteToFile(event)) {
+            writeToFile(FILE_OUTPUT_FORMAT.format(event));
+            String[] throwableStack = event.getThrowableStrRep();
+            if (throwableStack != null) {
+                for (String throwableElement : throwableStack) {
+                    if (FILE_OUTPUT_FORMAT.ignoresThrowable()) {
+                        writeToFile(throwableElement);
+                    }
                 }
             }
         }
     }
 
-    private void ifAboveMinimumWriteToConsole(String message, Level level)
+    private boolean shouldWriteToConsole(LoggingEvent loggingEvent)
     {
-        if (level.isGreaterOrEqual(MINIMUM_CONSOLE_LEVEL)) {
-            System.out.print(message);
+        return loggingEvent.getLevel().isGreaterOrEqual(MINIMUM_CONSOLE_LEVEL);
+    }
+
+    private void writeToConsole(String message)
+    {
+        System.out.print(message);
+    }
+
+    private boolean shouldWriteToFile(LoggingEvent loggingEvent)
+    {
+        return loggingEvent.getLevel().isGreaterOrEqual(MINIMUM_FILE_LEVEL);
+    }
+
+    private void writeToFile(String message)
+    {
+        Optional<PrintWriter> printWriter = getFilePrintWriterForCurrentTest();
+        if (printWriter.isPresent()) {
+            printWriter.get().print(message);
+            printWriter.get().flush();
         }
     }
 
-    private void ifAboveMinimumWriteToFile(String message, Level level)
+    private Optional<PrintWriter> getFilePrintWriterForCurrentTest()
     {
-        if (level.isGreaterOrEqual(MINIMUM_FILE_LEVEL)) {
-            PrintWriter printWriter = getFilePrintWriterForCurrentTest();
-            printWriter.print(message);
-            printWriter.flush();
+        Optional<String> currentTestLogFileName = getCurrentTestLogFileName();
+        if (currentTestLogFileName.isPresent()) {
+            return Optional.of(getFilePrintWriter(currentTestLogFileName.get()));
         }
-    }
-
-    private PrintWriter getFilePrintWriterForCurrentTest()
-    {
-        return getFilePrintWriter(getCurrentTestLogFileName());
+        else {
+            return Optional.empty();
+        }
     }
 
     private PrintWriter getFilePrintWriter(String fileName)
@@ -104,10 +143,16 @@ public class TestFrameworkLoggingAppender
         return printWriterCache.getUnchecked(fileName);
     }
 
-    private static String getCurrentTestLogFileName()
+    private Optional<String> getCurrentTestLogFileName()
     {
-        // todo obtain proper one
-        return "/tmp/test_framework_output_file.log";
+        Optional<TestContext> testContext = testContextIfSet();
+        if (testContext.isPresent()) {
+            TestInfo testInfo = testContext.get().getDependency(TestInfo.class);
+            return Optional.of(logsDirectory + "/" + testInfo.getTestName() + "_" + DATE_FORMAT.format(testInfo.getExecutionStart()));
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     @Override

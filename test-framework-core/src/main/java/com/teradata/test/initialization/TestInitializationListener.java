@@ -12,11 +12,13 @@ import com.google.inject.Module;
 import com.teradata.test.Requirement;
 import com.teradata.test.context.GuiceTestContext;
 import com.teradata.test.context.State;
-import com.teradata.test.context.TestContext;
 import com.teradata.test.context.ThreadLocalTestContextHolder;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
+import com.teradata.test.initialization.modules.TestInfoModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
@@ -36,28 +38,38 @@ import static com.google.inject.Guice.createInjector;
 import static com.google.inject.util.Modules.combine;
 import static com.google.inject.util.Modules.override;
 import static com.teradata.test.RequirementsCollector.collectRequirementsFor;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.clearTestContext;
 
 public class TestInitializationListener
         extends TestSuiteAwareTestInvocationListener
 {
 
-    private Optional<FulfillmentResult> suiteFulfillmentResult;
-    private Optional<FulfillmentResult> testFulfillmentResult;
+    private final static Logger LOGGER = LoggerFactory.getLogger(TestInitializationListener.class);
+
+    private Optional<FulfillmentResult> suiteFulfillmentResult = Optional.empty();
+    private Optional<FulfillmentResult> testFulfillmentResult = Optional.empty();
 
     @Override
     public void beforeSuite(ITestContext context)
     {
-        Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
+        try {
+            Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
 
-        // todo maybe list of modules and/or fulfiller should depend of test framework configuration provided by user
-        List<Module> suiteModules = ImmutableList.of(
-                new TestConfigurationModule()
-        );
+            // todo maybe list of modules and/or fulfiller should depend of test framework configuration provided by user
+            List<Module> suiteModules = ImmutableList.of(
+                    new TestConfigurationModule(),
+                    new TestInfoModule("SUITE")
+            );
 
-        List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers = ImmutableList.<Class<? extends RequirementFulfiller>>of(
-                ImmutableTableFulfiller.class
-        );
-        setSuiteFullmentResult(doFulfillment(combine(suiteModules), suiteLevelFulfillers, allTestsRequirements));
+            List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers = ImmutableList.<Class<? extends RequirementFulfiller>>of(
+                    ImmutableTableFulfiller.class
+            );
+            setSuiteFullmentResult(doFulfillment(combine(suiteModules), suiteLevelFulfillers, allTestsRequirements));
+        } catch (RuntimeException e) {
+            LOGGER.error("cannot initialize test suite", e);
+        } finally {
+            clearTestContext();
+        }
     }
 
     private FulfillmentResult doFulfillment(Module baseModule,
@@ -65,10 +77,13 @@ public class TestInitializationListener
             Set<Requirement> requirements)
     {
         Module currentModule = baseModule;
+        Injector currentInjector = createInjector(currentModule);
         List<RequirementFulfiller> successfulFulfillers = newArrayList();
+        setTestContext(currentModule, currentInjector);
         try {
             for (Class<? extends RequirementFulfiller> fulillerClass : fulillerClasses) {
-                Injector currentInjector = createInjector(currentModule);
+                currentInjector = createInjector(currentModule);
+                setTestContext(currentModule, currentInjector);
                 RequirementFulfiller fulfiller = currentInjector.getInstance(fulillerClass);
                 Set<State> states = fulfiller.fulfill(requirements);
                 currentModule = override(currentModule).with(new AbstractModule()
@@ -83,7 +98,7 @@ public class TestInitializationListener
                 });
                 successfulFulfillers.add(fulfiller);
             }
-            return new FulfillmentResult(successfulFulfillers, createInjector(currentModule), currentModule);
+            return new FulfillmentResult(successfulFulfillers, currentInjector, currentModule);
         }
         catch (RuntimeException e) {
             doCleanup(successfulFulfillers);
@@ -107,35 +122,38 @@ public class TestInitializationListener
     public void afterSuite(ITestContext context)
     {
         if (suiteFulfillmentResult.isPresent()) {
+            Injector guiceInjector = suiteFulfillmentResult.get().guiceInjector;
+            Module guiceModule = suiteFulfillmentResult.get().guiceModule;
+            setTestContext(guiceModule, guiceInjector);
             doCleanup(suiteFulfillmentResult.get());
         }
+        clearTestContext();
     }
 
     @Override
     public void beforeTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
     {
+        if (!suiteFulfillmentResult.isPresent()) {
+            throw new IllegalStateException("test suite not initialized");
+        }
         Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
-
         Module suiteGuiceModule = suiteFulfillmentResult.get().getGuiceModule();
-        // todo do we actually need to extend list of guice modules here
-        Module testGuiceModule = combine(
+        Module testGuiceModule = override(
                 suiteGuiceModule
+        ).with(
+                new TestInfoModule(testResult.getMethod().getClass().getName() + "." + testResult.getMethod().getMethodName())
         );
         List<Class<? extends RequirementFulfiller>> testLevelFulfillers = ImmutableList.<Class<? extends RequirementFulfiller>>of();
         setTestFulfillmentResult(doFulfillment(testGuiceModule, testLevelFulfillers, testSpecificRequirements));
-
-        TestContext testContext = new GuiceTestContext(testFulfillmentResult.get().getGuiceModule(), testFulfillmentResult.get().getGuiceInjector());
-        ThreadLocalTestContextHolder.setTestContext(testContext);
     }
 
     @Override
     public void afterTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
     {
-        ThreadLocalTestContextHolder.clearTestContext();
-
         if (testFulfillmentResult.isPresent()) {
             doCleanup(testFulfillmentResult.get());
         }
+        clearTestContext();
 
         unsetTestFulfillmentResult();
     }
@@ -179,6 +197,11 @@ public class TestInitializationListener
     private void unsetTestFulfillmentResult()
     {
         this.testFulfillmentResult = Optional.empty();
+    }
+
+    private void setTestContext(Module guiceModule, Injector guiceInjector)
+    {
+        ThreadLocalTestContextHolder.setTestContext(new GuiceTestContext(guiceModule, guiceInjector));
     }
 
     private static class FulfillmentResult
