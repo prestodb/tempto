@@ -45,7 +45,7 @@ public class ExampleTest
     }
 
     @Requires(RequirementSetOne.class)
-    @Test(groups = "example-smoketest")
+    @Test(groups = "example_smoketest")
     public void testOne()
     {
         assertTrue(true);
@@ -72,7 +72,7 @@ public class ExampleTest
     }
 
     @Requires({RequirementSetTwo.class, RequirementSetTwo.class})
-    @Test(groups = "example-smoketest")
+    @Test(groups = "example_smoketest")
     public void testThree()
     {
         assertTrue(true);
