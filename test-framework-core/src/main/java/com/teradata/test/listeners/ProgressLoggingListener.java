@@ -11,7 +11,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-class ProgressLoggingListener implements ITestListener {
+public class ProgressLoggingListener implements ITestListener {
     private final static Logger LOGGER = LoggerFactory.getLogger(ProgressLoggingListener.class);
 
     private int current;

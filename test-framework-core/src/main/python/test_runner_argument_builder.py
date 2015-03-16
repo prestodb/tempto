@@ -4,7 +4,8 @@
 
 import os
 
-from test_common import framework_root, get_suite_groups, test_runner_type, reporting_dir
+from test_common import framework_root, get_suite_groups,\
+    reporting_dir
 
 
 class TestRunnerArgumentBuilder(object):
@@ -33,7 +34,7 @@ class TestRunnerArgumentBuilder(object):
 
     @property
     def excluded_groups_argument(self):
-        if self.__args.excluded_groups != 'None':
+        if self.__args.excluded_groups:
             return '-excludegroups ' + ','.join(self.__args.excluded_groups)
         return ''
 
@@ -43,6 +44,10 @@ class TestRunnerArgumentBuilder(object):
         if groups_or_suites is not None:
             return '-groups ' + groups_or_suites
         return ''
+
+    @property
+    def testng_verbosity(self):
+        return self.__args.testng_verbosity
 
     def __groups_or_suites_string(self):
         """
@@ -60,7 +65,8 @@ class TestRunnerArgumentBuilder(object):
     @property
     def suite_xml_if_no_classes_methods(self):
         if self.classes_argument is '' and self.methods_argument is '':
-            return os.path.join(framework_root(), 'src/main/resources/hadapt-all-testng.xml')
+            return os.path.join(framework_root(),
+                                'src/main/resources/all-testng.xml')
         return ''
 
     @property
@@ -86,8 +92,8 @@ class TestRunnerArgumentBuilder(object):
 
     def __framework_properties(self):
         return (
-            '-Dtest-framework-type=' + test_runner_type() + '-test ' +
-            '-DperformanceResultDir=' + os.path.join(reporting_dir(), 'performance')
+            '-DperformanceResultDir=' + os.path.join(reporting_dir(),
+                                                     'performance')
         )
 
     def __cluster_string(self):
@@ -180,7 +186,6 @@ class TestRunnerArgumentBuilder(object):
     def test_java_properties(self):
         return self.__joined_string_excluding_nulls_for([
             self.__debug_string(),
-            self.__permgen_string()
         ])
 
     def __debug_string(self):
@@ -201,14 +206,6 @@ class TestRunnerArgumentBuilder(object):
                 debug_flags.append('-Ddebug-listeners')
 
         return ' '.join(debug_flags)
-
-    def __permgen_string(self):
-        """
-        Returns an increased setting of the PermGen
-        size, which is needed for the large number of classes
-        in the test framework.
-        """
-        return '-XX:MaxPermSize=256m'
 
     def __aws_instance_type(self):
         """

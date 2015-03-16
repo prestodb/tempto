@@ -7,14 +7,17 @@ import subprocess
 import sys
 
 from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
+from test_common import LOGGING_LISTENER, ANNOTATION_LISTENER
 from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
-from test_common import repo_root, reporting_dir, test_root, test_runner_type
+from test_common import repo_root, reporting_dir, framework_root,\
+    example_tests_root
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
 
 
 def check(popen_args):
-    process = subprocess.Popen(popen_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen(popen_args, stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT)
     unused_stdout, unused_stderr = process.communicate()
     retcode = process.poll()
     return retcode == 0
@@ -41,13 +44,8 @@ def vcs_appropriate_submitter(user, hadoop_distro, all_args):
     if check(["git", "rev-parse", "--show-toplevel"]):
         BASE_ARGS = [
             os.path.join(repo_root(), 'bin', 'sandbox'),
-            '-j', 'sandbox-build-test-' + test_runner_type() + '-' + hadoop_distro,
-        ]
-    elif check(["hg", "id"]):
-        BASE_ARGS = [
-            os.path.join(repo_root(), 'bin', 'try'),
-            '--mq',
-            '-j', 'try-build-test-' + test_runner_type() + '-' + hadoop_distro,
+            '-j', 'sandbox-build-test-product' +
+            '-' + hadoop_distro,
         ]
     else:
         BASE_ARGS = ["/bin/false"]
@@ -60,25 +58,24 @@ def listener_arguments():
         '-listener', 'org.uncommons.reportng.HTMLReporter,' +
         'org.uncommons.reportng.JUnitXMLReporter,' +
         'org.testng.reporters.XMLReporter,' +
-        'com.hadapt.test.common.listeners.SetupDataProviderListener,' +
-        'com.hadapt.test.common.listeners.ProductTestAnnotationTransformer,' +
-        'com.hadapt.test.common.listeners.ProgressLoggingListener,' +
-        'com.hadapt.test.common.listeners.MethodReorderingInterceptor,' +
-        'com.hadapt.test.common.listeners.TestInitializationListener'
+        LOGGING_LISTENER + ',' +
+        ANNOTATION_LISTENER
+
     ])
 
 
-def metadata_arguments():
+def metadata_arguments(test_runner_argument_builder):
     return ' '.join([
-        '-suitename', 'hadapt',
-        '-testname', test_runner_type() + '-test',
-        '-verbose', '0'
+        '-suitename', 'everything',
+        '-testname all',
+        '-verbose', test_runner_argument_builder.testng_verbosity
     ])
 
 
 def show_results_location():
     sys.stdout.write(
-        'See ' + os.path.join(reporting_dir(), 'html/index.html for detailed results.\n')
+        'See ' + os.path.join(reporting_dir(),
+                              'html/index.html for detailed results.\n')
     )
 
 
@@ -92,9 +89,12 @@ def be_playful():
 
 def run_testng(test_runner_argument_builder):
     be_playful()
+    classpath = ':'.join([
+        os.path.join(framework_root(), 'build/libs/test-framework-core-all.jar'),
+        os.path.join(example_tests_root(), 'build/libs/test-framework-examples.jar')])
 
-    result = subprocess.call(' '.join([
-        'java', '-classpath', os.path.join(test_root(), 'build/libs/' + test_runner_type() + '-test-all.jar'),
+    cmd_to_run  = ' '.join([
+        'java', '-classpath', classpath,
         test_runner_argument_builder.system_properties,
         test_runner_argument_builder.test_java_properties,
         'org.testng.TestNG', test_runner_argument_builder.suite_xml_if_no_classes_methods,
@@ -102,9 +102,10 @@ def run_testng(test_runner_argument_builder):
         test_runner_argument_builder.classes_argument,
         test_runner_argument_builder.groups_argument,
         test_runner_argument_builder.excluded_groups_argument,
-        metadata_arguments(), listener_arguments(),
-        '-d ', reporting_dir()
-    ]), shell=True)
+        metadata_arguments(test_runner_argument_builder), listener_arguments(),
+        '-d ', reporting_dir()])
+
+    result = subprocess.call(cmd_to_run, shell=True)
 
     show_results_location()
     return result
@@ -113,9 +114,7 @@ def run_testng(test_runner_argument_builder):
 def build_fat_jar(test_runner_argument_builder):
     return subprocess.call(' '.join([
         os.path.join(repo_root(), 'gradlew'),
-        'buildRunnableTestJar',
-        '-p', os.path.join('hadapt-test', test_runner_type() + '-test'),
-        test_runner_argument_builder.system_properties
+        ':test-framework-core:buildFatJar'
     ]), shell=True)
 
 

@@ -2,8 +2,6 @@
 
 SCRIPT_ROOT=$(readlink -f $(dirname $(readlink -f "$0"))/..)
 
-export TEST_RUNNER_TYPE=product
-
 export SCRIPT_ROOT
 export PYTHONPATH=$PYTHONPATH:$SCRIPT_ROOT/src/main/python
-exec python $SCRIPT_ROOT/src/main/python/test_runner.py "$@"
+exec python $SCRIPT_ROOT/test-framework-core/src/main/python/test_runner.py "$@"

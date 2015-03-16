@@ -15,4 +15,16 @@ dependencies {
   compile libraries.slf4j
 
   testCompile libraries.spock
+
+  testRuntime (libraries.reportng) {
+    exclude group: "org.testng", module: "testng"
+  }
 }
+
+task buildFatJar(type: Jar, dependsOn: assemble) {
+  appendix = "all"
+  from sourceSets.main.output
+  from { configurations.testRuntime.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+build.dependsOn.add(buildFatJar)

@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<!--
+    If no test classes or methods are specified then no command line suite will
+    be created by TestNG.  So this gets invoked then to provide a fully-encompassing
+    suite and test.  The groups and excludegroups go on top of this as filters.
+-->
+<suite name="everything">
+
+  <test name="all" preserve-order="false">
+    <packages>
+      <package name="com.teradata.test.examples" />
+    </packages>
+  </test>
+
+</suite>

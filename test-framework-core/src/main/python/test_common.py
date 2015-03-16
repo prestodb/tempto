@@ -16,6 +16,13 @@ import sys
 ) = range(0, 4)
 
 
+PACKAGE_PREFIX = 'com.teradata.test'
+
+LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
+ANNOTATION_LISTENER = PACKAGE_PREFIX +\
+    '.listeners.ProductTestAnnotationTransformer'
+
+
 def repo_root():
     try:
         return os.environ['SCRIPT_ROOT']
@@ -25,31 +32,21 @@ def repo_root():
         )
         sys.exit(ENVIRONMENT_ERROR)
 
+
 def framework_root():
-    return os.path.join(repo_root(), 'hadapt-test/product-framework')
+    return os.path.join(repo_root(), 'test-framework-core')
 
 
-def test_root():
-    return os.path.join(repo_root(), 'hadapt-test/' + test_runner_type() + '-test')
+def example_tests_root():
+    return os.path.join(repo_root(), 'test-framework-examples')
 
 
 def reporting_dir():
-    return os.path.join(test_root(), 'build/reports/' + test_runner_type() + '-test')
-
-
-def test_runner_type():
-    try:
-        return os.environ['TEST_RUNNER_TYPE']
-    except KeyError:
-        sys.stderr.write(
-            'Did not detect test runner type. Did you run using bin/*-test?\n'
-        )
-        sys.exit(ENVIRONMENT_ERROR)
+    return os.path.join(framework_root(), 'build/reports/')
 
 
 SUITES_FILE = os.path.join(
-    repo_root(),
-    'hadapt-test/' + test_runner_type() + '-test/src/main/resources/suites.json'
+    repo_root(), 'test-framework-examples/src/main/resources/suites.json'
 )
 
 

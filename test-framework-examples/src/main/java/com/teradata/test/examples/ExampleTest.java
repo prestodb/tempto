@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import static com.teradata.test.DataSourceRequirements.dataSource;
 import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.TableRequirements.table;
+import static org.testng.AssertJUnit.assertTrue;
 
 class CommonTestRequirements
         implements RequirementsProvider
@@ -44,17 +45,17 @@ public class ExampleTest
     }
 
     @Requires(RequirementSetOne.class)
-    @Test(groups = "g1")
-    void testOne()
+    @Test(groups = "example-smoketest")
+    public void testOne()
     {
-
+        assertTrue(true);
     }
 
-    @Requires(RequirementSetOne.class)
-    @Test(groups = "g1")
-    void testTwo()
+    // @Requires(RequirementSetOne.class)
+    @Test
+    public void testTwo()
     {
-
+        assertTrue(true);
     }
 
     private static class RequirementSetTwo
@@ -71,9 +72,9 @@ public class ExampleTest
     }
 
     @Requires({RequirementSetTwo.class, RequirementSetTwo.class})
-    @Test(groups = "g1")
-    void testThree()
+    @Test(groups = "example-smoketest")
+    public void testThree()
     {
-
+        assertTrue(true);
     }
 }

@@ -36,7 +36,8 @@ ext.versions = [
   log4j:                '1.2.17',
   testng:               '6.8',
   spock:                '0.7-groovy-2.0',
-  slf4j:                '1.7.5'
+  slf4j:                '1.7.5',
+  reportng:             '1.1.4'
 ]
 
 ext.libraries = [
@@ -48,7 +49,8 @@ ext.libraries = [
   commons_lang3:        "org.apache.commons:commons-lang3:3.3.2",
   spock:                "org.spockframework:spock-core:0.7-groovy-2.0",
   slf4j:                ["org.slf4j:slf4j-api:${versions.slf4j}",
-                         "org.slf4j:slf4j-log4j12:${versions.slf4j}"]
+                         "org.slf4j:slf4j-log4j12:${versions.slf4j}"],
+  reportng:             "org.uncommons:reportng:${versions.reportng}"
 ]
 
 ext.test_framework_core = project(":test-framework-core")

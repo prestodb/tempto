@@ -4,7 +4,7 @@
 
 import argparse
 
-from test_common import test_runner_type, get_groups, get_suites
+from test_common import get_groups, get_suites
 from argparse_extensions.choice_csv_list import ChoiceCSVList
 from argparse_extensions.combine_action import CombineAction
 
@@ -18,8 +18,8 @@ class TestRunnerParser(object):
     @staticmethod
     def __create_argparser():
         parser = argparse.ArgumentParser(
-            prog=test_runner_type() + '-test',
-            description='Run a set of ' + test_runner_type() + 'tests',
+            prog='product-test',
+            description='Run a set of product tests',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )
         TestRunnerParser.__add_test_organization_arguments(parser)
@@ -268,7 +268,7 @@ class TestRunnerParser(object):
             '--build-test-framework', '--compile-test',
             dest='build_fat_jar',
             action='store_true',
-            help='Rebuild the runnable test JAR before launching the test suite.'
+            help='Rebuild the runnable test Jar before launching the test suite.'
         )
 
         miscellaneous_arguments.add_argument(
@@ -292,6 +292,14 @@ class TestRunnerParser(object):
             help='Logging level used for Chef run. Possible choice are '
                  'info or debug.'
         )
+
+        miscellaneous_arguments.add_argument(
+            '--testng-verbosity',
+            dest='testng_verbosity',
+            default='0',
+            help='The verbosity level at which TestNG will log'
+        )
+
 
     def __init__(self):
         self.__argparser = TestRunnerParser.__create_argparser()
