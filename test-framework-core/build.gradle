@@ -6,7 +6,7 @@ apply plugin: "java"
 apply plugin: "groovy"
 
 dependencies {
-  compile libraries.fest_assert
+  compile libraries.assertj
   compile libraries.guava
   compile libraries.guice
   compile libraries.log4j

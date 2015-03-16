@@ -30,8 +30,8 @@ allprojects {
 }
 
 ext.versions = [
-  fest_assert:          '1.4',
-  guava:                '11.0.2',
+  assertj:              '2.0.0',
+  guava:                '18.0',
   guice:                '4.0-beta5',
   log4j:                '1.2.17',
   testng:               '6.8',
@@ -41,7 +41,7 @@ ext.versions = [
 ]
 
 ext.libraries = [
-  fest_assert:          "org.easytesting:fest-assert:${versions.fest_assert}",
+  assertj:              "org.assertj:assertj-core:${versions.assertj}",
   guava:                "com.google.guava:guava:${versions.guava}",
   guice:                "com.google.inject:guice:${versions.guice}",
   log4j:                "log4j:log4j:${versions.log4j}",
