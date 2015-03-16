@@ -19,8 +19,8 @@ import sys
 PACKAGE_PREFIX = 'com.teradata.test'
 
 LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
-ANNOTATION_LISTENER = PACKAGE_PREFIX +\
-    '.listeners.ProductTestAnnotationTransformer'
+ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'
+INITIALIZATION_LISTENER = PACKAGE_PREFIX + '.initialization.TestInitializationListener'
 
 
 def repo_root():

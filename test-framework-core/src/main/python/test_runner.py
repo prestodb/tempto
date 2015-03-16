@@ -7,9 +7,9 @@ import subprocess
 import sys
 
 from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
-from test_common import LOGGING_LISTENER, ANNOTATION_LISTENER
+from test_common import LOGGING_LISTENER, ANNOTATION_LISTENER, INITIALIZATION_LISTENER
 from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
-from test_common import repo_root, reporting_dir, framework_root,\
+from test_common import repo_root, reporting_dir, framework_root, \
     example_tests_root
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
@@ -58,8 +58,7 @@ def listener_arguments():
         '-listener', 'org.uncommons.reportng.HTMLReporter,' +
         'org.uncommons.reportng.JUnitXMLReporter,' +
         'org.testng.reporters.XMLReporter,' +
-        LOGGING_LISTENER + ',' +
-        ANNOTATION_LISTENER
+        ','.join([LOGGING_LISTENER, ANNOTATION_LISTENER, INITIALIZATION_LISTENER])
 
     ])
 
@@ -93,7 +92,7 @@ def run_testng(test_runner_argument_builder):
         os.path.join(framework_root(), 'build/libs/test-framework-core-all.jar'),
         os.path.join(example_tests_root(), 'build/libs/test-framework-examples.jar')])
 
-    cmd_to_run  = ' '.join([
+    cmd_to_run = ' '.join([
         'java', '-classpath', classpath,
         test_runner_argument_builder.system_properties,
         test_runner_argument_builder.test_java_properties,
@@ -104,7 +103,6 @@ def run_testng(test_runner_argument_builder):
         test_runner_argument_builder.excluded_groups_argument,
         metadata_arguments(test_runner_argument_builder), listener_arguments(),
         '-d ', reporting_dir()])
-
     result = subprocess.call(cmd_to_run, shell=True)
 
     show_results_location()
@@ -219,6 +217,7 @@ def main():
     except KeyboardInterrupt:
         sys.stderr.write('\nInterruption detected.  Exiting.\n')
         return USER_INTERRUPTION
+
 
 if __name__ == '__main__':
     sys.exit(main())
