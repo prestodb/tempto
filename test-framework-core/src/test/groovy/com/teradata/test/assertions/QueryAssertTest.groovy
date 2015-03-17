@@ -19,7 +19,11 @@ public class QueryAssertTest
 
   private final QueryResult NATION_JOIN_REGION_QUERY_RESULT = new QueryResult(
           [INTEGER, VARCHAR, VARCHAR],
-          ["n.nationkey", "n.name", "r.name"],
+          [
+                  "n.nationkey": 1,
+                  "n.name"     : 2,
+                  "r.name"     : 3
+          ],
           [
                   [1, "ALGERIA", "AFRICA"],
                   [2, "ARGENTINA", "SOUTH AMERICA"]

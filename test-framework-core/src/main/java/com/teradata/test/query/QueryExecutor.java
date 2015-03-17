@@ -4,12 +4,54 @@
 
 package com.teradata.test.query;
 
-public class QueryExecutor
+import java.sql.JDBCType;
+
+import static com.google.common.base.MoreObjects.toStringHelper;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+
+/**
+ * Interface for executors of a sql queries.
+ */
+public interface QueryExecutor
 {
 
-    public static QueryResult query(String sql, Object... params)
+    /**
+     * @return Result of executed query.
+     */
+    QueryResult executeQuery(String sql, QueryParam[] params);
+
+    /**
+     * Executes given query on DB setup in test context.
+     */
+    public static QueryResult query(String sql, QueryParam... params)
     {
-        // TODO: implement - just a stub to show how the test should look like
-        return null;
+        QueryExecutor executor = testContext().getDependency(QueryExecutor.class);
+        return executor.executeQuery(sql, params);
+    }
+
+    public static QueryParam param(JDBCType type, Object value)
+    {
+        return new QueryParam(type, value);
+    }
+
+    public static class QueryParam
+    {
+        final JDBCType type;
+        final Object value;
+
+        private QueryParam(JDBCType type, Object value)
+        {
+            this.type = type;
+            this.value = value;
+        }
+
+        @Override
+        public String toString()
+        {
+            return toStringHelper(this)
+                    .add("type", type)
+                    .add("value", value)
+                    .toString();
+        }
     }
 }

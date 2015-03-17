@@ -38,6 +38,8 @@ ext.versions = [
         spock   : '1.0-groovy-2.4',
         slf4j   : '1.7.5',
         reportng: '1.1.4',
+        hsqldb  : '2.3.2',
+        dbutils : '1.6'
 ]
 
 ext.libraries = [
@@ -48,6 +50,8 @@ ext.libraries = [
         testng       : "org.testng:testng:${versions.testng}",
         commons_lang3: "org.apache.commons:commons-lang3:3.3.2",
         spock        : "org.spockframework:spock-core:${versions.spock}",
+        hsqldb       : "org.hsqldb:hsqldb:${versions.hsqldb}",
+        dbutils      : "commons-dbutils:commons-dbutils:${versions.dbutils}",
         slf4j        : ["org.slf4j:slf4j-api:${versions.slf4j}",
                         "org.slf4j:slf4j-log4j12:${versions.slf4j}"],
         reportng     : "org.uncommons:reportng:${versions.reportng}",

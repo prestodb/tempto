@@ -17,7 +17,7 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.sql.DriverManager.getConnection;
+import static com.teradata.test.fulfillment.jdbc.JdbcUtils.registerDriver;
 import static java.util.Collections.emptySet;
 
 /**
@@ -46,27 +46,22 @@ public class JdbcConnectivityFulfiller
             return emptySet();
         }
 
-        checkConnection();
-
-        return newHashSet(new JdbcConnectivityState(
+        JdbcConnectivityState jdbcConnectivityState = new JdbcConnectivityState(
                 configuration.getStringMandatory(JDBC_DRIVER_CLASS),
                 configuration.getStringMandatory(JDBC_URL_KEY),
                 configuration.getStringMandatory(JDBC_USER_KEY),
-                configuration.getStringMandatory(JDBC_PASSWORD_KeY)));
+                configuration.getStringMandatory(JDBC_PASSWORD_KeY));
+
+        checkConnection(jdbcConnectivityState);
+
+        return newHashSet(jdbcConnectivityState);
     }
 
-    private void checkConnection()
+    private void checkConnection(JdbcConnectivityState jdbcConnectivityState)
     {
-        try {
-            Class.forName(configuration.getStringMandatory(JDBC_DRIVER_CLASS));
-            Connection connection = getConnection(
-                    configuration.getStringMandatory(JDBC_URL_KEY),
-                    configuration.getStringMandatory(JDBC_USER_KEY),
-                    configuration.getStringMandatory(JDBC_PASSWORD_KeY));
-            connection.close();
-        }
-        catch (ClassNotFoundException e) {
-            throw new RuntimeException("Could not load JDBC driver class " + configuration.getStringMandatory(JDBC_DRIVER_CLASS));
+        registerDriver(jdbcConnectivityState);
+        try (Connection connection = JdbcUtils.connection(jdbcConnectivityState)) {
+            connection.isValid(1000);
         }
         catch (SQLException e) {
             throw new RuntimeException("JDBC server (url: "

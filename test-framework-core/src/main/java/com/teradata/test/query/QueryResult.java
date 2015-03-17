@@ -5,11 +5,15 @@
 package com.teradata.test.query;
 
 import java.sql.JDBCType;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -23,16 +27,13 @@ public class QueryResult
 
     private final List<JDBCType> columnTypes;
     private final Map<String, Integer> columnNamesIndexes;
-    private final List<List<?>> values;
+    private final List<List<Object>> values;
 
-    public QueryResult(List<JDBCType> columnTypes, List<String> names, List<List<?>> values)
+    private QueryResult(List<JDBCType> columnTypes, Map<String, Integer> columnNamesIndexes, List<List<Object>> values)
     {
         this.columnTypes = columnTypes;
         this.values = values;
-        this.columnNamesIndexes = newHashMap();
-        for (int i = 0; i < names.size(); i++) {
-            columnNamesIndexes.put(names.get(i), toSqlIndex(i));
-        }
+        this.columnNamesIndexes = columnNamesIndexes;
     }
 
     public int getRowsCount()
@@ -60,16 +61,14 @@ public class QueryResult
         return ofNullable(columnNamesIndexes.get(columnName));
     }
 
-    @SuppressWarnings("unchecked")
     public List<Object> row(int rowIndex)
     {
-        return (List) values.get(rowIndex);
+        return values.get(rowIndex);
     }
 
-    @SuppressWarnings("unchecked")
     public List<List<Object>> rows()
     {
-        return (List) values;
+        return values;
     }
 
     @SuppressWarnings("unchecked")
@@ -99,5 +98,43 @@ public class QueryResult
     public static int fromSqlIndex(int index)
     {
         return index - 1;
+    }
+
+    static class QueryResultBuilder
+    {
+
+        private final List<JDBCType> columnTypes = newArrayList();
+        private final Map<String, Integer> columnNamesIndexes = newHashMap();
+        private final List<List<Object>> values = newArrayList();
+
+        QueryResultBuilder(ResultSetMetaData metaData)
+                throws SQLException
+        {
+            for (int sqlColumnIndex = 1; sqlColumnIndex <= metaData.getColumnCount(); ++sqlColumnIndex) {
+                columnTypes.add(JDBCType.valueOf(metaData.getColumnType(sqlColumnIndex)));
+                columnNamesIndexes.put(metaData.getColumnName(sqlColumnIndex), sqlColumnIndex);
+            }
+        }
+
+        public QueryResultBuilder addRows(ResultSet rs)
+                throws SQLException
+        {
+            int columnCount = columnTypes.size();
+
+            while (rs.next()) {
+                List<Object> row = newArrayList();
+                for (int sqlColumnIndex = 1; sqlColumnIndex <= columnCount; ++sqlColumnIndex) {
+                    row.add(rs.getObject(sqlColumnIndex));
+                }
+                values.add(row);
+            }
+
+            return this;
+        }
+
+        public QueryResult build()
+        {
+            return new QueryResult(columnTypes, columnNamesIndexes, values);
+        }
     }
 }

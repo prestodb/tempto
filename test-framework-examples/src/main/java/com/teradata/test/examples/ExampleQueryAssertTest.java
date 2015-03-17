@@ -10,14 +10,16 @@ import java.time.LocalDate;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
+import static com.teradata.test.query.QueryExecutor.param;
 import static com.teradata.test.query.QueryExecutor.query;
+import static java.sql.JDBCType.DATE;
 import static java.sql.JDBCType.INTEGER;
 import static java.sql.JDBCType.VARCHAR;
 
 public class ExampleQueryAssertTest
 {
 
-    @Test
+    @Test(enabled = false)
     public void testHasColumnName()
     {
         assertThat(query("SELECT * FROM nation WHERE name LIKE 'IR%' ORDER BY name"))
@@ -28,7 +30,7 @@ public class ExampleQueryAssertTest
                         .isSorted());
     }
 
-    @Test
+    @Test(enabled = false)
     public void testHasColumnIndex()
     {
         assertThat(query("SELECT nationkey, name FROM nation"))
@@ -37,7 +39,7 @@ public class ExampleQueryAssertTest
                 .column(1, INTEGER, c -> c.contains(5, 17));
     }
 
-    @Test
+    @Test(enabled = false)
     public void testContainsExactly()
     {
         assertThat(query("SELECT n.nationkey, n.name, r.name FROM nation n " +
@@ -49,12 +51,13 @@ public class ExampleQueryAssertTest
                         row(1, "ALGERIA", "AFRICA"));
     }
 
-    @Test
+    @Test(enabled = false)
     public void testContainsExactlyInOrder()
     {
         assertThat(query("SELECT n.nationkey, n.name, r.name FROM nation n " +
-                "INNER JOIN region r ON n.regionkey = r.regionkey " +
-                "WHERE name like 'A%' AND n.created > ? ORDER BY n.name", LocalDate.parse("2015-01-01")))
+                        "INNER JOIN region r ON n.regionkey = r.regionkey " +
+                        "WHERE name like 'A%' AND n.created > ? ORDER BY n.name",
+                param(DATE, LocalDate.parse("2015-01-01"))))
                 .hasColumns(INTEGER, VARCHAR, VARCHAR)
                 .hasRowsInOrder(
                         row(1, "ALGERIA", "AFRICA"),
