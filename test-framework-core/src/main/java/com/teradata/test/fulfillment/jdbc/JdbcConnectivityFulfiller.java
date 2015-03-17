@@ -6,6 +6,7 @@ package com.teradata.test.fulfillment.jdbc;
 import com.google.inject.Inject;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.Requirement;
+import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 
 import java.sql.Connection;
@@ -22,7 +23,7 @@ import static java.util.Collections.emptySet;
  * Produces {@link JdbcConnectivityState} from {@link }.
  */
 public class JdbcConnectivityFulfiller
-        implements RequirementFulfiller<JdbcConnectivityState>
+        implements RequirementFulfiller
 {
     private static final String JDBC_DRIVER_CLASS = "jdbc_driver_class";
     private static final String JDBC_URL_KEY = "jdbc_url";
@@ -38,7 +39,7 @@ public class JdbcConnectivityFulfiller
     }
 
     @Override
-    public Set<JdbcConnectivityState> fulfill(Set<Requirement> requirements)
+    public Set<State> fulfill(Set<Requirement> requirements)
     {
         if (isEmpty(filter(requirements, JdbcConnectivityRequirement.class))) {
             return emptySet();

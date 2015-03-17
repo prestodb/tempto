@@ -11,18 +11,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 public class ImmutableTableFulfiller
-        implements RequirementFulfiller<ImmutableTablesState>
+        implements RequirementFulfiller
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(ImmutableTableFulfiller.class);
 
     // todo should have some QueryExecutor as dependency
 
     @Override
-    public Set<ImmutableTablesState> fulfill(Set<Requirement> requirements)
+    public Set<State> fulfill(Set<Requirement> requirements)
     {
         LOGGER.debug("Immutable table fulfillment");
         // todo filter out requirement and create tables, upload data to hdfs etc.

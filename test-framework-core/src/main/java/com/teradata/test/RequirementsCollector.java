@@ -4,13 +4,11 @@
 
 package com.teradata.test;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +52,7 @@ public final class RequirementsCollector
                 RequirementsProvider provider = constructor.newInstance();
                 return provider.getRequirements();
             }
-            catch (InstantiationException  | InvocationTargetException | IllegalAccessException e) {
+            catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalArgumentException("Could not instantiate provider class", e);
             }
             catch (NoSuchMethodException e) {

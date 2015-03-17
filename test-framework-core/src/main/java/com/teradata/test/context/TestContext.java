@@ -14,7 +14,15 @@ public interface TestContext
      *
      * @param dependencyClass Class of dependency to be obtained
      */
-    public <T> T getDependency(Class<T> dependencyClass);
+    <T> T getDependency(Class<T> dependencyClass);
 
-    // todo add mutability methods for sake of DSLs changing context
+    <T> T getDependency(Class<T> dependencyClass, String dependencyName);
+
+    <S extends State> void pushState(S state);
+
+    <S extends State> void pushState(S state, String stateName);
+
+    void popState();
+
+    void close();
 }
