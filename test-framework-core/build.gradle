@@ -14,6 +14,8 @@ dependencies {
   compile libraries.commons_lang3
   compile libraries.slf4j
   compile libraries.snakeyaml
+  compile libraries.httpclient
+  compile libraries.ioutils
 
   testCompile libraries.spock
   testCompile libraries.hsqldb
