@@ -80,14 +80,15 @@ public class TestInitializationListener
         try {
             Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
             GuiceTestContext testContext = new GuiceTestContext(combine(suiteModules));
-            setSuiteTestContext(doFulfillment(testContext, suiteFulfillers, allTestsRequirements));
+            doFulfillment(testContext, suiteFulfillers, allTestsRequirements);
+            setSuiteTestContext(testContext);
         }
         catch (RuntimeException e) {
             LOGGER.error("cannot initialize test suite", e);
         }
     }
 
-    private GuiceTestContext doFulfillment(GuiceTestContext testContext,
+    private void doFulfillment(GuiceTestContext testContext,
             List<Class<? extends RequirementFulfiller>> fulillerClasses,
             Set<Requirement> requirements)
     {
@@ -108,7 +109,6 @@ public class TestInitializationListener
                 throw e;
             }
         });
-        return testContext;
     }
 
     private void doCleanup(GuiceTestContext testContext, List<Class<? extends RequirementFulfiller>> fulillerClasses)
@@ -135,7 +135,8 @@ public class TestInitializationListener
         GuiceTestContext testContext = suiteTestContext.get().override(
                 new TestInfoModule(testResult.getMethod().getClass().getName() + "." + testResult.getMethod().getMethodName()));
         Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
-        setTestMethodTestContext(doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements));
+        doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
+        setTestMethodTestContext(testContext);
     }
 
     @Override

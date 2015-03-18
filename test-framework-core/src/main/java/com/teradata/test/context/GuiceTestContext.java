@@ -23,25 +23,28 @@ public class GuiceTestContext
 {
     private final Module baseModule;
     private final Map<Key<State>, Stack<State>> stateStacks = newHashMap();
-    private final Stack<Key> pushedStates;
+    private final Stack<Key> pushedStates = new Stack<>();
+    private final Stack<Injector> injectors = new Stack<>();
 
-    private Injector injector;
-
-    public GuiceTestContext(Module baseModule)
+    public GuiceTestContext(Module... baseModules)
     {
-        this.baseModule = baseModule;
-        this.pushedStates = new Stack<>();
-        createInjector();
+        this.baseModule = combine(baseModules);
+        pushInjector();
     }
 
     private GuiceTestContext(GuiceTestContext other, Module... overrideModules)
     {
         this.baseModule = Modules.override(other.baseModule).with(overrideModules);
         for (Map.Entry<Key<State>, Stack<State>> otherStateStack : other.stateStacks.entrySet()) {
-            this.stateStacks.put(otherStateStack.getKey(), (Stack<State>) otherStateStack.getValue().clone());
+            if (otherStateStack.getValue().isEmpty()) {
+                continue;
+            }
+
+            Stack<State> stateStack = new Stack<>();
+            stateStack.push(otherStateStack.getValue().peek());
+            this.stateStacks.put(otherStateStack.getKey(), stateStack);
         }
-        this.pushedStates = (Stack<Key>) other.pushedStates.clone();
-        createInjector();
+        pushInjector();
     }
 
     @Override
@@ -58,7 +61,7 @@ public class GuiceTestContext
 
     private <T> T getDependency(Key key)
     {
-        return (T) injector.getInstance(key);
+        return (T) injectors.peek().getInstance(key);
     }
 
     @Override
@@ -81,14 +84,14 @@ public class GuiceTestContext
 
         stateStacks.get(key).add(state);
         pushedStates.push(key);
-        createInjector();
+        pushInjector();
     }
 
     @Override
     public void popState()
     {
         stateStacks.get(pushedStates.pop()).pop();
-        createInjector();
+        injectors.pop();
     }
 
     public void close()
@@ -101,9 +104,9 @@ public class GuiceTestContext
         return new GuiceTestContext(this, overrideModules);
     }
 
-    private void createInjector()
+    private void pushInjector()
     {
-        injector = Guice.createInjector(combine(baseModule, statesModule(), testContextModule()));
+        injectors.push(Guice.createInjector(combine(baseModule, statesModule(), testContextModule())));
     }
 
     private Module statesModule()

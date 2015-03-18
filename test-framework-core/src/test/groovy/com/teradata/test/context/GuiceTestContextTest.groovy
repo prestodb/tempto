@@ -38,6 +38,10 @@ class GuiceTestContextTest
         binder.bind(DummyState).toInstance(state1)
       }
     })
+    context1.pushState(state1, A)
+    context1.pushState(state2, B)
+    context1.popState()
+
     def context2 = context1.override(new Module() {
       @Override
       void configure(Binder binder)
@@ -49,6 +53,7 @@ class GuiceTestContextTest
     expect:
     assert context1.getDependency(DummyState) == state1
     assert context2.getDependency(DummyState) == state2
+    assert context2.getDependency(DummyState, A) == state1
   }
 
   def 'test states push/pop'()
@@ -62,9 +67,11 @@ class GuiceTestContextTest
     expect:
     context.pushState(state1, A)
     assert context.getDependency(DummyState, A) == state1
+    def obj1 = context.getDependency(DummyClass)
 
     context.pushState(state2, B)
     assert context.getDependency(DummyState, B) == state2
+    def obj2 = context.getDependency(DummyClass)
 
     context.pushState(state3, A)
     assert context.getDependency(DummyState, A) == state3
@@ -75,10 +82,19 @@ class GuiceTestContextTest
 
     context.popState()
     assert context.getDependency(DummyState, A) == state1
+
+    context.popState()
+    def obj3 = context.getDependency(DummyClass)
+
+    assert obj1 == obj3 != obj2
   }
 
   private class DummyState
           implements State
+  {
+  }
+
+  private static class DummyClass
   {
   }
 }
