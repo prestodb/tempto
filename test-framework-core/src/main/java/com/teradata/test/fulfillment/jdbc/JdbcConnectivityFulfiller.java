@@ -4,11 +4,9 @@
 package com.teradata.test.fulfillment.jdbc;
 
 import com.google.inject.Inject;
-import com.teradata.test.Configuration;
+import com.teradata.test.configuration.Configuration;
 import com.teradata.test.Requirement;
 import com.teradata.test.fulfillment.RequirementFulfiller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;

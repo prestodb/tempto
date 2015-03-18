@@ -13,12 +13,13 @@ dependencies {
   compile libraries.testng
   compile libraries.commons_lang3
   compile libraries.slf4j
+  compile libraries.snakeyaml
 
   testCompile libraries.spock
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
 
-  testRuntime (libraries.reportng) {
+  testRuntime(libraries.reportng) {
     exclude group: "org.testng", module: "testng"
   }
 }

@@ -3,6 +3,8 @@
  */
 package com.teradata.test;
 
+import com.teradata.test.configuration.Configuration;
+
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;

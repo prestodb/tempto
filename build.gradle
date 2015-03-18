@@ -30,16 +30,18 @@ allprojects {
 }
 
 ext.versions = [
-        assertj : '2.0.0',
-        guava   : '18.0',
-        guice   : '4.0-beta5',
-        log4j   : '1.2.17',
-        testng  : '6.8',
-        spock   : '1.0-groovy-2.4',
-        slf4j   : '1.7.5',
-        reportng: '1.1.4',
-        hsqldb  : '2.3.2',
-        dbutils : '1.6'
+        assertj  : '2.0.0',
+        guava    : '18.0',
+        guice    : '4.0-beta5',
+        log4j    : '1.2.17',
+        testng   : '6.8',
+        spock    : '1.0-groovy-2.4',
+        slf4j    : '1.7.5',
+        reportng : '1.1.4',
+        hsqldb   : '2.3.2',
+        dbutils  : '1.6',
+        snakeyaml: '1.15',
+        cglib    : '3.1'
 ]
 
 ext.libraries = [
@@ -49,12 +51,15 @@ ext.libraries = [
         log4j        : "log4j:log4j:${versions.log4j}",
         testng       : "org.testng:testng:${versions.testng}",
         commons_lang3: "org.apache.commons:commons-lang3:3.3.2",
-        spock        : "org.spockframework:spock-core:${versions.spock}",
+        spock        : ["org.spockframework:spock-core:${versions.spock}",
+                        "cglib:cglib:${versions.cglib}"],
         hsqldb       : "org.hsqldb:hsqldb:${versions.hsqldb}",
         dbutils      : "commons-dbutils:commons-dbutils:${versions.dbutils}",
         slf4j        : ["org.slf4j:slf4j-api:${versions.slf4j}",
                         "org.slf4j:slf4j-log4j12:${versions.slf4j}"],
         reportng     : "org.uncommons:reportng:${versions.reportng}",
+        snakeyaml    : "org.yaml:snakeyaml:${versions.snakeyaml}"
+
 ]
 
 ext.test_framework_core = project(":test-framework-core")

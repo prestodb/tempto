@@ -3,7 +3,7 @@
  */
 package com.teradata.test.fulfillment
 
-import com.teradata.test.Configuration
+import com.teradata.test.configuration.Configuration
 import com.teradata.test.fulfillment.jdbc.JdbcConnectivityFulfiller
 import com.teradata.test.fulfillment.jdbc.JdbcConnectivityRequirement
 import com.teradata.test.fulfillment.jdbc.JdbcConnectivityState
