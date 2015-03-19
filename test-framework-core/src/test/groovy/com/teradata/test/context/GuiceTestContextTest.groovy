@@ -56,7 +56,26 @@ class GuiceTestContextTest
     assert context2.getDependency(DummyState, A) == state1
   }
 
-  def 'test states push/pop'()
+  def 'test states push/pop no naming'()
+  {
+    setup:
+    def context = new GuiceTestContext(EMPTY_MODULE)
+    def state1 = new DummyState()
+    def state2 = new DummyState()
+    def state3 = new DummyState()
+
+    expect:
+    context.pushState(state1)
+    assert context.getDependency(DummyState) == state1
+
+    context.pushState(state2)
+    assert context.getDependency(DummyState) == state2
+
+    context.popState()
+    assert context.getDependency(DummyState) == state1
+  }
+
+  def 'test states push/pop external naming'()
   {
     setup:
     def context = new GuiceTestContext(EMPTY_MODULE)
@@ -89,9 +108,47 @@ class GuiceTestContextTest
     assert obj1 == obj3 != obj2
   }
 
+  def 'test states push/pop internal naming'()
+  {
+    setup:
+    def context = new GuiceTestContext(EMPTY_MODULE)
+    def state1 = new DummyState(A)
+    def state2 = new DummyState(B)
+    def state3 = new DummyState(A)
+
+    expect:
+    context.pushState(state1)
+    assert context.getDependency(DummyState, A) == state1
+
+    context.pushState(state2)
+    assert context.getDependency(DummyState, B) == state2
+
+    context.pushState(state3)
+    assert context.getDependency(DummyState, A) == state3
+
+    context.popState()
+    assert context.getDependency(DummyState, A) == state1
+    assert context.getDependency(DummyState, B) == state2
+
+    context.popState()
+    assert context.getDependency(DummyState, A) == state1
+  }
+
   private class DummyState
           implements State
   {
+    private final Optional<String> name;
+
+    DummyState(String name = null)
+    {
+      this.name = Optional.ofNullable(name)
+    }
+
+    @Override
+    Optional<String> getName()
+    {
+      return name
+    }
   }
 
   private static class DummyClass

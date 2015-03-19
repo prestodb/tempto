@@ -4,10 +4,19 @@
 
 package com.teradata.test.context;
 
+import java.util.Optional;
+
 /**
  * Marker interface of state objectes produced by fulfillers.
  */
 public interface State
 {
 
+    /**
+     * Return name for state. If non-empty optional is
+     * returned State will be bound in TestContext with name annotation.
+     */
+    default Optional<String> getName() {
+        return Optional.empty();
+    }
 }

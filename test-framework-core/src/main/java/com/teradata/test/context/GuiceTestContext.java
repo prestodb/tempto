@@ -67,7 +67,11 @@ public class GuiceTestContext
     @Override
     public <S extends State> void pushState(S state)
     {
-        pushState(Key.get((Class<State>) state.getClass()), state);
+        if (state.getName().isPresent()) {
+            pushState(state, state.getName().get());
+        } else {
+            pushState(Key.get((Class<State>) state.getClass()), state);
+        }
     }
 
     @Override
