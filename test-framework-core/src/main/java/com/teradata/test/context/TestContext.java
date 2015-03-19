@@ -6,7 +6,6 @@ package com.teradata.test.context;
 
 public interface TestContext
 {
-
     /**
      * Allows obtaining runtime dependency from within test body.
      * Common types of dependencies would be State instance comming out of RequirementFulfillers
@@ -18,11 +17,31 @@ public interface TestContext
 
     <T> T getDependency(Class<T> dependencyClass, String dependencyName);
 
-    <S extends State> void pushState(S state);
+    /**
+     * An interface for pushing multiple sets of states at once.
+     */
+    interface PushStateDsl
+    {
+        <S extends State> PushStateDsl pushState(S state);
 
-    <S extends State> void pushState(S state, String stateName);
+        <S extends State> PushStateDsl pushState(S state, String stateName);
 
-    void popState();
+        void finish();
+    }
+
+    default <S extends State> void pushState(S state)
+    {
+        pushStates().pushState(state).finish();
+    }
+
+    default <S extends State> void pushState(S state, String stateName)
+    {
+        pushStates().pushState(state, stateName).finish();
+    }
+
+    PushStateDsl pushStates();
+
+    void popStates();
 
     void close();
 }

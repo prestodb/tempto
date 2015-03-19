@@ -10,20 +10,25 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.Stack;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
 import static com.google.inject.util.Modules.combine;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class GuiceTestContext
         implements TestContext
 {
+    private final static Logger LOGGER = getLogger(GuiceTestContext.class);
+
     private final Module baseModule;
     private final Map<Key<State>, Stack<State>> stateStacks = newHashMap();
-    private final Stack<Key> pushedStates = new Stack<>();
+    private final Stack<PushStateDsl> pushedStateDsls = new Stack<>();
     private final Stack<Injector> injectors = new Stack<>();
 
     public GuiceTestContext(Module... baseModules)
@@ -64,37 +69,74 @@ public class GuiceTestContext
         return (T) injectors.peek().getInstance(key);
     }
 
-    @Override
-    public <S extends State> void pushState(S state)
+    private class PushStateDsl
+            implements TestContext.PushStateDsl
     {
-        if (state.getName().isPresent()) {
-            pushState(state, state.getName().get());
-        } else {
-            pushState(Key.get((Class<State>) state.getClass()), state);
+        Map<Key<State>, State> states = newHashMap();
+
+        @Override
+        public <S extends State> PushStateDsl pushState(S state)
+        {
+            if (state.getName().isPresent()) {
+                return pushState(state, state.getName().get());
+            }
+            else {
+                return pushState(Key.get((Class<State>) state.getClass()), state);
+            }
+        }
+
+        @Override
+        public <S extends State> PushStateDsl pushState(S state, String stateName)
+        {
+            return pushState(Key.get((Class<State>) state.getClass(), named(stateName)), state);
+        }
+
+        private PushStateDsl pushState(Key<State> key, State state)
+        {
+            checkState(!states.containsKey(key));
+            states.put(key, state);
+            return this;
+        }
+
+        @Override
+        public void finish()
+        {
+            LOGGER.debug("pushing states");
+            for (Map.Entry<Key<State>, State> state : states.entrySet()) {
+                Key key = state.getKey();
+
+                if (!stateStacks.containsKey(key)) {
+                    stateStacks.put(key, new Stack<>());
+                }
+
+                stateStacks.get(key).add(state.getValue());
+                LOGGER.debug("key: {}, state: {}", key, state.getValue());
+            }
+            LOGGER.debug("pushing states finished");
+
+            pushedStateDsls.push(this);
+            pushInjector();
         }
     }
 
     @Override
-    public <S extends State> void pushState(S state, String stateName)
+    public PushStateDsl pushStates()
     {
-        pushState(Key.get((Class<State>) state.getClass(), named(stateName)), state);
-    }
-
-    private void pushState(Key<State> key, State state)
-    {
-        if (!stateStacks.containsKey(key)) {
-            stateStacks.put(key, new Stack<>());
-        }
-
-        stateStacks.get(key).add(state);
-        pushedStates.push(key);
-        pushInjector();
+        return new PushStateDsl();
     }
 
     @Override
-    public void popState()
+    public void popStates()
     {
-        stateStacks.get(pushedStates.pop()).pop();
+        PushStateDsl pushedStateDsl = pushedStateDsls.pop();
+
+        LOGGER.debug("popping states");
+        for (Key key : pushedStateDsl.states.keySet()) {
+            State state = stateStacks.get(key).pop();
+            LOGGER.debug("key: {}, state: {}", key, state);
+        }
+        LOGGER.debug("popping states finished");
+
         injectors.pop();
     }
 

@@ -14,6 +14,7 @@ class GuiceTestContextTest
 {
   private static final def A = 'A'
   private static final def B = 'B'
+  private static final def C = 'C'
 
   def 'test get dependency'()
   {
@@ -40,7 +41,7 @@ class GuiceTestContextTest
     })
     context1.pushState(state1, A)
     context1.pushState(state2, B)
-    context1.popState()
+    context1.popStates()
 
     def context2 = context1.override(new Module() {
       @Override
@@ -62,7 +63,6 @@ class GuiceTestContextTest
     def context = new GuiceTestContext(EMPTY_MODULE)
     def state1 = new DummyState()
     def state2 = new DummyState()
-    def state3 = new DummyState()
 
     expect:
     context.pushState(state1)
@@ -71,7 +71,7 @@ class GuiceTestContextTest
     context.pushState(state2)
     assert context.getDependency(DummyState) == state2
 
-    context.popState()
+    context.popStates()
     assert context.getDependency(DummyState) == state1
   }
 
@@ -88,21 +88,22 @@ class GuiceTestContextTest
     assert context.getDependency(DummyState, A) == state1
     def obj1 = context.getDependency(DummyClass)
 
-    context.pushState(state2, B)
+    context.pushStates().pushState(state2, B).pushState(state3, C).finish()
     assert context.getDependency(DummyState, B) == state2
+    assert context.getDependency(DummyState, C) == state3
     def obj2 = context.getDependency(DummyClass)
 
     context.pushState(state3, A)
     assert context.getDependency(DummyState, A) == state3
 
-    context.popState()
+    context.popStates()
     assert context.getDependency(DummyState, A) == state1
     assert context.getDependency(DummyState, B) == state2
 
-    context.popState()
+    context.popStates()
     assert context.getDependency(DummyState, A) == state1
 
-    context.popState()
+    context.popStates()
     def obj3 = context.getDependency(DummyClass)
 
     assert obj1 == obj3 != obj2
@@ -126,11 +127,11 @@ class GuiceTestContextTest
     context.pushState(state3)
     assert context.getDependency(DummyState, A) == state3
 
-    context.popState()
+    context.popStates()
     assert context.getDependency(DummyState, A) == state1
     assert context.getDependency(DummyState, B) == state2
 
-    context.popState()
+    context.popStates()
     assert context.getDependency(DummyState, A) == state1
   }
 
