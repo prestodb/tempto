@@ -24,19 +24,12 @@ public interface TestContext
     {
         <S extends State> PushStateDsl pushState(S state);
 
-        <S extends State> PushStateDsl pushState(S state, String stateName);
-
         void finish();
     }
 
     default <S extends State> void pushState(S state)
     {
         pushStates().pushState(state).finish();
-    }
-
-    default <S extends State> void pushState(S state, String stateName)
-    {
-        pushStates().pushState(state, stateName).finish();
     }
 
     PushStateDsl pushStates();

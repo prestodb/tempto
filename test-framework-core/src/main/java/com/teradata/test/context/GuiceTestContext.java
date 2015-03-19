@@ -85,8 +85,7 @@ public class GuiceTestContext
             }
         }
 
-        @Override
-        public <S extends State> PushStateDsl pushState(S state, String stateName)
+        private <S extends State> PushStateDsl pushState(S state, String stateName)
         {
             return pushState(Key.get((Class<State>) state.getClass(), named(stateName)), state);
         }

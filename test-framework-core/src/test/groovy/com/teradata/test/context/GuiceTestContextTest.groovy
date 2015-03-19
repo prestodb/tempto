@@ -30,8 +30,8 @@ class GuiceTestContextTest
   def 'test override'()
   {
     setup:
-    def state1 = new DummyState()
-    def state2 = new DummyState()
+    def state1 = new DummyState(A)
+    def state2 = new DummyState(B)
     def context1 = new GuiceTestContext(new Module() {
       @Override
       void configure(Binder binder)
@@ -39,8 +39,8 @@ class GuiceTestContextTest
         binder.bind(DummyState).toInstance(state1)
       }
     })
-    context1.pushState(state1, A)
-    context1.pushState(state2, B)
+    context1.pushState(state1)
+    context1.pushState(state2)
     context1.popStates()
 
     def context2 = context1.override(new Module() {
@@ -79,22 +79,23 @@ class GuiceTestContextTest
   {
     setup:
     def context = new GuiceTestContext(EMPTY_MODULE)
-    def state1 = new DummyState()
-    def state2 = new DummyState()
-    def state3 = new DummyState()
+    def state1 = new DummyState(A)
+    def state2 = new DummyState(B)
+    def state3 = new DummyState(C)
+    def state4 = new DummyState(A)
 
     expect:
-    context.pushState(state1, A)
+    context.pushState(state1)
     assert context.getDependency(DummyState, A) == state1
     def obj1 = context.getDependency(DummyClass)
 
-    context.pushStates().pushState(state2, B).pushState(state3, C).finish()
+    context.pushStates().pushState(state2).pushState(state3).finish()
     assert context.getDependency(DummyState, B) == state2
     assert context.getDependency(DummyState, C) == state3
     def obj2 = context.getDependency(DummyClass)
 
-    context.pushState(state3, A)
-    assert context.getDependency(DummyState, A) == state3
+    context.pushState(state4)
+    assert context.getDependency(DummyState, A) == state4
 
     context.popStates()
     assert context.getDependency(DummyState, A) == state1
