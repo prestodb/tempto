@@ -4,7 +4,7 @@
 
 package com.teradata.test.query;
 
-import com.teradata.test.fulfillment.jdbc.JdbcConnectivityState;
+import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState;
 import com.teradata.test.query.QueryResult.QueryResultBuilder;
 
 import javax.inject.Inject;
@@ -22,19 +22,19 @@ public class JdbcQueryExecutor
         implements QueryExecutor
 {
 
-    private JdbcConnectivityState jdbcState;
+    private JdbcConnectivityParamsState jdbcParmasState;
 
     @Inject
-    public JdbcQueryExecutor(JdbcConnectivityState jdbcState)
+    public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParmasState)
     {
-        this.jdbcState = jdbcState;
+        this.jdbcParmasState = jdbcParmasState;
     }
 
     @Override
     public QueryResult executeQuery(String sql, QueryParam[] params)
     {
         try (
-                Connection connection = connection(jdbcState);
+                Connection connection = connection(jdbcParmasState);
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             setQueryParams(statement, params);

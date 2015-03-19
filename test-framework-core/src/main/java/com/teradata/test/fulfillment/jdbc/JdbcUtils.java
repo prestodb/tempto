@@ -12,23 +12,23 @@ import static java.sql.DriverManager.getConnection;
 public final class JdbcUtils
 {
 
-    public static void registerDriver(JdbcConnectivityState jdbcState)
+    public static void registerDriver(JdbcConnectivityParamsState jdbcParamsState)
     {
         try {
-            Class.forName(jdbcState.driverClass);
+            Class.forName(jdbcParamsState.driverClass);
         }
         catch (ClassNotFoundException e) {
-            throw new RuntimeException("Could not load jdbc driver class: " + jdbcState.driverClass, e);
+            throw new RuntimeException("Could not load jdbc driver class: " + jdbcParamsState.driverClass, e);
         }
     }
 
-    public static Connection connection(JdbcConnectivityState jdbcState)
+    public static Connection connection(JdbcConnectivityParamsState jdbcParamsState)
             throws SQLException
     {
         return getConnection(
-                jdbcState.url,
-                jdbcState.user,
-                jdbcState.password);
+                jdbcParamsState.url,
+                jdbcParamsState.user,
+                jdbcParamsState.password);
     }
 
     private JdbcUtils()

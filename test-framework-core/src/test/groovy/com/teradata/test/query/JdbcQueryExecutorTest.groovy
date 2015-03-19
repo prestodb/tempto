@@ -4,7 +4,7 @@
 
 package com.teradata.test.query
 
-import com.teradata.test.fulfillment.jdbc.JdbcConnectivityState
+import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState
 import org.apache.commons.dbutils.QueryRunner
 import spock.lang.Specification
 
@@ -21,7 +21,7 @@ class JdbcQueryExecutorTest
         extends Specification
 {
 
-  private static final JdbcConnectivityState JDBC_STATE = new JdbcConnectivityState("org.hsqldb.jdbc.JDBCDriver", "jdbc:hsqldb:mem:mydb", "sa", "")
+  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState('connection_name', 'org.hsqldb.jdbc.JDBCDriver', 'jdbc:hsqldb:mem:mydb', 'sa', '')
   private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE);
 
   def setupSpec()
@@ -32,15 +32,15 @@ class JdbcQueryExecutorTest
     QueryRunner run = new QueryRunner()
     try {
       c = connection(JDBC_STATE)
-      run.update(c, "DROP SCHEMA PUBLIC CASCADE")
+      run.update(c, 'DROP SCHEMA PUBLIC CASCADE')
       run.update(c,
-              "CREATE TABLE  company ( \
+              'CREATE TABLE  company ( \
                 comp_name varchar(100) NOT NULL, \
                 comp_id int \
-              )")
-      run.update(c, "INSERT INTO company(comp_id, comp_name) values (1, 'Teradata')")
-      run.update(c, "INSERT INTO company(comp_id, comp_name) values (2, 'Oracle')")
-      run.update(c, "INSERT INTO company(comp_id, comp_name) values (3, 'Facebook')")
+              )')
+      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (1, \'Teradata\')')
+      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (2, \'Oracle\')')
+      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (3, \'Facebook\')')
     }
     finally {
       if (c != null) {
@@ -52,14 +52,14 @@ class JdbcQueryExecutorTest
   def 'test'()
   {
     when:
-    QueryResult result = queryExecutor.executeQuery("SELECT comp_id, comp_name FROM company ORDER BY comp_id")
+    QueryResult result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
 
     then:
     assertThat(result)
             .hasColumns(INTEGER, VARCHAR)
             .hasRowsInOrder(
-            row(1, "Teradata"),
-            row(2, "Oracle"),
-            row(3, "Facebook"))
+            row(1, 'Teradata'),
+            row(2, 'Oracle'),
+            row(3, 'Facebook'))
   }
 }
