@@ -36,5 +36,10 @@ public interface TestContext
 
     void popStates();
 
+    /**
+     * Registers a callback that will be executed on {@link TestContext} close.
+     */
+    void registerCloseCallback(Runnable callback);
+
     void close();
 }

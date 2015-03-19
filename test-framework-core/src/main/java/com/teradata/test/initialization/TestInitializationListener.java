@@ -93,15 +93,19 @@ public class TestInitializationListener
     @Override
     public void beforeSuite(ITestContext context)
     {
+        GuiceTestContext testContext = new GuiceTestContext(combine(suiteModules));
+
         try {
             Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
-            GuiceTestContext testContext = new GuiceTestContext(combine(suiteModules));
             doFulfillment(testContext, suiteFulfillers, allTestsRequirements);
-            setSuiteTestContext(testContext);
         }
         catch (RuntimeException e) {
+            testContext.close();
             LOGGER.error("cannot initialize test suite", e);
+            throw e;
         }
+
+        setSuiteTestContext(testContext);
     }
 
     @Override
@@ -112,17 +116,24 @@ public class TestInitializationListener
         }
 
         runWithTestContext(suiteTestContext.get(), () -> doCleanup(suiteTestContext.get(), suiteFulfillers));
+        suiteTestContext.get().close();
     }
 
     @Override
     public void beforeTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
     {
         checkState(suiteTestContext.isPresent(), "test suite not initialized");
+        GuiceTestContext testContext = suiteTestContext.get().override(getTestModules(testResult));
 
-        GuiceTestContext testContext = suiteTestContext.get().override(
-                getTestModules(testResult));
-        Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
-        doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
+        try {
+            Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
+            doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
+        }
+        catch (RuntimeException e) {
+            testContext.close();
+            throw e;
+        }
+
         setTestMethodTestContext(testContext);
     }
 
@@ -134,6 +145,7 @@ public class TestInitializationListener
         }
 
         runWithTestContext(testMethodTextContext.get(), () -> doCleanup(testMethodTextContext.get(), testMethodFulfillers));
+        testMethodTextContext.get().close();
 
         unsetTestMethodTestContext();
     }
@@ -222,11 +234,13 @@ public class TestInitializationListener
     {
         checkState(!this.testMethodTextContext.isPresent(), "test fulfillment result already set");
         this.testMethodTextContext = Optional.of(testMethodTestContext);
+        setTestContext(testMethodTestContext);
     }
 
     private void unsetTestMethodTestContext()
     {
         this.testMethodTextContext = Optional.empty();
+        clearTestContext();
     }
 
     private void runWithTestContext(GuiceTestContext testContext, Runnable runnable)

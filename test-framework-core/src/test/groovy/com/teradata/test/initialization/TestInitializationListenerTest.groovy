@@ -3,10 +3,12 @@
  */
 package com.teradata.test.initialization
 
+import com.google.inject.Inject
 import com.teradata.test.Requirement
 import com.teradata.test.RequirementsProvider
 import com.teradata.test.Requires
 import com.teradata.test.context.State
+import com.teradata.test.context.TestContext
 import com.teradata.test.fulfillment.RequirementFulfiller
 import org.testng.IInvokedMethod
 import org.testng.ITestContext
@@ -17,99 +19,116 @@ import spock.lang.Specification
 
 import java.lang.reflect.Method
 
+import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet
+import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextSet
+
 class TestInitializationListenerTest
         extends Specification
 {
   static final A = 'A'
   static final B = 'B'
   static final C = 'C'
+
   static final A_FULFILL = 'AFULFILL'
   static final B_FULFILL = 'BFULFILL'
   static final C_FULFILL = 'CFULFILL'
+
   static final A_CLEANUP = 'ACLEANUP'
   static final B_CLEANUP = 'BCLEANUP'
   static final C_CLEANUP = 'CCLEANUP'
 
-  static List<Event> events
+  static final A_CALLBACK = 'ACALLBACK'
+  static final B_CALLBACK = 'BCALLBACK'
+  static final C_CALLBACK = 'CCALLBACK'
+
+  static List<Event> EVENTS
 
   def setup()
   {
-    events = []
+    EVENTS = []
   }
 
   def 'should fulfill requirements'()
   {
     setup:
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller])
-    def suiteContext = getSuiteContext(successMethod)
-    def testContext = getTestContext(successMethod)
+    def iTestContext = getITestContext(successMethod)
+    def iTestResult = getITestResult(successMethod)
+    def iInvokedMethod = Mock(IInvokedMethod)
 
     when:
-    listener.beforeSuite(suiteContext)
-    listener.beforeTest(Mock(IInvokedMethod), testContext, suiteContext)
-    listener.afterTest(Mock(IInvokedMethod), testContext, suiteContext)
-    listener.afterSuite(suiteContext)
+    listener.beforeSuite(iTestContext)
+    assertTestContextNotSet()
+    listener.beforeTest(iInvokedMethod, iTestResult, iTestContext)
+    assertTestContextSet()
+    listener.afterTest(iInvokedMethod, iTestResult, iTestContext)
+    assertTestContextNotSet()
+    listener.afterSuite(iTestContext)
 
     then:
-    events[0].name == A_FULFILL
-    events[1].name == B_FULFILL
-    events[2].name == B_CLEANUP
-    events[3].name == A_CLEANUP
+    EVENTS[0].name == A_FULFILL
+    EVENTS[1].name == B_FULFILL
+    EVENTS[2].name == B_CLEANUP
+    EVENTS[3].name == B_CALLBACK
+    EVENTS[4].name == A_CLEANUP
+    EVENTS[5].name == A_CALLBACK
 
-    events[1].object == events[2].object
-    events[0].object == events[3].object
+    EVENTS[1].object == EVENTS[2].object
+    EVENTS[0].object == EVENTS[4].object
   }
 
   def 'should cleanup after failure'()
   {
     setup:
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller, CFulfiller])
-    def suiteContext = getSuiteContext(failMethod)
-    def testContext = getTestContext(failMethod)
+    def iTestContext = getITestContext(failMethod)
+    def iTestResult = getITestResult(failMethod)
+    def iInvokedMethod = Mock(IInvokedMethod)
 
     when:
-    listener.beforeSuite(suiteContext)
+    listener.beforeSuite(iTestContext)
     try {
-      listener.beforeTest(Mock(IInvokedMethod), testContext, suiteContext)
+      listener.beforeTest(iInvokedMethod, iTestResult, iTestContext)
       assert false
     }
     catch (RuntimeException _) {
     }
-    listener.afterTest(Mock(IInvokedMethod), testContext, suiteContext)
-    listener.afterSuite(suiteContext)
+    listener.afterTest(iInvokedMethod, iTestResult, iTestContext)
+    listener.afterSuite(iTestContext)
 
     then:
-    events[0].name == A_FULFILL
-    events[1].name == B_FULFILL
-    events[2].name == C_FULFILL
-    events[3].name == B_CLEANUP
-    events[4].name == A_CLEANUP
+    EVENTS[0].name == A_FULFILL
+    EVENTS[1].name == B_FULFILL
+    EVENTS[2].name == C_FULFILL
+    EVENTS[3].name == B_CLEANUP
+    EVENTS[4].name == B_CALLBACK
+    EVENTS[5].name == C_CALLBACK
+    EVENTS[6].name == A_CLEANUP
+    EVENTS[7].name == A_CALLBACK
 
-    events[1].object == events[3].object
-    events[0].object == events[4].object
+    EVENTS[1].object == EVENTS[3].object
+    EVENTS[0].object == EVENTS[6].object
   }
 
-  def getSuiteContext(Method method)
+  def getITestContext(Method method)
   {
     ITestContext suiteContext = Mock(ITestContext)
     ITestNGMethod testMethod = Mock(ITestNGMethod)
-    ConstructorOrMethod constructorOrMethod = new ConstructorOrMethod(method)
 
     suiteContext.allTestMethods >> [testMethod]
-    testMethod.getConstructorOrMethod() >> constructorOrMethod
-    constructorOrMethod.method >> method
+    testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
 
     return suiteContext
   }
 
-  def getTestContext(Method method)
+  def getITestResult(Method method)
   {
     ITestResult testResult = Mock(ITestResult)
     ITestNGMethod testMethod = Mock(ITestNGMethod)
-    ConstructorOrMethod constructorOrMethod = new ConstructorOrMethod(method)
+
     testResult.method >> testMethod
     testMethod.method >> method
-    testMethod.getConstructorOrMethod() >> constructorOrMethod
+    testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
     return testResult
   }
 
@@ -138,15 +157,6 @@ class TestInitializationListenerTest
     }
   }
 
-  static class AFulfiller
-          extends DummyFulfiller
-  {
-    AFulfiller()
-    {
-      super(A, A_FULFILL, A_CLEANUP)
-    }
-  }
-
   static class ARequirement
           implements RequirementsProvider
   {
@@ -157,12 +167,13 @@ class TestInitializationListenerTest
     }
   }
 
-  static class BFulfiller
+  static class AFulfiller
           extends DummyFulfiller
   {
-    BFulfiller()
+    @Inject
+    AFulfiller(TestContext testContext)
     {
-      super(B, B_FULFILL, B_CLEANUP)
+      super(A, A_FULFILL, A_CLEANUP, A_CALLBACK, testContext)
     }
   }
 
@@ -176,18 +187,13 @@ class TestInitializationListenerTest
     }
   }
 
-  static class CFulfiller
+  static class BFulfiller
           extends DummyFulfiller
   {
-    CFulfiller()
+    @Inject
+    BFulfiller(TestContext testContext)
     {
-      super(C, C_FULFILL, C_CLEANUP)
-    }
-
-    Set<State> fulfill(Set<Requirement> requirements)
-    {
-      super.fulfill(requirements)
-      throw new RuntimeException()
+      super(B, B_FULFILL, B_CLEANUP, B_CALLBACK, testContext)
     }
   }
 
@@ -201,6 +207,22 @@ class TestInitializationListenerTest
     }
   }
 
+  static class CFulfiller
+          extends DummyFulfiller
+  {
+    @Inject
+    CFulfiller(TestContext testContext)
+    {
+      super(C, C_FULFILL, C_CLEANUP, C_CALLBACK, testContext)
+    }
+
+    Set<State> fulfill(Set<Requirement> requirements)
+    {
+      super.fulfill(requirements)
+      throw new RuntimeException()
+    }
+  }
+
   static class DummyFulfiller
           implements RequirementFulfiller
   {
@@ -208,11 +230,29 @@ class TestInitializationListenerTest
     final String fulfillEventName
     final String cleanupEventName
 
-    DummyFulfiller(String requirementName, String fulfillEventName, String cleanupEventName)
+    DummyFulfiller(
+            String requirementName,
+            String fulfillEventName,
+            String cleanupEventName,
+            String callbackEventName,
+            TestContext testContext)
     {
       this.requirementName = requirementName
       this.fulfillEventName = fulfillEventName
       this.cleanupEventName = cleanupEventName
+
+      registerCallback(testContext, callbackEventName)
+    }
+
+    void registerCallback(TestContext testContext, String callbackEventName)
+    {
+      testContext.registerCloseCallback(new Runnable() {
+        @Override
+        void run()
+        {
+          EVENTS.add(new Event(callbackEventName, this))
+        }
+      })
     }
 
     Set<State> fulfill(Set<Requirement> requirements)
@@ -221,13 +261,13 @@ class TestInitializationListenerTest
         return [];
       }
 
-      events.add(new Event(fulfillEventName, this))
+      EVENTS.add(new Event(fulfillEventName, this))
       return []
     }
 
     void cleanup()
     {
-      events.add(new Event(cleanupEventName, this))
+      EVENTS.add(new Event(cleanupEventName, this))
     }
   }
 

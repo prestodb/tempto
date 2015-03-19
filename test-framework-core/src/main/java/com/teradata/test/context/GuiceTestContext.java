@@ -12,9 +12,11 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
@@ -30,6 +32,7 @@ public class GuiceTestContext
     private final Map<Key<State>, Stack<State>> stateStacks = newHashMap();
     private final Stack<PushStateDsl> pushedStateDsls = new Stack<>();
     private final Stack<Injector> injectors = new Stack<>();
+    private final List<Runnable> closeCallbacks = newArrayList();
 
     public GuiceTestContext(Module... baseModules)
     {
@@ -139,9 +142,16 @@ public class GuiceTestContext
         injectors.pop();
     }
 
+    @Override
+    public void registerCloseCallback(Runnable callback)
+    {
+        closeCallbacks.add(callback);
+    }
+
+    @Override
     public void close()
     {
-        // TODO: notify listeners
+        closeCallbacks.forEach(java.lang.Runnable::run);
     }
 
     public GuiceTestContext override(Module... overrideModules)
