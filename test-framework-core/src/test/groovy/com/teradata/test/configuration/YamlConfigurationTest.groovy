@@ -23,8 +23,7 @@ x:
 
   def test() {
     setup:
-    def yamlInputStream = new ByteArrayInputStream(YAML.getBytes(UTF_8))
-    def configuration = new YamlConfiguration(yamlInputStream)
+    def configuration = new YamlConfiguration(YAML)
     expect:
     configuration.listKeys() == ['a.b.c', 'a.b.d', 'x.y'] as Set
     configuration.getInt('x.y') == Optional.of(10)

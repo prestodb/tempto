@@ -6,10 +6,11 @@ package com.teradata.test.configuration;
 
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Set;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class YamlConfiguration
@@ -18,7 +19,11 @@ public class YamlConfiguration
 
     private final MapConfiguration mapConfiguration;
 
-    private YamlConfiguration(InputStream yamlInputStream)
+    public YamlConfiguration(String yamlString) {
+        this(new ByteArrayInputStream(yamlString.getBytes(UTF_8)));
+    }
+
+    public YamlConfiguration(InputStream yamlInputStream)
     {
         Yaml yaml = new Yaml();
         Object loadedYaml = yaml.load(yamlInputStream);
