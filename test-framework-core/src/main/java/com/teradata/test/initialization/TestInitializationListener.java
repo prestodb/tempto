@@ -8,6 +8,8 @@ import com.beust.jcommander.internal.Sets;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import com.teradata.test.Requirement;
+import com.teradata.test.configuration.Configuration;
+import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
 import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
@@ -41,18 +43,13 @@ public class TestInitializationListener
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(TestInitializationListener.class);
 
-    private final static List<Module> SUITE_MODULES = ImmutableList.of(
-            new TestConfigurationModule(),
-            new TestInfoModule("SUITE")
-    );
-
     private final static List<Class<? extends RequirementFulfiller>> SUITE_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of(
             ImmutableTableFulfiller.class
     );
 
     private final static List<Class<? extends RequirementFulfiller>> TEST_METHOD_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();
 
-    private final List<Module> suiteModules;
+    private final Configuration testConfiguration;
     private final List<Class<? extends RequirementFulfiller>> suiteFulfillers;
     private final List<Class<? extends RequirementFulfiller>> testMethodFulfillers;
 
@@ -61,15 +58,16 @@ public class TestInitializationListener
 
     public TestInitializationListener()
     {
-        this(SUITE_MODULES, SUITE_FULFILLERS, TEST_METHOD_FULFILLERS);
+        this(createTestConfiguration(), SUITE_FULFILLERS, TEST_METHOD_FULFILLERS);
     }
 
+
     public TestInitializationListener(
-            List<Module> suiteModules,
+            Configuration testConfiguration,
             List<Class<? extends RequirementFulfiller>> suiteFulfillers,
             List<Class<? extends RequirementFulfiller>> testMethodFulfillers)
     {
-        this.suiteModules = suiteModules;
+        this.testConfiguration = testConfiguration;
         this.suiteFulfillers = suiteFulfillers;
         this.testMethodFulfillers = testMethodFulfillers;
     }
@@ -79,13 +77,19 @@ public class TestInitializationListener
     {
         try {
             Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
-            GuiceTestContext testContext = new GuiceTestContext(combine(suiteModules));
+            GuiceTestContext testContext = new GuiceTestContext(combine(getSuiteModules()));
             doFulfillment(testContext, suiteFulfillers, allTestsRequirements);
             setSuiteTestContext(testContext);
         }
         catch (RuntimeException e) {
             LOGGER.error("cannot initialize test suite", e);
         }
+    }
+
+    private static Configuration createTestConfiguration()
+    {
+        // todo
+        return new YamlConfiguration("");
     }
 
     private void doFulfillment(GuiceTestContext testContext,
@@ -133,10 +137,23 @@ public class TestInitializationListener
         checkState(suiteTestContext.isPresent(), "test suite not initialized");
 
         GuiceTestContext testContext = suiteTestContext.get().override(
-                new TestInfoModule(testResult.getMethod().getClass().getName() + "." + testResult.getMethod().getMethodName()));
+                getTestModules(testResult));
         Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
         doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
         setTestMethodTestContext(testContext);
+    }
+
+    private List<Module> getSuiteModules()
+    {
+        return ImmutableList.of(
+                new TestInfoModule("SUITE"),
+                new TestConfigurationModule(testConfiguration)
+        );
+    }
+
+    private TestInfoModule getTestModules(ITestResult testResult)
+    {
+        return new TestInfoModule(testResult.getMethod().getClass().getName() + "." + testResult.getMethod().getMethodName());
     }
 
     @Override
