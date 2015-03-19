@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.teradata.test.fulfillment.jdbc.JdbcUtils.DATABASES_CONFIGURATION_SECTION;
+import static com.teradata.test.fulfillment.jdbc.JdbcUtils.getDefinedJdcbConnectionNames;
 import static com.teradata.test.fulfillment.jdbc.JdbcUtils.registerDriver;
 
 /**
@@ -27,7 +29,6 @@ public class JdbcConnectivityParamsFulfiller
     private static final String JDBC_URL_KEY = "jdbc_url";
     private static final String JDBC_USER_KEY = "jdbc_user";
     private static final String JDBC_PASSWORD_KeY = "jdbc_password";
-    private static final String DATABASES_CONFIGURATION_SECTION = "databases";
 
     private final Configuration configuration;
 
@@ -41,7 +42,7 @@ public class JdbcConnectivityParamsFulfiller
     public Set<State> fulfill(Set<Requirement> requirements)
     {
 
-        Set<String> connectionNames = getDefinedJdcbConnectionNames();
+        Set<String> connectionNames = getDefinedJdcbConnectionNames(configuration);
         return connectionNames.stream()
                 .map(this::parseConnectionConfiguration)
                 .collect(Collectors.toSet());
@@ -64,11 +65,6 @@ public class JdbcConnectivityParamsFulfiller
     private Configuration getDatabaseConnectionSubConfiguration(String connectionName)
     {
         return configuration.getSubconfiguration(KeyUtils.joinKey(DATABASES_CONFIGURATION_SECTION, connectionName));
-    }
-
-    private Set<String> getDefinedJdcbConnectionNames()
-    {
-        return configuration.getSubconfiguration(DATABASES_CONFIGURATION_SECTION).listKeyPrefixes(1);
     }
 
     private void checkConnection(JdbcConnectivityParamsState jdbcConnectivityParamsState)

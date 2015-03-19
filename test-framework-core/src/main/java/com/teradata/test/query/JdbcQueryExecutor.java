@@ -22,19 +22,19 @@ public class JdbcQueryExecutor
         implements QueryExecutor
 {
 
-    private JdbcConnectivityParamsState jdbcParmasState;
+    private JdbcConnectivityParamsState jdbcParamsState;
 
     @Inject
-    public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParmasState)
+    public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState)
     {
-        this.jdbcParmasState = jdbcParmasState;
+        this.jdbcParamsState = jdbcParamsState;
     }
 
     @Override
     public QueryResult executeQuery(String sql, QueryParam[] params)
     {
         try (
-                Connection connection = connection(jdbcParmasState);
+                Connection connection = connection(jdbcParamsState);
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             setQueryParams(statement, params);

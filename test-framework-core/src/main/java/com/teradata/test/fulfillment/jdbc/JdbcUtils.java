@@ -4,13 +4,18 @@
 
 package com.teradata.test.fulfillment.jdbc;
 
+import com.teradata.test.configuration.Configuration;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 
 import static java.sql.DriverManager.getConnection;
 
 public final class JdbcUtils
 {
+
+    static final String DATABASES_CONFIGURATION_SECTION = "databases";
 
     public static void registerDriver(JdbcConnectivityParamsState jdbcParamsState)
     {
@@ -33,5 +38,10 @@ public final class JdbcUtils
 
     private JdbcUtils()
     {
+    }
+
+    public static Set<String> getDefinedJdcbConnectionNames(Configuration configuration)
+    {
+        return configuration.getSubconfiguration(DATABASES_CONFIGURATION_SECTION).listKeyPrefixes(1);
     }
 }
