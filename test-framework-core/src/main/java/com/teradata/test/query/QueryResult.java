@@ -4,6 +4,8 @@
 
 package com.teradata.test.query;
 
+import com.google.common.collect.ImmutableList;
+
 import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,12 +16,14 @@ import java.util.Optional;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.sql.JDBCType.INTEGER;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Result of a query.
- * <p/>
+ * <p>
  * It stores all returned values, column names and their types as {@link java.sql.JDBCType}.
  */
 public class QueryResult
@@ -100,6 +104,18 @@ public class QueryResult
         return index - 1;
     }
 
+    public static QueryResultBuilder builder(ResultSetMetaData metaData)
+            throws SQLException
+    {
+        return new QueryResultBuilder(metaData);
+    }
+
+    public static QueryResult forSingleIntegerValue(int value)
+            throws SQLException
+    {
+        return new QueryResult(ImmutableList.of(INTEGER), emptyMap(), ImmutableList.of(ImmutableList.of(value)));
+    }
+
     static class QueryResultBuilder
     {
 
@@ -107,7 +123,7 @@ public class QueryResult
         private final Map<String, Integer> columnNamesIndexes = newHashMap();
         private final List<List<Object>> values = newArrayList();
 
-        QueryResultBuilder(ResultSetMetaData metaData)
+        private QueryResultBuilder(ResultSetMetaData metaData)
                 throws SQLException
         {
             for (int sqlColumnIndex = 1; sqlColumnIndex <= metaData.getColumnCount(); ++sqlColumnIndex) {
@@ -128,7 +144,6 @@ public class QueryResult
                 }
                 values.add(row);
             }
-
             return this;
         }
 

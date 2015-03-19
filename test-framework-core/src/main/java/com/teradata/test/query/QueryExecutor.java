@@ -14,9 +14,10 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
  */
 public interface QueryExecutor
 {
-
     /**
-     * @return Result of executed query.
+     * Executes statement. Can be either SELECT or DDL/DML.
+     * DDL/DML integer result is wrapped into QueryResult
+     * @return Result of executed statement.
      */
     QueryResult executeQuery(String sql, QueryParam[] params);
 

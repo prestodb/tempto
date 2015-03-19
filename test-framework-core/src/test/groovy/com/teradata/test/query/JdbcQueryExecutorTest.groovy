@@ -27,6 +27,10 @@ class JdbcQueryExecutorTest
   def setupSpec()
   {
     registerDriver(JDBC_STATE)
+  }
+
+  void setup()
+  {
     // TODO: use try with resources when we move to groovy 2.3
     Connection c
     QueryRunner run = new QueryRunner()
@@ -49,7 +53,7 @@ class JdbcQueryExecutorTest
     }
   }
 
-  def 'test'()
+  def 'test select'()
   {
     when:
     QueryResult result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
@@ -61,5 +65,32 @@ class JdbcQueryExecutorTest
             row(1, 'Teradata'),
             row(2, 'Oracle'),
             row(3, 'Facebook'))
+  }
+
+  def 'test update'()
+  {
+    setup:
+    QueryResult result
+
+    when:
+    result = queryExecutor.executeQuery('UPDATE company SET comp_name=\'Teradata Kings\' WHERE comp_id=1')
+
+    then:
+    assertThat(result)
+            .hasColumns(INTEGER)
+            .hasRowsInOrder(
+            row(1))
+
+    when:
+    result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
+
+    then:
+    assertThat(result)
+            .hasColumns(INTEGER, VARCHAR)
+            .hasRowsInOrder(
+            row(1, 'Teradata Kings'),
+            row(2, 'Oracle'),
+            row(3, 'Facebook'))
+
   }
 }

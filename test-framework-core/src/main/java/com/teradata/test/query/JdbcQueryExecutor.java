@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 
 import static com.teradata.test.fulfillment.jdbc.JdbcUtils.connection;
+import static com.teradata.test.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
 
 public class JdbcQueryExecutor
@@ -39,14 +40,24 @@ public class JdbcQueryExecutor
         ) {
             setQueryParams(statement, params);
 
-            ResultSet rs = statement.executeQuery();
-            return new QueryResultBuilder(rs.getMetaData())
-                    .addRows(rs)
-                    .build();
+            if (isSelect(sql)) {
+                ResultSet rs = statement.executeQuery();
+                return QueryResult.builder(rs.getMetaData())
+                        .addRows(rs)
+                        .build();
+            }
+            else {
+                return forSingleIntegerValue(statement.executeUpdate());
+            }
         }
         catch (SQLException e) {
             throw new RuntimeException("Error while executing query: " + sql + ", params: " + Arrays.toString(params), e);
         }
+    }
+
+    boolean isSelect(String sql)
+    {
+        return sql.trim().toLowerCase().startsWith("select");
     }
 
     private static void setQueryParams(PreparedStatement statement, QueryParam[] params)
