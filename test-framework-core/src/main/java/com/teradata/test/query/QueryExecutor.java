@@ -19,7 +19,7 @@ public interface QueryExecutor
      * DDL/DML integer result is wrapped into QueryResult
      * @return Result of executed statement.
      */
-    QueryResult executeQuery(String sql, QueryParam[] params);
+    QueryResult executeQuery(String sql, QueryParam... params);
 
     /**
      * Executes given query on DB setup in test context.
