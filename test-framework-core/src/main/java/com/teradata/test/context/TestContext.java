@@ -4,6 +4,8 @@
 
 package com.teradata.test.context;
 
+import static java.util.Arrays.asList;
+
 public interface TestContext
 {
     /**
@@ -17,22 +19,12 @@ public interface TestContext
 
     <T> T getDependency(Class<T> dependencyClass, String dependencyName);
 
-    /**
-     * An interface for pushing multiple sets of states at once.
-     */
-    interface PushStateDsl
+    void pushStates(Iterable<State> states);
+
+    default void pushStates(State... states)
     {
-        <S extends State> PushStateDsl pushState(S state);
-
-        void finish();
+        pushStates(asList(states));
     }
-
-    default <S extends State> void pushState(S state)
-    {
-        pushStates().pushState(state).finish();
-    }
-
-    PushStateDsl pushStates();
 
     void popStates();
 

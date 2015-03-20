@@ -23,7 +23,7 @@ class GuiceTestContextTest
     def state = new DummyState()
 
     expect:
-    context.pushState(state)
+    context.pushStates(state)
     assert context.getDependency(DummyState) == state
   }
 
@@ -39,8 +39,8 @@ class GuiceTestContextTest
         binder.bind(DummyState).toInstance(state1)
       }
     })
-    context1.pushState(state1)
-    context1.pushState(state2)
+    context1.pushStates(state1)
+    context1.pushStates(state2)
     context1.popStates()
 
     def context2 = context1.override(new Module() {
@@ -65,10 +65,10 @@ class GuiceTestContextTest
     def state2 = new DummyState()
 
     expect:
-    context.pushState(state1)
+    context.pushStates(state1)
     assert context.getDependency(DummyState) == state1
 
-    context.pushState(state2)
+    context.pushStates(state2)
     assert context.getDependency(DummyState) == state2
 
     context.popStates()
@@ -85,16 +85,16 @@ class GuiceTestContextTest
     def state4 = new DummyState(A)
 
     expect:
-    context.pushState(state1)
+    context.pushStates(state1)
     assert context.getDependency(DummyState, A) == state1
     def obj1 = context.getDependency(DummyClass)
 
-    context.pushStates().pushState(state2).pushState(state3).finish()
+    context.pushStates(state2, state3)
     assert context.getDependency(DummyState, B) == state2
     assert context.getDependency(DummyState, C) == state3
     def obj2 = context.getDependency(DummyClass)
 
-    context.pushState(state4)
+    context.pushStates(state4)
     assert context.getDependency(DummyState, A) == state4
 
     context.popStates()
@@ -119,13 +119,13 @@ class GuiceTestContextTest
     def state3 = new DummyState(A)
 
     expect:
-    context.pushState(state1)
+    context.pushStates(state1)
     assert context.getDependency(DummyState, A) == state1
 
-    context.pushState(state2)
+    context.pushStates(state2)
     assert context.getDependency(DummyState, B) == state2
 
-    context.pushState(state3)
+    context.pushStates(state3)
     assert context.getDependency(DummyState, A) == state3
 
     context.popStates()

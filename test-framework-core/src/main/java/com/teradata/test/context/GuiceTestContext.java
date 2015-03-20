@@ -18,7 +18,6 @@ import java.util.Stack;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.beust.jcommander.internal.Maps.newHashMap;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
 import static com.google.inject.util.Modules.combine;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -30,7 +29,7 @@ public class GuiceTestContext
 
     private final Module baseModule;
     private final Map<Key<State>, Stack<State>> stateStacks = newHashMap();
-    private final Stack<PushStateDsl> pushedStateDsls = new Stack<>();
+    private final Stack<Map<Key<State>, State>> pushedStateMaps = new Stack<>();
     private final Stack<Injector> injectors = new Stack<>();
     private final List<Runnable> closeCallbacks = newArrayList();
 
@@ -72,68 +71,51 @@ public class GuiceTestContext
         return (T) injectors.peek().getInstance(key);
     }
 
-    private class PushStateDsl
-            implements TestContext.PushStateDsl
+    @Override
+    public void pushStates(Iterable<State> states)
     {
-        Map<Key<State>, State> states = newHashMap();
-
-        @Override
-        public <S extends State> PushStateDsl pushState(S state)
-        {
-            if (state.getName().isPresent()) {
-                return pushState(state, state.getName().get());
-            }
-            else {
-                return pushState(Key.get((Class<State>) state.getClass()), state);
-            }
+        Map<Key<State>, State> stateMap = newHashMap();
+        for (State state : states) {
+            stateMap.put(getKeyFor(state), state);
         }
 
-        private <S extends State> PushStateDsl pushState(S state, String stateName)
-        {
-            return pushState(Key.get((Class<State>) state.getClass(), named(stateName)), state);
+        LOGGER.debug("pushing states");
+        for (Map.Entry<Key<State>, State> stateEntry : stateMap.entrySet()) {
+            pushState(stateEntry.getKey(), stateEntry.getValue());
         }
+        LOGGER.debug("pushing states finished");
 
-        private PushStateDsl pushState(Key<State> key, State state)
-        {
-            checkState(!states.containsKey(key));
-            states.put(key, state);
-            return this;
-        }
-
-        @Override
-        public void finish()
-        {
-            LOGGER.debug("pushing states");
-            for (Map.Entry<Key<State>, State> state : states.entrySet()) {
-                Key key = state.getKey();
-
-                if (!stateStacks.containsKey(key)) {
-                    stateStacks.put(key, new Stack<>());
-                }
-
-                stateStacks.get(key).add(state.getValue());
-                LOGGER.debug("key: {}, state: {}", key, state.getValue());
-            }
-            LOGGER.debug("pushing states finished");
-
-            pushedStateDsls.push(this);
-            pushInjector();
-        }
+        pushedStateMaps.push(stateMap);
+        pushInjector();
     }
 
-    @Override
-    public PushStateDsl pushStates()
+    private void pushState(Key<State> key, State state)
     {
-        return new PushStateDsl();
+        if (!stateStacks.containsKey(key)) {
+            stateStacks.put(key, new Stack<>());
+        }
+
+        stateStacks.get(key).add(state);
+        LOGGER.debug("key: {}, state: {}", key, state);
+    }
+
+    private Key<State> getKeyFor(State state)
+    {
+        if (state.getName().isPresent()) {
+            return Key.get((Class<State>) state.getClass(), named(state.getName().get()));
+        }
+        else {
+            return Key.get((Class<State>) state.getClass());
+        }
     }
 
     @Override
     public void popStates()
     {
-        PushStateDsl pushedStateDsl = pushedStateDsls.pop();
+        Map<Key<State>, State> stateMap = pushedStateMaps.pop();
 
         LOGGER.debug("popping states");
-        for (Key key : pushedStateDsl.states.keySet()) {
+        for (Key key : stateMap.keySet()) {
             State state = stateStacks.get(key).pop();
             LOGGER.debug("key: {}, state: {}", key, state);
         }

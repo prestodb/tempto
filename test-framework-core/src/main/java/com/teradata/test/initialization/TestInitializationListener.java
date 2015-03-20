@@ -15,7 +15,6 @@ import com.teradata.test.Requirement;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
-import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
@@ -38,7 +37,6 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
 import static com.teradata.test.RequirementsCollector.collectRequirementsFor;
-import static com.teradata.test.context.TestContext.PushStateDsl;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.clearTestContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.setTestContext;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -164,12 +162,7 @@ public class TestInitializationListener
             try {
                 for (Class<? extends RequirementFulfiller> fulfillerClass : fulillerClasses) {
                     RequirementFulfiller fulfiller = testContext.getDependency(fulfillerClass);
-                    PushStateDsl pushStateDsl = testContext.pushStates();
-                    Set<State> states = fulfiller.fulfill(requirements);
-                    for (State state : states) {
-                        pushStateDsl.pushState(state);
-                    }
-                    pushStateDsl.finish();
+                    testContext.pushStates(fulfiller.fulfill(requirements));
                     successfulFulfillerClasses.add(fulfillerClass);
                 }
             }
