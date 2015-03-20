@@ -5,6 +5,7 @@
 package com.teradata.test.hadoop.hdfs;
 
 import com.google.common.net.HostAndPort;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -21,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,13 +44,22 @@ public class WebHDFSClient
 
     private static final Logger logger = LoggerFactory.getLogger(WebHDFSClient.class);
 
+    private static final JsonPath GETFILESTATUS_LENGTH_JON_PATH = JsonPath.compile("$.FileStatus.length");
+
     private final HostAndPort dataNode;
     private final HostAndPort nameNode;
     private final int nameNodePort;
 
     private final CloseableHttpClient httpClient;
 
-    public WebHDFSClient(String webHdfsDataNodeHost, int webHdfsDataNodePort, String webHdfsNameNodeHost, int webHdfsNameNodePort, int nameNodePort)
+    // TODO: use redirects and connect only not webhdfs namenode - SWARM-157
+    @Inject
+    public WebHDFSClient(
+            @Named("hdfs.webhdfs.datanode.host") String webHdfsDataNodeHost,
+            @Named("hdfs.webhdfs.datanode.port") int webHdfsDataNodePort,
+            @Named("hdfs.webhdfs.namenode.host") String webHdfsNameNodeHost,
+            @Named("hdfs.webhdfs.namenode.port") int webHdfsNameNodePort,
+            @Named("hdfs.port") int nameNodePort)
     {
         this.dataNode = fromParts(checkNotNull(webHdfsDataNodeHost), webHdfsDataNodePort);
         this.nameNode = fromParts(checkNotNull(webHdfsNameNodeHost), webHdfsNameNodePort);
@@ -118,6 +130,26 @@ public class WebHDFSClient
         }
     }
 
+    @Override
+    public long getLength(String path, String username)
+    {
+        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_NOT_FOUND) {
+                return -1;
+            }
+            else if (statusCode != HttpStatus.SC_OK) {
+                throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
+            }
+
+            return ((Integer) GETFILESTATUS_LENGTH_JON_PATH.read(response.getEntity().getContent())).longValue();
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not read file " + path + " in hdfs, user: " + username, e);
+        }
+    }
+
     private URI buildUri(String path, String username, String operation)
     {
         try {
@@ -149,12 +181,13 @@ public class WebHDFSClient
     {
         switch (operation) {
             case "MKDIRS":
+            case "GETFILESTATUS":
                 return nameNode;
             case "CREATE":
             case "OPEN":
                 return dataNode;
             default:
-                throw new RuntimeException("Unsupported operation: " + operation);
+                throw new RuntimeException("Unsupported operation in WebHDFSClient: " + operation);
         }
     }
 

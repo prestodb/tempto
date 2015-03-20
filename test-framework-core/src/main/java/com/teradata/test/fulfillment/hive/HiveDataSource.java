@@ -9,6 +9,8 @@ package com.teradata.test.fulfillment.hive;
  */
 public interface HiveDataSource
 {
-    // mock
-    public String getHdfsPath();
+    /**
+     * @return HDFS path
+     */
+    public String ensureDataOnHdfs();
 }

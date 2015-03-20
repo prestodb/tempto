@@ -17,6 +17,7 @@ import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
+import com.teradata.test.initialization.modules.HadoopModule;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
 import com.teradata.test.initialization.modules.TestInfoModule;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -68,14 +70,19 @@ public class TestInitializationListener
     {
         return ImmutableList.of(
                 new TestInfoModule("SUITE"),
-                new TestConfigurationModule(createTestConfiguration())
+                new TestConfigurationModule(createTestConfiguration()),
+                new HadoopModule()
         );
     }
 
     private static Configuration createTestConfiguration()
     {
-        // todo
-        return new YamlConfiguration("");
+        // TODO - SWARM-158
+        InputStream input = TestInitializationListener.class.getResourceAsStream("/test-configuration.yaml");
+        if (input == null) {
+            return new YamlConfiguration("");
+        }
+        return new YamlConfiguration(input);
     }
 
     public TestInitializationListener(

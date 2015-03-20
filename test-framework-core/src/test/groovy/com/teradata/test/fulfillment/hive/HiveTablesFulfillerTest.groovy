@@ -20,7 +20,7 @@ class HiveTablesFulfillerTest
     when:
     def nationDataSource = Mock(HiveDataSource)
     def requirement = new ImmutableHiveTableRequirement('nation', nationDataSource)
-    nationDataSource.getHdfsPath() >> '/some/table/in/hdfs'
+    nationDataSource.ensureDataOnHdfs() >> '/some/table/in/hdfs'
     def states = fulfiller.fulfill([requirement] as Set)
     
     assert states.size() == 1

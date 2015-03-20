@@ -29,4 +29,9 @@ public interface HdfsClient
         loadFile(path, username, output);
         return new String(output.toByteArray(), defaultCharset());
     }
+
+    /**
+     * @return length of a file stored in HDFS, -1 if file not exists
+     */
+    long getLength(String path, String username);
 }

@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
+import com.google.inject.ConfigurationException;
 import com.teradata.test.TestInfo;
 import com.teradata.test.context.TestContext;
 import org.apache.log4j.AppenderSkeleton;
@@ -28,12 +29,12 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
 
 /**
  * This class is a custom log appender that is responsible for two things:
- * <p>
+ * <p/>
  * <ol>
  * <li>Writing out messages to the console when they meet the minimum level</li>
  * <li>Writing out messages to a per-test file when they meet the minimum level</li>
  * </ol>
- * <p>
+ * <p/>
  * For now, the console and file levels are defined statically, as well as the output patterns.
  */
 public class TestFrameworkLoggingAppender
@@ -147,12 +148,15 @@ public class TestFrameworkLoggingAppender
     {
         Optional<TestContext> testContext = testContextIfSet();
         if (testContext.isPresent()) {
-            TestInfo testInfo = testContext.get().getDependency(TestInfo.class);
-            return Optional.of(logsDirectory + "/" + testInfo.getTestName() + "_" + DATE_FORMAT.format(testInfo.getExecutionStart()));
+            try {
+                TestInfo testInfo = testContext.get().getDependency(TestInfo.class);
+                return Optional.of(logsDirectory + "/" + testInfo.getTestName() + "_" + DATE_FORMAT.format(testInfo.getExecutionStart()));
+            }
+            catch (ConfigurationException e) {
+                System.err.append("Could not load TestInfo");
+            }
         }
-        else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override

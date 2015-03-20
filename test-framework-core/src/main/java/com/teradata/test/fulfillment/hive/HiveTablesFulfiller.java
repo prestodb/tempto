@@ -57,7 +57,7 @@ public class HiveTablesFulfiller
     {
         LOGGER.debug("fulfilling table {}", tableRequirement.getTableName());
         queryExecutor.executeQuery(format("DROP IF EXISTS TABLE %s", tableRequirement.getTableName()));
-        queryExecutor.executeQuery(format("CREATE TABLE %s LOCATION %s", tableRequirement.getTableName(), tableRequirement.getDataSource().getHdfsPath()));
+        queryExecutor.executeQuery(format("CREATE TABLE %s LOCATION %s", tableRequirement.getTableName(), tableRequirement.getDataSource().ensureDataOnHdfs()));
         return new HiveTableInstance(tableRequirement.getTableName(), tableRequirement.getTableName());
     }
 

@@ -1,0 +1,14 @@
+hdfs:
+  username: hdfs
+  port: 8020
+  webhdfs:
+    datanode:
+      host: slave1
+      port: 50075
+    namenode:
+      host: master
+      port: 50070
+
+tests:
+  hdfs:
+    path: /product-test

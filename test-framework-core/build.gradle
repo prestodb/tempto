@@ -16,6 +16,8 @@ dependencies {
   compile libraries.snakeyaml
   compile libraries.httpclient
   compile libraries.ioutils
+  compile libraries.tpchgen
+  compile libraries.jsonpath
 
   testCompile libraries.spock
   testCompile libraries.hsqldb
