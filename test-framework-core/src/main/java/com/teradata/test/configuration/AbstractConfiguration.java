@@ -15,12 +15,10 @@ public abstract class AbstractConfiguration
         implements Configuration
 {
 
-    protected abstract Optional<Object> getObject(String key);
-
     @Override
     public Optional<String> getString(String key)
     {
-        Optional<Object> optionalValue = getObject(key);
+        Optional<Object> optionalValue = get(key);
         checkValueOfType(key, optionalValue, String.class);
         return (Optional) optionalValue;
     }
@@ -42,7 +40,7 @@ public abstract class AbstractConfiguration
     @Override
     public Optional<Integer> getInt(String key)
     {
-        Optional<Object> optionalValue = getObject(key);
+        Optional<Object> optionalValue = get(key);
         checkValueOfType(key, optionalValue, Integer.class);
         return (Optional) optionalValue;
     }

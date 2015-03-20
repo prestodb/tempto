@@ -8,6 +8,8 @@ import java.util.Set;
 
 public interface Configuration
 {
+    Optional<Object> get(String key);
+
     Optional<String> getString(String key);
 
     String getStringMandatory(String key);
@@ -46,5 +48,4 @@ public interface Configuration
      * Keys for returned configuration are stripped of this prefix.
      */
     Configuration getSubconfiguration(String keyPrefix);
-
 }

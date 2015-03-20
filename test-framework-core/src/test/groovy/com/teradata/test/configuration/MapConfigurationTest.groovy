@@ -34,10 +34,10 @@ class MapConfigurationTest
   def 'test get objects'()
   {
     expect:
-    configuration.getObject('a.b.c') == Optional.of('ala')
-    configuration.getObject('a.b.d') == Optional.of('ela')
-    configuration.getObject('x.y') == Optional.of(10)
-    configuration.getObject('x.y.x') == Optional.empty()
+    configuration.get('a.b.c') == Optional.of('ala')
+    configuration.get('a.b.d') == Optional.of('ela')
+    configuration.get('x.y') == Optional.of(10)
+    configuration.get('x.y.x') == Optional.empty()
   }
 
   def 'test subconfiguration'()

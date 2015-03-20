@@ -123,6 +123,6 @@ class AbstractConfigurationTest
 
   private void setupGetObject(String key, Object value)
   {
-    configuration.getObject(key) >> Optional.ofNullable(value)
+    configuration.get(key) >> Optional.ofNullable(value)
   }
 }

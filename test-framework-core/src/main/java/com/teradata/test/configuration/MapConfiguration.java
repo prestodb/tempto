@@ -19,30 +19,30 @@ import static java.util.Optional.empty;
 /**
  * Map based configuration.
  * Configuration is stored in nested maps.
- *
+ * <p/>
  * For leafs - value is store in map.
  * For non-leaf - nested map is stored.
- *
+ * <p/>
  * Outer map is responsible for first part in all keys stored in configuration.
  * Maps stored at first internal level are responsible for second part in stored keys and so on.
- *
+ * <p/>
  * E.g for configuration storing following entries:
  * a.b.c = 3
  * a.x = 10
  * b.c = 15
- *
+ * <p/>
  * following map structure would be created
- *
+ * <p/>
  * {
- *     a : {
- *         b : {
- *             c : 3
- *         },
- *         x : 10
- *     },
- *     b : {
- *         c : 15
- *     }
+ * a : {
+ * b : {
+ * c : 3
+ * },
+ * x : 10
+ * },
+ * b : {
+ * c : 15
+ * }
  * }
  */
 public class MapConfiguration
@@ -56,7 +56,16 @@ public class MapConfiguration
     }
 
     @Override
-    protected Optional<Object> getObject(String key)
+    public Optional<Object> get(String key)
+    {
+        Optional<Object> object = getObject(key);
+        if (object.isPresent() && object.get() instanceof Map) {
+            throw new IllegalArgumentException("Provided key <" + key + "> for non leaf configuration property");
+        }
+        return object;
+    }
+
+    private Optional<Object> getObject(String key)
     {
         List<String> keyParts = KeyUtils.splitKey(key);
         Iterator<String> keyPartsIterator = keyParts.iterator();
@@ -83,7 +92,6 @@ public class MapConfiguration
         return empty();
     }
 
-
     @Override
     public Set<String> listKeys()
     {
@@ -98,7 +106,8 @@ public class MapConfiguration
             String currentKey = joinKey(currentPrefix, entry.getKey());
             if (entry.getValue() instanceof Map) {
                 listKeys((Map<String, Object>) entry.getValue(), currentKey, acc);
-            } else {
+            }
+            else {
                 acc.add(currentKey);
             }
         }
@@ -110,9 +119,9 @@ public class MapConfiguration
         Optional<Object> object = getObject(keyPrefix);
         if (object.isPresent() && object.get() instanceof Map) {
             return new MapConfiguration((Map<String, Object>) object.get());
-        } else {
+        }
+        else {
             return emptyConfiguration();
         }
-
     }
 }

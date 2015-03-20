@@ -20,7 +20,7 @@ public class EmptyConfiguration extends AbstractConfiguration
     private EmptyConfiguration() {}
 
     @Override
-    protected Optional<Object> getObject(String key)
+    public Optional<Object> get(String key)
     {
         return Optional.empty();
     }

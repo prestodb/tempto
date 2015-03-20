@@ -14,6 +14,12 @@ public abstract class DelegateConfiguration
     protected abstract Configuration getDelegate();
 
     @Override
+    public Optional<Object> get(String key)
+    {
+        return getDelegate().get(key);
+    }
+
+    @Override
     public Optional<String> getString(String key)
     {
         return getDelegate().getString(key);
