@@ -5,7 +5,6 @@
 package com.teradata.test.query;
 
 import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState;
-import com.teradata.test.query.QueryResult.QueryResultBuilder;
 
 import javax.inject.Inject;
 
@@ -15,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import static com.teradata.test.fulfillment.jdbc.JdbcUtils.connection;
 import static com.teradata.test.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
 
@@ -24,18 +22,20 @@ public class JdbcQueryExecutor
 {
 
     private JdbcConnectivityParamsState jdbcParamsState;
+    private JdbcConnectionsPool jdbcConnectionsPool;
 
     @Inject
-    public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState)
+    public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState, JdbcConnectionsPool jdbcConnectionsPool)
     {
         this.jdbcParamsState = jdbcParamsState;
+        this.jdbcConnectionsPool = jdbcConnectionsPool;
     }
 
     @Override
     public QueryResult executeQuery(String sql, QueryParam[] params)
     {
         try (
-                Connection connection = connection(jdbcParamsState);
+                Connection connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
                 PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             setQueryParams(statement, params);

@@ -7,7 +7,6 @@ package com.teradata.test.query;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.PrivateModule;
-import com.google.inject.name.Names;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState;
 import com.teradata.test.fulfillment.jdbc.JdbcUtils;
@@ -16,9 +15,11 @@ import java.util.Set;
 
 import static com.google.inject.name.Names.named;
 
-public class QueryExecutorModule extends AbstractModule
+public class QueryExecutorModule
+        extends AbstractModule
 {
     private final Configuration configuration;
+    private final JdbcConnectionsPool jdbcConnectionsPool = new JdbcConnectionsPool();
 
     public QueryExecutorModule(Configuration configuration)
     {
@@ -41,9 +42,12 @@ public class QueryExecutorModule extends AbstractModule
             @Override
             protected void configure()
             {
-                bind(JdbcConnectivityParamsState.class).to(Key.get(JdbcConnectivityParamsState.class, named(connectionName)));
                 Key<QueryExecutor> queryExecutorKey = Key.get(QueryExecutor.class, named(connectionName));
+
+                bind(JdbcConnectivityParamsState.class).to(Key.get(JdbcConnectivityParamsState.class, named(connectionName)));
+                bind(JdbcConnectionsPool.class).toInstance(jdbcConnectionsPool);
                 bind(queryExecutorKey).to(JdbcQueryExecutor.class);
+
                 expose(queryExecutorKey);
             }
         };

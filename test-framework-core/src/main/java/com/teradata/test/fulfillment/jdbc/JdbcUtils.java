@@ -5,6 +5,9 @@
 package com.teradata.test.fulfillment.jdbc;
 
 import com.teradata.test.configuration.Configuration;
+import org.apache.commons.dbcp2.BasicDataSource;
+
+import javax.sql.DataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -25,6 +28,16 @@ public final class JdbcUtils
         catch (ClassNotFoundException e) {
             throw new RuntimeException("Could not load jdbc driver class: " + jdbcParamsState.driverClass, e);
         }
+    }
+
+    public static DataSource dataSource(JdbcConnectivityParamsState jdbcParamsState)
+    {
+        BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(jdbcParamsState.driverClass);
+        dataSource.setUrl(jdbcParamsState.url);
+        dataSource.setUsername(jdbcParamsState.user);
+        dataSource.setPassword(jdbcParamsState.password);
+        return dataSource;
     }
 
     public static Connection connection(JdbcConnectivityParamsState jdbcParamsState)

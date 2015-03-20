@@ -22,7 +22,7 @@ class JdbcQueryExecutorTest
 {
 
   private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState('connection_name', 'org.hsqldb.jdbc.JDBCDriver', 'jdbc:hsqldb:mem:mydb', 'sa', '')
-  private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE);
+  private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool());
 
   def setupSpec()
   {
@@ -91,6 +91,5 @@ class JdbcQueryExecutorTest
             row(1, 'Teradata Kings'),
             row(2, 'Oracle'),
             row(3, 'Facebook'))
-
   }
 }
