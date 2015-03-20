@@ -16,7 +16,6 @@ import com.teradata.test.configuration.Configuration;
 import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
-import com.teradata.test.fulfillment.table.ImmutableTableFulfiller;
 import com.teradata.test.initialization.modules.HadoopModule;
 import com.teradata.test.initialization.modules.TestConfigurationModule;
 import com.teradata.test.initialization.modules.TestInfoModule;
@@ -49,7 +48,6 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> SUITE_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of(
-            ImmutableTableFulfiller.class
     );
 
     private static final List<Class<? extends RequirementFulfiller>> TEST_METHOD_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();

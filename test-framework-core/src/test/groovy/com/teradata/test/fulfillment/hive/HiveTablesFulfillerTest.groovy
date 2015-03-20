@@ -8,6 +8,8 @@ import com.teradata.test.query.QueryExecutor
 import spock.lang.Specification
 
 import static com.google.common.collect.Iterables.getOnlyElement
+import static com.teradata.test.fulfillment.hive.HiveType.INT
+import static com.teradata.test.fulfillment.hive.HiveType.STRING
 
 class HiveTablesFulfillerTest
         extends Specification
@@ -19,7 +21,14 @@ class HiveTablesFulfillerTest
   {
     when:
     def nationDataSource = Mock(HiveDataSource)
-    def requirement = new ImmutableHiveTableRequirement('nation', nationDataSource)
+    def nationDefinition = HiveTableDefinition.builder()
+            .setName('nation')
+            .setDataSource(nationDataSource)
+            .addColumn('n_nationid', INT)
+            .addColumn('n_name', STRING)
+            .build()
+
+    def requirement = new ImmutableHiveTableRequirement(nationDefinition)
     nationDataSource.ensureDataOnHdfs() >> '/some/table/in/hdfs'
     def states = fulfiller.fulfill([requirement] as Set)
     
@@ -34,7 +43,7 @@ class HiveTablesFulfillerTest
     then:
     1 * queryExecutor.executeQuery('DROP IF EXISTS TABLE nation')
     then:
-    1 * queryExecutor.executeQuery('CREATE TABLE nation LOCATION /some/table/in/hdfs')
+    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) LOCATION /some/table/in/hdfs')
 
     when:
     fulfiller.cleanup()

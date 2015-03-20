@@ -9,18 +9,22 @@ import com.google.inject.Inject;
 import com.teradata.test.Requirement;
 import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
+import com.teradata.test.fulfillment.table.TableColumn;
 import com.teradata.test.query.QueryExecutor;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
+import static com.google.common.base.Joiner.on;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HiveTablesFulfiller
@@ -46,19 +50,27 @@ public class HiveTablesFulfiller
         Map<String, HiveTableInstance> instanceMap = newHashMap();
 
         for (ImmutableHiveTableRequirement tableRequirement : tableRequirements) {
-            HiveTableInstance instance = fulfillTable(tableRequirement);
+            HiveTableInstance instance = fulfillTable(tableRequirement.getTableDefinition());
             cratedTables.add(instance);
             instanceMap.put(instance.getName(), instance);
         }
         return ImmutableSet.of(new HiveTablesState(instanceMap));
     }
 
-    private HiveTableInstance fulfillTable(ImmutableHiveTableRequirement tableRequirement)
+    private HiveTableInstance fulfillTable(HiveTableDefinition tableDefinition)
     {
-        LOGGER.debug("fulfilling table {}", tableRequirement.getTableName());
-        queryExecutor.executeQuery(format("DROP IF EXISTS TABLE %s", tableRequirement.getTableName()));
-        queryExecutor.executeQuery(format("CREATE TABLE %s LOCATION %s", tableRequirement.getTableName(), tableRequirement.getDataSource().ensureDataOnHdfs()));
-        return new HiveTableInstance(tableRequirement.getTableName(), tableRequirement.getTableName());
+        LOGGER.debug("fulfilling table {}", tableDefinition.getName());
+        queryExecutor.executeQuery(format("DROP IF EXISTS TABLE %s", tableDefinition.getName()));
+        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) LOCATION %s",
+                tableDefinition.getName(),
+                buildColumnListDDL(tableDefinition.getColumns()),
+                tableDefinition.getDataSource().ensureDataOnHdfs()));
+        return new HiveTableInstance(tableDefinition.getName(), tableDefinition.getName());
+    }
+
+    private String buildColumnListDDL(List<TableColumn> columns)
+    {
+        return on(',').join(columns.stream().map(tc -> tc.getName() + " " + tc.getType()).collect(toList()));
     }
 
     @Override

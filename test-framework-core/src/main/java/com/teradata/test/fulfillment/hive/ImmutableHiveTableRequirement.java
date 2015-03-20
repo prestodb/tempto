@@ -8,22 +8,16 @@ import com.teradata.test.Requirement;
 
 public class ImmutableHiveTableRequirement implements Requirement
 {
-    private final String tableName;
-    private final HiveDataSource dataSource;
 
-    public ImmutableHiveTableRequirement(String tableName, HiveDataSource dataSource)
+    private final HiveTableDefinition tableDefinition;
+
+    public ImmutableHiveTableRequirement(HiveTableDefinition tableDefinition)
     {
-        this.tableName = tableName;
-        this.dataSource = dataSource;
+        this.tableDefinition = tableDefinition;
     }
 
-    public String getTableName()
+    public HiveTableDefinition getTableDefinition()
     {
-        return tableName;
-    }
-
-    public HiveDataSource getDataSource()
-    {
-        return dataSource;
+        return tableDefinition;
     }
 }
