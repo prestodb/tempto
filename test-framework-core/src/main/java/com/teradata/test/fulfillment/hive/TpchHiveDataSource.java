@@ -41,13 +41,13 @@ public class TpchHiveDataSource
 
             long currentFileLength = hdfsClient.getLength(filePath, hdfsUsername);
             if (currentFileLength > 0) {
-                long storedLength = getLength(tableInputStream());
-                if (currentFileLength == storedLength) {
+                long expectedLength = getLength(tableInputStream());
+                if (currentFileLength == expectedLength) {
                     logger.debug("File {} ({} bytes) already exists", filePath, currentFileLength);
                     return filePath;
                 }
                 else {
-                    logger.debug("File {} ({} bytes) already exists, but have different size than expected ({} bytes)", filePath, currentFileLength, storedLength);
+                    logger.debug("File {} ({} bytes) already exists, but have different size than expected ({} bytes)", filePath, currentFileLength, expectedLength);
                 }
             }
 
@@ -82,7 +82,7 @@ public class TpchHiveDataSource
     {
         long sum = 0;
         while (inputStream.read() >= 0) {
-            sum += 0;
+            sum += 1;
         }
         return sum;
     }
