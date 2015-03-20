@@ -22,36 +22,6 @@ def check(popen_args):
     retcode = process.poll()
     return retcode == 0
 
-
-def password_argument():
-    try:
-        os.environ['JENKINS_PASSWORD']
-        return None
-    except KeyError:
-        return ['-p']
-
-
-def vcs_appropriate_submitter(user, hadoop_distro, all_args):
-    COMMON_ARGS = [
-        '-u', user,
-        '-a', "PRODUCT_TEST_ARGS:{all_args}".format(
-            all_args=' '.join(all_args)
-        )
-    ]
-    if password_argument() is not None:
-        COMMON_ARGS = COMMON_ARGS + password_argument()
-
-    if check(["git", "rev-parse", "--show-toplevel"]):
-        BASE_ARGS = [
-            os.path.join(repo_root(), 'bin', 'sandbox'),
-            '-j', 'sandbox-build-test-product' +
-            '-' + hadoop_distro,
-        ]
-    else:
-        BASE_ARGS = ["/bin/false"]
-    return BASE_ARGS + COMMON_ARGS
-
-
 def listener_arguments():
     return ' '.join([
         '-usedefaultlisteners', 'false',
@@ -108,14 +78,6 @@ def run_testng(test_runner_argument_builder):
     show_results_location()
     return result
 
-
-def build_fat_jar(test_runner_argument_builder):
-    return subprocess.call(' '.join([
-        os.path.join(repo_root(), 'gradlew'),
-        ':test-framework-core:buildFatJar'
-    ]), shell=True)
-
-
 def is_excluded_remote_arg(arg):
     return arg == '-r' or arg == '--remote'
 
@@ -126,23 +88,6 @@ def remove_user_args(sys_args):
             sys_args.pop(index)
             sys_args.pop(index)
             return
-
-
-def run_remote_tests(args):
-    if args.mapr:
-        hadoop_distro = 'mapr'
-    elif args.hdp:
-        hadoop_distro = 'hdp'
-    else:
-        hadoop_distro = 'cdh'
-
-    user = os.getenv('USER') if not args.user else args.user
-    remove_user_args(sys.argv)
-
-    all_args = [a for a in sys.argv[1:] if not is_excluded_remote_arg(a)]
-
-    return subprocess.call(vcs_appropriate_submitter(user, hadoop_distro, all_args))
-
 
 def list_suites():
     sys.stdout.write('Available suites:\n\n\t')
@@ -208,11 +153,7 @@ def main():
             return determine_list_suite_groups(args)
         elif args.which_suite:
             return which_suite(args.which_suite)
-        elif args.remote:
-            return run_remote_tests(args)
         else:
-            if args.build_fat_jar and build_fat_jar(test_runner_argument_builder) != 0:
-                return FAILURE
             return run_testng(test_runner_argument_builder)
     except KeyboardInterrupt:
         sys.stderr.write('\nInterruption detected.  Exiting.\n')
