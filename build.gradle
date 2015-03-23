@@ -78,6 +78,7 @@ ext.libraries = [
 
 ext.test_framework_core = project(":test-framework-core")
 ext.test_framework_examples = project(":test-framework-examples")
+ext.test_framework_hive_jdbc = project(":test-framework-hive-jdbc")
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'

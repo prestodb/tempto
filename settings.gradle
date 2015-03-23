@@ -3,3 +3,4 @@
  */
 include 'test-framework-core'
 include 'test-framework-examples'
+include 'test-framework-hive-jdbc'

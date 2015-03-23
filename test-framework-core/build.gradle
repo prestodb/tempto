@@ -19,10 +19,6 @@ dependencies {
   compile libraries.ioutils
   compile libraries.tpchgen
   compile libraries.jsonpath
-  compile (libraries.hive_jdbc) {
-    exclude module: 'groovy-all'
-  }
-  compile libraries.hadoop_core
 
   testCompile libraries.spock
   testCompile libraries.hsqldb
@@ -42,3 +38,4 @@ task buildFatJar(type: Jar, dependsOn: assemble) {
 }
 
 build.dependsOn.add(buildFatJar)
+build.dependsOn.add(':test-framework-hive-jdbc:buildFatJar')

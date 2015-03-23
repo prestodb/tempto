@@ -1,0 +1,21 @@
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
+ */
+
+apply plugin: "java"
+apply plugin: "groovy"
+
+dependencies {
+  compile libraries.hive_jdbc
+  compile libraries.hadoop_core
+}
+
+task buildFatJar(type: Jar, dependsOn: assemble) {
+  appendix = "all"
+  from sourceSets.main.output
+  from { configurations.testRuntime.collect {
+    it.isDirectory() ? it : zipTree(it)
+  } }
+}
+
+build.dependsOn.add(buildFatJar)
