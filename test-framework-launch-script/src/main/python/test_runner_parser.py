@@ -33,7 +33,18 @@ class TestRunnerParser(object):
         test_organization_arguments = parser.add_argument_group(
             title='Test Organization Arguments',
             description='Arguments which expose how test cases are organized in the ' +
-                        'framework, such as the available test suites and test groups.'
+                        'framework, such as the tests JAR classpath or the available test ' +
+                        'suites and test groups.'
+        )
+
+        test_organization_arguments.add_argument(
+            '--tests-classpath',
+            metavar='JAR_PATH[:JAR_PATH...]',
+            dest='tests_classpath',
+            default=[],
+            action=CombineAction,
+            type=lambda value : value.split(':'),
+            help='Classpath containing test cases'
         )
 
         test_organization_arguments.add_argument(
@@ -127,7 +138,7 @@ class TestRunnerParser(object):
         test_environment_arguments = parser.add_argument_group(
             title='Test Environment Arguments',
             description='Arguments which determine the environment the selected test cases ' +
-                        'are run on, such as the cluster to use or the software to install.'
+                        'are run on, such as the logging properties.'
         )
 
         test_environment_arguments.add_argument(

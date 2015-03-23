@@ -21,6 +21,12 @@ class TestRunnerArgumentBuilder(object):
         self.__args = args
 
     @property
+    def tests_classpath_argument(self):
+        if self.__args.tests_classpath is not None:
+            return self.__args.tests_classpath
+        return ''
+
+    @property
     def methods_argument(self):
         if self.__args.methods is not None:
             return '-methods ' + self.__args.methods

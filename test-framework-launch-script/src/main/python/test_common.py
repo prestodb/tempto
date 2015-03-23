@@ -22,7 +22,6 @@ LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
 ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'
 INITIALIZATION_LISTENER = PACKAGE_PREFIX + '.initialization.TestInitializationListener'
 
-
 def repo_root():
     try:
         return os.environ['SCRIPT_ROOT']
@@ -32,23 +31,15 @@ def repo_root():
         )
         sys.exit(ENVIRONMENT_ERROR)
 
-
-def framework_root():
-    return os.path.join(repo_root(), 'test-framework-core')
-
-
-def example_tests_root():
-    return os.path.join(repo_root(), 'test-framework-examples')
-
-
-def reporting_dir():
-    return os.path.join(framework_root(), 'build/reports/')
-
-
 SUITES_FILE = os.path.join(
     repo_root(), 'test-framework-examples/src/main/resources/suites.json'
 )
 
+def framework_root():
+    return os.path.join(repo_root(), 'test-framework-core')
+
+def reporting_dir():
+    return os.path.join(framework_root(), 'build/reports/')
 
 def raw_dict_for(filename):
     return dict(json.load(open(filename)))
@@ -58,7 +49,6 @@ def dict_without_private_fields_of(py_dict):
     return dict(
         (key, py_dict[key]) for key in py_dict if not key.startswith('__')
     )
-
 
 def get_public_dict_for(filename):
     return dict_without_private_fields_of(raw_dict_for(filename))

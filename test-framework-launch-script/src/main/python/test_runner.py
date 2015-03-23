@@ -9,8 +9,7 @@ import sys
 from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
 from test_common import LOGGING_LISTENER, ANNOTATION_LISTENER, INITIALIZATION_LISTENER
 from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
-from test_common import repo_root, reporting_dir, framework_root, \
-    example_tests_root
+from test_common import repo_root, reporting_dir, framework_root
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
 
@@ -58,9 +57,9 @@ def be_playful():
 
 def run_testng(test_runner_argument_builder):
     be_playful()
-    classpath = ':'.join([
-        os.path.join(framework_root(), 'build/libs/test-framework-core-all.jar'),
-        os.path.join(example_tests_root(), 'build/libs/test-framework-examples.jar')])
+    classpath = ':'.join(
+        [os.path.join(framework_root(), 'build/libs/test-framework-core-all.jar')] +
+        test_runner_argument_builder.tests_classpath_argument)
 
     cmd_to_run = ' '.join([
         'java', '-classpath', classpath,
