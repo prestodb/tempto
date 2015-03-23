@@ -70,6 +70,15 @@ class AbstractConfigurationTest
     configuration.getStringMandatory(KEY) == 'ala'
   }
 
+  def 'get present string value for integer object'() {
+    when:
+    setupGetObject(KEY, 10)
+
+    then:
+    configuration.getString(KEY) == Optional.of('10')
+    configuration.getStringMandatory(KEY) == '10'
+  }
+
   def 'non-mandatory get string not present value'() {
     when:
     setupGetObject(KEY, null)
@@ -96,16 +105,6 @@ class AbstractConfigurationTest
     then:
     def e = thrown(IllegalStateException)
     e.message == 'damn, no key'
-  }
-
-  def 'get string for non matching type'() {
-    when:
-    setupGetObject(KEY, 10)
-    configuration.getString(KEY)
-
-    then:
-    def e = thrown(IllegalStateException)
-    e.message == 'expected java.lang.String value for key a.b.c but got java.lang.Integer'
   }
 
   def 'test list key prefixes'() {

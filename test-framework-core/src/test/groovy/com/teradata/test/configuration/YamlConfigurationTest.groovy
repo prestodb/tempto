@@ -28,6 +28,7 @@ x:
     configuration.listKeys() == ['a.b.c', 'a.b.d', 'x.y'] as Set
     configuration.getInt('x.y') == Optional.of(10)
     configuration.getString('a.b.c') == Optional.of('ala')
+    configuration.getString('x.y') == Optional.of('10')
   }
 
 }

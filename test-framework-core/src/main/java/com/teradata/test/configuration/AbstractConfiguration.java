@@ -19,8 +19,7 @@ public abstract class AbstractConfiguration
     public Optional<String> getString(String key)
     {
         Optional<Object> optionalValue = get(key);
-        checkValueOfType(key, optionalValue, String.class);
-        return (Optional) optionalValue;
+        return optionalValue.map(Object::toString);
     }
 
     @Override
@@ -55,6 +54,28 @@ public abstract class AbstractConfiguration
     public int getIntMandatory(String key, String errorMessage)
     {
         Optional<Integer> value = getInt(key);
+        checkValuePresent(value, errorMessage);
+        return value.get();
+    }
+
+    @Override
+    public Optional<Boolean> getBoolean(String key)
+    {
+        Optional<Object> optionalValue = get(key);
+        checkValueOfType(key, optionalValue, Boolean.class);
+        return (Optional) optionalValue;
+    }
+
+    @Override
+    public boolean getBooleanMandatory(String key)
+    {
+        return getBooleanMandatory(key, standardValueNotFoundMessage(key));
+    }
+
+    @Override
+    public boolean getBooleanMandatory(String key, String errorMessage)
+    {
+        Optional<Boolean> value = getBoolean(key);
         checkValuePresent(value, errorMessage);
         return value.get();
     }

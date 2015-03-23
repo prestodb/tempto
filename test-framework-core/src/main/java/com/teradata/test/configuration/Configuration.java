@@ -22,6 +22,12 @@ public interface Configuration
 
     int getIntMandatory(String key, String errorMessage);
 
+    Optional<Boolean> getBoolean(String key);
+
+    boolean getBooleanMandatory(String key);
+
+    boolean getBooleanMandatory(String key, String errorMessage);
+
     /**
      * Lists all keys in configuration
      */

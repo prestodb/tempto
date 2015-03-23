@@ -56,6 +56,24 @@ public abstract class DelegateConfiguration
     }
 
     @Override
+    public Optional<Boolean> getBoolean(String key)
+    {
+        return getDelegate().getBoolean(key);
+    }
+
+    @Override
+    public boolean getBooleanMandatory(String key)
+    {
+        return getDelegate().getBooleanMandatory(key);
+    }
+
+    @Override
+    public boolean getBooleanMandatory(String key, String errorMessage)
+    {
+        return getDelegate().getBooleanMandatory(key, errorMessage);
+    }
+    
+    @Override
     public Set<String> listKeys()
     {
         return getDelegate().listKeys();
