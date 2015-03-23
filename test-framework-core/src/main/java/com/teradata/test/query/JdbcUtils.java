@@ -4,16 +4,16 @@
 
 package com.teradata.test.query;
 
-import com.teradata.test.query.JdbcConnectivityParamsState;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 import javax.sql.DataSource;
 
-import java.io.PrintWriter;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 
 import static java.sql.DriverManager.getConnection;
 
@@ -41,80 +41,34 @@ public final class JdbcUtils
 
     private static DataSource createPoolingDataSource(JdbcConnectivityParamsState jdbcParamsState)
     {
+
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(jdbcParamsState.driverClass);
         dataSource.setUrl(jdbcParamsState.url);
         dataSource.setUsername(jdbcParamsState.user);
         dataSource.setPassword(jdbcParamsState.password);
+        dataSource.setDriverClassLoader(getDriverClassLoader(jdbcParamsState));
         return dataSource;
     }
 
     private static DataSource createNonPoolingDataSource(JdbcConnectivityParamsState jdbcParamsState)
     {
-        registerDriver(jdbcParamsState);
-        return new DataSource() {
-            @Override
-            public Connection getConnection()
-                    throws SQLException
-            {
-                return connection(jdbcParamsState);
-            }
+        return new NonPoolingJdbcDataSource(jdbcParamsState, getDriverClassLoader(jdbcParamsState));
+    }
 
-            @Override
-            public Connection getConnection(String username, String password)
-                    throws SQLException
-            {
-                throw new RuntimeException("not implemented");
+    private static ClassLoader getDriverClassLoader(JdbcConnectivityParamsState jdbcParamsState)
+    {
+        try {
+            ClassLoader myClassLoader = JdbcUtils.class.getClassLoader();
+            if (!jdbcParamsState.jar.isPresent()) {
+                return myClassLoader;
             }
-
-            @Override
-            public PrintWriter getLogWriter()
-                    throws SQLException
-            {
-                return null;
-            }
-
-            @Override
-            public void setLogWriter(PrintWriter out)
-                    throws SQLException
-            {
-
-            }
-
-            @Override
-            public void setLoginTimeout(int seconds)
-                    throws SQLException
-            {
-            }
-
-            @Override
-            public int getLoginTimeout()
-                    throws SQLException
-            {
-                return 0;
-            }
-
-            @Override
-            public Logger getParentLogger()
-                    throws SQLFeatureNotSupportedException
-            {
-                return null;
-            }
-
-            @Override
-            public <T> T unwrap(Class<T> iface)
-                    throws SQLException
-            {
-                throw new RuntimeException("not implemented");
-            }
-
-            @Override
-            public boolean isWrapperFor(Class<?> iface)
-                    throws SQLException
-            {
-                return false;
-            }
-        };
+            URL jarURL = new File(jdbcParamsState.jar.get()).toURL();
+            return URLClassLoader.newInstance(new URL[] {jarURL}, myClassLoader);
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException("could not create classloader for file" + jdbcParamsState.jar.get(), e);
+        }
     }
 
     public static Connection connection(JdbcConnectivityParamsState jdbcParamsState)

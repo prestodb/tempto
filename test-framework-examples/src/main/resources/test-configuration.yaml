@@ -14,7 +14,7 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-
+    jdbc_jar: test-framework-hive-jdbc/build/libs/test-framework-hive-jdbc-all.jar
 tests:
   hdfs:
     path: /product-test

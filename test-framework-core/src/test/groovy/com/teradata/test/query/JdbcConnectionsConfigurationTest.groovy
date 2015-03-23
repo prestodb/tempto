@@ -7,11 +7,13 @@ package com.teradata.test.query
 import com.teradata.test.configuration.YamlConfiguration
 import spock.lang.Specification
 
+import static java.util.Optional.empty
+
 class JdbcConnectionsConfigurationTest
         extends Specification
 {
 
-  def configuration = new YamlConfiguration("""\
+  private static final def CONFIGURATION = new YamlConfiguration("""\
 databases:
   a:
     jdbc_driver_class: com.acme.ADriver
@@ -25,12 +27,25 @@ databases:
     jdbc_user: buser
     jdbc_password: bpassword
     jdbc_pooling: false
+    jdbc_jar: /path/to/jar.jar
 
   b_alias:
     alias: b
 """)
 
-  def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(configuration)
+  private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
+          new JdbcConnectivityParamsState('a', 'com.acme.ADriver', 'jdbc:a://localhost:8080',
+                  'auser', 'apassword', true, empty())
+
+  private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
+          new JdbcConnectivityParamsState('b', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'))
+
+  private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
+          new JdbcConnectivityParamsState('b_alias', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'))
+
+  def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
 
   def "list database connection configurations"()
   {
@@ -45,8 +60,8 @@ databases:
     def b = jdbcConnectionConfiguration.getConnectionConfiguration('b')
 
     expect:
-    a == new JdbcConnectivityParamsState('a', 'com.acme.ADriver', 'jdbc:a://localhost:8080', 'auser', 'apassword', true)
-    b == new JdbcConnectivityParamsState('b', 'com.acme.BDriver', 'jdbc:b://localhost:8080', 'buser', 'bpassword', false)
+    a == EXPECTED_A_JDBC_CONNECTIVITY_PARAMS
+    b == EXPECTED_B_JDBC_CONNECTIVITY_PARAMS
   }
 
   def "get connection configuration for alias"()
@@ -55,6 +70,6 @@ databases:
     def bAlias = jdbcConnectionConfiguration.getConnectionConfiguration('b_alias')
 
     expect:
-    bAlias == new JdbcConnectivityParamsState('b_alias', 'com.acme.BDriver', 'jdbc:b://localhost:8080', 'buser', 'bpassword', false)
+    bAlias == EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS
   }
 }

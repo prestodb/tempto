@@ -19,6 +19,7 @@ public class JdbcConnectionsConfiguration
     private static final String JDBC_USER_KEY = "jdbc_user";
     private static final String JDBC_PASSWORD_KEY = "jdbc_password";
     private static final String JDBC_POOLING_KEY = "jdbc_pooling";
+    private static final String JDBC_JAR = "jdbc_jar";
     private static final String ALIAS_KEY = "alias";
 
     private final Configuration configuration;
@@ -44,7 +45,8 @@ public class JdbcConnectionsConfiguration
                 connectionConfiguration.getStringMandatory(JDBC_URL_KEY),
                 connectionConfiguration.getStringMandatory(JDBC_USER_KEY),
                 connectionConfiguration.getStringMandatory(JDBC_PASSWORD_KEY),
-                connectionConfiguration.getBoolean(JDBC_POOLING_KEY).orElse(true));
+                connectionConfiguration.getBoolean(JDBC_POOLING_KEY).orElse(true),
+                connectionConfiguration.getString(JDBC_JAR));
 
         return jdbcConnectivityParamsState;
     }

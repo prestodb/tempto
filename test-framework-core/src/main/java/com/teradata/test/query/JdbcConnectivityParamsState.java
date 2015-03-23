@@ -24,8 +24,9 @@ public class JdbcConnectivityParamsState
     public final String user;
     public final String password;
     public final boolean pooling;
+    public final Optional<String> jar;
 
-    public JdbcConnectivityParamsState(String name, String driverClass, String url, String user, String password, boolean pooling)
+    public JdbcConnectivityParamsState(String name, String driverClass, String url, String user, String password, boolean pooling, Optional<String> jar)
     {
         this.name = name;
         this.driverClass = driverClass;
@@ -33,6 +34,7 @@ public class JdbcConnectivityParamsState
         this.user = user;
         this.password = password;
         this.pooling = pooling;
+        this.jar = jar;
     }
 
     @Override

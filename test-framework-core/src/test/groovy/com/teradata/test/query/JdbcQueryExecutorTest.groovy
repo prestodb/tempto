@@ -15,12 +15,20 @@ import static JdbcUtils.connection
 import static JdbcUtils.registerDriver
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
+import static java.util.Optional.empty
 
 class JdbcQueryExecutorTest
         extends Specification
 {
 
-  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState('connection_name', 'org.hsqldb.jdbc.JDBCDriver', 'jdbc:hsqldb:mem:mydb', 'sa', '', true)
+  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState(
+          'connection_name',
+          'org.hsqldb.jdbc.JDBCDriver',
+          'jdbc:hsqldb:mem:mydb',
+          'sa',
+          '',
+          true,
+          empty())
   private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool());
 
   def setupSpec()
