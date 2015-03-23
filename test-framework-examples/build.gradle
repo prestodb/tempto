@@ -7,4 +7,5 @@ apply plugin: "java"
 dependencies {
   compile test_framework_core
   compile libraries.testng
+
 }

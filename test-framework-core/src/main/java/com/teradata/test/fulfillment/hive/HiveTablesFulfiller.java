@@ -60,8 +60,8 @@ public class HiveTablesFulfiller
     private HiveTableInstance fulfillTable(HiveTableDefinition tableDefinition)
     {
         LOGGER.debug("fulfilling table {}", tableDefinition.getName());
-        queryExecutor.executeQuery(format("DROP IF EXISTS TABLE %s", tableDefinition.getName()));
-        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) LOCATION %s",
+        queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", tableDefinition.getName()));
+        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) LOCATION '%s'",
                 tableDefinition.getName(),
                 buildColumnListDDL(tableDefinition.getColumns()),
                 tableDefinition.getDataSource().ensureDataOnHdfs()));
@@ -86,7 +86,7 @@ public class HiveTablesFulfiller
     {
         LOGGER.debug("cleaning up table {}", createdTable.getName());
         try {
-            queryExecutor.executeQuery(format("DROP IF EXISTS TABLE %s", createdTable.getName()));
+            queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", createdTable.getName()));
         }
         catch (Exception e) {
             LOGGER.debug("error while cleaning up table {}", createdTable.getName(), e);

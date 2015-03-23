@@ -1,7 +1,7 @@
 /*
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
-package com.teradata.test.fulfillment.jdbc;
+package com.teradata.test.query;
 
 import com.teradata.test.context.State;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -23,14 +23,16 @@ public class JdbcConnectivityParamsState
     public final String url;
     public final String user;
     public final String password;
+    public final boolean pooling;
 
-    public JdbcConnectivityParamsState(String name, String driverClass, String url, String user, String password)
+    public JdbcConnectivityParamsState(String name, String driverClass, String url, String user, String password, boolean pooling)
     {
         this.name = name;
         this.driverClass = driverClass;
         this.url = url;
         this.user = user;
         this.password = password;
+        this.pooling = pooling;
     }
 
     @Override

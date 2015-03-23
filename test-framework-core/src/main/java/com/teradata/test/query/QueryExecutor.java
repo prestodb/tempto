@@ -26,7 +26,7 @@ public interface QueryExecutor
      */
     public static QueryResult query(String sql, QueryParam... params)
     {
-        QueryExecutor executor = testContext().getDependency(QueryExecutor.class);
+        QueryExecutor executor = testContext().getDependency(QueryExecutor.class, "default");
         return executor.executeQuery(sql, params);
     }
 

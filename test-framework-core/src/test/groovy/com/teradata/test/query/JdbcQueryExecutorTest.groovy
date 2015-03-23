@@ -4,7 +4,6 @@
 
 package com.teradata.test.query
 
-import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState
 import org.apache.commons.dbutils.QueryRunner
 import spock.lang.Specification
 
@@ -12,8 +11,8 @@ import java.sql.Connection
 
 import static com.teradata.test.assertions.QueryAssert.Row.row
 import static com.teradata.test.assertions.QueryAssert.assertThat
-import static com.teradata.test.fulfillment.jdbc.JdbcUtils.connection
-import static com.teradata.test.fulfillment.jdbc.JdbcUtils.registerDriver
+import static JdbcUtils.connection
+import static JdbcUtils.registerDriver
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
 
@@ -21,7 +20,7 @@ class JdbcQueryExecutorTest
         extends Specification
 {
 
-  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState('connection_name', 'org.hsqldb.jdbc.JDBCDriver', 'jdbc:hsqldb:mem:mydb', 'sa', '')
+  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState('connection_name', 'org.hsqldb.jdbc.JDBCDriver', 'jdbc:hsqldb:mem:mydb', 'sa', '', true)
   private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool());
 
   def setupSpec()

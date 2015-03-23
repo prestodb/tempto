@@ -41,15 +41,15 @@ class HiveTablesFulfillerTest
     assert nationTableInstance.nameInDatabase == 'nation'
 
     then:
-    1 * queryExecutor.executeQuery('DROP IF EXISTS TABLE nation')
+    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
     then:
-    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) LOCATION /some/table/in/hdfs')
+    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) LOCATION \'/some/table/in/hdfs\'')
 
     when:
     fulfiller.cleanup()
 
     then:
-    1 * queryExecutor.executeQuery('DROP IF EXISTS TABLE nation')
+    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
 
     then:
     0 * _

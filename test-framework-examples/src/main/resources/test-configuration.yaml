@@ -4,6 +4,21 @@ hdfs:
     host: master
     port: 50070
 
+databases:
+  default:
+    jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
+    jdbc_url: jdbc:hive2://master:10000
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+
+  hive:
+    jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
+    jdbc_url: jdbc:hive2://master:10000
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+
 tests:
   hdfs:
     path: /product-test

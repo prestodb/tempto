@@ -4,7 +4,8 @@
 
 package com.teradata.test.query;
 
-import com.teradata.test.fulfillment.jdbc.JdbcConnectivityParamsState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
@@ -16,10 +17,12 @@ import java.util.Arrays;
 
 import static com.teradata.test.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class JdbcQueryExecutor
         implements QueryExecutor
 {
+    private static final Logger LOGGER = getLogger(JdbcQueryExecutor.class);
 
     private JdbcConnectivityParamsState jdbcParamsState;
     private JdbcConnectionsPool jdbcConnectionsPool;
@@ -34,6 +37,7 @@ public class JdbcQueryExecutor
     @Override
     public QueryResult executeQuery(String sql, QueryParam[] params)
     {
+        LOGGER.debug("executing query {} with params {}", sql, params);
         try (
                 Connection connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
                 PreparedStatement statement = connection.prepareStatement(sql)

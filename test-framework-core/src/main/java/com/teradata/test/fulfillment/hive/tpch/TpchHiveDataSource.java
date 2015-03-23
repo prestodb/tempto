@@ -2,8 +2,9 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.fulfillment.hive;
+package com.teradata.test.fulfillment.hive.tpch;
 
+import com.teradata.test.fulfillment.hive.HiveDataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.tpch.IterableTpchEntityInputStream;
 import com.teradata.test.tpch.TpchTable;
@@ -34,7 +35,8 @@ public class TpchHiveDataSource
     public String ensureDataOnHdfs()
     {
         try {
-            String filePath = tpchTableHdfsPath();
+            String dirPath = tpchTableHdfsPath();
+            String filePath = dirPath + "/data";
 
             HdfsClient hdfsClient = testContext().getDependency(HdfsClient.class);
             String hdfsUsername = testContext().getDependency(String.class, "hdfs.username");
@@ -44,7 +46,7 @@ public class TpchHiveDataSource
                 long expectedLength = getLength(tableInputStream());
                 if (currentFileLength == expectedLength) {
                     logger.debug("File {} ({} bytes) already exists", filePath, currentFileLength);
-                    return filePath;
+                    return dirPath;
                 }
                 else {
                     logger.debug("File {} ({} bytes) already exists, but have different size than expected ({} bytes)", filePath, currentFileLength, expectedLength);
@@ -54,7 +56,7 @@ public class TpchHiveDataSource
             logger.debug("Saving new file {} for TPCH table {}", filePath, table);
             hdfsClient.saveFile(filePath, hdfsUsername, tableInputStream());
 
-            return filePath;
+            return dirPath;
         }
         catch (IOException e) {
             throw new RuntimeException("Could not generate data for table: " + table, e);

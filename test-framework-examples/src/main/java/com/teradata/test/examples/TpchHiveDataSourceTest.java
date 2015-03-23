@@ -5,7 +5,7 @@
 package com.teradata.test.examples;
 
 import com.teradata.test.Requires;
-import com.teradata.test.fulfillment.hive.TpchHiveDataSource;
+import com.teradata.test.fulfillment.hive.tpch.TpchHiveDataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.tpch.IterableTpchEntityInputStream;
 import org.apache.commons.io.IOUtils;

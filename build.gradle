@@ -30,24 +30,26 @@ allprojects {
 }
 
 ext.versions = [
-        assertj       : '2.0.0',
-        guava         : '18.0',
-        guice         : '4.0-beta5',
-        log4j         : '1.2.17',
-        testng        : '6.8',
-        spock         : '1.0-groovy-2.4',
-        slf4j         : '1.7.5',
-        reportng      : '1.1.4',
-        hsqldb        : '2.3.2',
-        dbutils       : '1.6',
-        snakeyaml     : '1.15',
-        cglib         : '3.1',
-        httpclient    : '4.4',
-        ioutils       : '2.4',
-        tpchgen       : '0.4',
-        jsonpath      : '2.0.0',
-        commons_lang3 : '3.3.2',
-        commons_dbcp2 : '2.1'
+        assertj      : '2.0.0',
+        guava        : '18.0',
+        guice        : '4.0-beta5',
+        log4j        : '1.2.17',
+        testng       : '6.8',
+        spock        : '1.0-groovy-2.4',
+        slf4j        : '1.7.5',
+        reportng     : '1.1.4',
+        hsqldb       : '2.3.2',
+        dbutils      : '1.6',
+        snakeyaml    : '1.15',
+        cglib        : '3.1',
+        httpclient   : '4.4',
+        ioutils      : '2.4',
+        tpchgen      : '0.4',
+        jsonpath     : '2.0.0',
+        commons_lang3: '3.3.2',
+        commons_dbcp2: '2.1',
+        hive         : '0.12.0-cdh5.1.2',
+        hadoop       : '0.20.2'
 ]
 
 ext.libraries = [
@@ -70,6 +72,8 @@ ext.libraries = [
         snakeyaml    : "org.yaml:snakeyaml:${versions.snakeyaml}",
         tpchgen      : "io.airlift.tpch:tpch:${versions.tpchgen}",
         jsonpath     : "com.jayway.jsonpath:json-path:${versions.jsonpath}",
+        hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
+        hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}"
 ]
 
 ext.test_framework_core = project(":test-framework-core")
