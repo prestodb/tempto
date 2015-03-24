@@ -27,8 +27,10 @@ import org.testng.ITestListener;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -48,6 +50,10 @@ public class TestInitializationListener
         implements ITestListener
 {
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
+
+    private static final String TEST_CONFIGURATION_URI_KEY = "test-configuration";
+    private static final String DEFAULT_TEST_CONFIGURATION_URI = "classpath:/test-configuration.yaml";
+    private static final String CLASSPATH_PROTOCOL = "classpath:";
 
     private final static List<Class<? extends RequirementFulfiller>> SUITE_FULFILLERS = ImmutableList.of(
             HiveTablesFulfiller.class
@@ -78,14 +84,34 @@ public class TestInitializationListener
         );
     }
 
+    private static InputStream getConfigurationInputStream()
+    {
+        String testConfigurationUri = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_URI);
+        if (testConfigurationUri.startsWith(CLASSPATH_PROTOCOL)) {
+            InputStream input = TestInitializationListener.class.getResourceAsStream(testConfigurationUri.substring(CLASSPATH_PROTOCOL.length()));
+            if (input == null) {
+                throw new IllegalArgumentException("test configuration URI is incorrect: " + testConfigurationUri);
+            }
+            return input;
+        }
+        else {
+            try {
+                return new URL(testConfigurationUri).openConnection().getInputStream();
+            }
+            catch (IOException e) {
+                throw new IllegalArgumentException("test configuration URI is incorrect: " + testConfigurationUri);
+            }
+        }
+    }
+
     private static Configuration createTestConfiguration()
     {
-        // TODO - SWARM-158
-        InputStream input = TestInitializationListener.class.getResourceAsStream("/test-configuration.yaml");
-        if (input == null) {
-            return new YamlConfiguration("");
+        try (InputStream configurationInputStream = getConfigurationInputStream()) {
+            return new YamlConfiguration(configurationInputStream);
         }
-        return new YamlConfiguration(input);
+        catch (IOException e) {
+            throw new RuntimeException("could not parse configuration file", e);
+        }
     }
 
     public TestInitializationListener(

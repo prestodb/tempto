@@ -49,7 +49,13 @@ class TestRunnerParser(object):
             type=lambda value : value.split(':'),
             help='Classpath containing test cases'
         )
-
+        test_organization_arguments.add_argument(
+            '--test-configuration',
+            dest='test_configuration',
+            metavar='TEST_CONFIGURATION_URI',
+            default='classpath:/test-configuration.yaml',
+            help='URI to Test configuration YAML file'
+        )
         test_organization_arguments.add_argument(
             '--list-suites',
             dest='list_suites',

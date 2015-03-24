@@ -79,11 +79,14 @@ class TestRunnerArgumentBuilder(object):
     def system_properties(self):
         return self.__joined_string_excluding_nulls_for([
             self.__logs_collection_string(),
+            self.__test_configuration_argument()
         ])
 
-    def __joined_string_excluding_nulls_for(self, lst):
-        isNotNone = lambda x: (0 if x is None else 1)
-        return ' '.join(filter(isNotNone, lst))
+
+    def __test_configuration_argument(self):
+        if self.__args.test_configuration is not None:
+            return '-Dtest-configuration=' + self.__args.test_configuration
+        return ''
 
     def __logs_collection_string(self):
         """
@@ -111,3 +114,7 @@ class TestRunnerArgumentBuilder(object):
             )
 
         return ' '.join(debug_flags)
+
+    def __joined_string_excluding_nulls_for(self, lst):
+        isNotNone = lambda x: (0 if x is None else 1)
+        return ' '.join(filter(isNotNone, lst))
