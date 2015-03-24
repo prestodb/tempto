@@ -2,6 +2,7 @@
     "__copyright": "Copyright Teradata Inc., 2015, All Rights Reserved",
 
     "smoketest": [
-        "example_smoketest"
+        "example_smoketest",
+        "example_smoketest_empty"
     ]
 }

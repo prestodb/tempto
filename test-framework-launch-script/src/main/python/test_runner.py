@@ -88,21 +88,21 @@ def remove_user_args(sys_args):
             sys_args.pop(index)
             return
 
-def list_suites():
+def list_suites(tests_classpath):
     sys.stdout.write('Available suites:\n\n\t')
-    sys.stdout.write('\n\t'.join(get_sorted_suites()))
+    sys.stdout.write('\n\t'.join(get_sorted_suites(tests_classpath)))
     sys.stdout.write('\n')
     return SUCCESS
 
 
-def list_groups():
+def list_groups(tests_classpath):
     sys.stdout.write('Available groups:\n\n\t')
-    sys.stdout.write('\n\t'.join(get_sorted_groups()))
+    sys.stdout.write('\n\t'.join(get_sorted_groups(tests_classpath)))
     sys.stdout.write('\n')
     return SUCCESS
 
 
-def list_suite_groups(suites):
+def list_suite_groups(suites, tests_classpath):
     sys.stdout.write(
         'Available groups for suites [{suites}]:\n'.format(
             suites=' '.join(suites)
@@ -112,18 +112,18 @@ def list_suite_groups(suites):
         sys.stdout.write('\n\t' + suite + '\n\t' + '=' * len(suite))
         sys.stdout.write('\n\t\t')
         try:
-            sys.stdout.write('\n\t\t'.join(get_suite_groups(suite)))
+            sys.stdout.write('\n\t\t'.join(get_suite_groups(suite, tests_classpath)))
         except KeyError:
             sys.stdout.write('[NO GROUPS]\n')
             return FAILURE
         sys.stdout.write('\n')
 
 
-def which_suite(group):
+def which_suite(group, tests_classpath):
     sys.stdout.write(group + ': ')
-    suites = []
-    for suite in get_sorted_suites():
-        if group in get_suite_groups(suite):
+    suites=[]
+    for suite in get_sorted_suites(tests_classpath):
+        if group in get_suite_groups(suite, tests_classpath):
             suites.append(suite)
     if not suites:
         sys.stdout.write('[NO SUITES]\n')
@@ -134,9 +134,9 @@ def which_suite(group):
 
 def determine_list_suite_groups(args):
     if args.list_suite_groups == 'all':
-        return list_suite_groups(get_sorted_suites())
+        return list_suite_groups(get_sorted_suites(args.tests_classpath), args.tests_classpath)
     else:
-        return list_suite_groups(args.list_suite_groups.split(','))
+        return list_suite_groups([args.list_suite_groups], args.tests_classpath)
 
 
 def main():
@@ -145,13 +145,13 @@ def main():
         args = parser.parse_args()
         test_runner_argument_builder = TestRunnerArgumentBuilder(parser, args)
         if args.list_groups:
-            return list_groups()
+            return list_groups(args.tests_classpath)
         elif args.list_suites:
-            return list_suites()
-        elif args.list_suite_groups != 'ALL':  # default value
+            return list_suites(args.tests_classpath)
+        elif args.list_suite_groups is not None:
             return determine_list_suite_groups(args)
         elif args.which_suite:
-            return which_suite(args.which_suite)
+            return which_suite(args.which_suite, args.tests_classpath)
         else:
             return run_testng(test_runner_argument_builder)
     except KeyboardInterrupt:

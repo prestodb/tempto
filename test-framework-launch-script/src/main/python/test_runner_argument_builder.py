@@ -64,7 +64,7 @@ class TestRunnerArgumentBuilder(object):
             groups += self.__args.groups
         if self.__args.suites:
             for suite in self.__args.suites:
-                groups += get_suite_groups(suite)
+                groups += get_suite_groups(suite, self.__args.tests_classpath)
         if groups:
             return ','.join(groups)
 
