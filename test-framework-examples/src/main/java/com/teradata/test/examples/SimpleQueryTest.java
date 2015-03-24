@@ -4,6 +4,7 @@
 
 package com.teradata.test.examples;
 
+import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
@@ -16,7 +17,7 @@ import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATIO
 import static com.teradata.test.query.QueryExecutor.query;
 
 public class SimpleQueryTest
-        extends ProductTests
+        extends ProductTest
 {
 
     private static class SimpleTestRequirements

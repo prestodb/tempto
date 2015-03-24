@@ -21,8 +21,10 @@ PACKAGE_PREFIX = 'com.teradata.test'
 
 LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
 ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'
-INITIALIZATION_LISTENER = PACKAGE_PREFIX + '.initialization.TestInitializationListener'
 SUITES_FILE = 'suites.json'
+#
+# extra listeners added through ProductTest super class are:
+#  - TestInitializationListener
 
 def repo_root():
     try:
