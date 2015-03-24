@@ -50,6 +50,11 @@ class TestRunnerParser(object):
             help='Classpath containing test cases'
         )
         test_organization_arguments.add_argument(
+            '--tests-package',
+            dest='tests_package',
+            help='Package containing tests (e.g.: com.tests.*)'
+        )
+        test_organization_arguments.add_argument(
             '--test-configuration',
             dest='test_configuration',
             metavar='TEST_CONFIGURATION_URI',

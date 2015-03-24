@@ -3,6 +3,8 @@
 #
 
 import os
+import tempfile
+from string import Template
 
 from test_common import framework_root, get_suite_groups,\
     reporting_dir
@@ -71,8 +73,12 @@ class TestRunnerArgumentBuilder(object):
     @property
     def suite_xml_if_no_classes_methods(self):
         if self.classes_argument is '' and self.methods_argument is '':
-            return os.path.join(framework_root(),
-                                'src/main/resources/all-testng.xml')
+            suite_xml_path = tempfile.mktemp(suffix='.xml')
+            with open(os.path.join(framework_root(), 'src/main/resources/all-testng-template.xml'), 'r') as template_xml_file:
+                template_xml = Template(template_xml_file.read())
+            with open(suite_xml_path, 'w') as suite_xml_file:
+                suite_xml_file.write(template_xml.substitute(package=self.__args.tests_package))
+            return suite_xml_path
         return ''
 
     @property
