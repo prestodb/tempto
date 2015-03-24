@@ -7,5 +7,7 @@ apply plugin: "java"
 dependencies {
   compile test_framework_core
   compile libraries.testng
+  compile 'com.facebook.presto:presto-jdbc:0.97'
+
 
 }

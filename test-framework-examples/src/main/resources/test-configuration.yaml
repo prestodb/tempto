@@ -6,7 +6,7 @@ hdfs:
 
 databases:
   default:
-    alias: hive
+    alias: presto
 
   hive:
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
@@ -15,6 +15,15 @@ databases:
     jdbc_password: na
     jdbc_pooling: false
     jdbc_jar: test-framework-hive-jdbc/build/libs/test-framework-hive-jdbc-all.jar
+
+  presto:
+    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
+    jdbc_url: jdbc:presto://localhost:8080/hive/default
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+
 tests:
   hdfs:
     path: /product-test
+
