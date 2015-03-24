@@ -43,7 +43,7 @@ class HiveTablesFulfillerTest
     then:
     1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
     then:
-    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) LOCATION \'/some/table/in/hdfs\'')
+    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' LOCATION \'/some/table/in/hdfs\'')
 
     when:
     fulfiller.cleanup()

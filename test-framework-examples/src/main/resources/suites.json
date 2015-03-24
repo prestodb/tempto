@@ -3,6 +3,7 @@
 
     "smoketest": [
         "example_smoketest",
-        "example_smoketest_empty"
+        "example_smoketest_empty",
+        "sql_tests"
     ]
 }

@@ -61,7 +61,8 @@ public class HiveTablesFulfiller
     {
         LOGGER.debug("fulfilling table {}", tableDefinition.getName());
         queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", tableDefinition.getName()));
-        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) LOCATION '%s'",
+        // TODO: handling of different delimiters
+        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' LOCATION '%s'",
                 tableDefinition.getName(),
                 buildColumnListDDL(tableDefinition.getColumns()),
                 tableDefinition.getDataSource().ensureDataOnHdfs()));

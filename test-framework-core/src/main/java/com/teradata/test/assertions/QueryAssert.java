@@ -10,6 +10,7 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
 import java.sql.JDBCType;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -56,11 +57,11 @@ public class QueryAssert
         return this;
     }
 
-    public QueryAssert hasColumns(JDBCType... expectedTypes)
+    public QueryAssert hasColumns(List<JDBCType> expectedTypes)
     {
-        hasColumnsCount(expectedTypes.length);
-        for (int i = 0; i < expectedTypes.length; i++) {
-            JDBCType expectedType = expectedTypes[i];
+        hasColumnsCount(expectedTypes.size());
+        for (int i = 0; i < expectedTypes.size(); i++) {
+            JDBCType expectedType = expectedTypes.get(i);
             JDBCType actualType = actual.getColumnType(toSqlIndex(i));
 
             if (!actualType.equals(expectedType)) {
@@ -70,9 +71,14 @@ public class QueryAssert
         return this;
     }
 
-    public QueryAssert hasRows(Row... rows)
+    public QueryAssert hasColumns(JDBCType... expectedTypes)
     {
-        hasRowsCount(rows.length);
+        return hasColumns(Arrays.asList(expectedTypes));
+    }
+
+    public QueryAssert hasRows(List<Row> rows)
+    {
+        hasRowsCount(rows.size());
         List<List<Object>> missingRows = newArrayList();
         for (Row row : rows) {
             List<Object> expectedRow = row.getValues();
@@ -89,12 +95,17 @@ public class QueryAssert
         return this;
     }
 
-    public QueryAssert hasRowsInOrder(Row... rows)
+    public QueryAssert hasRows(Row... rows)
     {
-        hasRowsCount(rows.length);
+        return hasRows(Arrays.asList(rows));
+    }
+
+    public QueryAssert hasRowsInOrder(List<Row> rows)
+    {
+        hasRowsCount(rows.size());
         List<Integer> unequalRowsIndexes = newArrayList();
-        for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-            List<Object> expectedRow = rows[rowIndex].getValues();
+        for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+            List<Object> expectedRow = rows.get(rowIndex).getValues();
             List<Object> actualRow = actual.row(rowIndex);
 
             if (!rowsEqual(expectedRow, actualRow)) {
@@ -107,6 +118,11 @@ public class QueryAssert
         }
 
         return this;
+    }
+
+    public QueryAssert hasRowsInOrder(Row... rows)
+    {
+        return hasRowsInOrder(Arrays.asList(rows));
     }
 
     private String buildHasRowsErrorMessage(List<List<Object>> missingRows)
@@ -123,14 +139,14 @@ public class QueryAssert
         rows.stream().forEach(row -> msg.append('\n').append(row));
     }
 
-    private String buildHasRowsInOrderErrorMessage(List<Integer> unequalRowsIndexes, Row[] rows)
+    private String buildHasRowsInOrderErrorMessage(List<Integer> unequalRowsIndexes, List<Row> rows)
     {
         StringBuilder msg = new StringBuilder("Not equal rows:");
         for (int i = 0; i < unequalRowsIndexes.size(); ++i) {
             int unequalRowIndex = unequalRowsIndexes.get(i);
             msg.append('\n').append(unequalRowIndex)
                     .append(" - expected: ")
-                    .append(rows[unequalRowIndex].getValues())
+                    .append(rows.get(unequalRowIndex).getValues())
                     .append(", actual: ")
                     .append(actual.row(unequalRowIndex));
         }
