@@ -10,7 +10,10 @@ dependencies {
   compile libraries.hadoop_core
 }
 
-task buildFatJar(type: Jar, dependsOn: assemble) {
+// added clean dependency because of problem with non writable pom.xml file
+// comming from antlr-4.3 which causes build failure if temporary
+// directory with unzipped jars is already present.
+task buildFatJar(type: Jar, dependsOn: [clean,assemble]) {
   appendix = "all"
   from sourceSets.main.output
   from { configurations.testRuntime.collect {
