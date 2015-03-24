@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static com.teradata.test.query.QueryExecutor.query;
 
@@ -31,20 +32,32 @@ public class SimpleQueryTest
         }
     }
 
-    @Test
+    @Test(groups = "query")
     @Requires(SimpleTestRequirements.class)
     public void selectAllFromNation()
     {
         assertThat(query("select * from nation")).hasRowsCount(25);
     }
 
-    @Test
+    @Test(groups = {"smoke", "query"})
     @Requires(SimpleTestRequirements.class)
     public void selectCountFromNation()
     {
         assertThat(query("select count(*) from nation"))
                 .hasRowsCount(1)
                 .hasRows(row(25));
+    }
+
+    @Test(groups = "failing")
+    public void failingTest()
+    {
+        assertThat(1).isEqualTo(2);
+    }
+
+    @Test(groups = "skipped", enabled = false)
+    public void disabledTest()
+    {
+        assertThat(1).isEqualTo(2);
     }
 
 }

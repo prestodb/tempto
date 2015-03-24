@@ -11,48 +11,73 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-public class ProgressLoggingListener implements ITestListener {
+public class ProgressLoggingListener
+        implements ITestListener
+{
     private final static Logger LOGGER = LoggerFactory.getLogger(ProgressLoggingListener.class);
 
-    private int current;
     private int total;
+    private int started;
     private int succeeded;
     private int skipped;
     private int failed;
+    private long testStartTime;
 
     @Override
-    public void onStart(ITestContext context) {
-        current = 1;
+    public void onStart(ITestContext context)
+    {
         total = context.getAllTestMethods().length;
-
-        succeeded = skipped = failed = 0;
+        LOGGER.info("Starting tests running");
     }
 
     @Override
-    public void onTestStart(ITestResult testCase) {
+    public void onTestStart(ITestResult testCase)
+    {
+        testStartTime = System.currentTimeMillis();
         String qualifiedTestName = testCase.getInstanceName() + "." + testCase.getName();
+        LOGGER.info("");
+        started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                    current++, total++, qualifiedTestName, Joiner.on(' ').join(testCase.getMethod().getGroups()));
+                started, total, qualifiedTestName, Joiner.on(", ").join(testCase.getMethod().getGroups()));
     }
 
     @Override
-    public void onTestSuccess(ITestResult testCase) {
+    public void onTestSuccess(ITestResult testCase)
+    {
         succeeded++;
+        logTestEnd("SUCCESS");
     }
 
     @Override
-    public void onTestFailure(ITestResult testCase) {
+    public void onTestFailure(ITestResult testCase)
+    {
+        failed++;
+        logTestEnd("FAILURE");
     }
 
     @Override
-    public void onTestSkipped(ITestResult testCase) {
+    public void onTestSkipped(ITestResult testCase)
+    {
+        skipped++;
+        logTestEnd("SKIPPED");
+    }
+
+    private void logTestEnd(String outcome)
+    {
+        long executionTime = System.currentTimeMillis() - testStartTime;
+        LOGGER.info("{}     /    took: {}ms", outcome, executionTime);
     }
 
     @Override
-    public void onTestFailedButWithinSuccessPercentage(ITestResult testCase) {
+    public void onTestFailedButWithinSuccessPercentage(ITestResult testCase)
+    {
     }
 
     @Override
-    public void onFinish(ITestContext context) {
+    public void onFinish(ITestContext context)
+    {
+        LOGGER.info("");
+        LOGGER.info("Completed {} tests", started);
+        LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
     }
 }
