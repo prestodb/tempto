@@ -7,10 +7,13 @@
 -->
 <suite name="everything">
 
-  <test name="all" preserve-order="false">
-    <packages>
-      <package name="com.teradata.test.examples" />
-    </packages>
-  </test>
+    <test name="all" preserve-order="false">
+        <packages>
+            <package name="com.teradata.test.examples"/>
+        </packages>
+        <classes>
+            <class name="com.teradata.test.convention.SqlQueryConventionBasedTestFactory"/>
+        </classes>
+    </test>
 
 </suite>
