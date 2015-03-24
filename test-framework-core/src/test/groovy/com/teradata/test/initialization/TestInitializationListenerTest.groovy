@@ -54,16 +54,15 @@ class TestInitializationListenerTest
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller])
     def iTestContext = getITestContext(successMethod)
     def iTestResult = getITestResult(successMethod)
-    def iInvokedMethod = Mock(IInvokedMethod)
 
     when:
-    listener.beforeSuite(iTestContext)
+    listener.onStart(iTestContext)
     assertTestContextNotSet()
-    listener.beforeTest(iInvokedMethod, iTestResult, iTestContext)
+    listener.onTestStart(iTestResult)
     assertTestContextSet()
-    listener.afterTest(iInvokedMethod, iTestResult, iTestContext)
+    listener.onTestSuccess(iTestResult)
     assertTestContextNotSet()
-    listener.afterSuite(iTestContext)
+    listener.onFinish(iTestContext)
 
     then:
     EVENTS[0].name == A_FULFILL
@@ -83,18 +82,17 @@ class TestInitializationListenerTest
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller, CFulfiller])
     def iTestContext = getITestContext(failMethod)
     def iTestResult = getITestResult(failMethod)
-    def iInvokedMethod = Mock(IInvokedMethod)
 
     when:
-    listener.beforeSuite(iTestContext)
+    listener.onStart(iTestContext)
     try {
-      listener.beforeTest(iInvokedMethod, iTestResult, iTestContext)
+      listener.onTestStart(iTestResult)
       assert false
     }
     catch (RuntimeException _) {
     }
-    listener.afterTest(iInvokedMethod, iTestResult, iTestContext)
-    listener.afterSuite(iTestContext)
+    listener.onTestFailure(iTestResult)
+    listener.onFinish(iTestContext)
 
     then:
     EVENTS[0].name == A_FULFILL

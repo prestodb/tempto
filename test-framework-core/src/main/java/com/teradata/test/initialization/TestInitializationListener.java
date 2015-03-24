@@ -22,8 +22,8 @@ import com.teradata.test.initialization.modules.TestConfigurationModule;
 import com.teradata.test.initialization.modules.TestInfoModule;
 import com.teradata.test.query.QueryExecutorModule;
 import org.slf4j.Logger;
-import org.testng.IInvokedMethod;
 import org.testng.ITestContext;
+import org.testng.ITestListener;
 import org.testng.ITestNGMethod;
 import org.testng.ITestResult;
 
@@ -45,7 +45,7 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.setTestCont
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class TestInitializationListener
-        extends TestSuiteAwareTestInvocationListener
+        implements ITestListener
 {
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
@@ -99,7 +99,7 @@ public class TestInitializationListener
     }
 
     @Override
-    public void beforeSuite(ITestContext context)
+    public void onStart(ITestContext context)
     {
         GuiceTestContext testContext = new GuiceTestContext(combine(suiteModules));
 
@@ -117,7 +117,7 @@ public class TestInitializationListener
     }
 
     @Override
-    public void afterSuite(ITestContext context)
+    public void onFinish(ITestContext context)
     {
         if (!suiteTestContext.isPresent()) {
             return;
@@ -128,7 +128,7 @@ public class TestInitializationListener
     }
 
     @Override
-    public void beforeTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
+    public void onTestStart(ITestResult testResult)
     {
         checkState(suiteTestContext.isPresent(), "test suite not initialized");
         GuiceTestContext testContext = suiteTestContext.get().override(getTestModules(testResult));
@@ -146,7 +146,24 @@ public class TestInitializationListener
     }
 
     @Override
-    public void afterTest(IInvokedMethod method, ITestResult testResult, ITestContext context)
+    public void onTestSuccess(ITestResult result)
+    {
+        onTestFinished(result);
+    }
+
+    @Override
+    public void onTestFailure(ITestResult result)
+    {
+        onTestFinished(result);
+    }
+
+    @Override
+    public void onTestSkipped(ITestResult result)
+    {
+        onTestFinished(result);
+    }
+
+    private void onTestFinished(ITestResult testResult)
     {
         if (!testMethodTextContext.isPresent()) {
             return;
@@ -256,5 +273,10 @@ public class TestInitializationListener
         finally {
             clearTestContext();
         }
+    }
+
+    @Override
+    public void onTestFailedButWithinSuccessPercentage(ITestResult result)
+    {
     }
 }
