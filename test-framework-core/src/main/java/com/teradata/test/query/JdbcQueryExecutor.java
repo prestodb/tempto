@@ -5,7 +5,6 @@
 package com.teradata.test.query;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
@@ -24,8 +23,8 @@ public class JdbcQueryExecutor
 {
     private static final Logger LOGGER = getLogger(JdbcQueryExecutor.class);
 
-    private JdbcConnectivityParamsState jdbcParamsState;
-    private JdbcConnectionsPool jdbcConnectionsPool;
+    private final JdbcConnectivityParamsState jdbcParamsState;
+    private final JdbcConnectionsPool jdbcConnectionsPool;
 
     @Inject
     public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState, JdbcConnectionsPool jdbcConnectionsPool)

@@ -17,32 +17,31 @@ import static com.teradata.test.configuration.KeyUtils.joinKey;
 import static java.util.Optional.empty;
 
 /**
- * Map based configuration.
- * Configuration is stored in nested maps.
+ * This class constructs and stores a map based configuration using nested maps.
  * <p/>
- * For leafs - value is store in map.
+ * For leafs - value is stored in map.
  * For non-leaf - nested map is stored.
  * <p/>
  * Outer map is responsible for first part in all keys stored in configuration.
  * Maps stored at first internal level are responsible for second part in stored keys and so on.
  * <p/>
- * E.g for configuration storing following entries:
+ * For example, for a configuration storing these hierarchical entries:
  * a.b.c = 3
  * a.x = 10
  * b.c = 15
  * <p/>
- * following map structure would be created
+ * the following map structure would be created
  * <p/>
  * {
  * a : {
+ *  b : {
+ *   c : 3
+ *  },
+ *  x : 10
+ *  },
  * b : {
- * c : 3
- * },
- * x : 10
- * },
- * b : {
- * c : 15
- * }
+ *  c : 15
+ *  }
  * }
  */
 public class MapConfiguration
