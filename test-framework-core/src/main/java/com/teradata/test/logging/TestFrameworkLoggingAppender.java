@@ -88,7 +88,7 @@ public class TestFrameworkLoggingAppender
             if (throwableStack != null) {
                 for (String throwableElement : throwableStack) {
                     if (CONSOLE_OUTPUT_FORMAT.ignoresThrowable()) {
-                        writeToConsole(throwableElement);
+                        writeToConsole(formatThrowableElement(throwableElement));
                     }
                 }
             }
@@ -100,12 +100,14 @@ public class TestFrameworkLoggingAppender
             if (throwableStack != null) {
                 for (String throwableElement : throwableStack) {
                     if (FILE_OUTPUT_FORMAT.ignoresThrowable()) {
-                        writeToFile(throwableElement);
+                        writeToFile(formatThrowableElement(throwableElement));
                     }
                 }
             }
         }
     }
+
+    private String formatThrowableElement(String throwableElement) {return "   " + throwableElement + "\n";}
 
     private boolean shouldWriteToConsole(LoggingEvent loggingEvent)
     {

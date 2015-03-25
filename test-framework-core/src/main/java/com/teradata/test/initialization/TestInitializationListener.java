@@ -165,6 +165,7 @@ public class TestInitializationListener
         }
         catch (RuntimeException e) {
             testContext.close();
+            LOGGER.debug("error within test initialization", e);
             throw e;
         }
 
@@ -180,6 +181,7 @@ public class TestInitializationListener
     @Override
     public void onTestFailure(ITestResult result)
     {
+        LOGGER.debug("test failure", result.getThrowable());
         onTestFinished(result);
     }
 

@@ -53,6 +53,9 @@ public class ProgressLoggingListener
     public void onTestFailure(ITestResult testCase)
     {
         failed++;
+        if (testCase.getThrowable() != null) {
+            LOGGER.error("Exception: ", testCase.getThrowable());
+        }
         logTestEnd("FAILURE");
     }
 
