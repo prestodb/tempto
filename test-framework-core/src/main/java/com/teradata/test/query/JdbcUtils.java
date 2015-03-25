@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.SQLException;
 
 import static java.sql.DriverManager.getConnection;
@@ -53,7 +54,17 @@ public final class JdbcUtils
 
     private static DataSource createNonPoolingDataSource(JdbcConnectivityParamsState jdbcParamsState)
     {
-        return new NonPoolingJdbcDataSource(jdbcParamsState, getDriverClassLoader(jdbcParamsState));
+        return new NonPoolingJdbcDataSource(jdbcParamsState, getDatabaseDriver(jdbcParamsState));
+    }
+
+    private static Driver getDatabaseDriver(JdbcConnectivityParamsState jdbcParamsState) {
+        try {
+            Class<?> driverClass = Class.forName(jdbcParamsState.driverClass, true, getDriverClassLoader(jdbcParamsState));
+            return (Driver) driverClass.newInstance();
+        }
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("could not create JDBC Driver for connection " + jdbcParamsState.getName(), e);
+        }
     }
 
     private static ClassLoader getDriverClassLoader(JdbcConnectivityParamsState jdbcParamsState)

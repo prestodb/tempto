@@ -14,28 +14,19 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+/**
+ * DataSource implementation which creates new connection every time getConnection method is called
+ */
 class NonPoolingJdbcDataSource
         implements DataSource
 {
     private final JdbcConnectivityParamsState jdbcParamsState;
     private final Driver driver;
 
-    public NonPoolingJdbcDataSource(JdbcConnectivityParamsState jdbcParamsState, ClassLoader driverClassLoader)
+    public NonPoolingJdbcDataSource(JdbcConnectivityParamsState jdbcParamsState, Driver driver)
     {
         this.jdbcParamsState = jdbcParamsState;
-        this.driver = getDriver(jdbcParamsState, driverClassLoader);
-    }
-
-    private static Driver getDriver(JdbcConnectivityParamsState jdbcParamsState, ClassLoader driverClassLoader)
-
-    {
-        try {
-            Class<?> driverClass = Class.forName(jdbcParamsState.driverClass, true, driverClassLoader);
-            return (Driver) driverClass.newInstance();
-        }
-        catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("could not create JDBC Driver for connection " + jdbcParamsState.getName(), e);
-        }
+        this.driver = driver;
     }
 
     @Override
