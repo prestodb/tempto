@@ -16,7 +16,7 @@ dependencies {
 task buildFatJar(type: Jar, dependsOn: [clean,assemble]) {
   appendix = "all"
   from sourceSets.main.output
-  from { configurations.testRuntime.collect {
+  from { configurations.runtime.collect {
     it.isDirectory() ? it : zipTree(it)
   } }
 }

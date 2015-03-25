@@ -24,7 +24,7 @@ dependencies {
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
 
-  testRuntime(libraries.reportng) {
+  runtime(libraries.reportng) {
     exclude group: "org.testng", module: "testng"
   }
 }
@@ -32,7 +32,7 @@ dependencies {
 task buildFatJar(type: Jar, dependsOn: assemble) {
   appendix = "all"
   from sourceSets.main.output
-  from { configurations.testRuntime.collect {
+  from { configurations.runtime.collect {
     it.isDirectory() ? it : zipTree(it)
   } }
 }
