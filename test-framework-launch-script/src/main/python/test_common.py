@@ -54,8 +54,8 @@ def dict_without_private_fields_of(py_dict):
     )
 
 
-def get_public_dict_for(classpath):
-    for path in classpath:
+def get_public_dict_for(tests_classpath):
+    for path in tests_classpath:
         if zipfile.is_zipfile(path):
             archive = zipfile.ZipFile(path, 'r')
             if not SUITES_FILE in archive.namelist():
@@ -67,37 +67,37 @@ def get_public_dict_for(classpath):
             return dict_without_private_fields_of(raw_dict_for(open(os.path.join(path, SUITES_FILE))))
 
     sys.stderr.write(
-        "No %s provided on classpath\n" % SUITES_FILE
+        "No %s provided on tests classpath\n" % SUITES_FILE
     )
     sys.exit(ENVIRONMENT_ERROR)
 
 
-def get_suites_dict(classpath):
-    return get_public_dict_for(classpath)
+def get_suites_dict(tests_classpath):
+    return get_public_dict_for(tests_classpath)
 
 
-def get_suite_groups(suite, classpath):
-    return get_suites_dict(classpath)[suite]
+def get_suite_groups(suite, tests_classpath):
+    return get_suites_dict(tests_classpath)[suite]
 
 
-def get_suites(classpath):
-    return get_suites_dict(classpath).keys()
+def get_suites(tests_classpath):
+    return get_suites_dict(tests_classpath).keys()
 
 
-def get_sorted_suites(classpath):
-    suites = get_suites(classpath)
+def get_sorted_suites(tests_classpath):
+    suites = get_suites(tests_classpath)
     suites.sort()
     return suites
 
 
-def get_groups(classpath):
-    groups = get_suites_dict(classpath).values()
+def get_groups(tests_classpath):
+    groups = get_suites_dict(tests_classpath).values()
     groups = [group for group_lst in groups for group in group_lst]
     # Ensure uniqueness, but convert back to list
     return list(set(groups))
 
 
-def get_sorted_groups(classpath):
-    groups = get_groups(classpath)
+def get_sorted_groups(tests_classpath):
+    groups = get_groups(tests_classpath)
     groups.sort()
     return groups

@@ -3,8 +3,8 @@
 import argparse
 from argparse_extensions import ensure_arg_is_list, lower_case_list
 
-def choice_list(choice_func, case_sensitive=True):
-    class ChoiceList(argparse.Action):
+def choice_action(choice_func, case_sensitive=True):
+    class ChoiceAction(argparse.Action):
         """
         Type for argparse supporting comma separated values and validating all of them
         with predefined choices list
@@ -12,7 +12,7 @@ def choice_list(choice_func, case_sensitive=True):
         def __init__(self, **kwargs):
             self.__choice_func = choice_func
             self.__case_sensitive = case_sensitive
-            super(ChoiceList, self).__init__(**kwargs)
+            super(ChoiceAction, self).__init__(**kwargs)
 
         def __get_choices(self, namespace):
             choices = self.__choice_func(namespace)
@@ -29,4 +29,4 @@ def choice_list(choice_func, case_sensitive=True):
             if len(remainder) > 0:
                 raise argparse.ArgumentTypeError("invalid choices: %r (choose from %r)"
                                                  % (remainder, choices))
-    return ChoiceList
+    return ChoiceAction

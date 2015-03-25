@@ -6,7 +6,7 @@ import argparse
 
 from test_common import get_groups, get_suites
 from argparse_extensions import comma_separated_list, lower_case_list
-from argparse_extensions.choice_list import choice_list
+from argparse_extensions.choice_action import choice_action
 from argparse_extensions.combine_action import CombineAction
 from argparse_extensions.store_action import StoreAction
 from argparse_extensions.action_list import action_list
@@ -45,8 +45,8 @@ class TestRunnerParser(object):
             metavar='JAR_PATH[:JAR_PATH...]',
             dest='tests_classpath',
             default=[],
+            type=TestRunnerParser.__classpath(),
             action=CombineAction,
-            type=lambda value : value.split(':'),
             help='Classpath containing test cases'
         )
         test_organization_arguments.add_argument(
@@ -77,16 +77,16 @@ class TestRunnerParser(object):
             '--groups-in-suite', '--list-suite-groups',
             metavar='SUITE',
             dest='list_suite_groups',
-            action=action_list([StoreAction, choice_list(TestRunnerParser.__get_suites(['all']), case_sensitive=False)]),
-            type=lambda value: value.lower(),
+            type=TestRunnerParser.__lower_case_string(),
+            action=action_list([choice_action(TestRunnerParser.__get_suites(['all']), case_sensitive=False), StoreAction]),
             help='Prints a list of the group(s) in a given suite. Possible values {%(choices)s}'
         )
         test_organization_arguments.add_argument(
             '--suites-for-group', '--which-suite',
             metavar='GROUP',
             dest='which_suite',
-            action=action_list([StoreAction, choice_list(TestRunnerParser.__get_groups(), case_sensitive=False)]),
-            type=lambda value: value.lower(),
+            type=TestRunnerParser.__lower_case_string(),
+            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), StoreAction]),
             help='Prints a list of the suite(s) a given group belongs to. Possible values {%(choices)s}'
         )
 
@@ -106,16 +106,16 @@ class TestRunnerParser(object):
             metavar='GROUP[,GROUP...]',
             dest='groups',
             default=[],
-            action=action_list([CombineAction, choice_list(TestRunnerParser.__get_groups(), case_sensitive=False)]),
-            type=lambda value: lower_case_list(comma_separated_list(value)),
+            type=TestRunnerParser.__lower_case_comma_separated_list(),
+            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), CombineAction]),
             help='List of test groups to be included in the selection, case-insensitive. Possible values {%(choices)s}'
         )
         groups_suites.add_argument(
             '--suites',
             metavar='SUITE[,SUITE...]',
             dest='suites',
-            action=action_list([CombineAction, choice_list(TestRunnerParser.__get_suites(), case_sensitive=False)]),
-            type=lambda value: lower_case_list(comma_separated_list(value)),
+            type=TestRunnerParser.__lower_case_comma_separated_list(),
+            action=action_list([choice_action(TestRunnerParser.__get_suites(), case_sensitive=False), CombineAction]),
             help='List of test suites to be included in the selection, case-insensitive. Possible values {%(choices)s}'
         )
 
@@ -141,8 +141,8 @@ class TestRunnerParser(object):
             dest='excluded_groups',
             metavar='GROUP[,GROUP...]',
             default=[],
-            action=action_list([CombineAction, choice_list(TestRunnerParser.__get_groups(), case_sensitive=False)]),
-            type=lambda value: lower_case_list(comma_separated_list(value)),
+            type=TestRunnerParser.__lower_case_comma_separated_list(),
+            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), CombineAction]),
             help='List of test groups to be *excluded* from the selection, case-insensitive. Possible values {%(choices)s}'
         )
 
@@ -184,11 +184,23 @@ class TestRunnerParser(object):
 
     @staticmethod
     def __get_groups(additional_groups=[]):
-        return lambda namespace: get_groups(getattr(namespace, 'tests_classpath')) + additional_groups
+        return lambda namespace: get_groups(namespace.tests_classpath) + additional_groups
 
     @staticmethod
     def __get_suites(additional_suites=[]):
-        return lambda namespace: get_suites(getattr(namespace, 'tests_classpath')) + additional_suites
+        return lambda namespace: get_suites(namespace.tests_classpath) + additional_suites
+
+    @staticmethod
+    def __classpath():
+        return lambda value: value.split(':')
+
+    @staticmethod
+    def __lower_case_string():
+        return lambda value: value.lower()
+
+    @staticmethod
+    def __lower_case_comma_separated_list():
+        return lambda value: lower_case_list(comma_separated_list(value))
 
     def __init__(self):
         self.__argparser = TestRunnerParser.__create_argparser()
