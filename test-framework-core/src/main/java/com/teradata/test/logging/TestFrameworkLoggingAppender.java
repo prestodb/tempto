@@ -11,8 +11,10 @@ import com.google.common.cache.RemovalNotification;
 import com.google.inject.ConfigurationException;
 import com.teradata.test.TestInfo;
 import com.teradata.test.context.TestContext;
+import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -21,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -171,6 +174,20 @@ public class TestFrameworkLoggingAppender
     public boolean requiresLayout()
     {
         return false;
+    }
+
+    /**
+     * Returns logs directory for configured TestFrameworkLoggingAppender.
+     */
+    public static Optional<String> getSelectedLogsDirectory() {
+        Enumeration allAppenders = Logger.getRootLogger().getAllAppenders();
+        while (allAppenders.hasMoreElements()) {
+            Appender appender = (Appender) allAppenders.nextElement();
+            if (appender instanceof TestFrameworkLoggingAppender) {
+                return Optional.of(((TestFrameworkLoggingAppender) appender).logsDirectory);
+            }
+        }
+        return Optional.empty();
     }
 }
 
