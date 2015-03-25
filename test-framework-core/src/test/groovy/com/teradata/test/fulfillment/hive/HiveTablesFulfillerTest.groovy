@@ -15,12 +15,13 @@ class HiveTablesFulfillerTest
         extends Specification
 {
   QueryExecutor queryExecutor = Mock()
-  HiveTablesFulfiller fulfiller = new HiveTablesFulfiller(queryExecutor)
+  HiveDataSourceWriter dataSourceWriter = Mock()
+  HiveTablesFulfiller fulfiller = new HiveTablesFulfiller(queryExecutor, dataSourceWriter)
 
   def "test fulfill/cleanup"()
   {
     when:
-    def nationDataSource = Mock(HiveDataSource)
+    def nationDataSource = Mock(DataSource)
     def nationDefinition = HiveTableDefinition.builder()
             .setName('nation')
             .setDataSource(nationDataSource)
@@ -29,9 +30,9 @@ class HiveTablesFulfillerTest
             .build()
 
     def requirement = new ImmutableHiveTableRequirement(nationDefinition)
-    nationDataSource.ensureDataOnHdfs() >> '/some/table/in/hdfs'
+    nationDataSource.getName() >> '/some/table/in/hdfs'
     def states = fulfiller.fulfill([requirement] as Set)
-    
+
     assert states.size() == 1
     def state = getOnlyElement(states)
     assert state.class == HiveTablesState

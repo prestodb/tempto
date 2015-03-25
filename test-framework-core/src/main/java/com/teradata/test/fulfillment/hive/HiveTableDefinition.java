@@ -14,15 +14,15 @@ import static com.google.common.collect.Lists.newArrayList;
 public class HiveTableDefinition
         extends TableDefinition
 {
-    public HiveTableDefinition(String name, List<TableColumn> columns, HiveDataSource dataSource)
+    public HiveTableDefinition(String name, List<TableColumn> columns, DataSource dataSource)
     {
         super(name, columns);
         this.dataSource = dataSource;
     }
 
-    private final HiveDataSource dataSource;
+    private final DataSource dataSource;
 
-    public HiveDataSource getDataSource()
+    public DataSource getDataSource()
     {
         return dataSource;
     }
@@ -36,7 +36,7 @@ public class HiveTableDefinition
     {
 
         private String name;
-        private HiveDataSource dataSource;
+        private DataSource dataSource;
         private List<TableColumn> columns = newArrayList();
 
         private HiveTablesFulfillerBuilder()
@@ -49,7 +49,7 @@ public class HiveTableDefinition
             return this;
         }
 
-        public HiveTablesFulfillerBuilder setDataSource(HiveDataSource dataSource)
+        public HiveTablesFulfillerBuilder setDataSource(DataSource dataSource)
         {
             this.dataSource = dataSource;
             return this;

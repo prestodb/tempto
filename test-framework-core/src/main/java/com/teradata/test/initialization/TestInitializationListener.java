@@ -256,10 +256,12 @@ public class TestInitializationListener
     {
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            Set<Set<Requirement>> requirementSets = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod)).getRequirementsSets();
-            for (Set<Requirement> requirementSet : requirementSets) {
-                allTestsRequirements.addAll(requirementSet);
-            }
+            allTestsRequirements.addAll(getTestSpecificRequirements(iTestNGMethod));
+            // TODO: remove this
+//            Set<Set<Requirement>> requirementSets = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod)).getRequirementsSets();
+//            for (Set<Requirement> requirementSet : requirementSets) {
+//                allTestsRequirements.addAll(requirementSet);
+//            }
         }
         return allTestsRequirements;
     }

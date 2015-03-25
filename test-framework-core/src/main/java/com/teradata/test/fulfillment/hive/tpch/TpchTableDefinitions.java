@@ -17,6 +17,6 @@ public class TpchTableDefinitions
                     .addColumn("n_name", HiveType.STRING)
                     .addColumn("n_regionkey", HiveType.INT)
                     .addColumn("n_comment", HiveType.STRING)
-                    .setDataSource(new TpchHiveDataSource(TpchTable.NATION, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
                     .build();
 }

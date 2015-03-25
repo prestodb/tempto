@@ -8,6 +8,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 
 import static java.nio.charset.Charset.defaultCharset;
 
@@ -22,6 +23,10 @@ public interface HdfsClient
     void saveFile(String path, String username, InputStream input);
 
     void loadFile(String path, String username, OutputStream outputStream);
+
+    void setXAttr(String path, String username, String key, String value);
+
+    Optional<String> getXAttr(String path, String username, String key);
 
     default String loadFile(String path, String username)
     {

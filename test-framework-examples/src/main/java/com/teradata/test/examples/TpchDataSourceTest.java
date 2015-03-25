@@ -8,9 +8,8 @@ import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
-import com.teradata.test.fulfillment.hive.tpch.TpchHiveDataSource;
+import com.teradata.test.fulfillment.hive.tpch.TpchDataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
-import com.teradata.test.requirements.TableRequirements;
 import com.teradata.test.tpch.IterableTpchEntityInputStream;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
@@ -22,7 +21,7 @@ import static com.teradata.test.requirements.TableRequirements.table;
 import static com.teradata.test.tpch.TpchTable.NATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TpchHiveDataSourceTest
+public class TpchDataSourceTest
         extends ProductTest
 {
 
@@ -31,9 +30,9 @@ public class TpchHiveDataSourceTest
     public void testDataSource()
             throws IOException
     {
-        TpchHiveDataSource dataSource = new TpchHiveDataSource(NATION, 1.0);
+        TpchDataSource dataSource = new TpchDataSource(NATION, 1.0);
 
-        String path = dataSource.ensureDataOnHdfs();
+        String path = dataSource.getName();
 
         assertThat(path).isEqualTo("/product-test/tpch/sf-1_00/NATION");
 

@@ -34,12 +34,14 @@ public class HiveTablesFulfiller
     private static final Logger LOGGER = getLogger(HiveTablesFulfiller.class);
 
     private final QueryExecutor queryExecutor;
+    private final HiveDataSourceWriter hiveDataSourceWriter;
     private final Set<HiveTableInstance> cratedTables = newHashSet();
 
     @Inject
-    public HiveTablesFulfiller(@Named("hive") QueryExecutor queryExecutor)
+    public HiveTablesFulfiller(@Named("hive") QueryExecutor queryExecutor, HiveDataSourceWriter hiveDataSourceWriter)
     {
         this.queryExecutor = queryExecutor;
+        this.hiveDataSourceWriter = hiveDataSourceWriter;
     }
 
     @Override
@@ -61,11 +63,12 @@ public class HiveTablesFulfiller
     {
         LOGGER.debug("fulfilling table {}", tableDefinition.getName());
         queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", tableDefinition.getName()));
-        // TODO: handling of different delimiters
+        hiveDataSourceWriter.ensureDataOnHdfs(tableDefinition.getDataSource());
+        // TODO: handling of different delimiters: SWARM-181
         queryExecutor.executeQuery(format("CREATE TABLE %s(%s) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' LOCATION '%s'",
                 tableDefinition.getName(),
                 buildColumnListDDL(tableDefinition.getColumns()),
-                tableDefinition.getDataSource().ensureDataOnHdfs()));
+                tableDefinition.getDataSource().getName()));
         return new HiveTableInstance(tableDefinition.getName(), tableDefinition.getName());
     }
 
