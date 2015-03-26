@@ -49,7 +49,8 @@ ext.versions = [
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
         hive         : '0.12.0-cdh5.1.2',
-        hadoop       : '0.20.2'
+        hadoop       : '0.20.2',
+        presto       : '0.97'
 ]
 
 ext.libraries = [
@@ -73,7 +74,8 @@ ext.libraries = [
         tpchgen      : "io.airlift.tpch:tpch:${versions.tpchgen}",
         jsonpath     : "com.jayway.jsonpath:json-path:${versions.jsonpath}",
         hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
-        hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}"
+        hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}",
+        presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}"
 ]
 
 ext.test_framework_core = project(":test-framework-core")

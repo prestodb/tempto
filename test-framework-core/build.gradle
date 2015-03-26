@@ -20,6 +20,9 @@ dependencies {
   compile libraries.tpchgen
   compile libraries.jsonpath
 
+  // todo separate out to different module
+  compile libraries.presto_jdbc
+
   testCompile libraries.spock
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
