@@ -11,6 +11,7 @@ import com.teradata.test.tpch.TpchTable;
 import java.io.InputStream;
 
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static java.lang.String.format;
 
 public class TpchDataSource
         implements DataSource
@@ -32,7 +33,7 @@ public class TpchDataSource
     {
         // {TESTS_PATH}/tpch/sf-{scaleFactor}/{tableName}
         String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");
-        return String.format("%s/tpch/sf-%.2f/%s", testsPath, scaleFactor, table.name()).replaceAll("\\.", "_");
+        return format("%s/tpch/sf-%.2f/%s", testsPath, scaleFactor, table.name()).replaceAll("\\.", "_");
     }
 
     @Override

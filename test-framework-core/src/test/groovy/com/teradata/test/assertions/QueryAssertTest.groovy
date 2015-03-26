@@ -116,7 +116,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected column count to be <1>, but was <2>'
+    e.message == 'Expected column count to be <1>, but was <3> - columns <[INTEGER, VARCHAR, VARCHAR]>'
   }
 
   def 'hasColumns - different column types'()

@@ -170,6 +170,9 @@ public class WebHDFSClient
         Pair[] params = {Pair.of("xattr.name", key)};
         HttpGet setXAttrRequest = new HttpGet(buildUri(path, username, "GETXATTRS", params));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+            if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
+                return Optional.empty();
+            }
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("GETXATTRS", path, username, setXAttrRequest, response);
             }

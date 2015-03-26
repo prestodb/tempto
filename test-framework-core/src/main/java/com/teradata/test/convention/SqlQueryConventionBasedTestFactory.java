@@ -4,6 +4,8 @@
 
 package com.teradata.test.convention;
 
+import com.teradata.test.Requirement;
+import com.teradata.test.convention.SqlTestsFileUtils.ExtensionFileCollectorVisitor;
 import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
 import org.slf4j.Logger;
 import org.testng.annotations.Factory;
@@ -12,18 +14,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.teradata.test.Requirements.compose;
+import static com.teradata.test.convention.SqlTestsFileUtils.changeExtension;
+import static com.teradata.test.convention.SqlTestsFileUtils.extensionFileCollectorVisitor;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
+import static java.nio.file.Files.newDirectoryStream;
+import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTestFactory
@@ -36,6 +42,8 @@ public class SqlQueryConventionBasedTestFactory
     public static final String DATASETS_PATH_PART = "datasets";
     public static final String TESTCASES_PATH_PART = "testcases";
 
+    private ConventionRequirementBuilder requirementBuilder = new ConventionRequirementBuilder();
+
     @Factory
     public Object[] createTestCases()
     {
@@ -47,8 +55,8 @@ public class SqlQueryConventionBasedTestFactory
                 return NO_TEST_CASES;
             }
 
-            handleDataSets(productTestPath.get());
-            return buildTestCases(productTestPath.get());
+            List<ConventionTableDefinition> conventionTableDefinitions = loadDataSets(productTestPath.get());
+            return buildTestCases(productTestPath.get(), conventionTableDefinitions);
         }
         catch (Exception e) {
             LOGGER.error("Could not create file test", e);
@@ -67,26 +75,35 @@ public class SqlQueryConventionBasedTestFactory
         return Optional.of(Paths.get(productTestURI.toURI()));
     }
 
-    private void handleDataSets(Path productTestPath)
+    private List<ConventionTableDefinition> loadDataSets(Path productTestPath)
+            throws IOException
     {
         Path dataSetsPath = productTestPath.resolve(DATASETS_PATH_PART);
+
         if (dataSetsPath.toFile().exists()) {
-            LOGGER.debug("Datasets configuration");
-            // TODO
+            LOGGER.debug("Data sets configuration for path: {}", dataSetsPath);
+
+            return StreamSupport.stream(newDirectoryStream(dataSetsPath, "*.ddl").spliterator(), false)
+                    .map(ddlFilePath -> ddlFilePath.toFile())
+                    .map(ddlFile -> new ConventionTableDefinition(ddlFile, changeExtension(ddlFile, "data"), changeExtension(ddlFile, "data-revision")))
+                    .collect(Collectors.toList());
+        }
+        else {
+            return emptyList();
         }
     }
 
-    private Object[] buildTestCases(Path productTestPath)
+    private Object[] buildTestCases(Path productTestPath, List<ConventionTableDefinition> conventionTableDefinitions)
             throws IOException
     {
         Path testCasesDirPath = productTestPath.resolve(TESTCASES_PATH_PART);
 
         if (testCasesDirPath.toFile().exists()) {
-            ExtensionFileCollectorVisitor sqlFileCollector = new ExtensionFileCollectorVisitor("sql");
+            ExtensionFileCollectorVisitor sqlFileCollector = extensionFileCollectorVisitor("sql");
             Files.walkFileTree(testCasesDirPath, sqlFileCollector);
 
             return sqlFileCollector.getResult().stream()
-                    .map(this::createFileConventionTest)
+                    .map(testMethodPath -> createFileConventionTest(testMethodPath, conventionTableDefinitions))
                     .toArray();
         }
         else {
@@ -94,10 +111,10 @@ public class SqlQueryConventionBasedTestFactory
         }
     }
 
-    private SqlQueryConventionBasedTest createFileConventionTest(Path testMethodPath)
+    private SqlQueryConventionBasedTest createFileConventionTest(Path testMethodPath, List<ConventionTableDefinition> conventionTableDefinitions)
     {
         File testMethodFile = testMethodPath.toFile();
-        File testMethodResult = changeExtension(testMethodPath, ".result").toFile();
+        File testMethodResult = changeExtension(testMethodFile, "result");
 
         checkState(testMethodFile.exists() && testMethodFile.isFile(), "Could not find file: %s", testMethodFile.getAbsolutePath());
         checkState(testMethodResult.exists() && testMethodResult.isFile(), "Could not find file: %s", testMethodResult.getAbsolutePath());
@@ -106,43 +123,19 @@ public class SqlQueryConventionBasedTestFactory
                 testMethodResult.getAbsolutePath(), SQL_TESTS_PATH_PART, TESTCASES_PATH_PART, testMethodFile.getName());
 
         String testName = testMethodPath.getParent().getFileName().toString();
+        Requirement requirement = getRequirements(conventionTableDefinitions);
+        return new SqlQueryConventionBasedTest(new SqlQueryConventionBasedTestCaseDefinition(testName, testMethodFile, testMethodResult, requirement));
+    }
+
+    private Requirement getRequirements(List<ConventionTableDefinition> conventionTableDefinitions)
+    {
         // TODO: requirements need to be based on actual convention based requirements
-        List<SqlQueryConventionBasedTestCaseDefinition> testCases = newArrayList(new SqlQueryConventionBasedTestCaseDefinition(testName, testMethodFile, testMethodResult, new ImmutableHiveTableRequirement(NATION)));
-        return new SqlQueryConventionBasedTest(testCases);
-    }
-
-    private Path changeExtension(Path source, String extension)
-    {
-        String fileName = source.getFileName().toString();
-        String newFileName = fileName.substring(0, fileName.lastIndexOf(".")) + extension;
-        return source.getParent().resolve(newFileName);
-    }
-
-    private static final class ExtensionFileCollectorVisitor
-            extends SimpleFileVisitor<Path>
-    {
-
-        private final List<Path> result = newArrayList();
-        private final String extension;
-
-        public ExtensionFileCollectorVisitor(String extension)
-        {
-            this.extension = "." + extension;
+        List<Requirement> requirements = newArrayList();
+        requirements.add(new ImmutableHiveTableRequirement(NATION)); // TODO: this should not be hardcoded
+        for (ConventionTableDefinition conventionTableDefinition : conventionTableDefinitions) {
+            Requirement dataSetRequirement = requirementBuilder.hiveTableRequirementFor(conventionTableDefinition);
+            requirements.add(dataSetRequirement);
         }
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                throws IOException
-        {
-            if (file.getFileName().toString().endsWith(extension)) {
-                result.add(file);
-            }
-            return FileVisitResult.CONTINUE;
-        }
-
-        public List<Path> getResult()
-        {
-            return result;
-        }
+        return compose(requirements);
     }
 }

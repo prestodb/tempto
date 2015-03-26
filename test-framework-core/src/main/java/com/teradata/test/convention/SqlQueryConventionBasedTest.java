@@ -29,6 +29,7 @@ import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -43,9 +44,9 @@ public class SqlQueryConventionBasedTest
 
     private String currentTestCaseName;
 
-    public SqlQueryConventionBasedTest(List<SqlQueryConventionBasedTestCaseDefinition> testCases)
+    public SqlQueryConventionBasedTest(SqlQueryConventionBasedTestCaseDefinition... testCases)
     {
-        this.testCases = testCases;
+        this.testCases = asList(testCases);
         this.fileParser = new FileParser();
     }
 

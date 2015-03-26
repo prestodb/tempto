@@ -22,15 +22,18 @@ class HiveTablesFulfillerTest
   {
     when:
     def nationDataSource = Mock(DataSource)
+    nationDataSource.getName() >> '/some/table/in/hdfs'
     def nationDefinition = HiveTableDefinition.builder()
             .setName('nation')
             .setDataSource(nationDataSource)
-            .addColumn('n_nationid', INT)
-            .addColumn('n_name', STRING)
+            .setCreateTableDDLTemplate('CREATE TABLE nation(' +
+            'n_nationid INT,' +
+            'n_name STRING) ' +
+            'ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' ' +
+            'LOCATION \'{0}\'')
             .build()
 
     def requirement = new ImmutableHiveTableRequirement(nationDefinition)
-    nationDataSource.getName() >> '/some/table/in/hdfs'
     def states = fulfiller.fulfill([requirement] as Set)
 
     assert states.size() == 1
@@ -43,7 +46,7 @@ class HiveTablesFulfillerTest
 
     then:
     1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
-    then:
+    1 * dataSourceWriter.ensureDataOnHdfs(_)
     1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' LOCATION \'/some/table/in/hdfs\'')
 
     when:
@@ -51,8 +54,6 @@ class HiveTablesFulfillerTest
 
     then:
     1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
-
-    then:
     0 * _
   }
 }

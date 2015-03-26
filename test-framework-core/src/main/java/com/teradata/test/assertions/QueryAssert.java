@@ -52,7 +52,7 @@ public class QueryAssert
     public QueryAssert hasColumnsCount(int columnCount)
     {
         if (actual.getColumnsCount() != columnCount) {
-            failWithMessage("Expected column count to be <%s>, but was <%s>", columnCount, actual.getRowsCount());
+            failWithMessage("Expected column count to be <%s>, but was <%s> - columns <%s>", columnCount, actual.getColumnsCount(), actual.getColumnTypes());
         }
         return this;
     }

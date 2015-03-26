@@ -9,22 +9,18 @@ import com.google.inject.Inject;
 import com.teradata.test.Requirement;
 import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
-import com.teradata.test.fulfillment.table.TableColumn;
 import com.teradata.test.query.QueryExecutor;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
-import static com.google.common.base.Joiner.on;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Sets.newHashSet;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HiveTablesFulfiller
@@ -62,19 +58,21 @@ public class HiveTablesFulfiller
     private HiveTableInstance fulfillTable(HiveTableDefinition tableDefinition)
     {
         LOGGER.debug("fulfilling table {}", tableDefinition.getName());
-        queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", tableDefinition.getName()));
+        queryExecutor.executeQuery(dropTableDDL(tableDefinition.getName()));
         hiveDataSourceWriter.ensureDataOnHdfs(tableDefinition.getDataSource());
-        // TODO: handling of different delimiters: SWARM-181
-        queryExecutor.executeQuery(format("CREATE TABLE %s(%s) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' LOCATION '%s'",
-                tableDefinition.getName(),
-                buildColumnListDDL(tableDefinition.getColumns()),
-                tableDefinition.getDataSource().getName()));
+        queryExecutor.executeQuery(createTableDDL(tableDefinition));
         return new HiveTableInstance(tableDefinition.getName(), tableDefinition.getName());
     }
 
-    private String buildColumnListDDL(List<TableColumn> columns)
+    private String createTableDDL(HiveTableDefinition tableDefinition)
     {
-        return on(',').join(columns.stream().map(tc -> tc.getName() + " " + tc.getType()).collect(toList()));
+        String escapedFormat = tableDefinition.getCreateTableDDLTemplate().replaceAll("\'", "''");
+        return format(escapedFormat, tableDefinition.getDataSource().getName());
+    }
+
+    private String dropTableDDL(String tableName)
+    {
+        return format("DROP TABLE IF EXISTS {0}", tableName);
     }
 
     @Override
@@ -90,7 +88,7 @@ public class HiveTablesFulfiller
     {
         LOGGER.debug("cleaning up table {}", createdTable.getName());
         try {
-            queryExecutor.executeQuery(format("DROP TABLE IF EXISTS %s", createdTable.getName()));
+            queryExecutor.executeQuery(dropTableDDL(createdTable.getName()));
         }
         catch (Exception e) {
             LOGGER.debug("error while cleaning up table {}", createdTable.getName(), e);

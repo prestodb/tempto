@@ -4,66 +4,74 @@
 
 package com.teradata.test.fulfillment.hive;
 
-import com.teradata.test.fulfillment.table.TableColumn;
 import com.teradata.test.fulfillment.table.TableDefinition;
-
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 public class HiveTableDefinition
         extends TableDefinition
 {
-    public HiveTableDefinition(String name, List<TableColumn> columns, DataSource dataSource)
-    {
-        super(name, columns);
-        this.dataSource = dataSource;
-    }
 
     private final DataSource dataSource;
+    private final String createTableDDLTemplate;
+
+    private HiveTableDefinition(String name, String createTableDDLTemplate, DataSource dataSource)
+    {
+        super(name);
+        this.dataSource = dataSource;
+        this.createTableDDLTemplate = createTableDDLTemplate;
+    }
 
     public DataSource getDataSource()
     {
         return dataSource;
     }
 
-    public static HiveTablesFulfillerBuilder builder()
+    public String getCreateTableDDLTemplate()
     {
-        return new HiveTablesFulfillerBuilder();
+        return createTableDDLTemplate;
     }
 
-    public static class HiveTablesFulfillerBuilder
+    public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, DataSource dataSource)
+    {
+        return new HiveTableDefinition(name, createTableDDLTemplate, dataSource);
+    }
+
+    public static HiveTableDefinitionBuilder builder()
+    {
+        return new HiveTableDefinitionBuilder();
+    }
+
+    public static class HiveTableDefinitionBuilder
     {
 
         private String name;
+        private String createTableDDLTemplate;
         private DataSource dataSource;
-        private List<TableColumn> columns = newArrayList();
 
-        private HiveTablesFulfillerBuilder()
+        private HiveTableDefinitionBuilder()
         {
         }
 
-        public HiveTablesFulfillerBuilder setName(String name)
+        public HiveTableDefinitionBuilder setName(String name)
         {
             this.name = name;
             return this;
         }
 
-        public HiveTablesFulfillerBuilder setDataSource(DataSource dataSource)
+        public HiveTableDefinitionBuilder setCreateTableDDLTemplate(String createTableDDLTemplate)
+        {
+            this.createTableDDLTemplate = createTableDDLTemplate;
+            return this;
+        }
+
+        public HiveTableDefinitionBuilder setDataSource(DataSource dataSource)
         {
             this.dataSource = dataSource;
             return this;
         }
 
-        public HiveTablesFulfillerBuilder addColumn(String name, HiveType hiveType)
-        {
-            columns.add(new TableColumn(name, hiveType.name()));
-            return this;
-        }
-
         public HiveTableDefinition build()
         {
-            return new HiveTableDefinition(name, columns, dataSource);
+            return new HiveTableDefinition(name, createTableDDLTemplate, dataSource);
         }
     }
 }
