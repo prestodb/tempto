@@ -107,7 +107,8 @@ public class SqlQueryConventionBasedTestFactory
 
         String testName = testMethodPath.getParent().getFileName().toString();
         // TODO: requirements need to be based on actual convention based requirements
-        return new SqlQueryConventionBasedTest(testName, testMethodFile, testMethodResult, new ImmutableHiveTableRequirement(NATION));
+        List<SqlQueryConventionBasedTestCaseDefinition> testCases = newArrayList(new SqlQueryConventionBasedTestCaseDefinition(testName, testMethodFile, testMethodResult, new ImmutableHiveTableRequirement(NATION)));
+        return new SqlQueryConventionBasedTest(testCases);
     }
 
     private Path changeExtension(Path source, String extension)

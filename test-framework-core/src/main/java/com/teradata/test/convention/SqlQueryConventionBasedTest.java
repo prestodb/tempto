@@ -4,60 +4,67 @@
 
 package com.teradata.test.convention;
 
+import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
-import com.teradata.test.RequirementsProvider;
 import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.convention.FileParser.ParsingResult;
-import com.teradata.test.initialization.TestInitializationListener;
+import com.teradata.test.initialization.TestMethodRequirementsProvider;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import org.slf4j.Logger;
 import org.testng.ITest;
-import org.testng.annotations.Listeners;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Optional;
 
+import static com.beust.jcommander.internal.Lists.newArrayList;
+import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Listeners(TestInitializationListener.class)
 public class SqlQueryConventionBasedTest
-        implements ITest, RequirementsProvider
+        extends ProductTest
+        implements TestMethodRequirementsProvider, ITest
 {
 
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
 
-    private final String testName;
-    private final File queryFile;
-    private final File resultFile;
     private final FileParser fileParser;
-    private final Requirement requirement;
+    private final List<SqlQueryConventionBasedTestCaseDefinition> testCases;
 
-    public SqlQueryConventionBasedTest(String testName, File queryFile, File resultFile, Requirement requirement)
+    private String currentTestCaseName;
+
+    public SqlQueryConventionBasedTest(List<SqlQueryConventionBasedTestCaseDefinition> testCases)
     {
-        this.testName = testName;
-        this.queryFile = queryFile;
-        this.resultFile = resultFile;
+        this.testCases = testCases;
         this.fileParser = new FileParser();
-        this.requirement = requirement;
     }
 
-    @Test(groups = "sql_tests")
-    public void test()
+    @BeforeMethod(groups = "sql_tests")
+    public void beforeMethod(Object[] parameters)
+    {
+        SqlQueryConventionBasedTestCaseDefinition testCase = (SqlQueryConventionBasedTestCaseDefinition) parameters[0];
+        currentTestCaseName = testCase.testCaseName;
+    }
+
+    @Test(groups = "sql_tests", dataProvider = "testCasesDataProvider")
+    public void test(final SqlQueryConventionBasedTestCaseDefinition testCase)
             throws IOException
     {
         LOGGER.debug("Executing sql test: {}", getTestName());
 
         try (
-                InputStream queryInput = new BufferedInputStream(new FileInputStream(queryFile));
-                InputStream resultInput = new BufferedInputStream(new FileInputStream(resultFile))
+                InputStream queryInput = new BufferedInputStream(new FileInputStream(testCase.queryFile));
+                InputStream resultInput = new BufferedInputStream(new FileInputStream(testCase.resultFile))
         ) {
             ParsingResult queryFile = fileParser.parseFile(queryInput);
             ParsingResult resultFile = fileParser.parseFile(resultInput);
@@ -80,9 +87,36 @@ public class SqlQueryConventionBasedTest
     }
 
     @Override
-    public Requirement getRequirements()
+    public Requirement getRequirements(Method testMethod, Object[] parameters)
     {
-        return requirement;
+        SqlQueryConventionBasedTestCaseDefinition testCase = (SqlQueryConventionBasedTestCaseDefinition) parameters[0];
+        return testCase.requirement;
+    }
+
+    @Override
+    public Requirement getAllRequirements()
+    {
+        List<Requirement> requirements = newArrayList();
+        for (SqlQueryConventionBasedTestCaseDefinition testCase : testCases) {
+            requirements.add(testCase.requirement);
+        }
+        return compose(requirements);
+    }
+
+    @Override
+    public String getTestName()
+    {
+        return currentTestCaseName;
+    }
+
+    @DataProvider(name = "testCasesDataProvider")
+    public Object[][] testCasesDataProvider()
+    {
+        Object[][] parameters = new Object[testCases.size()][1];
+        for (int i = 0; i < testCases.size(); ++i) {
+            parameters[i][0] = testCases.get(i);
+        }
+        return parameters;
     }
 
     private QueryExecutor getQueryExecutor(ParsingResult queryFile)
@@ -96,11 +130,5 @@ public class SqlQueryConventionBasedTest
             queryExecutor = testContext().getDependency(QueryExecutor.class);
         }
         return queryExecutor;
-    }
-
-    @Override
-    public String getTestName()
-    {
-        return testName + "." + queryFile.getName();
     }
 }

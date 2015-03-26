@@ -157,7 +157,7 @@ class TestInitializationListenerTest
 
   @Requires(ARequirement)
   static class TestClass
-          implements RequirementsProvider
+          implements TestMethodRequirementsProvider
   {
 
     @BeforeTestWithContext
@@ -182,9 +182,14 @@ class TestInitializationListenerTest
     }
 
     @Override
-    Requirement getRequirements()
+    Requirement getRequirements(Method testMethod, Object[] parameters)
     {
       return B_REQUIREMENT
+    }
+
+    Requirement getAllRequirements()
+    {
+      return B_REQUIREMENT;
     }
   }
 

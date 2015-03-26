@@ -15,7 +15,6 @@ import com.teradata.test.AfterTestWithContext;
 import com.teradata.test.BeforeTestWithContext;
 import com.teradata.test.CompositeRequirement;
 import com.teradata.test.Requirement;
-import com.teradata.test.RequirementsProvider;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
@@ -167,7 +166,7 @@ public class TestInitializationListener
         GuiceTestContext testContext = suiteTestContext.get().override(getTestModules(testResult));
 
         try {
-            Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
+            Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod(), testResult.getParameters());
             doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
             runWithTestContext(testContext, () -> runBeforeWithContextMethods(testResult));
             setTestMethodTestContext(testContext);
@@ -287,20 +286,21 @@ public class TestInitializationListener
     {
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            allTestsRequirements.addAll(getTestSpecificRequirements(iTestNGMethod));
-            // TODO: remove this
-//            Set<Set<Requirement>> requirementSets = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod)).getRequirementsSets();
-//            for (Set<Requirement> requirementSet : requirementSets) {
-//                allTestsRequirements.addAll(requirementSet);
-//            }
+            CompositeRequirement compositeRequirement = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod));
+            Optional<Requirement> allInstanceRequirements = getAllTestRequirementsFor(iTestNGMethod.getInstance());
+            if (allInstanceRequirements.isPresent()) {
+                compositeRequirement = compose(compositeRequirement, allInstanceRequirements.get());
+            }
+            compositeRequirement.getRequirementsSets().forEach(allTestsRequirements::addAll);
         }
         return allTestsRequirements;
     }
 
-    private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod)
+    private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod, Object[] parameters)
     {
-        CompositeRequirement compositeRequirement = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(testMethod));
-        Optional<Requirement> providedRequirement = getExplicitRequirementsFor(testMethod.getInstance());
+        Method javaTestMethod = getJavaMethodFromTestMethod(testMethod);
+        CompositeRequirement compositeRequirement = getAnnotationBasedRequirementsFor(javaTestMethod);
+        Optional<Requirement> providedRequirement = getExplicitRequirementsFor(testMethod.getInstance(), javaTestMethod, parameters);
         if (providedRequirement.isPresent()) {
             compositeRequirement = compose(providedRequirement.get(), compositeRequirement);
         }
@@ -310,10 +310,20 @@ public class TestInitializationListener
         return getOnlyElement(requirementSets);
     }
 
-    private Optional<Requirement> getExplicitRequirementsFor(Object testClassInstance)
+    private Optional<Requirement> getExplicitRequirementsFor(Object testClassInstance, Method testMethod, Object[] parameters)
     {
-        if (testClassInstance instanceof RequirementsProvider) {
-            return Optional.of(((RequirementsProvider) testClassInstance).getRequirements());
+        if (testClassInstance instanceof TestMethodRequirementsProvider) {
+            return Optional.of(((TestMethodRequirementsProvider) testClassInstance).getRequirements(testMethod, parameters));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<Requirement> getAllTestRequirementsFor(Object testClassInstance)
+    {
+        if (testClassInstance instanceof TestMethodRequirementsProvider) {
+            return Optional.of(((TestMethodRequirementsProvider) testClassInstance).getAllRequirements());
         }
         else {
             return Optional.empty();
