@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.teradata.test.AfterTestWithContext;
+import com.teradata.test.BeforeTestWithContext;
 import com.teradata.test.CompositeRequirement;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
@@ -31,6 +33,8 @@ import org.testng.ITestResult;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
@@ -165,14 +169,14 @@ public class TestInitializationListener
         try {
             Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
             doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
+            runWithTestContext(testContext, () -> runBeforeWithContextMethods(testResult));
+            setTestMethodTestContext(testContext);
         }
         catch (RuntimeException e) {
             testContext.close();
             LOGGER.debug("error within test initialization", e);
             throw e;
         }
-
-        setTestMethodTestContext(testContext);
     }
 
     @Override
@@ -199,11 +203,38 @@ public class TestInitializationListener
         if (!testMethodTextContext.isPresent()) {
             return;
         }
+        try {
+            runAfterWithContextMethods(testResult);
+        }
+        finally {
+            doCleanup(testMethodTextContext.get(), testMethodFulfillers);
+            testMethodTextContext.get().close();
+            unsetTestMethodTestContext();
+        }
+    }
 
-        runWithTestContext(testMethodTextContext.get(), () -> doCleanup(testMethodTextContext.get(), testMethodFulfillers));
-        testMethodTextContext.get().close();
+    private void runBeforeWithContextMethods(ITestResult testResult)
+    {
+        invokeMethodsAnnotatedWith(BeforeTestWithContext.class, testResult);
+    }
 
-        unsetTestMethodTestContext();
+    private void runAfterWithContextMethods(ITestResult testResult)
+    {
+        invokeMethodsAnnotatedWith(AfterTestWithContext.class, testResult);
+    }
+
+    private static void invokeMethodsAnnotatedWith(Class<? extends Annotation> annotationClass, ITestResult testCase)
+    {
+        for (Method declaredMethod : testCase.getTestClass().getRealClass().getDeclaredMethods()) {
+            if (declaredMethod.getAnnotation(annotationClass) != null) {
+                try {
+                    declaredMethod.invoke(testCase.getInstance());
+                }
+                catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException("error invoking methods annotated with " + annotationClass.getName(), e);
+                }
+            }
+        }
     }
 
     private TestInfoModule getTestModules(ITestResult testResult)

@@ -4,12 +4,15 @@
 package com.teradata.test.initialization
 
 import com.google.inject.Inject
+import com.teradata.test.AfterTestWithContext
+import com.teradata.test.BeforeTestWithContext
 import com.teradata.test.Requirement
 import com.teradata.test.RequirementsProvider
 import com.teradata.test.Requires
 import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
 import com.teradata.test.fulfillment.RequirementFulfiller
+import org.testng.ITestClass
 import org.testng.ITestContext
 import org.testng.ITestNGMethod
 import org.testng.ITestResult
@@ -28,17 +31,17 @@ class TestInitializationListenerTest
   static final B = 'B'
   static final C = 'C'
 
-  static final A_FULFILL = 'AFULFILL'
-  static final B_FULFILL = 'BFULFILL'
-  static final C_FULFILL = 'CFULFILL'
+  static final SUITE_A_FULFILL = 'AFULFILL'
+  static final TEST_B_FULFILL = 'BFULFILL'
+  static final THROWING_TEST_C_FULFILL = 'CFULFILL'
 
-  static final A_CLEANUP = 'ACLEANUP'
-  static final B_CLEANUP = 'BCLEANUP'
-  static final C_CLEANUP = 'CCLEANUP'
+  static final SUITE_A_CLEANUP = 'ACLEANUP'
+  static final TEST_B_CLEANUP = 'BCLEANUP'
+  static final THROWING_TEST_C_CLEANUP = 'CCLEANUP'
 
-  static final A_CALLBACK = 'ACALLBACK'
-  static final B_CALLBACK = 'BCALLBACK'
-  static final C_CALLBACK = 'CCALLBACK'
+  static final SUITE_A_CALLBACK = 'ACALLBACK'
+  static final TEST_B_CALLBACK = 'BCALLBACK'
+  static final THROWING_TEST_C_CALLBACK = 'CCALLBACK'
 
   static final A_REQUIREMENT = new DummyRequirement(A)
   static final B_REQUIREMENT = new DummyRequirement(B)
@@ -51,7 +54,7 @@ class TestInitializationListenerTest
     EVENTS = []
   }
 
-  def 'should fulfill requirements'()
+  def 'positive flow'()
   {
     setup:
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller])
@@ -68,18 +71,20 @@ class TestInitializationListenerTest
     listener.onFinish(iTestContext)
 
     then:
-    EVENTS[0].name == A_FULFILL
-    EVENTS[1].name == B_FULFILL
-    EVENTS[2].name == B_CLEANUP
-    EVENTS[3].name == B_CALLBACK
-    EVENTS[4].name == A_CLEANUP
-    EVENTS[5].name == A_CALLBACK
+    EVENTS[0].name == SUITE_A_FULFILL
+    EVENTS[1].name == TEST_B_FULFILL
+    EVENTS[2].name == "beforeMethod";
+    EVENTS[3].name == "afterMethod";
+    EVENTS[4].name == TEST_B_CLEANUP
+    EVENTS[5].name == TEST_B_CALLBACK
+    EVENTS[6].name == SUITE_A_CLEANUP
+    EVENTS[7].name == SUITE_A_CALLBACK
 
-    EVENTS[1].object == EVENTS[2].object
-    EVENTS[0].object == EVENTS[4].object
+    EVENTS[1].object == EVENTS[4].object
+    EVENTS[0].object == EVENTS[6].object
   }
 
-  def 'should cleanup after failure'()
+  def 'failure during fulfillment'()
   {
     setup:
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller, CFulfiller])
@@ -98,14 +103,14 @@ class TestInitializationListenerTest
     listener.onFinish(iTestContext)
 
     then:
-    EVENTS[0].name == A_FULFILL
-    EVENTS[1].name == B_FULFILL
-    EVENTS[2].name == C_FULFILL
-    EVENTS[3].name == B_CLEANUP
-    EVENTS[4].name == B_CALLBACK
-    EVENTS[5].name == C_CALLBACK
-    EVENTS[6].name == A_CLEANUP
-    EVENTS[7].name == A_CALLBACK
+    EVENTS[0].name == SUITE_A_FULFILL
+    EVENTS[1].name == TEST_B_FULFILL
+    EVENTS[2].name == THROWING_TEST_C_FULFILL
+    EVENTS[3].name == TEST_B_CLEANUP
+    EVENTS[4].name == TEST_B_CALLBACK
+    EVENTS[5].name == THROWING_TEST_C_CALLBACK
+    EVENTS[6].name == SUITE_A_CLEANUP
+    EVENTS[7].name == SUITE_A_CALLBACK
 
     EVENTS[1].object == EVENTS[3].object
     EVENTS[0].object == EVENTS[6].object
@@ -124,6 +129,10 @@ class TestInitializationListenerTest
   {
     ITestResult testResult = Mock(ITestResult)
     testResult.method >> getITestNGMethod(method)
+    ITestClass iTestClass = Mock()
+    testResult.testClass >> iTestClass
+    testResult.instance >> testResult.method.instance
+    iTestClass.realClass >> TestClass
     return testResult
   }
 
@@ -150,6 +159,18 @@ class TestInitializationListenerTest
   static class TestClass
           implements RequirementsProvider
   {
+
+    @BeforeTestWithContext
+    public void beforeMethod()
+    {
+      EVENTS.add(new Event("beforeMethod", this));
+    }
+
+    @AfterTestWithContext
+    public void afterMethod()
+    {
+      EVENTS.add(new Event("afterMethod", this));
+    }
 
     public void testMethodSuccess()
     {
@@ -183,7 +204,7 @@ class TestInitializationListenerTest
     @Inject
     AFulfiller(TestContext testContext)
     {
-      super(A, A_FULFILL, A_CLEANUP, A_CALLBACK, testContext)
+      super(A, SUITE_A_FULFILL, SUITE_A_CLEANUP, SUITE_A_CALLBACK, testContext)
     }
   }
 
@@ -193,7 +214,7 @@ class TestInitializationListenerTest
     @Inject
     BFulfiller(TestContext testContext)
     {
-      super(B, B_FULFILL, B_CLEANUP, B_CALLBACK, testContext)
+      super(B, TEST_B_FULFILL, TEST_B_CLEANUP, TEST_B_CALLBACK, testContext)
     }
   }
 
@@ -213,7 +234,7 @@ class TestInitializationListenerTest
     @Inject
     CFulfiller(TestContext testContext)
     {
-      super(C, C_FULFILL, C_CLEANUP, C_CALLBACK, testContext)
+      super(C, THROWING_TEST_C_FULFILL, THROWING_TEST_C_CLEANUP, THROWING_TEST_C_CALLBACK, testContext)
     }
 
     Set<State> fulfill(Set<Requirement> requirements)

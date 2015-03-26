@@ -4,6 +4,8 @@
 
 package com.teradata.test.examples;
 
+import com.teradata.test.AfterTestWithContext;
+import com.teradata.test.BeforeTestWithContext;
 import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
@@ -13,9 +15,10 @@ import org.testng.annotations.Test;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static com.teradata.test.query.QueryExecutor.query;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleQueryTest
         extends ProductTest
@@ -30,6 +33,16 @@ public class SimpleQueryTest
         {
             return new ImmutableHiveTableRequirement(NATION);
         }
+    }
+
+    @BeforeTestWithContext
+    public void beforeTest() {
+       assertThat(testContextIfSet().isPresent()).isTrue();
+    }
+
+    @AfterTestWithContext
+    public void afterTest() {
+        assertThat(testContextIfSet().isPresent()).isTrue();
     }
 
     @Test(groups = "query")
