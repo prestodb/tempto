@@ -10,7 +10,7 @@ import spock.lang.Specification
 
 import static com.teradata.test.Requirements.allOf
 import static com.teradata.test.Requirements.compose
-import static com.teradata.test.RequirementsCollector.collectRequirementsFor
+import static com.teradata.test.RequirementsCollector.getAnnotationBasedRequirementsFor
 import static java.util.Arrays.asList
 
 public class RequirementsCollectorTest
@@ -24,7 +24,7 @@ public class RequirementsCollectorTest
   def "should list method requirements"()
   {
     expect:
-    collectRequirementsFor(method) == expectedRequirementSets
+    getAnnotationBasedRequirementsFor(method).requirementsSets == expectedRequirementSets
 
     where:
     method                                        | expectedRequirementSets

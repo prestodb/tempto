@@ -4,6 +4,7 @@
 
 package com.teradata.test.convention;
 
+import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
 import org.slf4j.Logger;
 import org.testng.annotations.Factory;
 
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTestFactory
@@ -104,7 +106,8 @@ public class SqlQueryConventionBasedTestFactory
                 testMethodResult.getAbsolutePath(), SQL_TESTS_PATH_PART, TESTCASES_PATH_PART, testMethodFile.getName());
 
         String testName = testMethodPath.getParent().getFileName().toString();
-        return new SqlQueryConventionBasedTest(testName, testMethodFile, testMethodResult);
+        // TODO: requirements need to be based on actual convention based requirements
+        return new SqlQueryConventionBasedTest(testName, testMethodFile, testMethodResult, new ImmutableHiveTableRequirement(NATION));
     }
 
     private Path changeExtension(Path source, String extension)

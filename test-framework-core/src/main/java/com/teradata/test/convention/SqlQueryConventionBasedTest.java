@@ -4,7 +4,8 @@
 
 package com.teradata.test.convention;
 
-import com.teradata.test.Requires;
+import com.teradata.test.Requirement;
+import com.teradata.test.RequirementsProvider;
 import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.convention.FileParser.ParsingResult;
 import com.teradata.test.initialization.TestInitializationListener;
@@ -28,7 +29,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Listeners(TestInitializationListener.class)
 public class SqlQueryConventionBasedTest
-        implements ITest
+        implements ITest, RequirementsProvider
 {
 
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
@@ -37,17 +38,17 @@ public class SqlQueryConventionBasedTest
     private final File queryFile;
     private final File resultFile;
     private final FileParser fileParser;
+    private final Requirement requirement;
 
-    public SqlQueryConventionBasedTest(String testName, File queryFile, File resultFile)
+    public SqlQueryConventionBasedTest(String testName, File queryFile, File resultFile, Requirement requirement)
     {
         this.testName = testName;
         this.queryFile = queryFile;
         this.resultFile = resultFile;
         this.fileParser = new FileParser();
+        this.requirement = requirement;
     }
 
-    // TODO: create something like RequirementAware interface and remove this annotation
-    @Requires(SqlQueryConventionBasedTestRequirement.class)
     @Test(groups = "sql_tests")
     public void test()
             throws IOException
@@ -76,6 +77,12 @@ public class SqlQueryConventionBasedTest
                 queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
             }
         }
+    }
+
+    @Override
+    public Requirement getRequirements()
+    {
+        return requirement;
     }
 
     private QueryExecutor getQueryExecutor(ParsingResult queryFile)

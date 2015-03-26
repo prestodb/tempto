@@ -10,7 +10,6 @@ import com.teradata.test.Requires
 import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
 import com.teradata.test.fulfillment.RequirementFulfiller
-import org.testng.IInvokedMethod
 import org.testng.ITestContext
 import org.testng.ITestNGMethod
 import org.testng.ITestResult
@@ -40,6 +39,10 @@ class TestInitializationListenerTest
   static final A_CALLBACK = 'ACALLBACK'
   static final B_CALLBACK = 'BCALLBACK'
   static final C_CALLBACK = 'CCALLBACK'
+
+  static final A_REQUIREMENT = new DummyRequirement(A)
+  static final B_REQUIREMENT = new DummyRequirement(B)
+  static final C_REQUIREMENT = new DummyRequirement(C)
 
   static List<Event> EVENTS
 
@@ -111,10 +114,8 @@ class TestInitializationListenerTest
   def getITestContext(Method method)
   {
     ITestContext suiteContext = Mock(ITestContext)
-    ITestNGMethod testMethod = Mock(ITestNGMethod)
 
-    suiteContext.allTestMethods >> [testMethod]
-    testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
+    suiteContext.allTestMethods >> [getITestNGMethod(method)]
 
     return suiteContext
   }
@@ -122,12 +123,17 @@ class TestInitializationListenerTest
   def getITestResult(Method method)
   {
     ITestResult testResult = Mock(ITestResult)
-    ITestNGMethod testMethod = Mock(ITestNGMethod)
-
-    testResult.method >> testMethod
-    testMethod.method >> method
-    testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
+    testResult.method >> getITestNGMethod(method)
     return testResult
+  }
+
+  def getITestNGMethod(Method method)
+  {
+    ITestNGMethod testMethod = Mock(ITestNGMethod)
+    testMethod.method >> method
+    testMethod.instance >> new TestClass()
+    testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
+    return testMethod
   }
 
   def getSuccessMethod()
@@ -142,16 +148,22 @@ class TestInitializationListenerTest
 
   @Requires(ARequirement)
   static class TestClass
+          implements RequirementsProvider
   {
 
-    @Requires(BRequirement)
     public void testMethodSuccess()
     {
     }
 
-    @Requires([BRequirement, CRequirement])
+    @Requires(CRequirement)
     public void testMethodFailed()
     {
+    }
+
+    @Override
+    Requirement getRequirements()
+    {
+      return B_REQUIREMENT
     }
   }
 
@@ -161,7 +173,7 @@ class TestInitializationListenerTest
     @Override
     public Requirement getRequirements()
     {
-      return new DummyRequirement(A)
+      return A_REQUIREMENT
     }
   }
 
@@ -172,16 +184,6 @@ class TestInitializationListenerTest
     AFulfiller(TestContext testContext)
     {
       super(A, A_FULFILL, A_CLEANUP, A_CALLBACK, testContext)
-    }
-  }
-
-  static class BRequirement
-          implements RequirementsProvider
-  {
-    @Override
-    public Requirement getRequirements()
-    {
-      return new DummyRequirement(B)
     }
   }
 
@@ -201,7 +203,7 @@ class TestInitializationListenerTest
     @Override
     public Requirement getRequirements()
     {
-      return new DummyRequirement(C)
+      return C_REQUIREMENT
     }
   }
 

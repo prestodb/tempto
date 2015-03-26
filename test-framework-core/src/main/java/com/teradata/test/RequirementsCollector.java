@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.test.Requirements.compose;
@@ -21,7 +20,7 @@ import static java.util.Arrays.asList;
  */
 public final class RequirementsCollector
 {
-    public static Set<Set<Requirement>> collectRequirementsFor(Method method)
+    public static CompositeRequirement getAnnotationBasedRequirementsFor(Method method)
     {
         Requires methodRequiresAnnotation = method.getAnnotation(Requires.class);
         CompositeRequirement methodCompositeRequirement = getCompositeRequirement(methodRequiresAnnotation);
@@ -29,7 +28,7 @@ public final class RequirementsCollector
         Requires classRequiresAnnotation = method.getDeclaringClass().getAnnotation(Requires.class);
         CompositeRequirement classCompositeRequirement = getCompositeRequirement(classRequiresAnnotation);
 
-        return compose(methodCompositeRequirement, classCompositeRequirement).getRequirementsSets();
+        return compose(methodCompositeRequirement, classCompositeRequirement);
     }
 
     private static CompositeRequirement getCompositeRequirement(Requires requires)

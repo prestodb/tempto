@@ -11,7 +11,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.teradata.test.CompositeRequirement;
 import com.teradata.test.Requirement;
+import com.teradata.test.RequirementsProvider;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.configuration.YamlConfiguration;
 import com.teradata.test.context.GuiceTestContext;
@@ -41,7 +43,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
-import static com.teradata.test.RequirementsCollector.collectRequirementsFor;
+import static com.teradata.test.Requirements.compose;
+import static com.teradata.test.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.clearTestContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.setTestContext;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -253,7 +256,7 @@ public class TestInitializationListener
     {
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            Set<Set<Requirement>> requirementSets = collectRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod));
+            Set<Set<Requirement>> requirementSets = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(iTestNGMethod)).getRequirementsSets();
             for (Set<Requirement> requirementSet : requirementSets) {
                 allTestsRequirements.addAll(requirementSet);
             }
@@ -263,9 +266,25 @@ public class TestInitializationListener
 
     private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod)
     {
-        Set<Set<Requirement>> requirementSets = collectRequirementsFor(getJavaMethodFromTestMethod(testMethod));
+        CompositeRequirement compositeRequirement = getAnnotationBasedRequirementsFor(getJavaMethodFromTestMethod(testMethod));
+        Optional<Requirement> providedRequirement = getExplicitRequirementsFor(testMethod.getInstance());
+        if (providedRequirement.isPresent()) {
+            compositeRequirement = compose(providedRequirement.get(), compositeRequirement);
+        }
+
+        Set<Set<Requirement>> requirementSets = compositeRequirement.getRequirementsSets();
         checkArgument(requirementSets.size() == 1, "multiple sets of requirements per test are not supported yet");
         return getOnlyElement(requirementSets);
+    }
+
+    private Optional<Requirement> getExplicitRequirementsFor(Object testClassInstance)
+    {
+        if (testClassInstance instanceof RequirementsProvider) {
+            return Optional.of(((RequirementsProvider) testClassInstance).getRequirements());
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private Method getJavaMethodFromTestMethod(ITestNGMethod method)
