@@ -29,7 +29,7 @@ public class FileBasedDataSource
     }
 
     @Override
-    public String getName()
+    public String getPath()
     {
         // {TESTS_PATH}/datasets/{dataSetName}
         String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");

@@ -38,9 +38,10 @@ public class DefaultHiveDataSourceWriter
     @Override
     public void ensureDataOnHdfs(DataSource dataSource)
     {
-        String filePath = dataSource.getName() + "/data";
+        String dataSourcePath = dataSource.getPath();
+        String filePath = dataSourcePath + "/data";
 
-        Optional<String> storedRevisionMarker = hdfsClient.getXAttr(filePath, hdfsUsername, REVISON_XATTR_NAME);
+        Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);
         if (storedRevisionMarker.isPresent()) {
             if (storedRevisionMarker.get().equals(dataSource.revisionMarker())) {
                 LOGGER.debug("File {} ({}) already exists, skipping generation of data", filePath, storedRevisionMarker.get());
@@ -53,7 +54,8 @@ public class DefaultHiveDataSourceWriter
         }
 
         LOGGER.info("Saving new file {} ({})", filePath, dataSource.revisionMarker());
+        hdfsClient.createDirectory(dataSourcePath, hdfsUsername);
         hdfsClient.saveFile(filePath, hdfsUsername, dataSource.data());
-        hdfsClient.setXAttr(filePath, hdfsUsername, REVISON_XATTR_NAME, dataSource.revisionMarker());
+        hdfsClient.setXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME, dataSource.revisionMarker());
     }
 }

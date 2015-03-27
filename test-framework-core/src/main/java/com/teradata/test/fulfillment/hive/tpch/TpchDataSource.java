@@ -29,7 +29,7 @@ public class TpchDataSource
     }
 
     @Override
-    public String getName()
+    public String getPath()
     {
         // {TESTS_PATH}/tpch/sf-{scaleFactor}/{tableName}
         String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");

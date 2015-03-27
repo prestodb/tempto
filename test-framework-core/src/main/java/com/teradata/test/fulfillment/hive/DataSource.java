@@ -15,7 +15,7 @@ public interface DataSource
     /**
      * @return path where data source data should be stored
      */
-    String getName();
+    String getPath();
 
     /**
      * @return input stream of data

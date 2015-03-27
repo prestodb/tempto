@@ -35,6 +35,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.HostAndPort.fromParts;
+import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -103,7 +104,8 @@ public class WebHDFSClient
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
                 throw invalidStatusException("CREATE", path, username, writeRequest, response);
             }
-            logger.debug("Save file {} - username: {}", path, username);
+            long length = waitForFileSavedAndReturnLength(path, username);
+            logger.debug("Saved file {} - username: {}, size: {}", path, username, byteCountToDisplaySize(length));
         }
         catch (IOException e) {
             throw new RuntimeException("Could not save file " + path + " in hdfs, user: " + username, e);
@@ -201,6 +203,16 @@ public class WebHDFSClient
         catch (IOException e) {
             throw new RuntimeException("Could not execute request " + request, e);
         }
+    }
+
+    /**
+     * There is some wired bug in WebHDFS, which happens for big files. Just after saving such file
+     * it is not possible to immediately set xAttr. Calling GETFILESTATUS seems to introduce
+     * some synchronization point, so it should be used just after saving file.
+     */
+    private long waitForFileSavedAndReturnLength(String path, String username)
+    {
+        return getLength(path, username);
     }
 
     private URI buildUri(String path, String username, String operation, Pair<String, String>... parameters)

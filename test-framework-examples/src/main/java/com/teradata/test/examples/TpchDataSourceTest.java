@@ -32,7 +32,7 @@ public class TpchDataSourceTest
     {
         TpchDataSource dataSource = new TpchDataSource(NATION, 1.0);
 
-        String path = dataSource.getName();
+        String path = dataSource.getPath();
 
         assertThat(path).isEqualTo("/product-test/tpch/sf-1_00/NATION");
 

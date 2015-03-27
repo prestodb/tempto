@@ -67,7 +67,7 @@ public class HiveTablesFulfiller
     private String createTableDDL(HiveTableDefinition tableDefinition)
     {
         String escapedFormat = tableDefinition.getCreateTableDDLTemplate().replaceAll("\'", "''");
-        return format(escapedFormat, tableDefinition.getDataSource().getName());
+        return format(escapedFormat, tableDefinition.getDataSource().getPath());
     }
 
     private String dropTableDDL(String tableName)

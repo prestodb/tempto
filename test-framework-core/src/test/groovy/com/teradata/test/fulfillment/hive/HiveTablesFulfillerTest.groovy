@@ -8,8 +8,6 @@ import com.teradata.test.query.QueryExecutor
 import spock.lang.Specification
 
 import static com.google.common.collect.Iterables.getOnlyElement
-import static com.teradata.test.fulfillment.hive.HiveType.INT
-import static com.teradata.test.fulfillment.hive.HiveType.STRING
 
 class HiveTablesFulfillerTest
         extends Specification
@@ -22,7 +20,7 @@ class HiveTablesFulfillerTest
   {
     when:
     def nationDataSource = Mock(DataSource)
-    nationDataSource.getName() >> '/some/table/in/hdfs'
+    nationDataSource.getPath() >> '/some/table/in/hdfs'
     def nationDefinition = HiveTableDefinition.builder()
             .setName('nation')
             .setDataSource(nationDataSource)

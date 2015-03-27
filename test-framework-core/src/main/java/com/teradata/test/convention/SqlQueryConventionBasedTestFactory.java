@@ -6,7 +6,9 @@ package com.teradata.test.convention;
 
 import com.teradata.test.Requirement;
 import com.teradata.test.convention.SqlTestsFileUtils.ExtensionFileCollectorVisitor;
+import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
+import com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions;
 import org.slf4j.Logger;
 import org.testng.annotations.Factory;
 
@@ -28,7 +30,6 @@ import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.convention.ConventionRequirements.hiveTableRequirementFor;
 import static com.teradata.test.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.convention.SqlTestsFileUtils.extensionFileCollectorVisitor;
-import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -142,7 +143,9 @@ public class SqlQueryConventionBasedTestFactory
     {
         // TODO: requirements need to be based on actual convention based requirements
         List<Requirement> requirements = newArrayList();
-        requirements.add(new ImmutableHiveTableRequirement(NATION)); // TODO: this should not be hardcoded
+        for (HiveTableDefinition tpchHiveTableDefinition : TpchTableDefinitions.TABLES) {
+            requirements.add(new ImmutableHiveTableRequirement(tpchHiveTableDefinition));
+        }
         for (ConventionTableDefinition conventionTableDefinition : conventionTableDefinitions) {
             Requirement dataSetRequirement = hiveTableRequirementFor(conventionTableDefinition);
             requirements.add(dataSetRequirement);
