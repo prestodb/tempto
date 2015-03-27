@@ -6,66 +6,67 @@ package com.teradata.test.convention;
 
 import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
+import com.teradata.test.RequirementsProvider;
 import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.convention.FileParser.ParsingResult;
-import com.teradata.test.initialization.TestMethodRequirementsProvider;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import org.slf4j.Logger;
 import org.testng.ITest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Optional;
 
-import static com.beust.jcommander.internal.Lists.newArrayList;
-import static com.teradata.test.Requirements.compose;
+import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
-import static java.util.Arrays.asList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
         extends ProductTest
-        implements TestMethodRequirementsProvider, ITest
+        implements RequirementsProvider, ITest
 {
-
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
+    private static final int SUCCESS_EXIT_CODE = 0;
 
     private final FileParser fileParser;
-    private final List<SqlQueryConventionBasedTestCaseDefinition> testCases;
+    private final String testCaseName;
+    private final Optional<File> beforeScriptFile;
+    private final Optional<File> afterScriptFile;
+    private final File queryFile;
+    private final File resultFile;
+    private final Requirement requirement;
 
-    private String currentTestCaseName;
-
-    public SqlQueryConventionBasedTest(SqlQueryConventionBasedTestCaseDefinition... testCases)
+    public SqlQueryConventionBasedTest(String testCaseName, Optional<File> beforeScriptFile, Optional<File> afterScriptFile,
+            File queryFile, File resultFile, Requirement requirement)
     {
-        this.testCases = asList(testCases);
+        this.testCaseName = testCaseName;
+        this.beforeScriptFile = beforeScriptFile;
+        this.afterScriptFile = afterScriptFile;
+        this.queryFile = queryFile;
+        this.resultFile = resultFile;
+        this.requirement = requirement;
         this.fileParser = new FileParser();
     }
 
-    @BeforeMethod(groups = "sql_tests")
-    public void beforeMethod(Object[] parameters)
-    {
-        SqlQueryConventionBasedTestCaseDefinition testCase = (SqlQueryConventionBasedTestCaseDefinition) parameters[0];
-        currentTestCaseName = testCase.testCaseName;
-    }
-
-    @Test(groups = "sql_tests", dataProvider = "testCasesDataProvider")
-    public void test(final SqlQueryConventionBasedTestCaseDefinition testCase)
-            throws IOException
+    @Test(groups = "sql_tests")
+    public void test()
+            throws IOException, InterruptedException
     {
         LOGGER.debug("Executing sql test: {}", getTestName());
 
+        if (beforeScriptFile.isPresent()) {
+            execute(beforeScriptFile.get());
+        }
+
         try (
-                InputStream queryInput = new BufferedInputStream(new FileInputStream(testCase.queryFile));
-                InputStream resultInput = new BufferedInputStream(new FileInputStream(testCase.resultFile))
+                InputStream queryInput = new BufferedInputStream(new FileInputStream(queryFile));
+                InputStream resultInput = new BufferedInputStream(new FileInputStream(resultFile))
         ) {
             ParsingResult queryFile = fileParser.parseFile(queryInput);
             ParsingResult resultFile = fileParser.parseFile(resultInput);
@@ -85,39 +86,30 @@ public class SqlQueryConventionBasedTest
                 queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
             }
         }
-    }
 
-    @Override
-    public Requirement getRequirements(Method testMethod, Object[] parameters)
-    {
-        SqlQueryConventionBasedTestCaseDefinition testCase = (SqlQueryConventionBasedTestCaseDefinition) parameters[0];
-        return testCase.requirement;
-    }
-
-    @Override
-    public Requirement getAllRequirements()
-    {
-        List<Requirement> requirements = newArrayList();
-        for (SqlQueryConventionBasedTestCaseDefinition testCase : testCases) {
-            requirements.add(testCase.requirement);
+        if (afterScriptFile.isPresent()) {
+            execute(afterScriptFile.get());
         }
-        return compose(requirements);
+    }
+
+    @Override
+    public Requirement getRequirements()
+    {
+        return requirement;
     }
 
     @Override
     public String getTestName()
     {
-        return currentTestCaseName;
+        return testCaseName;
     }
 
-    @DataProvider(name = "testCasesDataProvider")
-    public Object[][] testCasesDataProvider()
+    private void execute(File file)
+            throws IOException, InterruptedException
     {
-        Object[][] parameters = new Object[testCases.size()][1];
-        for (int i = 0; i < testCases.size(); ++i) {
-            parameters[i][0] = testCases.get(i);
-        }
-        return parameters;
+        Process process = Runtime.getRuntime().exec(file.toString());
+        process.waitFor();
+        checkState(process.exitValue() == SUCCESS_EXIT_CODE, file.toString() + " exited with status code: " + process.exitValue());
     }
 
     private QueryExecutor getQueryExecutor(ParsingResult queryFile)

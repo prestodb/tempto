@@ -16,17 +16,17 @@ import java.io.InputStream;
 
 import static com.teradata.test.fulfillment.hive.HiveTableDefinition.hiveTableDefinition;
 
-public class ConventionRequirementBuilder
+public final class ConventionRequirements
 {
 
-    public Requirement hiveTableRequirementFor(ConventionTableDefinition tableDefinition)
+    public static Requirement hiveTableRequirementFor(ConventionTableDefinition tableDefinition)
     {
         DataSource dataSource = new FileBasedDataSource(tableDefinition);
         HiveTableDefinition hiveTableDefinition = hiveTableDefinition(tableDefinition.getName(), createTableDDLTemplate(tableDefinition), dataSource);
         return new ImmutableHiveTableRequirement(hiveTableDefinition);
     }
 
-    private String createTableDDLTemplate(ConventionTableDefinition conventionTableDefinition)
+    private static String createTableDDLTemplate(ConventionTableDefinition conventionTableDefinition)
     {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(conventionTableDefinition.getDdlFile()))) {
             return new FileParser().parseFile(inputStream).getContent();
@@ -34,5 +34,9 @@ public class ConventionRequirementBuilder
         catch (IOException e) {
             throw new IllegalStateException("Could not open ddl file: " + conventionTableDefinition.getDdlFile());
         }
+    }
+
+    private ConventionRequirements()
+    {
     }
 }

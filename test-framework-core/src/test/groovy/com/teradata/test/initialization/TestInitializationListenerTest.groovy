@@ -4,11 +4,7 @@
 package com.teradata.test.initialization
 
 import com.google.inject.Inject
-import com.teradata.test.AfterTestWithContext
-import com.teradata.test.BeforeTestWithContext
-import com.teradata.test.Requirement
-import com.teradata.test.RequirementsProvider
-import com.teradata.test.Requires
+import com.teradata.test.*
 import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
 import com.teradata.test.fulfillment.RequirementFulfiller
@@ -157,7 +153,7 @@ class TestInitializationListenerTest
 
   @Requires(ARequirement)
   static class TestClass
-          implements TestMethodRequirementsProvider
+          implements RequirementsProvider
   {
 
     @BeforeTestWithContext
@@ -182,14 +178,9 @@ class TestInitializationListenerTest
     }
 
     @Override
-    Requirement getRequirements(Method testMethod, Object[] parameters)
+    Requirement getRequirements()
     {
       return B_REQUIREMENT
-    }
-
-    Requirement getAllRequirements()
-    {
-      return B_REQUIREMENT;
     }
   }
 
