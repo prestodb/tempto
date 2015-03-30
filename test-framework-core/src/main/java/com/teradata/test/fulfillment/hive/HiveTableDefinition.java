@@ -6,6 +6,9 @@ package com.teradata.test.fulfillment.hive;
 
 import com.teradata.test.fulfillment.table.TableDefinition;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+
 public class HiveTableDefinition
         extends TableDefinition
 {
@@ -73,5 +76,17 @@ public class HiveTableDefinition
         {
             return new HiveTableDefinition(name, createTableDDLTemplate, dataSource);
         }
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        return reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return reflectionHashCode(this);
     }
 }
