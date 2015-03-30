@@ -14,7 +14,10 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
+import static com.google.common.collect.Iterables.any;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 public final class SqlTestsFileUtils
 {
@@ -41,9 +44,14 @@ public final class SqlTestsFileUtils
         return FilenameUtils.removeExtension(fileName);
     }
 
-    public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(String extension)
+    public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(String... extensions)
     {
-        return new ExtensionFileCollectorVisitor(extension);
+        return extensionFileCollectorVisitor(asList(extensions));
+    }
+
+    public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(List<String> extensions)
+    {
+        return new ExtensionFileCollectorVisitor(extensions);
     }
 
     private SqlTestsFileUtils()
@@ -55,18 +63,18 @@ public final class SqlTestsFileUtils
     {
 
         private final List<Path> result = newArrayList();
-        private final String extension;
+        private final List<String> extensions;
 
-        private ExtensionFileCollectorVisitor(String extension)
+        private ExtensionFileCollectorVisitor(List<String> extensions)
         {
-            this.extension = "." + extension;
+            this.extensions = extensions.stream().map((String extension) -> "." + extension).collect(toList());
         }
 
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                 throws IOException
         {
-            if (file.getFileName().toString().endsWith(extension)) {
+            if (any(extensions, (String extension) -> file.getFileName().toString().endsWith(extension))) {
                 result.add(file);
             }
             return FileVisitResult.CONTINUE;

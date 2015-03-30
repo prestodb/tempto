@@ -22,10 +22,10 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static com.teradata.test.internal.convention.ProcessUtils.execute;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -33,25 +33,24 @@ public class SqlQueryConventionBasedTest
         implements RequirementsProvider, WithName, WithTestGroups
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
-    private static final int SUCCESS_EXIT_CODE = 0;
 
     private static final String GROUPS_HEADER_PROPERTY = "groups";
     private static final Splitter GROUPS_HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final HeaderFileParser headerFileParser;
     private final String testCaseName;
-    private final Optional<File> beforeScriptFile;
-    private final Optional<File> afterScriptFile;
+    private final Optional<File> beforeScriptPath;
+    private final Optional<File> afterScriptPath;
     private final File queryFile;
     private final File resultFile;
     private final Requirement requirement;
 
-    public SqlQueryConventionBasedTest(String testCaseName, Optional<File> beforeScriptFile, Optional<File> afterScriptFile,
+    public SqlQueryConventionBasedTest(String testCaseName, Optional<File> beforeScriptPath, Optional<File> afterScriptPath,
             File queryFile, File resultFile, Requirement requirement)
     {
         this.testCaseName = testCaseName;
-        this.beforeScriptFile = beforeScriptFile;
-        this.afterScriptFile = afterScriptFile;
+        this.beforeScriptPath = beforeScriptPath;
+        this.afterScriptPath = afterScriptPath;
         this.queryFile = queryFile;
         this.resultFile = resultFile;
         this.requirement = requirement;
@@ -60,12 +59,12 @@ public class SqlQueryConventionBasedTest
 
     @Test
     public void test()
-            throws IOException, InterruptedException
+            throws IOException
     {
         LOGGER.debug("Executing sql test: {}", getTestName());
 
-        if (beforeScriptFile.isPresent()) {
-            execute(beforeScriptFile.get());
+        if (beforeScriptPath.isPresent()) {
+            execute(beforeScriptPath.get().toString());
         }
 
         ParsingResult parsedQueryFile = headerFileParser.parseFile(queryFile);
@@ -86,8 +85,8 @@ public class SqlQueryConventionBasedTest
             queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
         }
 
-        if (afterScriptFile.isPresent()) {
-            execute(afterScriptFile.get());
+        if (afterScriptPath.isPresent()) {
+            execute(afterScriptPath.get().toString());
         }
     }
 
@@ -114,14 +113,6 @@ public class SqlQueryConventionBasedTest
         catch (IOException e) {
             throw new RuntimeException("cannot parse query file", e);
         }
-    }
-
-    private void execute(File file)
-            throws IOException, InterruptedException
-    {
-        Process process = Runtime.getRuntime().exec(file.toString());
-        process.waitFor();
-        checkState(process.exitValue() == SUCCESS_EXIT_CODE, file.toString() + " exited with status code: " + process.exitValue());
     }
 
     private QueryExecutor getQueryExecutor(ParsingResult queryFile)
