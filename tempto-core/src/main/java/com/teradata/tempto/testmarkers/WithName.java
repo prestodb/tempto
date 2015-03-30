@@ -12,19 +12,16 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention;
+package com.teradata.tempto.testmarkers;
 
-import com.teradata.tempto.ProductTest;
-import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.testmarkers.WithName;
-import com.teradata.tempto.testmarkers.WithTestGroups;
+import org.testng.ITest;
 
-public abstract class ConventionBasedTest
-        extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
+/**
+ * Marker interface for test classes which explicitly define dest name.
+ */
+public interface WithName
+        extends ITest
 {
-    public abstract void test();
-
-
-
+    @Override
+    String getTestName();
 }

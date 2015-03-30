@@ -15,7 +15,6 @@
 package com.teradata.tempto.internal.listeners;
 
 import com.google.common.base.Joiner;
-import com.teradata.tempto.internal.TestInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -35,6 +34,13 @@ public class ProgressLoggingListener
     private int failed;
     private long testStartTime;
 
+    private final TestMetadataReader testMetadataReader;
+
+    public ProgressLoggingListener()
+    {
+        this.testMetadataReader = new TestMetadataReader();
+    }
+
     @Override
     public void onStart(ITestContext context)
     {
@@ -44,12 +50,13 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");
         started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, getMethodsCountFromContext(testCase.getTestContext()), new TestInfo(testCase).getShortTestId(), Joiner.on(", ").join(testCase.getMethod().getGroups()));
+                started, getMethodsCountFromContext(testCase.getTestContext()), testMetadata.testName, Joiner.on(", ").join(testMetadata.testGroups));
     }
 
 

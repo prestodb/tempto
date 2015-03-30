@@ -17,23 +17,25 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.initialization.AutoModuleProvider;
-import com.teradata.tempto.internal.TestInfo;
 import com.teradata.tempto.initialization.TestMethodModuleProvider;
+import com.teradata.tempto.internal.listeners.TestMetadata;
+import com.teradata.tempto.internal.listeners.TestMetadataReader;
 import org.testng.ITestResult;
 
 @AutoModuleProvider
 public class TestMethodInfoModuleProvider
         implements TestMethodModuleProvider
 {
+    private final TestMetadataReader testMetadataReader = new TestMetadataReader();
     public Module getModule(Configuration configuration, ITestResult testResult)
     {
-        TestInfo testInfo = new TestInfo(testResult);
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testResult);
         return new AbstractModule()
         {
             @Override
             protected void configure()
             {
-                bind(TestInfo.class).toInstance(testInfo);
+                bind(TestMetadata.class).toInstance(testMetadata);
             }
         };
     }

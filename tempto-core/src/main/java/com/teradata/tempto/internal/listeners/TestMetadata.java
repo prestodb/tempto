@@ -12,19 +12,20 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention;
+package com.teradata.tempto.internal.listeners;
 
-import com.teradata.tempto.ProductTest;
-import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.testmarkers.WithName;
-import com.teradata.tempto.testmarkers.WithTestGroups;
+import java.util.Set;
 
-public abstract class ConventionBasedTest
-        extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.copyOf;
+
+public class TestMetadata
 {
-    public abstract void test();
+    public final Set<String> testGroups;
+    public final String testName;
 
-
-
+    public TestMetadata(Set<String> testGroups, String testName) {
+        this.testGroups = copyOf(checkNotNull(testGroups, "testGroups can not be null"));
+        this.testName = checkNotNull(testName, "testName can not be null");
+    }
 }

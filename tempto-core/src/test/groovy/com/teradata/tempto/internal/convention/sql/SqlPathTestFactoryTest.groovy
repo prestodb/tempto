@@ -54,13 +54,14 @@ class SqlPathTestFactoryTest
     Path testPath = getPathForConventionTest("-- requires: ${DummyRequirementsProvider1.class.name}; groups:foo")
 
     when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+    String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
 
     then:
     conventionBasedTests.size() == 1
     containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
-    conventionBasedTests.get(0).testCaseName() == FilenameUtils.getBaseName(testPath.getFileName().toString()) + '_1'
-    conventionBasedTests.get(0).testGroups() == ['foo']
+    conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}" as String
+    conventionBasedTests.get(0).testGroups == ['foo'] as Set
   }
 
   def shouldUseSectionNameAsTestName()
@@ -69,11 +70,12 @@ class SqlPathTestFactoryTest
     Path testPath = getPathForConventionTest("-- name:foo_boo")
 
     when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+    String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
 
     then:
     conventionBasedTests.size() == 1
-    conventionBasedTests.get(0).testCaseName() == 'foo_boo'
+    conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}.foo_boo" as String
   }
 
   def shouldCreateTestsWithMultipleSections()
@@ -93,16 +95,17 @@ query 2 result
 """, Optional.empty())
 
     when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+    String testFileBaseName = FilenameUtils.getBaseName(testPath.getFileName().toString())
 
     then:
     conventionBasedTests.size() == 2
 
-    conventionBasedTests.get(0).testCaseName() == 'query_1'
+    conventionBasedTests.get(0).testName == "tests.prefix.${testFileBaseName}.query_1" as String
     containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
     containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement2)
 
-    conventionBasedTests.get(1).testCaseName() == 'query_2'
+    conventionBasedTests.get(1).testName == "tests.prefix.${testFileBaseName}.query_2" as String
     containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement1)
     !containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement2)
   }
@@ -118,19 +121,6 @@ query 2 result
     then:
     RuntimeException ex = thrown()
     ex.message == 'Unable to find specified class: not.existing.Requirement'
-  }
-
-  def shouldFailInvalidQueryName()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("-- name: query^")
-
-    when:
-    sqlPathTestFactory.createTestsForPath(testPath, '', null)
-
-    then:
-    IllegalArgumentException e = thrown()
-    e.message == 'Not a valid Java identifier: query^'
   }
 
   def shouldFailNoResultsFile()

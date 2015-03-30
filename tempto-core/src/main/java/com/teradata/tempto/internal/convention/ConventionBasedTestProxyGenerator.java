@@ -14,7 +14,9 @@
 
 package com.teradata.tempto.internal.convention;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.configuration.Configuration;
 import net.bytebuddy.ByteBuddy;
@@ -28,11 +30,12 @@ import org.testng.annotations.Test;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
+import static java.lang.Character.isAlphabetic;
 import static java.lang.ClassLoader.getSystemClassLoader;
-import static org.apache.commons.lang3.StringUtils.replace;
-import static org.apache.commons.lang3.text.WordUtils.capitalize;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -55,7 +58,7 @@ public class ConventionBasedTestProxyGenerator
     {
         try {
             String className = generatedClassName(conventionBasedTest);
-            String methodName = conventionBasedTest.testCaseName();
+            String methodName = generatedMethodName(conventionBasedTest);
             TestAnnotationImpl testAnnotationImpl = new TestAnnotationImpl(conventionBasedTest);
 
             DynamicType.Unloaded<ConventionBasedTestProxy> dynamicType = new ByteBuddy()
@@ -81,7 +84,23 @@ public class ConventionBasedTestProxyGenerator
 
     private String generatedClassName(ConventionBasedTest conventionBasedTest)
     {
-        return testPackage + "." + capitalize(replace(conventionBasedTest.testName(), "-", "_"));
+        List<String> testNameParts = Splitter.on('.').splitToList(conventionBasedTest.getTestName());
+        return testPackage + "." + toJavaSymbol(testNameParts.get(testNameParts.size() - 2));
+    }
+
+    private String generatedMethodName(ConventionBasedTest conventionBasedTest)
+    {
+        List<String> testNameParts = Splitter.on('.').splitToList(conventionBasedTest.getTestName());
+        return toJavaSymbol(Iterables.getLast(testNameParts));
+    }
+
+    private String toJavaSymbol(String s)
+    {
+        String javaSymbol = s.replaceAll("[^A-Za-z0-9_]", "_");
+        if (!isAlphabetic(javaSymbol.charAt(0))) {
+            javaSymbol = "_" + javaSymbol;
+        }
+        return javaSymbol;
     }
 
     public static class ConventionBasedTestProxy
@@ -102,21 +121,15 @@ public class ConventionBasedTestProxyGenerator
         }
 
         @Override
-        public String testName()
+        public String getTestName()
         {
-            return delegate.testName();
+            return delegate.getTestName();
         }
 
         @Override
-        public String testCaseName()
+        public Set<String> getTestGroups()
         {
-            return delegate.testCaseName();
-        }
-
-        @Override
-        public String[] testGroups()
-        {
-            return delegate.testGroups();
+            return delegate.getTestGroups();
         }
 
         @Override
@@ -140,7 +153,8 @@ public class ConventionBasedTestProxyGenerator
         @Override
         public String[] groups()
         {
-            return conventionBasedTest.testGroups();
+            Set<String> testGroups = conventionBasedTest.getTestGroups();
+            return testGroups.toArray(new String[testGroups.size()]);
         }
 
         @Override
