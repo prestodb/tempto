@@ -14,7 +14,11 @@
 
 package com.teradata.tempto.runner;
 
+import com.google.common.base.Joiner;
 import com.teradata.tempto.internal.configuration.TestConfigurationFactory;
+import com.teradata.tempto.internal.listeners.TestMetadataReader;
+import com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector;
+import jdk.nashorn.internal.runtime.options.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.TestNG;
@@ -25,6 +29,8 @@ import org.testng.xml.XmlTest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.singletonList;
 
@@ -54,11 +60,31 @@ public class TemptoRunner
         }
 
         XmlSuite testSuite = getXmlSuite();
-        System.setProperty(TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY, options.getConfigFile());
-        System.setProperty(TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY, options.getConfigFileLocal());
+        setupTestsConfiguration();
         TestNG testNG = new TestNG();
         testNG.setXmlSuites(singletonList(testSuite));
+        setupTestsFiltering(testNG);
         testNG.run();
+    }
+
+    private void setupTestsConfiguration()
+    {
+        System.setProperty(TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY, options.getConfigFile());
+        System.setProperty(TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY, options.getConfigFileLocal());
+    }
+
+    private void setupTestsFiltering(TestNG testNG)
+    {
+        if (!options.getTestGroups().isEmpty()) {
+            System.setProperty(TestNameGroupNameMethodSelector.TEST_GROUPS_TO_RUN_PROPERTY, Joiner.on(',').join(options.getTestGroups()));
+        }
+        if (!options.getExcludeGroups().isEmpty()) {
+            System.setProperty(TestNameGroupNameMethodSelector.TEST_GROUPS_TO_EXCLUDE_PROPERTY, Joiner.on(',').join(options.getExcludeGroups()));
+        }
+        if (!options.getTests().isEmpty()) {
+            System.setProperty(TestNameGroupNameMethodSelector.TEST_NAMES_TO_RUN_PROPERTY, Joiner.on(',').join(options.getTests()));
+        }
+        testNG.addMethodSelector("com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector", 20);
     }
 
     private XmlSuite getXmlSuite()
@@ -74,13 +100,6 @@ public class TemptoRunner
         List<XmlPackage> testPackages = new ArrayList<>();
         testPackages.add(testPackage);
         test.setPackages(testPackages);
-        if (!options.getTestGroups().isEmpty()) {
-            test.setIncludedGroups(new ArrayList<>(options.getTestGroups()));
-        }
-        if (!options.getExcludeGroups().isEmpty()) {
-            test.setExcludedGroups(new ArrayList<>(options.getExcludeGroups()));
-        }
-
         XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.internal.convention.ConventionBasedTestFactory");
         List<XmlClass> classes = new ArrayList<>();
         classes.add(conventionBasedTestsClass);

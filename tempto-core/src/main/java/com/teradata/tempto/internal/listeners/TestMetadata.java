@@ -12,19 +12,17 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention;
+package com.teradata.tempto.internal.listeners;
 
-import com.teradata.tempto.ProductTest;
-import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.testmarkers.WithName;
-import com.teradata.tempto.testmarkers.WithTestGroups;
+import java.util.Set;
 
-public abstract class ConventionBasedTest
-        extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
+public class TestMetadata
 {
-    public abstract void test();
+    public final Set<String> testGroups;
+    public final String testName;
 
-
-
+    public TestMetadata(Set<String> testGroups, String testName) {
+        this.testGroups = testGroups;
+        this.testName = testName;
+    }
 }

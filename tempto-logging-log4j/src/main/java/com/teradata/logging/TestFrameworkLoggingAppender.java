@@ -20,7 +20,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.google.inject.ConfigurationException;
 import com.teradata.tempto.context.TestContext;
-import com.teradata.tempto.internal.TestInfo;
+import com.teradata.tempto.internal.listeners.TestMetadata;
 import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Logger;
@@ -145,15 +145,15 @@ public class TestFrameworkLoggingAppender
         try {
             String testName = "SUITE";
             if (testContext.isPresent()) {
-                Optional<TestInfo> testInfo = testContext.get().getOptionalDependency(TestInfo.class);
-                if (testInfo.isPresent()) {
-                    testName = testInfo.get().getLongTestId();
+                Optional<TestMetadata> testMetadata = testContext.get().getOptionalDependency(TestMetadata.class);
+                if (testMetadata.isPresent()) {
+                    testName = testMetadata.get().testName;
                 }
             }
             return Optional.of(logsDirectory + "/" + testName);
         }
         catch (ConfigurationException e) {
-            System.err.append("Could not load TestInfo");
+            System.err.append("Could not load TestMetadata from guice context");
             return Optional.empty();
         }
     }

@@ -14,15 +14,18 @@
 
 package com.teradata.tempto.internal.logging;
 
-import com.teradata.tempto.internal.TestInfo;
+import com.teradata.tempto.internal.listeners.TestMetadata;
+import com.teradata.tempto.internal.listeners.TestMetadataReader;
 import org.testng.ITestResult;
 
 public class LoggingMdcHelper
 {
     private static final String MDC_TEST_ID_KEY = "test_id";
+    private static final TestMetadataReader testMetadataReader = new TestMetadataReader();
 
     public static void setupLoggingMdcForTest(ITestResult testCase) {
-        String testId = new TestInfo(testCase).getShortTestId();
+        TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
+        String testId = testMetadata.testName;
         org.slf4j.MDC.put("test_id", testId);
     }
 

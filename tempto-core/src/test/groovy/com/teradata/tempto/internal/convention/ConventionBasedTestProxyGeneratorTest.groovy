@@ -39,7 +39,16 @@ class ConventionBasedTestProxyGeneratorTest
     SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(section(testFile))
     SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(section(testFile))
     Requirement requirement = Mock(Requirement)
-    ConventionBasedTest testInstance = new SqlQueryConventionBasedTest(Optional.empty(), Optional.empty(), testFile, 1, queryDescriptor, resultDescriptor, requirement)
+    ConventionBasedTest testInstance = new SqlQueryConventionBasedTest(
+            Optional.empty(),
+            Optional.empty(),
+            testFile,
+            "test.prefix",
+            1,
+            5,
+            queryDescriptor,
+            resultDescriptor,
+            requirement)
 
     ConventionBasedTest proxiedTest = proxyGenerator.generateProxy(testInstance)
     Class<ConventionBasedTest> proxiedClass = proxiedTest.getClass()
