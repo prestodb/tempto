@@ -2,9 +2,9 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
-apply plugin: "idea"
-apply plugin: "java"
-apply plugin: "groovy"
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'groovy'
 
 plugins.withType(JavaPlugin) {
   sourceCompatibility = 1.8
@@ -19,7 +19,7 @@ buildscript {
       url 'http://phabricator.td.teradata.com:8081/nexus/content/groups/hadapt-deps'
     }
     maven {
-      url "http://phabricator.td.teradata.com:8081/nexus/content/repositories/build/"
+      url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/build/'
     }
   }
   repositories teradataNexusRepositories
@@ -78,9 +78,9 @@ ext.libraries = [
         presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}"
 ]
 
-ext.test_framework_core = project(":test-framework-core")
-ext.test_framework_examples = project(":test-framework-examples")
-ext.test_framework_hive_jdbc = project(":test-framework-hive-jdbc")
+ext.test_framework_core = project(':test-framework-core')
+ext.test_framework_examples = project(':test-framework-examples')
+ext.third_party_deps = project(':third-party-deps')
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'

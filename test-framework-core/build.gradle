@@ -2,9 +2,9 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
-apply plugin: "java"
-apply plugin: "groovy"
-apply plugin: "maven-publish"
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 dependencies {
   compile libraries.assertj
@@ -20,29 +20,23 @@ dependencies {
   compile libraries.ioutils
   compile libraries.tpchgen
   compile libraries.jsonpath
-
-  // todo separate out to different module
-  compile libraries.presto_jdbc
+  compile(libraries.reportng) {
+    exclude group: 'org.testng', module: 'testng'
+  }
 
   testCompile libraries.spock
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
-
-  runtime(libraries.reportng) {
-    exclude group: "org.testng", module: "testng"
-  }
 }
 
 task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = "all"
+  appendix = 'all'
   from sourceSets.main.output
-  from { configurations.runtime.collect {
-    it.isDirectory() ? it : zipTree(it)
-  } }
+  from {configurations.runtime.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
 }
-
-build.dependsOn.add(buildFatJar)
-build.dependsOn.add(':test-framework-hive-jdbc:buildFatJar')
 
 publishing {
   publications {
@@ -55,3 +49,5 @@ publishing {
     }
   }
 }
+
+build.dependsOn.add(buildFatJar)

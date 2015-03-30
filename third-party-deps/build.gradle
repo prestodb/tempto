@@ -1,0 +1,33 @@
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
+ */
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+configurations {
+  hiveJdbcFatJar
+  provided
+}
+
+dependencies {
+  hiveJdbcFatJar libraries.hive_jdbc
+  provided libraries.presto_jdbc
+  provided (libraries.hadoop_core) {transitive=false}
+}
+
+task hiveJdbcFatJar(type: Jar, dependsOn: clean) {
+  baseName = 'hive-jdbc-fat'
+  from {
+    configurations.hiveJdbcFatJar.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
+}
+
+task copyProvidedDeps(type: Copy, dependsOn: hiveJdbcFatJar) {
+  from configurations.provided
+  into ("$buildDir/libs")
+}
+
+build.dependsOn.add([hiveJdbcFatJar, copyProvidedDeps ])
