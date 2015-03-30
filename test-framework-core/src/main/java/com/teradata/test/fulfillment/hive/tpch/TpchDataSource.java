@@ -5,8 +5,7 @@
 package com.teradata.test.fulfillment.hive.tpch;
 
 import com.teradata.test.fulfillment.hive.DataSource;
-import com.teradata.test.tpch.IterableTpchEntityInputStream;
-import com.teradata.test.tpch.TpchTable;
+import com.teradata.test.internal.fulfillment.hive.tpch.IterableTpchEntityInputStream;
 
 import java.io.InputStream;
 

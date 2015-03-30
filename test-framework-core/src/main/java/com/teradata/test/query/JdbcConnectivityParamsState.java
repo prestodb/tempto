@@ -4,7 +4,6 @@
 package com.teradata.test.query;
 
 import com.teradata.test.context.State;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Optional;
 

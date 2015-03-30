@@ -4,6 +4,8 @@
 
 package com.teradata.test.fulfillment.hive
 
+import com.teradata.test.internal.fulfillment.hive.HiveDataSourceWriter
+import com.teradata.test.internal.fulfillment.hive.HiveTablesFulfiller
 import com.teradata.test.query.QueryExecutor
 import spock.lang.Specification
 

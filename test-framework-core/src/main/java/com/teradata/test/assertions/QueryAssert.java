@@ -5,7 +5,7 @@
 package com.teradata.test.assertions;
 
 import com.teradata.test.query.QueryResult;
-import com.teradata.test.query.QueryResultValueComparator;
+import com.teradata.test.internal.query.QueryResultValueComparator;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 

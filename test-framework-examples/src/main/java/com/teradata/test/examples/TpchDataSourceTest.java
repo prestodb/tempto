@@ -5,27 +5,22 @@
 package com.teradata.test.examples;
 
 import com.teradata.test.ProductTest;
-import com.teradata.test.Requirement;
-import com.teradata.test.RequirementsProvider;
-import com.teradata.test.Requires;
+import com.teradata.test.internal.fulfillment.hive.tpch.IterableTpchEntityInputStream;
 import com.teradata.test.fulfillment.hive.tpch.TpchDataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
-import com.teradata.test.tpch.IterableTpchEntityInputStream;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
+import static com.teradata.test.fulfillment.hive.tpch.TpchTable.NATION;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
-import static com.teradata.test.requirements.TableRequirements.table;
-import static com.teradata.test.tpch.TpchTable.NATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TpchDataSourceTest
         extends ProductTest
 {
 
-    @Requires(BaseProductTestRequirements.class)
     @Test(groups = "example_smoketest")
     public void testDataSource()
             throws IOException
@@ -44,16 +39,5 @@ public class TpchDataSourceTest
         String storedData = hdfsClient.loadFile(path + "/data", hdfsUsername);
 
         assertThat(expectedData).isEqualTo(storedData);
-    }
-
-    public static class BaseProductTestRequirements
-            implements RequirementsProvider
-    {
-
-        @Override
-        public Requirement getRequirements()
-        {
-            return table("dummy table");
-        }
     }
 }

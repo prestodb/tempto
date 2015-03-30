@@ -17,7 +17,7 @@ import zipfile
 ) = range(0, 4)
 
 
-PACKAGE_PREFIX = 'com.teradata.test'
+PACKAGE_PREFIX = 'com.teradata.test.internal'
 
 LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
 ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'

@@ -7,7 +7,6 @@ package com.teradata.test.fulfillment;
 import com.teradata.test.Requirement;
 import com.teradata.test.context.State;
 
-import java.util.List;
 import java.util.Set;
 
 public interface RequirementFulfiller

@@ -6,7 +6,6 @@ package com.teradata.test.fulfillment.hive.tpch;
 
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
-import com.teradata.test.tpch.TpchTable;
 
 import java.util.List;
 

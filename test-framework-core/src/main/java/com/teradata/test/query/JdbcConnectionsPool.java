@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
-import static com.teradata.test.query.JdbcUtils.dataSource;
+import static com.teradata.test.internal.query.JdbcUtils.dataSource;
 
 public class JdbcConnectionsPool
 {
