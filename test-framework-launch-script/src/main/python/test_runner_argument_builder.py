@@ -29,9 +29,22 @@ class TestRunnerArgumentBuilder(object):
         return ''
 
     @property
-    def methods_argument(self):
-        if self.__args.methods is not None:
-            return '-methods ' + self.__args.methods
+    def test_names_system_property(self):
+        if self.__args.test_names is not None:
+            return '-Dcom.teradata.test.names=' + self.__args.test_names
+        return ''
+
+    @property
+    def groups_system_property(self):
+        groups_or_suites = self.__groups_or_suites_string()
+        if groups_or_suites is not None:
+            return '-Dcom.teradata.test.groups=' + groups_or_suites
+        return ''
+
+    @property
+    def exclude_groups_system_property(self):
+        if self.__args.excluded_groups:
+            return '-Dcom.teradata.test.exclude_groups=' + ','.join(self.__args.excluded_groups)
         return ''
 
     @property
@@ -40,18 +53,7 @@ class TestRunnerArgumentBuilder(object):
             return '-testclass ' + self.__args.classes
         return ''
 
-    @property
-    def excluded_groups_argument(self):
-        if self.__args.excluded_groups:
-            return '-excludegroups ' + ','.join(self.__args.excluded_groups)
-        return ''
 
-    @property
-    def groups_argument(self):
-        groups_or_suites = self.__groups_or_suites_string()
-        if groups_or_suites is not None:
-            return '-groups ' + groups_or_suites
-        return ''
 
     @property
     def testng_verbosity(self):
@@ -72,7 +74,7 @@ class TestRunnerArgumentBuilder(object):
 
     @property
     def suite_xml_if_no_classes_methods(self):
-        if self.classes_argument is '' and self.methods_argument is '':
+        if self.classes_argument is '':
             suite_xml_path = tempfile.mktemp(suffix='.xml')
             with open(os.path.join(framework_root(), 'src/main/resources/all-testng-template.xml'), 'r') as template_xml_file:
                 template_xml = Template(template_xml_file.read())
@@ -87,7 +89,6 @@ class TestRunnerArgumentBuilder(object):
             self.__logs_collection_string(),
             self.__test_configuration_argument()
         ])
-
 
     def __test_configuration_argument(self):
         if self.__args.test_configuration is not None:

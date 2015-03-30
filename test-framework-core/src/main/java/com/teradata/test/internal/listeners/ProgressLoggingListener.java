@@ -24,6 +24,13 @@ public class ProgressLoggingListener
     private int failed;
     private long testStartTime;
 
+    private final TestMetadataReader testMetadataReader;
+
+    public ProgressLoggingListener()
+    {
+        this.testMetadataReader = new TestMetadataReader();
+    }
+
     @Override
     public void onStart(ITestContext context)
     {
@@ -34,12 +41,13 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
+        TestMetadataReader.TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
         testStartTime = System.currentTimeMillis();
-        String qualifiedTestName = testCase.getInstanceName() + "." + testCase.getName();
+
         LOGGER.info("");
         started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, total, qualifiedTestName, Joiner.on(", ").join(testCase.getMethod().getGroups()));
+                started, total, testMetadata.testName, Joiner.on(", ").join(testMetadata.testGroups));
     }
 
     @Override

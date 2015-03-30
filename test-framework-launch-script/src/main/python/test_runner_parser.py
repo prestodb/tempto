@@ -127,13 +127,13 @@ class TestRunnerParser(object):
         )
 
         test_selection_arguments.add_argument(
-            '--methods', '-M',
-            metavar='METHODS',
-            dest='methods',
+            '--tests', '-T',
+            metavar='TESTS',
+            dest='test_names',
             type=lambda value : value.replace("#", "."),
-            help='A comma-separated list of test methods to be executed, case-sensitive, fully-qualified. ' +
-                 '\'#\' chars will be replaced by \'.\' chars, so all following arguments will be interpreted ' +
-                 'exactly the same way: "module.class.method" "module#class#method" "module.class#method"'
+            help='A comma-separated list of test names to be executed. Test is executed if its name is ends with one of test_names passed' +
+                 'as parameter. For standard Java based tests test name is fully qualified method name (a.b.c.Class.method).' +
+                 'For convention based sql tests test name is sql_query_test.<test_dir_name>.<sql_file_without_extension>.'
         )
 
         test_selection_arguments.add_argument(

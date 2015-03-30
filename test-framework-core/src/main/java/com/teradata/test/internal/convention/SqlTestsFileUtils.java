@@ -4,6 +4,8 @@
 
 package com.teradata.test.internal.convention;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -32,6 +34,11 @@ public final class SqlTestsFileUtils
     public static String changeExtension(String extension, String fileName)
     {
         return fileName.substring(0, fileName.lastIndexOf(".")) + '.' + extension;
+    }
+
+    public static String trimExtension(String fileName)
+    {
+        return FilenameUtils.removeExtension(fileName);
     }
 
     public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(String extension)

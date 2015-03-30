@@ -30,6 +30,7 @@ import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.internal.convention.ConventionRequirements.hiveTableRequirementFor;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.extensionFileCollectorVisitor;
+import static com.teradata.test.internal.convention.SqlTestsFileUtils.trimExtension;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -134,9 +135,14 @@ public class SqlQueryConventionBasedTestFactory
         File afterScripFile = testMethodPath.getParent().resolve(AFTER_SCRIPT_NAME).toFile();
         Optional<File> optionalAfterScriptFile = afterScripFile.isFile() ? Optional.of(afterScripFile) : Optional.<File>empty();
 
-        String testName = testMethodPath.getParent().getFileName().toString();
+        String testName = buildTestName(testMethodFile);
         Requirement requirement = getRequirements(conventionTableDefinitions);
         return new SqlQueryConventionBasedTest(testName, optionalBeforeScriptFile, optionalAfterScriptFile, testMethodFile, testMethodResult, requirement);
+    }
+
+    private String buildTestName(File testMethodFile)
+    {
+        return "sql_query_test." + testMethodFile.getParentFile().getName() + "." + trimExtension(testMethodFile.getName());
     }
 
     private Requirement getRequirements(List<ConventionTableDefinition> conventionTableDefinitions)

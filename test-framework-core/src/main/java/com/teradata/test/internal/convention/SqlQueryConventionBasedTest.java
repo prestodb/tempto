@@ -4,6 +4,7 @@
 
 package com.teradata.test.internal.convention;
 
+import com.google.common.collect.ImmutableSet;
 import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
@@ -11,8 +12,9 @@ import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.internal.convention.FileParser.ParsingResult;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
+import com.teradata.test.testmarkers.WithName;
+import com.teradata.test.testmarkers.WithTestGroups;
 import org.slf4j.Logger;
-import org.testng.ITest;
 import org.testng.annotations.Test;
 
 import java.io.BufferedInputStream;
@@ -21,15 +23,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static java.util.Collections.emptySet;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
         extends ProductTest
-        implements RequirementsProvider, ITest
+        implements RequirementsProvider, WithName, WithTestGroups
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
     private static final int SUCCESS_EXIT_CODE = 0;
@@ -54,7 +58,7 @@ public class SqlQueryConventionBasedTest
         this.fileParser = new FileParser();
     }
 
-    @Test(groups = "sql_tests")
+    @Test
     public void test()
             throws IOException, InterruptedException
     {
@@ -104,8 +108,15 @@ public class SqlQueryConventionBasedTest
         return testCaseName;
     }
 
-    private void execute(File file)
-            throws IOException, InterruptedException
+    @Override
+    public Set<String> getTestGroups()
+    {
+        // TODO
+        return ImmutableSet.of("sql_tests");
+    }
+
+private void execute(File file)
+        throws IOException, InterruptedException
     {
         Process process = Runtime.getRuntime().exec(file.toString());
         process.waitFor();
