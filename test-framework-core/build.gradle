@@ -4,6 +4,7 @@
 
 apply plugin: "java"
 apply plugin: "groovy"
+apply plugin: "maven-publish"
 
 dependencies {
   compile libraries.assertj
@@ -42,3 +43,15 @@ task buildFatJar(type: Jar, dependsOn: assemble) {
 
 build.dependsOn.add(buildFatJar)
 build.dependsOn.add(':test-framework-hive-jdbc:buildFatJar')
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId 'com.teradata.test'
+      artifactId 'test-framework-core'
+      version '1.0'
+
+      from components.java
+    }
+  }
+}
