@@ -51,6 +51,7 @@ public class QueryResultValueComparator
             case CHAR:
             case VARCHAR:
             case LONGVARCHAR:
+            case LONGNVARCHAR:
                 return stringsEqual(actual, expected);
             case BINARY:
             case VARBINARY:
@@ -122,7 +123,8 @@ public class QueryResultValueComparator
         if (isFloatingPointValue(actual) && isFloatingPointValue(expected)) {
             Double actualDouble = Double.valueOf(actual.toString());
             Double expectedDouble = Double.valueOf(expected.toString());
-            return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, DOUBLE_FUZZY_MATCH_THRESHOLD);
+            Double threshold = expectedDouble * DOUBLE_FUZZY_MATCH_THRESHOLD;
+            return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, threshold);
         }
         return -1;
     }

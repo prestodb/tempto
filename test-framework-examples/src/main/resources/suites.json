@@ -4,6 +4,8 @@
     "smoketest": [
         "example_smoketest",
         "example_smoketest_empty",
-        "sql_tests"
+        "sql_tests",
+        "tpch",
+        "quarantine"
     ]
 }

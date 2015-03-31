@@ -126,7 +126,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected <0> column of type <VARCHAR>, but was <INTEGER>'
+    e.message == 'Expected <0> column of type <VARCHAR>, but was <INTEGER>, actual columns: [INTEGER, VARCHAR, VARCHAR]'
   }
 
   def 'hasColumns'()
@@ -212,7 +212,7 @@ public class QueryAssertTest
     then:
     def e = thrown(AssertionError)
     e.message == 'Not equal rows:\n' +
-            '1 - expected: [2, ARGENTINA, valid_value], actual: [2, ARGENTINA, SOUTH AMERICA]'
+            '1 - expected: <2|ARGENTINA|valid_value|>\n1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'
   }
 
   def 'hasRowsInOrder - different order'()
@@ -227,8 +227,8 @@ public class QueryAssertTest
     then:
     def e = thrown(AssertionError)
     e.message == 'Not equal rows:\n' +
-            '0 - expected: [2, ARGENTINA, SOUTH AMERICA], actual: [1, ALGERIA, AFRICA]\n' +
-            '1 - expected: [1, ALGERIA, AFRICA], actual: [2, ARGENTINA, SOUTH AMERICA]'
+            '0 - expected: <2|ARGENTINA|SOUTH AMERICA|>\n0 - actual:   <1|ALGERIA|AFRICA|>\n' +
+            '1 - expected: <1|ALGERIA|AFRICA|>\n1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'
   }
 
   def 'hasRowsInOrder'()

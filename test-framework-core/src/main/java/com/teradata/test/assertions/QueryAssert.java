@@ -4,12 +4,14 @@
 
 package com.teradata.test.assertions;
 
-import com.teradata.test.query.QueryResult;
 import com.teradata.test.internal.query.QueryResultValueComparator;
+import com.teradata.test.query.QueryResult;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
 import java.sql.JDBCType;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -23,6 +25,8 @@ import static com.teradata.test.query.QueryResult.toSqlIndex;
 public class QueryAssert
         extends AbstractAssert<QueryAssert, QueryResult>
 {
+
+    private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("#0.00000000000");
 
     private final List<Comparator<Object>> columnComparators;
 
@@ -65,7 +69,7 @@ public class QueryAssert
             JDBCType actualType = actual.getColumnType(toSqlIndex(i));
 
             if (!actualType.equals(expectedType)) {
-                failWithMessage("Expected <%s> column of type <%s>, but was <%s>", i, expectedType, actualType);
+                failWithMessage("Expected <%s> column of type <%s>, but was <%s>, actual columns: %s", i, expectedType, actualType, actual.getColumnTypes());
             }
         }
         return this;
@@ -144,13 +148,31 @@ public class QueryAssert
         StringBuilder msg = new StringBuilder("Not equal rows:");
         for (int i = 0; i < unequalRowsIndexes.size(); ++i) {
             int unequalRowIndex = unequalRowsIndexes.get(i);
-            msg.append('\n').append(unequalRowIndex)
-                    .append(" - expected: ")
-                    .append(rows.get(unequalRowIndex).getValues())
-                    .append(", actual: ")
-                    .append(actual.row(unequalRowIndex));
+            msg.append('\n');
+            msg.append(unequalRowIndex);
+            msg.append(" - expected: ");
+            formatRow(msg, rows.get(unequalRowIndex).getValues());
+            msg.append('\n');
+            msg.append(unequalRowIndex);
+            msg.append(" - actual:   ");
+            formatRow(msg, actual.row(unequalRowIndex));
         }
         return msg.toString();
+    }
+
+    private void formatRow(StringBuilder msg, List<Object> rowValues)
+    {
+        msg.append('<');
+        for (Object rowValue : rowValues) {
+            if (rowValue instanceof Double || rowValue instanceof Float) {
+                msg.append(DECIMAL_FORMAT.format(rowValue));
+            }
+            else if (rowValue != null) {
+                msg.append(rowValue.toString());
+            }
+            msg.append('|');
+        }
+        msg.append('>');
     }
 
     private boolean containsRow(List<Object> expectedRow)

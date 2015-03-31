@@ -45,12 +45,12 @@ public class TpchTableDefinitions
                             "CREATE TABLE part(" +
                             "   p_partkey     INT," +
                             "   p_name        STRING," +
-                            "   p_mfgr        CHAR(25)," +
-                            "   p_brand       CHAR(10)," +
+                            "   p_mfgr        STRING," +
+                            "   p_brand       STRING," +
                             "   p_type        STRING," +
                             "   p_size        INT," +
-                            "   p_container   CHAR(10)," +
-                            "   p_retailprice DECIMAL(15,2)," +
+                            "   p_container   STRING," +
+                            "   p_retailprice DOUBLE," +
                             "   p_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '{0}'")
@@ -63,11 +63,11 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE TABLE supplier(" +
                             "   s_suppkey     INT," +
-                            "   s_name        CHAR(25)," +
+                            "   s_name        STRING," +
                             "   s_address     STRING," +
                             "   s_nationkey   INT," +
-                            "   s_phone       CHAR(15)," +
-                            "   s_acctbal     DECIMAL(15,2)," +
+                            "   s_phone       STRING," +
+                            "   s_acctbal     DOUBLE," +
                             "   s_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '{0}'")
@@ -82,7 +82,7 @@ public class TpchTableDefinitions
                             "   ps_partkey     INT," +
                             "   ps_suppkey     INT," +
                             "   ps_availqty    INT," +
-                            "   ps_supplycost  DECIMAL(15,2)," +
+                            "   ps_supplycost  DOUBLE," +
                             "   ps_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '{0}'")
@@ -98,9 +98,9 @@ public class TpchTableDefinitions
                             "   c_name        STRING," +
                             "   c_address     STRING," +
                             "   c_nationkey   INT," +
-                            "   c_phone       CHAR(15)," +
-                            "   c_acctbal     DECIMAL(15,2)  ," +
-                            "   c_mktsegment  CHAR(10)," +
+                            "   c_phone       STRING," +
+                            "   c_acctbal     DOUBLE  ," +
+                            "   c_mktsegment  STRING," +
                             "   c_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '{0}'")
@@ -114,11 +114,11 @@ public class TpchTableDefinitions
                             "CREATE TABLE orders(" +
                             "   o_orderkey       INT," +
                             "   o_custkey        INT," +
-                            "   o_orderstatus    CHAR(1)," +
-                            "   o_totalprice     DECIMAL(15,2)," +
+                            "   o_orderstatus    STRING," +
+                            "   o_totalprice     DOUBLE," +
                             "   o_orderdate      DATE," +
-                            "   o_orderpriority  CHAR(15),  " +
-                            "   o_clerk          CHAR(15), " +
+                            "   o_orderpriority  STRING,  " +
+                            "   o_clerk          STRING, " +
                             "   o_shippriority   INT," +
                             "   o_comment        STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
@@ -135,17 +135,17 @@ public class TpchTableDefinitions
                             "   l_partkey       INT," +
                             "   l_suppkey       INT," +
                             "   l_linenumber    INT," +
-                            "   l_quantity      DECIMAL(15,2)," +
-                            "   l_extendedprice DECIMAL(15,2)," +
-                            "   l_discount      DECIMAL(15,2)," +
-                            "   l_tax           DECIMAL(15,2)," +
-                            "   l_returnflag    CHAR(1)," +
-                            "   l_linestatus    CHAR(1)," +
+                            "   l_quantity      DOUBLE," +
+                            "   l_extendedprice DOUBLE," +
+                            "   l_discount      DOUBLE," +
+                            "   l_tax           DOUBLE," +
+                            "   l_returnflag    STRING," +
+                            "   l_linestatus    STRING," +
                             "   l_shipdate      DATE," +
                             "   l_commitdate    DATE," +
                             "   l_receiptdate   DATE," +
-                            "   l_shipinstruct  CHAR(25)," +
-                            "   l_shipmode      CHAR(10)," +
+                            "   l_shipinstruct  STRING," +
+                            "   l_shipmode      STRING," +
                             "   l_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '{0}'")
