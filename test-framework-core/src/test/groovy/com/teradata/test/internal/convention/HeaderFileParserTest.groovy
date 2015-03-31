@@ -8,17 +8,17 @@ import spock.lang.Specification
 
 import static org.apache.commons.io.IOUtils.toInputStream
 
-class FileParserTest
+class HeaderFileParserTest
         extends Specification
 {
-  private FileParser fileParser = new FileParser()
+  private HeaderFileParser fileParser = new HeaderFileParser()
 
   def 'parse file with comment properties'()
   {
-    String fileContent = '-- property1: value1, property2: value2\n' +
+    String fileContent = '-- property1: value1; property2: value2\n' +
             'content line 1\n' +
             'content line 2'
-    FileParser.ParsingResult parsingResult = fileParser.parseFile(toInputStream(fileContent))
+    HeaderFileParser.ParsingResult parsingResult = fileParser.parseFile(toInputStream(fileContent))
 
     expect:
     parsingResult.getProperty("property1").get() == "value1"
@@ -34,7 +34,7 @@ class FileParserTest
   {
     String fileContent = 'content line 1\n' +
             'content line 2'
-    FileParser.ParsingResult parsingResult = fileParser.parseFile(toInputStream(fileContent))
+    HeaderFileParser.ParsingResult parsingResult = fileParser.parseFile(toInputStream(fileContent))
 
     expect:
     !parsingResult.getProperty("unknownProperty").isPresent()

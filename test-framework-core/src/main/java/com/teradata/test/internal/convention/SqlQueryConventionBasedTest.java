@@ -4,12 +4,12 @@
 
 package com.teradata.test.internal.convention;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Splitter;
 import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.assertions.QueryAssert;
-import com.teradata.test.internal.convention.FileParser.ParsingResult;
+import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import com.teradata.test.testmarkers.WithName;
@@ -17,18 +17,15 @@ import com.teradata.test.testmarkers.WithTestGroups;
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
-import static java.util.Collections.emptySet;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -38,7 +35,10 @@ public class SqlQueryConventionBasedTest
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
     private static final int SUCCESS_EXIT_CODE = 0;
 
-    private final FileParser fileParser;
+    private static final String GROUPS_HEADER_PROPERTY = "groups";
+    private static final Splitter GROUPS_HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
+
+    private final HeaderFileParser headerFileParser;
     private final String testCaseName;
     private final Optional<File> beforeScriptFile;
     private final Optional<File> afterScriptFile;
@@ -55,7 +55,7 @@ public class SqlQueryConventionBasedTest
         this.queryFile = queryFile;
         this.resultFile = resultFile;
         this.requirement = requirement;
-        this.fileParser = new FileParser();
+        this.headerFileParser = new HeaderFileParser();
     }
 
     @Test
@@ -68,27 +68,22 @@ public class SqlQueryConventionBasedTest
             execute(beforeScriptFile.get());
         }
 
-        try (
-                InputStream queryInput = new BufferedInputStream(new FileInputStream(queryFile));
-                InputStream resultInput = new BufferedInputStream(new FileInputStream(resultFile))
-        ) {
-            ParsingResult queryFile = fileParser.parseFile(queryInput);
-            ParsingResult resultFile = fileParser.parseFile(resultInput);
-            SqlResultFileWrapper resultFileWrapper = new SqlResultFileWrapper(resultFile);
+        ParsingResult parsedQueryFile = headerFileParser.parseFile(queryFile);
+        ParsingResult parsedResultFile = headerFileParser.parseFile(resultFile);
+        SqlResultFileWrapper resultFileWrapper = new SqlResultFileWrapper(parsedResultFile);
 
-            QueryExecutor queryExecutor = getQueryExecutor(queryFile);
-            QueryResult result = queryExecutor.executeQuery(queryFile.getContent());
+        QueryExecutor queryExecutor = getQueryExecutor(parsedQueryFile);
+        QueryResult result = queryExecutor.executeQuery(parsedQueryFile.getContent());
 
-            QueryAssert queryAssert = assertThat(result)
-                    .hasRowsCount(resultFile.getContentLines().size())
-                    .hasColumns(resultFileWrapper.getTypes());
+        QueryAssert queryAssert = assertThat(result)
+                .hasRowsCount(parsedResultFile.getContentLines().size())
+                .hasColumns(resultFileWrapper.getTypes());
 
-            if (resultFileWrapper.isIgnoreOrder()) {
-                queryAssert.hasRows(resultFileWrapper.getRows());
-            }
-            else {
-                queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
-            }
+        if (resultFileWrapper.isIgnoreOrder()) {
+            queryAssert.hasRows(resultFileWrapper.getRows());
+        }
+        else {
+            queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
         }
 
         if (afterScriptFile.isPresent()) {
@@ -111,12 +106,18 @@ public class SqlQueryConventionBasedTest
     @Override
     public Set<String> getTestGroups()
     {
-        // TODO
-        return ImmutableSet.of("sql_tests");
+        try {
+            ParsingResult parsedQueryFile = headerFileParser.parseFile(queryFile);
+            String groupsProperty = parsedQueryFile.getProperty(GROUPS_HEADER_PROPERTY).orElse("");
+            return newHashSet(GROUPS_HEADER_PROPERTY_SPLITTER.split(groupsProperty));
+        }
+        catch (IOException e) {
+            throw new RuntimeException("cannot parse query file", e);
+        }
     }
 
-private void execute(File file)
-        throws IOException, InterruptedException
+    private void execute(File file)
+            throws IOException, InterruptedException
     {
         Process process = Runtime.getRuntime().exec(file.toString());
         process.waitFor();

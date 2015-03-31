@@ -29,7 +29,7 @@ public final class ConventionRequirements
     private static String createTableDDLTemplate(ConventionTableDefinition conventionTableDefinition)
     {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(conventionTableDefinition.getDdlFile()))) {
-            return new FileParser().parseFile(inputStream).getContent();
+            return new HeaderFileParser().parseFile(inputStream).getContent();
         }
         catch (IOException e) {
             throw new IllegalStateException("Could not open ddl file: " + conventionTableDefinition.getDdlFile());

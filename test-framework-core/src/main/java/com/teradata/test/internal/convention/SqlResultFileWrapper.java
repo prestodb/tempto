@@ -25,10 +25,10 @@ public class SqlResultFileWrapper
     private static final String DEFAULT_IGNORE_ORDER = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
-    private final FileParser.ParsingResult sqlFileParsingResult;
+    private final HeaderFileParser.ParsingResult sqlFileParsingResult;
     private List<JDBCType> types;
 
-    public SqlResultFileWrapper(FileParser.ParsingResult sqlFileParsingResult)
+    public SqlResultFileWrapper(HeaderFileParser.ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
     }

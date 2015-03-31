@@ -7,6 +7,9 @@ package com.teradata.test.internal.convention;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -18,18 +21,38 @@ import static com.google.common.collect.Iterables.getFirst;
 import static java.util.Collections.emptyMap;
 import static org.apache.commons.io.IOUtils.readLines;
 
-public class FileParser
+/**
+ * Parses files where first line can be single line header.
+ * The line must start with -- marker, and define semicolon separeated map of params.
+ *
+ * Example contents:
+ * -- database: hive; groups: example_smoketest,blah
+ * SOME BODY
+ * BODY
+ * BODY
+ */
+public class HeaderFileParser
 {
     private static final String COMMENT_PREFIX = "--";
-    private static final Splitter.MapSplitter COMMENT_PROPERTIES_SPLITTER = Splitter.on(',')
+    private static final Splitter.MapSplitter COMMENT_PROPERTIES_SPLITTER = Splitter.on(';')
             .omitEmptyStrings()
             .trimResults()
             .withKeyValueSeparator(Splitter.on(":").trimResults());
 
-    public ParsingResult parseFile(InputStream queryFileInput)
+    public ParsingResult parseFile(File file)
             throws IOException
     {
-        List<String> lines = readLines(queryFileInput);
+        try (
+                InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+        ) {
+            return parseFile(inputStream);
+        }
+    }
+
+    public ParsingResult parseFile(InputStream fileInput)
+            throws IOException
+    {
+        List<String> lines = readLines(fileInput);
         String firstLine = getFirst(lines, "");
 
         Map<String, String> commentProperties;

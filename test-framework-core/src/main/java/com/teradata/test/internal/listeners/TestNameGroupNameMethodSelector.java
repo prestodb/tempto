@@ -18,6 +18,7 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.indexOf;
 import static com.google.common.collect.Sets.intersection;
 import static java.lang.System.getProperty;
+import static java.lang.System.in;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -71,6 +72,9 @@ public class TestNameGroupNameMethodSelector
     @Override
     public boolean includeMethod(IMethodSelectorContext context, ITestNGMethod method, boolean isTestMethod)
     {
+        if (!isTestMethod) {
+            return true;
+        }
         TestMetadataReader.TestMetadata testMetadata = testMetadataReader.getTestMetadata(method);
         return includeBasedOnTestName(testMetadata) &&
                 includeBasedOnGroups(testMetadata) &&

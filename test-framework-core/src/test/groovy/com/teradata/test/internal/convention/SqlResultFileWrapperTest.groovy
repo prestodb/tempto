@@ -20,10 +20,10 @@ class SqlResultFileWrapperTest
   def 'sampleResultFile'()
   {
     setup:
-    String fileContent = '-- delimiter: |, ignoreOrder: true, types: VARCHAR|BINARY|BIT|INTEGER|REAL|NUMERIC|DATE|TIME|TIMESTAMP\n' +
+    String fileContent = '-- delimiter: |; ignoreOrder: true; types: VARCHAR|BINARY|BIT|INTEGER|REAL|NUMERIC|DATE|TIME|TIMESTAMP\n' +
             'A|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|\n' +
             'B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'
-    FileParser.ParsingResult parsingResult = new FileParser().parseFile(toInputStream(fileContent))
+    HeaderFileParser.ParsingResult parsingResult = new HeaderFileParser().parseFile(toInputStream(fileContent))
     SqlResultFileWrapper resultFileWrapper = new SqlResultFileWrapper(parsingResult)
 
     expect:
