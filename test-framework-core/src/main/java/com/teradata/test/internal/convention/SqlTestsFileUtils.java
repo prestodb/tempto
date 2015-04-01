@@ -7,20 +7,15 @@ package com.teradata.test.internal.convention;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.List;
 
-import static com.google.common.collect.Iterables.any;
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public final class SqlTestsFileUtils
 {
+    private SqlTestsFileUtils()
+    {
+    }
 
     public static File changeExtension(File source, String extension)
     {
@@ -39,50 +34,23 @@ public final class SqlTestsFileUtils
         return fileName.substring(0, fileName.lastIndexOf(".")) + '.' + extension;
     }
 
-    public static String trimExtension(String fileName)
+    public static String getFilenameWithoutExtension(Path path)
     {
-        return FilenameUtils.removeExtension(fileName);
+        return removeExtension(path.getFileName().toString());
     }
 
-    public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(String... extensions)
+    public static String getFilenameWithoutExtension(File file)
     {
-        return extensionFileCollectorVisitor(asList(extensions));
+        return removeExtension(file.getName());
     }
 
-    public static ExtensionFileCollectorVisitor extensionFileCollectorVisitor(List<String> extensions)
+    public static String getExtension(Path path)
     {
-        return new ExtensionFileCollectorVisitor(extensions);
+        return FilenameUtils.getExtension(path.getFileName().toString());
     }
 
-    private SqlTestsFileUtils()
+    public static String getExtension(File file)
     {
-    }
-
-    public static final class ExtensionFileCollectorVisitor
-            extends SimpleFileVisitor<Path>
-    {
-
-        private final List<Path> result = newArrayList();
-        private final List<String> extensions;
-
-        private ExtensionFileCollectorVisitor(List<String> extensions)
-        {
-            this.extensions = extensions.stream().map((String extension) -> "." + extension).collect(toList());
-        }
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-                throws IOException
-        {
-            if (any(extensions, (String extension) -> file.getFileName().toString().endsWith(extension))) {
-                result.add(file);
-            }
-            return FileVisitResult.CONTINUE;
-        }
-
-        public List<Path> getResult()
-        {
-            return result;
-        }
+        return FilenameUtils.getExtension(file.getName());
     }
 }

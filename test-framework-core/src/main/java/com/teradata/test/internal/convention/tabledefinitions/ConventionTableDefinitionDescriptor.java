@@ -2,30 +2,28 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.convention;
-
-import org.apache.commons.io.FilenameUtils;
+package com.teradata.test.internal.convention.tabledefinitions;
 
 import java.io.File;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
+import static com.teradata.test.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
 
-public class ConventionTableDefinition
+class ConventionTableDefinitionDescriptor
 {
     private final String name;
     private final File ddlFile;
     private final File dataFile;
     private final File revisionFile;
 
-    public ConventionTableDefinition(File ddlFile, File dataFile, File revisionFile)
+    public ConventionTableDefinitionDescriptor(File ddlFile, File dataFile, File revisionFile)
     {
         checkArgument(ddlFile.exists() && ddlFile.isFile(), "Invalid file: %s", ddlFile);
         checkArgument(dataFile.exists() && dataFile.isFile(), "Invalid file: %s", dataFile);
         checkArgument(revisionFile.exists() && revisionFile.isFile(), "Invalid file: %s", revisionFile);
 
-        this.name = removeExtension(FilenameUtils.getName(ddlFile.getName()));
+        this.name = getFilenameWithoutExtension(ddlFile);
         this.ddlFile = ddlFile;
         this.dataFile = dataFile;
         this.revisionFile = revisionFile;

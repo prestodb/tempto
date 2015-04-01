@@ -12,7 +12,7 @@
             <package name="$package"/>
         </packages>
         <classes>
-            <class name="com.teradata.test.internal.convention.SqlQueryConventionBasedTestFactory"/>
+            <class name="com.teradata.test.internal.convention.ConventionBasedTestFactory"/>
         </classes>
     </test>
 

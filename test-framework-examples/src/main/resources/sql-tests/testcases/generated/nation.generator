@@ -6,7 +6,7 @@ SELECT * FROM sample_table
 EOF
 
 cat >$1/generated_nation.result << EOF
--- delimiter: |, ignoreOrder: false, types: INTEGER|VARCHAR
+-- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR
 1|A|
 2|B|
 3|C|

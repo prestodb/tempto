@@ -2,18 +2,17 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.convention;
+package com.teradata.test.internal.convention.sql;
 
 import com.google.common.base.Splitter;
-import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
-import com.teradata.test.RequirementsProvider;
 import com.teradata.test.assertions.QueryAssert;
+import com.teradata.test.internal.convention.ConventionBasedTest;
+import com.teradata.test.internal.convention.HeaderFileParser;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
+import com.teradata.test.internal.convention.SqlResultFileWrapper;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
-import com.teradata.test.testmarkers.WithName;
-import com.teradata.test.testmarkers.WithTestGroups;
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
@@ -29,8 +28,7 @@ import static com.teradata.test.internal.convention.ProcessUtils.execute;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
-        extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
+        extends ConventionBasedTest
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
 

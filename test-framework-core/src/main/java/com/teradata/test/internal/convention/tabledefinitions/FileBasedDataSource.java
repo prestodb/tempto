@@ -2,7 +2,7 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.convention;
+package com.teradata.test.internal.convention.tabledefinitions;
 
 import com.teradata.test.fulfillment.hive.DataSource;
 
@@ -20,12 +20,12 @@ public class FileBasedDataSource
         implements DataSource
 {
 
-    private final ConventionTableDefinition conventionTableDefinition;
+    private final ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor;
     private String revisionMarker;
 
-    public FileBasedDataSource(ConventionTableDefinition conventionTableDefinition)
+    public FileBasedDataSource(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
     {
-        this.conventionTableDefinition = conventionTableDefinition;
+        this.conventionTableDefinitionDescriptor = conventionTableDefinitionDescriptor;
     }
 
     @Override
@@ -33,17 +33,17 @@ public class FileBasedDataSource
     {
         // {TESTS_PATH}/datasets/{dataSetName}
         String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");
-        return format("%s/datasets/%s", testsPath, conventionTableDefinition.getName());
+        return format("%s/datasets/%s", testsPath, conventionTableDefinitionDescriptor.getName());
     }
 
     @Override
     public InputStream data()
     {
         try {
-            return new BufferedInputStream(new FileInputStream(conventionTableDefinition.getDataFile()));
+            return new BufferedInputStream(new FileInputStream(conventionTableDefinitionDescriptor.getDataFile()));
         }
         catch (FileNotFoundException e) {
-            throw new IllegalStateException("Data file " + conventionTableDefinition.getDdlFile() + " should exist");
+            throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDdlFile() + " should exist");
         }
     }
 
@@ -52,12 +52,12 @@ public class FileBasedDataSource
     {
         try {
             if (revisionMarker == null) {
-                revisionMarker = readFileToString(conventionTableDefinition.getRevisionFile());
+                revisionMarker = readFileToString(conventionTableDefinitionDescriptor.getRevisionFile());
             }
             return revisionMarker;
         }
         catch (IOException e) {
-            throw new IllegalStateException("Could not read revision file: " + conventionTableDefinition.getRevisionFile());
+            throw new IllegalStateException("Could not read revision file: " + conventionTableDefinitionDescriptor.getRevisionFile());
         }
     }
 }
