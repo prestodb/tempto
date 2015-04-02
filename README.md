@@ -31,6 +31,41 @@ and [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/h
 **TODO:** we should include here information which jar to use as dependency, and where to put file with properties,
 how to setup maven plugins...
 
+## Running samples
+
+* Build project:
+
+```Shell
+$ test-framework$ ./gradlew clean build
+...
+BUILD SUCCESSFUL
+
+Total time: 2 mins 47.263 secs
+```
+
+* Set configuration properties in file: _/test-framework/test-framework-examples/src/main/resources/test-configuration.yaml_.
+You will need to change WebHDFS host, and hive and presto JDBC urls - check details in **Configuration** section below.
+
+* Make sure that WebHDFS, Hive and Presto are running.
+
+* Run tests using launcher:
+
+```
+$ ./bin/product-test \
+     --tests-classpath test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar \
+     --tests-package=com.teradata.test.examples \
+     --exclude-groups quarantine
+Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
+...
+[2015-04-02 15:21:48] Completed 18 tests
+[2015-04-02 15:21:48] 17 SUCCEEDED      /      1 FAILED      /      0 SKIPPED
+[2015-04-02 15:21:48] For tests logs see: testlogs/2015-04-02_15-15-16
+See /home/sogorkis/repos/test-framework/test-framework-core/build/reports/html/index.html for detailed results.
+```
+
+* Check result report - [/home/sogorkis/repos/test-framework/test-framework-core/build/reports/html/index.html](file:///home/sogorkis/repos/test-framework/test-framework-core/build/reports/html/index.html).
+One test (_com.teradata.test.examples.SimpleQueryTest.failingTest_) should fail.
+
 
 ## Configuration
 
