@@ -4,7 +4,6 @@
 
 package com.teradata.test.internal.configuration
 
-import com.teradata.test.internal.configuration.AbstractConfiguration
 import spock.lang.Specification
 
 class AbstractConfigurationTest
@@ -14,8 +13,8 @@ class AbstractConfigurationTest
   public static final String KEY = 'a.b.c'
   def configuration = Spy(AbstractConfiguration)
 
-
-  def 'get present integer value'() {
+  def 'get present integer value'()
+  {
     when:
     setupGetObject(KEY, 10)
 
@@ -24,7 +23,8 @@ class AbstractConfigurationTest
     configuration.getIntMandatory(KEY) == 10
   }
 
-  def 'non-mandatory get integer not present value'() {
+  def 'non-mandatory get integer not present value'()
+  {
     when:
     setupGetObject(KEY, null)
 
@@ -32,7 +32,8 @@ class AbstractConfigurationTest
     configuration.getInt(KEY) == Optional.empty()
   }
 
-  def 'mandatory get integer not present value'() {
+  def 'mandatory get integer not present value'()
+  {
     when:
     setupGetObject(KEY, null)
     configuration.getIntMandatory(KEY)
@@ -42,7 +43,8 @@ class AbstractConfigurationTest
     e.message == 'could not find value for key a.b.c'
   }
 
-  def 'mandatory get integer not present value with message'() {
+  def 'mandatory get integer not present value with message'()
+  {
     when:
     setupGetObject(KEY, null)
     configuration.getIntMandatory(KEY, 'damn, no key')
@@ -52,7 +54,8 @@ class AbstractConfigurationTest
     e.message == 'damn, no key'
   }
 
-  def 'get integer for non matching type'() {
+  def 'get integer for non matching type'()
+  {
     when:
     setupGetObject(KEY, 'ala')
     configuration.getInt(KEY)
@@ -62,7 +65,8 @@ class AbstractConfigurationTest
     e.message == 'expected java.lang.Integer value for key a.b.c but got java.lang.String'
   }
 
-  def 'get present string value'() {
+  def 'get present string value'()
+  {
     when:
     setupGetObject(KEY, 'ala')
 
@@ -71,7 +75,8 @@ class AbstractConfigurationTest
     configuration.getStringMandatory(KEY) == 'ala'
   }
 
-  def 'get present string value for integer object'() {
+  def 'get present string value for integer object'()
+  {
     when:
     setupGetObject(KEY, 10)
 
@@ -80,7 +85,8 @@ class AbstractConfigurationTest
     configuration.getStringMandatory(KEY) == '10'
   }
 
-  def 'non-mandatory get string not present value'() {
+  def 'non-mandatory get string not present value'()
+  {
     when:
     setupGetObject(KEY, null)
 
@@ -88,7 +94,8 @@ class AbstractConfigurationTest
     configuration.getString(KEY) == Optional.empty()
   }
 
-  def 'mandatory get string not present value'() {
+  def 'mandatory get string not present value'()
+  {
     when:
     setupGetObject(KEY, null)
     configuration.getStringMandatory(KEY)
@@ -98,7 +105,8 @@ class AbstractConfigurationTest
     e.message == 'could not find value for key a.b.c'
   }
 
-  def 'mandatory get string not present value with message'() {
+  def 'mandatory get string not present value with message'()
+  {
     when:
     setupGetObject(KEY, null)
     configuration.getStringMandatory(KEY, 'damn, no key')
@@ -108,7 +116,8 @@ class AbstractConfigurationTest
     e.message == 'damn, no key'
   }
 
-  def 'test list key prefixes'() {
+  def 'test list key prefixes'()
+  {
     when:
     configuration.listKeys() >> [
             'a.b.c',
