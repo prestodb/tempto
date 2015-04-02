@@ -1,4 +1,4 @@
--- database: presto; groups: tpch
+-- database: presto; groups: tpch,quarantine
 SELECT
   c_name,
   c_custkey,
