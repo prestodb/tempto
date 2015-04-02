@@ -16,10 +16,10 @@ buildscript {
   // and some values has to be set here
   ext.teradataNexusRepositories = {
     maven {
-      url 'http://jenkins.eng.hadapt.com:8081/nexus/content/groups/hadapt-deps'
+      url 'http://phabricator.td.teradata.com:8081/nexus/content/groups/hadapt-deps'
     }
     maven {
-      url "http://jenkins.eng.hadapt.com:8081/nexus/content/repositories/build/"
+      url "http://phabricator.td.teradata.com:8081/nexus/content/repositories/build/"
     }
   }
   repositories teradataNexusRepositories
