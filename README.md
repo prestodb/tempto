@@ -13,7 +13,8 @@ ability to generate dataset of arbitrary size.
 ## Prerequisites
 
 * Java >= 1.8
-* Running Hadoop cluster with WebHDFS and XAttr metadata enabled
+* Running Hadoop cluster with [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html)
+and [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtendedAttributes.html) enabled
 * Python >= 2.6 (if custom launcher is used)
 
 
@@ -327,7 +328,7 @@ By default all tests found in classpath are executed but user may limit that.
 
 <table>
     <tr>
-        <td>--suites</td>
+        <td style="width:120px">--suites</td>
         <td>List of suites to be executed. Each suite is a list of groups suites.json.
             TODO link to section with description of suites.json
         </td>
