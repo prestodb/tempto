@@ -17,7 +17,8 @@ dependencies {
 }
 
 task hiveJdbcFatJar(type: Jar, dependsOn: clean) {
-  baseName = 'hive-jdbc-fat'
+  baseName = 'hive-jdbc'
+  appendix = 'all'
   from {
     configurations.hiveJdbcFatJar.collect {
       it.isDirectory() ? it : zipTree(it)
@@ -28,6 +29,7 @@ task hiveJdbcFatJar(type: Jar, dependsOn: clean) {
 task copyProvidedDeps(type: Copy, dependsOn: hiveJdbcFatJar) {
   from configurations.provided
   into ("$buildDir/libs")
+  rename ('presto-jdbc-(.*).jar', 'presto-jdbc-all.jar')
 }
 
 build.dependsOn.add([hiveJdbcFatJar, copyProvidedDeps])

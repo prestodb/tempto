@@ -9,7 +9,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Static helper for holding TestContext in thread local variable.
+ * Static helper for holding TestContext in a thread local variable.
  * <p>
  * Justification for existence:
  * <p>
@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private static InheritableThreadLocal<TestContext> testContextThreadLocal = new InheritableThreadLocal<>();
+    private final static InheritableThreadLocal<TestContext> testContextThreadLocal = new InheritableThreadLocal<>();
 
     public static TestContext testContext()
     {

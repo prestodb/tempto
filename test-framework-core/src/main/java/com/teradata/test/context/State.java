@@ -7,7 +7,7 @@ package com.teradata.test.context;
 import java.util.Optional;
 
 /**
- * Marker interface of state objectes produced by fulfillers.
+ * Marker interface of state objects produced by fulfillers.
  */
 public interface State
 {

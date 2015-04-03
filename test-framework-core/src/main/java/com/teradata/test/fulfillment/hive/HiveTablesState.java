@@ -22,7 +22,7 @@ public class HiveTablesState
 
     public HiveTableInstance getTableInstance(String name)
     {
-        checkArgument(tableInstances.containsKey(name), "not table instance found for name %s", name);
+        checkArgument(tableInstances.containsKey(name), "no table instance found for name %s", name);
         return tableInstances.get(name);
     }
 }
