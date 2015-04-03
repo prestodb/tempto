@@ -19,19 +19,24 @@ public interface TestContext
 
     <T> T getDependency(Class<T> dependencyClass, String dependencyName);
 
-    void pushStates(Iterable<State> states);
+    /**
+     * Creates a new child {@link TestContext} with new {@link com.google.inject.Injector}
+     * that contains new states.
+     */
+    TestContext createChildContext(Iterable<State> states);
 
-    default void pushStates(State... states)
+    default TestContext createChildContext(State... states)
     {
-        pushStates(asList(states));
+        return createChildContext(asList(states));
     }
-
-    void popStates();
 
     /**
      * Registers a callback that will be executed on {@link TestContext} close.
      */
-    void registerCloseCallback(Runnable callback);
+    void registerCloseCallback(TestContextCloseCallback callback);
 
+    /**
+     * Closes this {@link TestContext} and all children {@link TestContext}s.
+     */
     void close();
 }

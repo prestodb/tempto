@@ -6,9 +6,8 @@ package com.teradata.test.internal.context
 import com.google.inject.Binder
 import com.google.inject.Module
 import com.teradata.test.context.State
+import com.teradata.test.context.TestContextCloseCallback
 import spock.lang.Specification
-
-import static com.google.inject.util.Modules.EMPTY_MODULE
 
 class GuiceTestContextTest
         extends Specification
@@ -20,12 +19,11 @@ class GuiceTestContextTest
   def 'test get dependency'()
   {
     setup:
-    def context = new GuiceTestContext(EMPTY_MODULE)
+    def context = new GuiceTestContext()
     def state = new DummyState()
 
     expect:
-    context.pushStates(state)
-    assert context.getDependency(DummyState) == state
+    assert context.createChildContext(state).getDependency(DummyState) == state
   }
 
   def 'test override'()
@@ -40,11 +38,8 @@ class GuiceTestContextTest
         binder.bind(DummyState).toInstance(state1)
       }
     })
-    context1.pushStates(state1)
-    context1.pushStates(state2)
-    context1.popStates()
 
-    def context2 = context1.override(new Module() {
+    def context2 = context1.createChildContext(new Module() {
       @Override
       void configure(Binder binder)
       {
@@ -55,86 +50,62 @@ class GuiceTestContextTest
     expect:
     assert context1.getDependency(DummyState) == state1
     assert context2.getDependency(DummyState) == state2
-    assert context2.getDependency(DummyState, A) == state1
   }
 
-  def 'test states push/pop no naming'()
+  def 'test spawning no naming'()
   {
     setup:
-    def context = new GuiceTestContext(EMPTY_MODULE)
-    def state1 = new DummyState()
-    def state2 = new DummyState()
+    def context = new GuiceTestContext()
+    def state = new DummyState()
 
     expect:
-    context.pushStates(state1)
-    assert context.getDependency(DummyState) == state1
-
-    context.pushStates(state2)
-    assert context.getDependency(DummyState) == state2
-
-    context.popStates()
-    assert context.getDependency(DummyState) == state1
+    assert context.createChildContext(state).getDependency(DummyState) == state
   }
 
-  def 'test states push/pop external naming'()
+  def 'test spawning external naming'()
   {
     setup:
-    def context = new GuiceTestContext(EMPTY_MODULE)
-    def state1 = new DummyState(A)
-    def state2 = new DummyState(B)
-    def state3 = new DummyState(C)
-    def state4 = new DummyState(A)
+    def context = new GuiceTestContext()
+    def state = new DummyState(A)
 
     expect:
-    context.pushStates(state1)
-    assert context.getDependency(DummyState, A) == state1
-    def obj1 = context.getDependency(DummyClass)
-
-    context.pushStates(state2, state3)
-    assert context.getDependency(DummyState, B) == state2
-    assert context.getDependency(DummyState, C) == state3
-    def obj2 = context.getDependency(DummyClass)
-
-    context.pushStates(state4)
-    assert context.getDependency(DummyState, A) == state4
-
-    context.popStates()
-    assert context.getDependency(DummyState, A) == state1
-    assert context.getDependency(DummyState, B) == state2
-
-    context.popStates()
-    assert context.getDependency(DummyState, A) == state1
-
-    context.popStates()
-    def obj3 = context.getDependency(DummyClass)
-
-    assert obj1 == obj3 != obj2
+    assert context.createChildContext(state).getDependency(DummyState, A) == state
   }
 
-  def 'test states push/pop internal naming'()
+  def 'test context close'()
   {
     setup:
-    def context = new GuiceTestContext(EMPTY_MODULE)
-    def state1 = new DummyState(A)
-    def state2 = new DummyState(B)
-    def state3 = new DummyState(A)
+    def context1 = new GuiceTestContext()
+    def context2 = context1.createChildContext([])
 
-    expect:
-    context.pushStates(state1)
-    assert context.getDependency(DummyState, A) == state1
+    def callback1 = Mock(TestContextCloseCallback)
+    def callback2 = Mock(TestContextCloseCallback)
 
-    context.pushStates(state2)
-    assert context.getDependency(DummyState, B) == state2
+    context1.registerCloseCallback(callback1)
+    context2.registerCloseCallback(callback2)
 
-    context.pushStates(state3)
-    assert context.getDependency(DummyState, A) == state3
+    when:
+    context1.close()
 
-    context.popStates()
-    assert context.getDependency(DummyState, A) == state1
-    assert context.getDependency(DummyState, B) == state2
+    then:
+    1 * callback2.testContextClosed(context2)
+    then:
+    1 * callback1.testContextClosed(context1)
 
-    context.popStates()
-    assert context.getDependency(DummyState, A) == state1
+    when:
+    context2.close()
+    context1.close()
+
+    then:
+    1 * callback2.testContextClosed(context2)
+    then:
+    1 * callback1.testContextClosed(context1)
+
+    when:
+    context2.close()
+
+    then:
+    1 * callback2.testContextClosed(context2)
   }
 
   private class DummyState

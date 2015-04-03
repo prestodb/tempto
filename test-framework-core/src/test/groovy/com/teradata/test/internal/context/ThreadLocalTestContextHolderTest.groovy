@@ -15,7 +15,7 @@ class ThreadLocalTestContextHolderTest
   void cleanup()
   {
     if (testContextIfSet().isPresent()) {
-      clearTestContext();
+      popAllTestContexts();
     }
   }
 
@@ -29,7 +29,7 @@ class ThreadLocalTestContextHolderTest
   def "assertNotSet throws if set"()
   {
     setup:
-    setTestContext(Mock(TestContext))
+    pushTestContext(Mock(TestContext))
 
     when:
     assertTestContextNotSet()
@@ -51,7 +51,7 @@ class ThreadLocalTestContextHolderTest
   {
     setup:
     TestContext mockTestContext = Mock()
-    setTestContext(mockTestContext)
+    pushTestContext(mockTestContext)
 
     expect:
     testContext() == mockTestContext

@@ -4,12 +4,14 @@
 
 package com.teradata.test.context;
 
+import com.teradata.test.internal.context.TestContextStack;
+
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Static helper for holding TestContext in a thread local variable.
+ * Static helper for holding TestContext stack in thread local variable.
  * <p>
  * Justification for existence:
  * <p>
@@ -21,40 +23,69 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private final static InheritableThreadLocal<TestContext> testContextThreadLocal = new InheritableThreadLocal<>();
+    private final static InheritableThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new InheritableThreadLocal<TestContextStack<TestContext>>()
+    {
+        @Override
+        protected TestContextStack<TestContext> initialValue()
+        {
+            return new TestContextStack<>();
+        }
+    };
 
     public static TestContext testContext()
     {
         assertTestContextSet();
-        return testContextThreadLocal.get();
+        return testContextStackThreadLocal.get().peek();
     }
 
     public static Optional<TestContext> testContextIfSet()
     {
-        TestContext testContext = testContextThreadLocal.get();
-        return Optional.ofNullable(testContext);
+        TestContextStack<TestContext> testContextStack = testContextStackThreadLocal.get();
+        return !testContextStack.empty() ? Optional.of(testContextStack.peek()) : Optional.<TestContext>empty();
     }
 
-    public static void setTestContext(TestContext testContext)
+    public static void runWithTextContext(TestContext testContext, Runnable runnable)
     {
-        assertTestContextNotSet();
-        testContextThreadLocal.set(testContext);
+        pushTestContext(testContext);
+        try {
+            runnable.run();
+        }
+        finally {
+            popTestContext();
+        }
     }
 
-    public static void clearTestContext()
+    public static void pushTestContext(TestContext testContext)
+    {
+        testContextStackThreadLocal.get().push(testContext);
+    }
+
+    public static TestContext popTestContext()
     {
         assertTestContextSet();
-        testContextThreadLocal.set(null);
+        return testContextStackThreadLocal.get().pop();
+    }
+
+    public static void pushAllTestContexts(TestContextStack<? extends TestContext> testContextStack)
+    {
+        testContextStack.forEach(com.teradata.test.context.ThreadLocalTestContextHolder::pushTestContext);
+    }
+
+    public static TestContextStack<TestContext> popAllTestContexts()
+    {
+        TestContextStack<TestContext> testContextStack = testContextStackThreadLocal.get();
+        testContextStackThreadLocal.remove();
+        return testContextStack;
     }
 
     public static void assertTestContextNotSet()
     {
-        checkState(testContextThreadLocal.get() == null, "test context should not be set for current thread");
+        checkState(testContextStackThreadLocal.get().empty(), "test context should not be set for current thread");
     }
 
     public static void assertTestContextSet()
     {
-        checkState(testContextThreadLocal.get() != null, "test context not set for current thread");
+        checkState(!testContextStackThreadLocal.get().empty(), "test context not set for current thread");
     }
 
     private ThreadLocalTestContextHolder() {}

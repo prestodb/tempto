@@ -7,6 +7,7 @@ import com.google.inject.Inject
 import com.teradata.test.*
 import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
+import com.teradata.test.context.TestContextCloseCallback
 import com.teradata.test.fulfillment.RequirementFulfiller
 import org.testng.ITestClass
 import org.testng.ITestContext
@@ -102,13 +103,13 @@ class TestInitializationListenerTest
     EVENTS[0].name == SUITE_A_FULFILL
     EVENTS[1].name == TEST_B_FULFILL
     EVENTS[2].name == THROWING_TEST_C_FULFILL
-    EVENTS[3].name == TEST_B_CLEANUP
-    EVENTS[4].name == TEST_B_CALLBACK
-    EVENTS[5].name == THROWING_TEST_C_CALLBACK
+    EVENTS[3].name == THROWING_TEST_C_CALLBACK
+    EVENTS[4].name == TEST_B_CLEANUP
+    EVENTS[5].name == TEST_B_CALLBACK
     EVENTS[6].name == SUITE_A_CLEANUP
     EVENTS[7].name == SUITE_A_CALLBACK
 
-    EVENTS[1].object == EVENTS[3].object
+    EVENTS[1].object == EVENTS[4].object
     EVENTS[0].object == EVENTS[6].object
   }
 
@@ -263,9 +264,9 @@ class TestInitializationListenerTest
 
     void registerCallback(TestContext testContext, String callbackEventName)
     {
-      testContext.registerCloseCallback(new Runnable() {
+      testContext.registerCloseCallback(new TestContextCloseCallback() {
         @Override
-        void run()
+        void testContextClosed(TestContext _)
         {
           EVENTS.add(new Event(callbackEventName, this))
         }
