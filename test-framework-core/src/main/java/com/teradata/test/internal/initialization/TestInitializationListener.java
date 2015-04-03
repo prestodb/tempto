@@ -17,9 +17,9 @@ import com.teradata.test.CompositeRequirement;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.configuration.Configuration;
+import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.configuration.YamlConfiguration;
 import com.teradata.test.internal.context.GuiceTestContext;
-import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.fulfillment.hive.HiveTablesFulfiller;
 import com.teradata.test.internal.initialization.modules.HadoopModule;
 import com.teradata.test.internal.initialization.modules.TestConfigurationModule;
@@ -48,9 +48,11 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
 import static com.teradata.test.Requirements.compose;
-import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.clearTestContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.setTestContext;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class TestInitializationListener
@@ -73,7 +75,6 @@ public class TestInitializationListener
     private final List<Class<? extends RequirementFulfiller>> testMethodFulfillers;
 
     private Optional<GuiceTestContext> suiteTestContext = Optional.empty();
-    private Optional<GuiceTestContext> testMethodTextContext = Optional.empty();
 
     public TestInitializationListener()
     {
@@ -170,7 +171,7 @@ public class TestInitializationListener
             Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
             doFulfillment(testContext, testMethodFulfillers, testSpecificRequirements);
             runWithTestContext(testContext, () -> runBeforeWithContextMethods(testResult));
-            setTestMethodTestContext(testContext);
+            setTestContext(testContext);
         }
         catch (RuntimeException e) {
             testContext.close();
@@ -200,16 +201,18 @@ public class TestInitializationListener
 
     private void onTestFinished(ITestResult testResult)
     {
-        if (!testMethodTextContext.isPresent()) {
+        if (!testContextIfSet().isPresent()) {
             return;
         }
+
+        GuiceTestContext testContext = (GuiceTestContext) testContext();
         try {
             runAfterWithContextMethods(testResult);
         }
         finally {
-            doCleanup(testMethodTextContext.get(), testMethodFulfillers);
-            testMethodTextContext.get().close();
-            unsetTestMethodTestContext();
+            doCleanup(testContext, testMethodFulfillers);
+            testContext.close();
+            clearTestContext();
         }
     }
 
@@ -325,19 +328,6 @@ public class TestInitializationListener
     {
         checkState(!this.suiteTestContext.isPresent(), "suite fulfillment result already set");
         this.suiteTestContext = Optional.of(suiteTestContext);
-    }
-
-    private void setTestMethodTestContext(GuiceTestContext testMethodTestContext)
-    {
-        checkState(!this.testMethodTextContext.isPresent(), "test fulfillment result already set");
-        this.testMethodTextContext = Optional.of(testMethodTestContext);
-        setTestContext(testMethodTestContext);
-    }
-
-    private void unsetTestMethodTestContext()
-    {
-        this.testMethodTextContext = Optional.empty();
-        clearTestContext();
     }
 
     private void runWithTestContext(GuiceTestContext testContext, Runnable runnable)

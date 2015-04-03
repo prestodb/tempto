@@ -21,35 +21,12 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private static ThreadLocal<TestContext> testContextThreadLocal = new ThreadLocal<>();
-
-    private ThreadLocalTestContextHolder() {}
-
-    public static void assertTestContextNotSet()
-    {
-        checkState(testContextThreadLocal.get() == null);
-    }
-
-    public static void assertTestContextSet()
-    {
-        checkState(testContextThreadLocal.get() != null);
-    }
-
-    public static void clearTestContext()
-    {
-        testContextThreadLocal.set(null);
-    }
-
-    public static void setTestContext(TestContext testContext)
-    {
-        testContextThreadLocal.set(testContext);
-    }
+    private static InheritableThreadLocal<TestContext> testContextThreadLocal = new InheritableThreadLocal<>();
 
     public static TestContext testContext()
     {
-        TestContext testContext = testContextThreadLocal.get();
-        checkState(testContext != null, "test context not set for current thread");
-        return testContext;
+        assertTestContextSet();
+        return testContextThreadLocal.get();
     }
 
     public static Optional<TestContext> testContextIfSet()
@@ -57,4 +34,28 @@ public final class ThreadLocalTestContextHolder
         TestContext testContext = testContextThreadLocal.get();
         return Optional.ofNullable(testContext);
     }
+
+    public static void setTestContext(TestContext testContext)
+    {
+        assertTestContextNotSet();
+        testContextThreadLocal.set(testContext);
+    }
+
+    public static void clearTestContext()
+    {
+        assertTestContextSet();
+        testContextThreadLocal.set(null);
+    }
+
+    public static void assertTestContextNotSet()
+    {
+        checkState(testContextThreadLocal.get() == null, "test context should not be set for current thread");
+    }
+
+    public static void assertTestContextSet()
+    {
+        checkState(testContextThreadLocal.get() != null, "test context not set for current thread");
+    }
+
+    private ThreadLocalTestContextHolder() {}
 }

@@ -7,27 +7,27 @@ package com.teradata.test.internal.context
 import com.teradata.test.context.TestContext
 import spock.lang.Specification
 
-import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet
-import static com.teradata.test.context.ThreadLocalTestContextHolder.clearTestContext
-import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
+import static com.teradata.test.context.ThreadLocalTestContextHolder.*
 
 class ThreadLocalTestContextHolderTest
         extends Specification
 {
-
   void cleanup()
   {
-    clearTestContext();
+    if (testContextIfSet().isPresent()) {
+      clearTestContext();
+    }
   }
 
-  def "assertNotSet does not throw if unset"() {
+  def "assertNotSet does not throw if unset"()
+  {
     setup:
-    clearTestContext()
     assertTestContextNotSet()
     // works fine
   }
 
-  def "assertNotSet throws if set"() {
+  def "assertNotSet throws if set"()
+  {
     setup:
     setTestContext(Mock(TestContext))
 
@@ -38,10 +38,8 @@ class ThreadLocalTestContextHolderTest
     thrown(IllegalStateException)
   }
 
-  def "getting testContext throws if not set"() {
-    setup:
-    clearTestContext()
-
+  def "getting testContext throws if not set"()
+  {
     when:
     testContext()
 
@@ -49,7 +47,8 @@ class ThreadLocalTestContextHolderTest
     thrown(IllegalStateException)
   }
 
-  def "getting testContext returns what was set"() {
+  def "getting testContext returns what was set"()
+  {
     setup:
     TestContext mockTestContext = Mock()
     setTestContext(mockTestContext)
@@ -57,5 +56,4 @@ class ThreadLocalTestContextHolderTest
     expect:
     testContext() == mockTestContext
   }
-
 }
