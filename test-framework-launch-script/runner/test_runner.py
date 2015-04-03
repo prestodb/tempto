@@ -61,6 +61,7 @@ def run_testng(test_runner_argument_builder):
         test_runner_argument_builder.tests_classpath_argument
     )
 
+    # TODO shouldn't we take into account $JAVA_HOME here?
     cmd_to_run = ' '.join([
         'java', '-classpath', classpath,
         test_runner_argument_builder.system_properties,

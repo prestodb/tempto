@@ -6,6 +6,7 @@ package com.teradata.test.internal.convention;
 
 import com.google.common.base.Splitter;
 import com.teradata.test.assertions.QueryAssert.Row;
+import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.query.QueryRowMapper;
 
 import java.sql.JDBCType;
@@ -23,12 +24,13 @@ public class SqlResultFileWrapper
     private static final String DEFAULT_DELIMITER = "|";
 
     private static final String DEFAULT_IGNORE_ORDER = "false";
+    private static final String DEFAULT_IGNORE_EXCESS = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
-    private final HeaderFileParser.ParsingResult sqlFileParsingResult;
+    private final ParsingResult sqlFileParsingResult;
     private List<JDBCType> types;
 
-    public SqlResultFileWrapper(HeaderFileParser.ParsingResult sqlFileParsingResult)
+    public SqlResultFileWrapper(ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
     }
@@ -74,6 +76,11 @@ public class SqlResultFileWrapper
     public boolean isIgnoreOrder()
     {
         return Boolean.valueOf(sqlFileParsingResult.getProperty("ignoreOrder").orElse(DEFAULT_IGNORE_ORDER));
+    }
+
+    public boolean isIgnoreExcessRows()
+    {
+        return Boolean.valueOf(sqlFileParsingResult.getProperty("ignoreExcessRows").orElse(DEFAULT_IGNORE_EXCESS));
     }
 
     private String getDelimiter()

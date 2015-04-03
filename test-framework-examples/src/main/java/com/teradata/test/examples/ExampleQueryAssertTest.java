@@ -59,7 +59,7 @@ public class ExampleQueryAssertTest
                         "WHERE name like 'A%' AND n.created > ? ORDER BY n.name",
                 param(DATE, LocalDate.parse("2015-01-01"))))
                 .hasColumns(INTEGER, VARCHAR, VARCHAR)
-                .hasRowsInOrder(
+                .hasRowsExact(
                         row(1, "ALGERIA", "AFRICA"),
                         row(7, "ARGENTINA", "SOUTH AMERICA"));
     }

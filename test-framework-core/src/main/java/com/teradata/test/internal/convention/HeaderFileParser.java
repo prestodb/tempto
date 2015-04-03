@@ -19,7 +19,9 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getFirst;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.IOUtils.readLines;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Parses files where first line can be single line header.
@@ -66,7 +68,20 @@ public class HeaderFileParser
             contentLines = lines;
         }
 
-        return new ParsingResult(commentProperties, contentLines);
+        List<String> contentFiltered = filterContent(contentLines);
+
+        return new ParsingResult(commentProperties, contentFiltered);
+    }
+
+    /**
+     * Remove all comments and empty lines from content body
+     */
+    private List<String> filterContent(List<String> contentLines)
+    {
+        contentLines = contentLines.stream()
+                .filter(s -> !(isCommentLine(s) || isBlank(s)))
+                .collect(toList());
+        return contentLines;
     }
 
     private Map<String, String> parseCommentLine(String line)

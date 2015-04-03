@@ -48,7 +48,7 @@ public class QueryAssert
     public QueryAssert hasRowsCount(int resultCount)
     {
         if (actual.getRowsCount() != resultCount) {
-            failWithMessage("Expected result count to be <%s>, but was <%s>", resultCount, actual.getRowsCount());
+            failWithMessage("Expected row count to be <%s>, but was <%s>", resultCount, actual.getRowsCount());
         }
         return this;
     }
@@ -82,7 +82,6 @@ public class QueryAssert
 
     public QueryAssert hasRows(List<Row> rows)
     {
-        hasRowsCount(rows.size());
         List<List<Object>> missingRows = newArrayList();
         for (Row row : rows) {
             List<Object> expectedRow = row.getValues();
@@ -104,7 +103,7 @@ public class QueryAssert
         return hasRows(Arrays.asList(rows));
     }
 
-    public QueryAssert hasRowsInOrder(List<Row> rows)
+    public QueryAssert hasRowsExact(List<Row> rows)
     {
         hasRowsCount(rows.size());
         List<Integer> unequalRowsIndexes = newArrayList();
@@ -118,15 +117,15 @@ public class QueryAssert
         }
 
         if (!unequalRowsIndexes.isEmpty()) {
-            failWithMessage(buildHasRowsInOrderErrorMessage(unequalRowsIndexes, rows));
+            failWithMessage(buildHasRowsExactErrorMessage(unequalRowsIndexes, rows));
         }
 
         return this;
     }
 
-    public QueryAssert hasRowsInOrder(Row... rows)
+    public QueryAssert hasRowsExact(Row... rows)
     {
-        return hasRowsInOrder(Arrays.asList(rows));
+        return hasRowsExact(Arrays.asList(rows));
     }
 
     private String buildHasRowsErrorMessage(List<List<Object>> missingRows)
@@ -143,7 +142,7 @@ public class QueryAssert
         rows.stream().forEach(row -> msg.append('\n').append(row));
     }
 
-    private String buildHasRowsInOrderErrorMessage(List<Integer> unequalRowsIndexes, List<Row> rows)
+    private String buildHasRowsExactErrorMessage(List<Integer> unequalRowsIndexes, List<Row> rows)
     {
         StringBuilder msg = new StringBuilder("Not equal rows:");
         for (int i = 0; i < unequalRowsIndexes.size(); ++i) {

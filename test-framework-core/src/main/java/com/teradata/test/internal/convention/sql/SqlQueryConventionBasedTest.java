@@ -4,12 +4,13 @@
 
 package com.teradata.test.internal.convention.sql;
 
-import com.google.common.base.Splitter;
 import com.teradata.test.Requirement;
 import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.HeaderFileParser;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
+import com.teradata.test.internal.convention.SqlQueryFileWrapper;
+import com.teradata.test.internal.convention.SqlQueryFileWrapper.QueryType;
 import com.teradata.test.internal.convention.SqlResultFileWrapper;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
@@ -31,9 +31,6 @@ public class SqlQueryConventionBasedTest
         extends ConventionBasedTest
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
-
-    private static final String GROUPS_HEADER_PROPERTY = "groups";
-    private static final Splitter GROUPS_HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final HeaderFileParser headerFileParser;
     private final String testCaseName;
@@ -65,22 +62,25 @@ public class SqlQueryConventionBasedTest
             execute(beforeScriptPath.get().toString());
         }
 
-        ParsingResult parsedQueryFile = headerFileParser.parseFile(queryFile);
-        ParsingResult parsedResultFile = headerFileParser.parseFile(resultFile);
-        SqlResultFileWrapper resultFileWrapper = new SqlResultFileWrapper(parsedResultFile);
+        SqlQueryFileWrapper sqlQueryFileWrapper = getSqlQueryFileWrapper();
+        SqlResultFileWrapper resultFileWrapper = getSqlResultFileWrapper();
 
-        QueryExecutor queryExecutor = getQueryExecutor(parsedQueryFile);
-        QueryResult result = queryExecutor.executeQuery(parsedQueryFile.getContent());
-
+        QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFileWrapper);
+        QueryResult result = executeQuery(
+                queryExecutor, sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType()
+        );
         QueryAssert queryAssert = assertThat(result)
-                .hasRowsCount(parsedResultFile.getContentLines().size())
                 .hasColumns(resultFileWrapper.getTypes());
 
         if (resultFileWrapper.isIgnoreOrder()) {
             queryAssert.hasRows(resultFileWrapper.getRows());
         }
         else {
-            queryAssert.hasRowsInOrder(resultFileWrapper.getRows());
+            queryAssert.hasRowsExact(resultFileWrapper.getRows());
+        }
+
+        if (!resultFileWrapper.isIgnoreExcessRows()) {
+            queryAssert.hasRowsCount(resultFileWrapper.getRows().size());
         }
 
         if (afterScriptPath.isPresent()) {
@@ -104,25 +104,50 @@ public class SqlQueryConventionBasedTest
     public Set<String> getTestGroups()
     {
         try {
-            ParsingResult parsedQueryFile = headerFileParser.parseFile(queryFile);
-            String groupsProperty = parsedQueryFile.getProperty(GROUPS_HEADER_PROPERTY).orElse("");
-            return newHashSet(GROUPS_HEADER_PROPERTY_SPLITTER.split(groupsProperty));
+            return getSqlQueryFileWrapper().getTestGroups();
         }
         catch (IOException e) {
             throw new RuntimeException("cannot parse query file", e);
         }
     }
 
-    private QueryExecutor getQueryExecutor(ParsingResult queryFile)
+    private SqlQueryFileWrapper getSqlQueryFileWrapper()
+            throws IOException
     {
-        QueryExecutor queryExecutor;
-        Optional<String> database = queryFile.getProperty("database");
-        if (database.isPresent()) {
-            queryExecutor = testContext().getDependency(QueryExecutor.class, database.get());
+        return new SqlQueryFileWrapper(headerFileParser.parseFile(queryFile));
+    }
+
+    private SqlResultFileWrapper getSqlResultFileWrapper()
+            throws IOException
+    {
+        ParsingResult parsedResultFile = headerFileParser.parseFile(resultFile);
+        return new SqlResultFileWrapper(parsedResultFile);
+    }
+
+    private QueryExecutor getQueryExecutor(SqlQueryFileWrapper sqlQueryFileWrapper)
+    {
+        String database = sqlQueryFileWrapper.getDatabaseName();
+        try {
+            return testContext().getDependency(QueryExecutor.class, database);
         }
-        else {
-            queryExecutor = testContext().getDependency(QueryExecutor.class);
+        catch (RuntimeException e) {
+            throw new RuntimeException("Cannot get query executor for database '" + database + "'", e);
         }
-        return queryExecutor;
+    }
+
+    private QueryResult executeQuery(QueryExecutor queryExecutor, String query, Optional<QueryType> queryType)
+    {
+        if (!queryType.isPresent()) {
+            return queryExecutor.executeQuery(query);
+        }
+
+        switch (queryType.get()) {
+            case SELECT:
+                return queryExecutor.executeSelect(query);
+            case UPDATE:
+                return queryExecutor.executeUpdate(query);
+            default:
+                throw new IllegalArgumentException("Invalid query type");
+        }
     }
 }

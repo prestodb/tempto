@@ -35,16 +35,33 @@ public class JdbcQueryExecutor
     }
 
     @Override
-    public QueryResult executeQuery(String sql, QueryParam[] params)
+    public QueryResult executeQuery(String sql, QueryParam... params)
+    {
+        return execute(sql, isSelect(sql), params);
+    }
+
+    @Override
+    public QueryResult executeUpdate(String sql, QueryParam... params)
+    {
+        return execute(sql, false, params);
+    }
+
+    @Override
+    public QueryResult executeSelect(String sql, QueryParam... params)
+    {
+        return execute(sql, true, params);
+    }
+
+    private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
     {
         LOGGER.debug("executing query {} with params {}", sql, params);
 
         try {
             if (params.length == 0) {
-                return executeQueryNoParams(sql);
+                return executeQueryNoParams(sql, isSelect);
             }
             else {
-                return executeQueryWithParams(sql, params);
+                return executeQueryWithParams(sql, isSelect, params);
             }
         }
         catch (SQLException e) {
@@ -52,14 +69,14 @@ public class JdbcQueryExecutor
         }
     }
 
-    private QueryResult executeQueryNoParams(String sql)
+    private QueryResult executeQueryNoParams(String sql, boolean isSelect)
             throws SQLException
     {
         try (
                 Connection connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
                 Statement statement = connection.createStatement()
         ) {
-            if (isSelect(sql)) {
+            if (isSelect) {
                 ResultSet rs = statement.executeQuery(sql);
                 return buildQueryResult(rs);
             }
@@ -70,7 +87,7 @@ public class JdbcQueryExecutor
     }
 
     // TODO - remove this method as soon as Presto supports prepared statements
-    private QueryResult executeQueryWithParams(String sql, QueryParam[] params)
+    private QueryResult executeQueryWithParams(String sql, boolean isSelect, QueryParam[] params)
             throws SQLException
     {
         try (
@@ -79,7 +96,7 @@ public class JdbcQueryExecutor
         ) {
             setQueryParams(statement, params);
 
-            if (isSelect(sql)) {
+            if (isSelect) {
                 ResultSet rs = statement.executeQuery();
                 return buildQueryResult(rs);
             }

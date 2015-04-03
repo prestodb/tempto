@@ -14,6 +14,9 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
  */
 public interface QueryExecutor
 {
+
+    String DEFAULT_DB_NAME = "default";
+
     /**
      * Executes statement. Can be either SELECT or DDL/DML.
      * DDL/DML integer result is wrapped into QueryResult
@@ -22,11 +25,21 @@ public interface QueryExecutor
     QueryResult executeQuery(String sql, QueryParam... params);
 
     /**
+     * Force given query to be executed as update
+     */
+    QueryResult executeUpdate(String sql, QueryParam... params);
+
+    /**
+     * Force given query to be executed as select
+     */
+    QueryResult executeSelect(String sql, QueryParam... params);
+
+    /**
      * Executes given query on DB setup in test context.
      */
     public static QueryResult query(String sql, QueryParam... params)
     {
-        QueryExecutor executor = testContext().getDependency(QueryExecutor.class, "default");
+        QueryExecutor executor = testContext().getDependency(QueryExecutor.class, DEFAULT_DB_NAME);
         return executor.executeQuery(sql, params);
     }
 

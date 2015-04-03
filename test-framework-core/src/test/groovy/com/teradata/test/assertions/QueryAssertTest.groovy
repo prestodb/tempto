@@ -44,7 +44,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected result count to be <3>, but was <2>'
+    e.message == 'Expected row count to be <3>, but was <2>'
   }
 
   def 'hasResultCount'()
@@ -144,13 +144,11 @@ public class QueryAssertTest
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
             .hasRows(
             row(1, "ALGERIA", "AFRICA"),
-            row(2, "ARGENTINA", "SOUTH AMERICA"),
-            row(3, "AUSTRIA", "EUROPE")
+            row(2, "ARGENTINA", "SOUTH AMERICA")
     )
 
     then:
-    def e = thrown(AssertionError)
-    e.message == 'Expected result count to be <3>, but was <2>'
+    noExceptionThrown()
   }
 
   def 'hasRows - different value - no row'()
@@ -189,7 +187,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(3, "AUSTRIA", "EUROPE")
@@ -197,14 +195,14 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected result count to be <3>, but was <2>'
+    e.message == 'Expected row count to be <3>, but was <2>'
   }
 
   def 'hasRowsInOrder - different value - no row'()
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "valid_value")
     )
@@ -219,7 +217,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(1, "ALGERIA", "AFRICA")
     )
@@ -235,7 +233,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "SOUTH AMERICA")
     )

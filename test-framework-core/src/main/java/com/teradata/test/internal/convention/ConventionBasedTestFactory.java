@@ -5,7 +5,6 @@
 package com.teradata.test.internal.convention;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.internal.convention.generator.GeneratorPathTestFactory;
 import com.teradata.test.internal.convention.recursion.RecursionPathTestFactory;
@@ -77,6 +76,8 @@ public class ConventionBasedTestFactory
     public List<ConventionBasedTest> createTestsForChildrenOfPath(Path path, String testNamePrefix)
     {
         try {
+            // TODO tree traversal for ZIP file system (when resources are inside jar) results with Exception
+            // TODO https://hadapt.jira.com/browse/SWARM-246
             return Files.list(path)
                     .flatMap(child -> createTestsForPath(child, testNamePrefix).stream())
                     .collect(toList());

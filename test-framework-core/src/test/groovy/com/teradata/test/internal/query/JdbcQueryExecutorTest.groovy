@@ -72,7 +72,7 @@ class JdbcQueryExecutorTest
     then:
     assertThat(result)
             .hasColumns(INTEGER, VARCHAR)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1, 'Teradata'),
             row(2, 'Oracle'),
             row(3, 'Facebook'))
@@ -89,7 +89,7 @@ class JdbcQueryExecutorTest
     then:
     assertThat(result)
             .hasColumns(INTEGER)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1))
 
     when:
@@ -98,7 +98,7 @@ class JdbcQueryExecutorTest
     then:
     assertThat(result)
             .hasColumns(INTEGER, VARCHAR)
-            .hasRowsInOrder(
+            .hasRowsExact(
             row(1, 'Teradata Kings'),
             row(2, 'Oracle'),
             row(3, 'Facebook'))

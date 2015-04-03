@@ -74,7 +74,7 @@ public class TestFrameworkLoggingAppender
 
     private String selectLogsDirectory()
     {
-        return "testlogs/" + DATE_FORMAT.format(new Date());
+        return "/tmp/testlogs/" + DATE_FORMAT.format(new Date());
     }
 
     @Override
