@@ -22,6 +22,7 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
+    jdbc_jar: third-party-deps/build/libs/presto-jdbc-all.jar
 
 tests:
   hdfs:
