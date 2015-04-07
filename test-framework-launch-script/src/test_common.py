@@ -27,6 +27,7 @@ SUITES_FILE = 'suites.json'
 # extra listeners added through ProductTest super class are:
 #  - TestInitializationListener
 
+
 def repo_root():
     try:
         return os.environ['SCRIPT_ROOT']

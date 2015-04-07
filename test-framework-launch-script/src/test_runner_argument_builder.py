@@ -122,6 +122,7 @@ class TestRunnerArgumentBuilder(object):
 
         return ' '.join(debug_flags)
 
-    def __joined_string_excluding_nulls_for(self, lst):
-        isNotNone = lambda x: (0 if x is None else 1)
-        return ' '.join(filter(isNotNone, lst))
+    @staticmethod
+    def __joined_string_excluding_nulls_for(lst):
+        is_not_none = lambda x: (0 if x is None else 1)
+        return ' '.join(filter(is_not_none, lst))

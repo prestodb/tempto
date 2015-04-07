@@ -21,6 +21,7 @@ def check(popen_args):
     retcode = process.poll()
     return retcode == 0
 
+
 def listener_arguments():
     return ' '.join([
         '-usedefaultlisteners', 'false',
@@ -77,6 +78,7 @@ def run_testng(test_runner_argument_builder):
     show_results_location()
     return result
 
+
 def is_excluded_remote_arg(arg):
     return arg == '-r' or arg == '--remote'
 
@@ -87,6 +89,7 @@ def remove_user_args(sys_args):
             sys_args.pop(index)
             sys_args.pop(index)
             return
+
 
 def list_suites(tests_classpath):
     sys.stdout.write('Available suites:\n\n\t')
