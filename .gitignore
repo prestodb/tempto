@@ -16,3 +16,7 @@ out/
 
 # tests logging output
 testlogs
+
+# python packaging artifacts
+dist/
+product_test.egg-info/
