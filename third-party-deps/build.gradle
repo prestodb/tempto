@@ -4,6 +4,7 @@
 
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 configurations {
   hiveJdbcFatJar
@@ -33,3 +34,31 @@ task copyProvidedDeps(type: Copy, dependsOn: hiveJdbcFatJar) {
 }
 
 build.dependsOn.add([hiveJdbcFatJar, copyProvidedDeps])
+
+publishing {
+  publications {
+    hiveJdbcFatJar(MavenPublication) {
+      groupId 'org.apache.hive'
+      artifactId 'hive-jdbc-all'
+      version '1.0-SNAPSHOT'
+
+      artifacts = ["$libsDir/hive-jdbc-all.jar"]
+    }
+    prestoJdbcFatJar(MavenPublication) {
+      groupId 'com.facebook.presto'
+      artifactId 'presto-jdbc-all'
+      version versions['presto'] + '-SNAPSHOT'
+
+      artifacts = ["$libsDir/presto-jdbc-all.jar"]
+    }
+  }
+
+
+  repositories.maven {
+    url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
+    credentials {
+      username 'automation'
+      password 'hadoopdb'
+    }
+  }
+}
