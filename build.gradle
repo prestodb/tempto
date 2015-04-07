@@ -11,22 +11,12 @@ plugins.withType(JavaPlugin) {
   targetCompatibility = 1.8
 }
 
-buildscript {
-  // buildscript is executed before anything, so ext variable is not yet configured
-  // and some values has to be set here
-  ext.teradataNexusRepositories = {
+allprojects {
+  repositories {
     maven {
       url 'http://phabricator.td.teradata.com:8081/nexus/content/groups/hadapt-deps'
     }
-    maven {
-      url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/build/'
-    }
   }
-  repositories teradataNexusRepositories
-}
-
-allprojects {
-  repositories teradataNexusRepositories
 }
 
 ext.versions = [
