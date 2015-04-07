@@ -11,7 +11,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * Static helper for holding TestContext stack in thread local variable.
+ * Static helper for holding TestContext stack in a thread local variable.
  * <p>
  * Justification for existence:
  * <p>

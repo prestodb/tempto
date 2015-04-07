@@ -9,7 +9,8 @@ import com.teradata.test.Requirement;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
-public class ImmutableHiveTableRequirement implements Requirement
+public class ImmutableHiveTableRequirement
+        implements Requirement
 {
 
     private final HiveTableDefinition tableDefinition;

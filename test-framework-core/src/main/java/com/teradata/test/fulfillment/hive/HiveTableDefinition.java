@@ -6,12 +6,15 @@ package com.teradata.test.fulfillment.hive;
 
 import com.teradata.test.fulfillment.table.TableDefinition;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class HiveTableDefinition
         extends TableDefinition
 {
+    private static final String NAME_TEMPLATE = "%NAME%";
+    private static final String LOCATION_TEMPLATE = "%LOCATION%";
 
     private final DataSource dataSource;
     private final String createTableDDLTemplate;
@@ -21,6 +24,9 @@ public class HiveTableDefinition
         super(name);
         this.dataSource = dataSource;
         this.createTableDDLTemplate = createTableDDLTemplate;
+
+        checkArgument(createTableDDLTemplate.contains(NAME_TEMPLATE), "Create table DDL must contain %NAME% placeholder");
+        checkArgument(createTableDDLTemplate.contains(LOCATION_TEMPLATE), "Create table DDL must contain %LOCATION% placeholder");
     }
 
     public DataSource getDataSource()
@@ -28,9 +34,14 @@ public class HiveTableDefinition
         return dataSource;
     }
 
-    public String getCreateTableDDLTemplate()
+    public String getCreateTableDDLTemplate(String location)
     {
-        return createTableDDLTemplate;
+        return getCreateTableDDLTemplate(getName(), location);
+    }
+
+    public String getCreateTableDDLTemplate(String name, String location)
+    {
+        return createTableDDLTemplate.replace(NAME_TEMPLATE, name).replace(LOCATION_TEMPLATE, location).replaceAll("\'", "''");
     }
 
     public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, DataSource dataSource)

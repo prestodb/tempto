@@ -15,13 +15,13 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("nation")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE nation(" +
+                            "CREATE TABLE %NAME%(" +
                             "   n_nationkey     INT," +
                             "   n_name          STRING," +
                             "   n_regionkey     INT," +
                             "   n_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
                     .build();
 
@@ -29,12 +29,12 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("region")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE region(" +
+                            "CREATE TABLE %NAME%(" +
                             "   r_regionkey     INT," +
                             "   r_name          STRING," +
                             "   r_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.REGION, 1.0))
                     .build();
 
@@ -42,7 +42,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("part")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE part(" +
+                            "CREATE TABLE %NAME%(" +
                             "   p_partkey     INT," +
                             "   p_name        STRING," +
                             "   p_mfgr        STRING," +
@@ -53,7 +53,7 @@ public class TpchTableDefinitions
                             "   p_retailprice DOUBLE," +
                             "   p_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.PART, 1.0))
                     .build();
 
@@ -61,7 +61,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("supplier")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE supplier(" +
+                            "CREATE TABLE %NAME%(" +
                             "   s_suppkey     INT," +
                             "   s_name        STRING," +
                             "   s_address     STRING," +
@@ -70,7 +70,7 @@ public class TpchTableDefinitions
                             "   s_acctbal     DOUBLE," +
                             "   s_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, 1.0))
                     .build();
 
@@ -78,14 +78,14 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("partsupp")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE partsupp(" +
+                            "CREATE TABLE %NAME%(" +
                             "   ps_partkey     INT," +
                             "   ps_suppkey     INT," +
                             "   ps_availqty    INT," +
                             "   ps_supplycost  DOUBLE," +
                             "   ps_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, 1.0))
                     .build();
 
@@ -93,7 +93,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("customer")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE customer(" +
+                            "CREATE TABLE %NAME%(" +
                             "   c_custkey     INT," +
                             "   c_name        STRING," +
                             "   c_address     STRING," +
@@ -103,7 +103,7 @@ public class TpchTableDefinitions
                             "   c_mktsegment  STRING," +
                             "   c_comment     STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.CUSTOMER, 1.0))
                     .build();
 
@@ -111,7 +111,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("orders")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE orders(" +
+                            "CREATE TABLE %NAME%(" +
                             "   o_orderkey       INT," +
                             "   o_custkey        INT," +
                             "   o_orderstatus    STRING," +
@@ -122,7 +122,7 @@ public class TpchTableDefinitions
                             "   o_shippriority   INT," +
                             "   o_comment        STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.ORDERS, 1.0))
                     .build();
 
@@ -130,7 +130,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("lineitem")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE lineitem(" +
+                            "CREATE TABLE %NAME%(" +
                             "   l_orderkey      INT," +
                             "   l_partkey       INT," +
                             "   l_suppkey       INT," +
@@ -148,7 +148,7 @@ public class TpchTableDefinitions
                             "   l_shipmode      STRING," +
                             "   l_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                            "LOCATION '{0}'")
+                            "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, 1.0))
                     .build();
 

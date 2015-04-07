@@ -22,7 +22,8 @@ import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.configuration.YamlConfiguration;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
-import com.teradata.test.internal.fulfillment.hive.HiveTablesFulfiller;
+import com.teradata.test.internal.fulfillment.table.TableManagerDispatcherModule;
+import com.teradata.test.internal.fulfillment.table.TablesFulfiller;
 import com.teradata.test.internal.initialization.modules.HadoopModule;
 import com.teradata.test.internal.initialization.modules.TestConfigurationModule;
 import com.teradata.test.internal.initialization.modules.TestInfoModule;
@@ -67,7 +68,7 @@ public class TestInitializationListener
     private static final String CLASSPATH_PROTOCOL = "classpath:";
 
     private final static List<Class<? extends RequirementFulfiller>> SUITE_FULFILLERS = ImmutableList.of(
-            HiveTablesFulfiller.class
+            TablesFulfiller.class
     );
 
     private static final List<Class<? extends RequirementFulfiller>> TEST_METHOD_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();
@@ -90,6 +91,7 @@ public class TestInitializationListener
                 new TestInfoModule("SUITE"),
                 new TestConfigurationModule(testConfiguration),
                 new QueryExecutorModule(testConfiguration),
+                new TableManagerDispatcherModule(),
                 new HadoopModule()
         );
     }
