@@ -21,29 +21,11 @@ PACKAGE_PREFIX = 'com.teradata.test.internal'
 
 LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
 ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'
-TEST_METHOD_SELECTOR = PACKAGE_PREFIX + '.listeners.TestNameGroupNameMethodSelector:100' # 100 is selector priority, anything bigger than default 10 is good
+TEST_METHOD_SELECTOR = PACKAGE_PREFIX + '.listeners.TestNameGroupNameMethodSelector:100'  # 100 is selector priority, anything bigger than default 10 is good
 SUITES_FILE = 'suites.json'
 #
 # extra listeners added through ProductTest super class are:
 #  - TestInitializationListener
-
-
-def repo_root():
-    try:
-        return os.environ['SCRIPT_ROOT']
-    except KeyError:
-        sys.stderr.write(
-            'Did not detect script root. Did you run using bin/*-test?\n'
-        )
-        sys.exit(ENVIRONMENT_ERROR)
-
-
-def framework_root():
-    return os.path.join(repo_root(), 'test-framework-core')
-
-
-def reporting_dir():
-    return os.path.join(framework_root(), 'build/reports/')
 
 
 def raw_dict_for(jsonfile):

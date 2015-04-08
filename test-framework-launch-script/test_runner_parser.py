@@ -90,6 +90,13 @@ class TestRunnerParser(object):
             action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), StoreAction]),
             help='Prints a list of the suite(s) a given group belongs to. Possible values {%(choices)s}'
         )
+        test_organization_arguments.add_argument(
+            '--report-dir',
+            metavar='DIR',
+            dest='report_dir',
+            required=True,
+            help='Directory to store report files'
+        )
 
     @staticmethod
     def __add_test_selection_arguments(parser):

@@ -9,7 +9,6 @@ import sys
 from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
 from test_common import LOGGING_LISTENER, ANNOTATION_LISTENER, TEST_METHOD_SELECTOR
 from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
-from test_common import repo_root, reporting_dir, framework_root
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
 
@@ -41,9 +40,9 @@ def metadata_arguments(test_runner_argument_builder):
     ])
 
 
-def show_results_location():
+def show_results_location(test_runner_argument_builder):
     sys.stdout.write(
-        'See ' + os.path.join(reporting_dir(),
+        'See ' + os.path.join(test_runner_argument_builder.report_dir,
                               'html/index.html for detailed results.\n')
     )
 
@@ -59,8 +58,8 @@ def be_playful():
 def run_testng(test_runner_argument_builder):
     be_playful()
     classpath = ':'.join(
-        [os.path.join(framework_root(), 'build/libs/test-framework-core-all.jar')] +
-        test_runner_argument_builder.tests_classpath_argument)
+        test_runner_argument_builder.tests_classpath_argument
+    )
 
     cmd_to_run = ' '.join([
         'java', '-classpath', classpath,
@@ -72,10 +71,10 @@ def run_testng(test_runner_argument_builder):
         'org.testng.TestNG', test_runner_argument_builder.suite_xml_if_no_classes_methods,
         test_runner_argument_builder.classes_argument,
         metadata_arguments(test_runner_argument_builder), listener_arguments(),
-        '-d ', reporting_dir()])
+        '-d ', test_runner_argument_builder.report_dir])
     result = subprocess.call(cmd_to_run, shell=True)
 
-    show_results_location()
+    show_results_location(test_runner_argument_builder)
     return result
 
 

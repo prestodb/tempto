@@ -8,7 +8,7 @@ setup(
     name='product-test',
     version='1.0',
     description='product-test will run your product tests using a custom SQL on Hadoop test harness.',
-    author="Teradata Coporation",
+    author='Teradata Corporation',
     author_email='anton.petrov@teradata.com',
     url='https://github.com/teradatalabs/test-framework',
     packages=['argparse_extensions'],

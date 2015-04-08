@@ -1,6 +1,3 @@
 #!/bin/sh
 
-SCRIPT_ROOT=$(readlink -f $(dirname $(readlink -f "$0"))/../..)
-export SCRIPT_ROOT # used by the script
-
-exec python $SCRIPT_ROOT/test-framework-launch-script/test_runner.py "$@"
+exec python test-framework-launch-script/test_runner.py "$@"

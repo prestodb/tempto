@@ -6,8 +6,7 @@ import os
 import tempfile
 from string import Template
 
-from test_common import framework_root, get_suite_groups,\
-    reporting_dir
+from test_common import get_suite_groups
 
 
 class TestRunnerArgumentBuilder(object):
@@ -21,6 +20,10 @@ class TestRunnerArgumentBuilder(object):
     def __init__(self, parser, args):
         self.__parser = parser
         self.__args = args
+
+    @property
+    def report_dir(self):
+        return self.__args.report_dir
 
     @property
     def tests_classpath_argument(self):
@@ -76,7 +79,9 @@ class TestRunnerArgumentBuilder(object):
     def suite_xml_if_no_classes_methods(self):
         if self.classes_argument is '':
             suite_xml_path = tempfile.mktemp(suffix='.xml')
-            with open(os.path.join(framework_root(), 'src/main/resources/all-testng-template.xml'), 'r') as template_xml_file:
+            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   'all-testng-template.xml'),
+                      'r') as template_xml_file:
                 template_xml = Template(template_xml_file.read())
             with open(suite_xml_path, 'w') as suite_xml_file:
                 suite_xml_file.write(template_xml.substitute(package=self.__args.tests_package))
