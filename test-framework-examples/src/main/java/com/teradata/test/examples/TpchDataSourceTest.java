@@ -36,6 +36,7 @@ public class TpchDataSourceTest
 
         Iterable generator = NATION.getTpchTableEntity().createGenerator(1.0, 1, 1);
         String expectedData = IOUtils.toString(new IterableTpchEntityInputStream<>(generator));
+        hdfsClient.saveFile(path + "/data", hdfsUsername, new IterableTpchEntityInputStream<>(generator));
         String storedData = hdfsClient.loadFile(path + "/data", hdfsUsername);
 
         assertThat(expectedData).isEqualTo(storedData);
