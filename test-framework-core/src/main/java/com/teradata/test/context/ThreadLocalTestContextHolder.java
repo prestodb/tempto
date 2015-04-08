@@ -23,7 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private final static InheritableThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new InheritableThreadLocal<TestContextStack<TestContext>>()
+    private final static ThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new ThreadLocal<TestContextStack<TestContext>>()
     {
         @Override
         protected TestContextStack<TestContext> initialValue()
