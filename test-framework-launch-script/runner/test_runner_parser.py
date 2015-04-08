@@ -141,7 +141,7 @@ class TestRunnerParser(object):
             type=lambda value : value.replace("#", "."),
             help='A comma-separated list of test names to be executed. Test is executed if its name is ends with one of test_names passed' +
                  'as parameter. For standard Java based tests test name is fully qualified method name (a.b.c.Class.method).' +
-                 'For convention based sql tests test name is sql_query_test.<test_dir_name>.<sql_file_without_extension>.'
+                 'For convention based sql tests test name is sql_tests.testcases.<test_dir_name>.<sql_file_without_extension>'
         )
 
         test_selection_arguments.add_argument(

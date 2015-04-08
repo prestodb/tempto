@@ -46,7 +46,7 @@ public class ExampleQueryAssertTest
                 "INNER JOIN region r ON n.regionkey = r.regionkey " +
                 "WHERE name like 'A%' ORDER BY n.name"))
                 .hasColumns(INTEGER, VARCHAR, VARCHAR)
-                .hasRows(
+                .contains(
                         row(7, "ARGENTINA", "SOUTH AMERICA"),
                         row(1, "ALGERIA", "AFRICA"));
     }
@@ -59,7 +59,7 @@ public class ExampleQueryAssertTest
                         "WHERE name like 'A%' AND n.created > ? ORDER BY n.name",
                 param(DATE, LocalDate.parse("2015-01-01"))))
                 .hasColumns(INTEGER, VARCHAR, VARCHAR)
-                .hasRowsExact(
+                .containsExactly(
                         row(1, "ALGERIA", "AFRICA"),
                         row(7, "ARGENTINA", "SOUTH AMERICA"));
     }

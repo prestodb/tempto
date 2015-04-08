@@ -4,17 +4,19 @@
 
 package com.teradata.test.examples;
 
+import com.google.common.io.ByteSource;
 import com.teradata.test.ProductTest;
-import com.teradata.test.internal.fulfillment.hive.tpch.IterableTpchEntityInputStream;
 import com.teradata.test.fulfillment.hive.tpch.TpchDataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
+import com.teradata.test.internal.fulfillment.hive.tpch.TpchEntityByteSource;
+import io.airlift.tpch.TpchEntity;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
-import static com.teradata.test.fulfillment.hive.tpch.TpchTable.NATION;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static com.teradata.test.fulfillment.hive.tpch.TpchTable.NATION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TpchDataSourceTest
@@ -34,9 +36,10 @@ public class TpchDataSourceTest
         HdfsClient hdfsClient = testContext().getDependency(HdfsClient.class);
         String hdfsUsername = testContext().getDependency(String.class, "hdfs.username");
 
-        Iterable generator = NATION.getTpchTableEntity().createGenerator(1.0, 1, 1);
-        String expectedData = IOUtils.toString(new IterableTpchEntityInputStream<>(generator));
-        hdfsClient.saveFile(path + "/data", hdfsUsername, new IterableTpchEntityInputStream<>(generator));
+        Iterable<TpchEntity> generator = NATION.getTpchTableEntity().createGenerator(1.0, 1, 1);
+        ByteSource byteSource = new TpchEntityByteSource<>(generator);
+        String expectedData = IOUtils.toString(byteSource.openStream());
+        hdfsClient.saveFile(path + "/data", hdfsUsername, byteSource.openStream());
         String storedData = hdfsClient.loadFile(path + "/data", hdfsUsername);
 
         assertThat(expectedData).isEqualTo(storedData);

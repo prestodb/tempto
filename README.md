@@ -274,7 +274,7 @@ Example assertions:
                   "INNER JOIN region r ON n.regionkey = r.regionkey " +
                   "WHERE name like 'A%' AND n.created > ? ORDER BY n.name", LocalDate.parse("2015-01-01")))
                   .hasColumns(INTEGER, VARCHAR, VARCHAR)
-                  .hasRowsInOrder(
+                  .containsOnly(
                           row(1, "ALGERIA", "AFRICA"),
                           row(7, "ARGENTINA", "SOUTH AMERICA"));
       }
@@ -436,7 +436,7 @@ By default all tests found in classpath are executed but user may limit that.
         <td>--tests</td>
         <td>List of tests to be executed. For java based tests test name is just fully qualified method name
             e.g. com.teradata.test.examples.SimpleQueryTest.selectCountFromNation. For sql convention based tests name 
-            looks like: sql_query_test.sample_table.allRows. Tests which name ends with one of patterns specified
+            looks like: sql_tests.testcases.sample_table.allRows. Tests which name ends with one of patterns specified
             in --tests parameter will be executed.
         </td>
     </tr>

@@ -4,16 +4,17 @@
 
 package com.teradata.test.internal.convention.tabledefinitions;
 
+import com.google.common.io.ByteSource;
 import com.teradata.test.fulfillment.hive.DataSource;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Collection;
 
+import static com.google.common.io.Files.asByteSource;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static org.apache.commons.io.FileUtils.readFileToString;
 
 public class FileBasedDataSource
@@ -37,14 +38,15 @@ public class FileBasedDataSource
     }
 
     @Override
-    public InputStream data()
+    public Collection<ByteSource> data()
     {
-        try {
-            return new BufferedInputStream(new FileInputStream(conventionTableDefinitionDescriptor.getDataFile()));
-        }
-        catch (FileNotFoundException e) {
+        File dataFile = conventionTableDefinitionDescriptor.getDataFile();
+
+        if (!dataFile.exists()) {
             throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDdlFile() + " should exist");
         }
+
+        return singleton(asByteSource(dataFile));
     }
 
     @Override

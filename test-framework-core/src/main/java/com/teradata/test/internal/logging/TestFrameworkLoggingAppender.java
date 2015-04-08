@@ -29,6 +29,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.io.Files.createParentDirs;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 
 /**
  * This class is a custom log appender that is responsible for two things:
@@ -74,7 +75,7 @@ public class TestFrameworkLoggingAppender
 
     private String selectLogsDirectory()
     {
-        return "/tmp/testlogs/" + DATE_FORMAT.format(new Date());
+        return getTempDirectoryPath()+"/testlogs/" + DATE_FORMAT.format(new Date());
     }
 
     @Override

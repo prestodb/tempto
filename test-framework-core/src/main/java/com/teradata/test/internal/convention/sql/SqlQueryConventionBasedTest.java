@@ -10,7 +10,6 @@ import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.HeaderFileParser;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.convention.SqlQueryFileWrapper;
-import com.teradata.test.internal.convention.SqlQueryFileWrapper.QueryType;
 import com.teradata.test.internal.convention.SqlResultFileWrapper;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
@@ -66,17 +65,17 @@ public class SqlQueryConventionBasedTest
         SqlResultFileWrapper resultFileWrapper = getSqlResultFileWrapper();
 
         QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFileWrapper);
-        QueryResult result = executeQuery(
-                queryExecutor, sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType()
-        );
-        QueryAssert queryAssert = assertThat(result)
+
+        QueryResult queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType());
+
+        QueryAssert queryAssert = assertThat(queryResult)
                 .hasColumns(resultFileWrapper.getTypes());
 
         if (resultFileWrapper.isIgnoreOrder()) {
-            queryAssert.hasRows(resultFileWrapper.getRows());
+            queryAssert.contains(resultFileWrapper.getRows());
         }
         else {
-            queryAssert.hasRowsExact(resultFileWrapper.getRows());
+            queryAssert.containsExactly(resultFileWrapper.getRows());
         }
 
         if (!resultFileWrapper.isIgnoreExcessRows()) {
@@ -132,22 +131,6 @@ public class SqlQueryConventionBasedTest
         }
         catch (RuntimeException e) {
             throw new RuntimeException("Cannot get query executor for database '" + database + "'", e);
-        }
-    }
-
-    private QueryResult executeQuery(QueryExecutor queryExecutor, String query, Optional<QueryType> queryType)
-    {
-        if (!queryType.isPresent()) {
-            return queryExecutor.executeQuery(query);
-        }
-
-        switch (queryType.get()) {
-            case SELECT:
-                return queryExecutor.executeSelect(query);
-            case UPDATE:
-                return queryExecutor.executeUpdate(query);
-            default:
-                throw new IllegalArgumentException("Invalid query type");
         }
     }
 }

@@ -13,10 +13,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
+import java.util.Optional;
 
 import static com.teradata.test.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
+import static com.teradata.test.query.QueryType.SELECT;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class JdbcQueryExecutor
@@ -36,23 +37,21 @@ public class JdbcQueryExecutor
 
     @Override
     public QueryResult executeQuery(String sql, QueryParam... params)
+            throws QueryExecutionException
     {
         return execute(sql, isSelect(sql), params);
     }
 
     @Override
-    public QueryResult executeUpdate(String sql, QueryParam... params)
+    public QueryResult executeQuery(String sql, Optional<QueryType> queryType, QueryParam... params)
+            throws QueryExecutionException
     {
-        return execute(sql, false, params);
-    }
-
-    @Override
-    public QueryResult executeSelect(String sql, QueryParam... params)
-    {
-        return execute(sql, true, params);
+        boolean isSelect = queryType.isPresent() ? queryType.get() == SELECT : isSelect(sql);
+        return execute(sql, isSelect, params);
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
+            throws QueryExecutionException
     {
         LOGGER.debug("executing query {} with params {}", sql, params);
 
@@ -65,7 +64,7 @@ public class JdbcQueryExecutor
             }
         }
         catch (SQLException e) {
-            throw new RuntimeException("Error while executing query: " + sql + ", params: " + Arrays.toString(params), e);
+            throw new QueryExecutionException(e);
         }
     }
 

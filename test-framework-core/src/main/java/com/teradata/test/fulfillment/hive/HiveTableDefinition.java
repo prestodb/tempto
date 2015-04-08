@@ -7,6 +7,8 @@ package com.teradata.test.fulfillment.hive;
 import com.teradata.test.fulfillment.table.TableDefinition;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.teradata.test.fulfillment.hive.InlineDataSource.createSameRowDataSource;
+import static com.teradata.test.fulfillment.hive.InlineDataSource.createStringDataSource;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
@@ -80,6 +82,24 @@ public class HiveTableDefinition
         public HiveTableDefinitionBuilder setDataSource(DataSource dataSource)
         {
             this.dataSource = dataSource;
+            return this;
+        }
+
+        public HiveTableDefinitionBuilder setData(String revision, String data)
+        {
+            this.dataSource = createStringDataSource(name, revision, data);
+            return this;
+        }
+
+        public HiveTableDefinitionBuilder setRows(String revision, int rowsCount, String rowData)
+        {
+            this.dataSource = createSameRowDataSource(name, revision, 1, rowsCount, rowData);
+            return this;
+        }
+
+        public HiveTableDefinitionBuilder setRows(String revision, int splitCount, int rowsInEachSplit, String rowData)
+        {
+            this.dataSource = createSameRowDataSource(name, revision, splitCount, rowsInEachSplit, rowData);
             return this;
         }
 

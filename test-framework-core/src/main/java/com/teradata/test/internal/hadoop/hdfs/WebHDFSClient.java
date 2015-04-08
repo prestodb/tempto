@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -90,6 +91,22 @@ public class WebHDFSClient
         }
         catch (IOException e) {
             throw new RuntimeException("Could not create directory " + path + " in hdfs, user: " + username, e);
+        }
+    }
+
+    @Override
+    public void delete(String path, String username)
+    {
+        Pair[] params = {Pair.of("recursive", "true")};
+        HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, username, "DELETE", params));
+        try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
+            if (response.getStatusLine().getStatusCode() != SC_OK) {
+                throw invalidStatusException("DELETE", path, username, removeFileOrDirectoryRequest, response);
+            }
+            logger.debug("Removed file or directory {} - username: {}", path, username);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not remove file or directory " + path + " in hdfs, user: " + username, e);
         }
     }
 
@@ -190,22 +207,6 @@ public class WebHDFSClient
         }
         catch (IOException e) {
             throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
-        }
-    }
-
-    @Override
-    public void delete(String path, String username)
-    {
-        Pair[] params = {Pair.of("recursive", "true")};
-        HttpGet removeFileOrDirectoryRequest = new HttpGet(buildUri(path, username, "DELETE", params));
-        try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
-            if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("DELETE", path, username, removeFileOrDirectoryRequest, response);
-            }
-            logger.debug("Removed file or directory {} - username: {}", path, username);
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Could not remove file or directory " + path + " in hdfs, user: " + username, e);
         }
     }
 

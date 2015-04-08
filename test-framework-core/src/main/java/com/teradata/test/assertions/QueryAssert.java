@@ -5,9 +5,12 @@
 package com.teradata.test.assertions;
 
 import com.teradata.test.internal.query.QueryResultValueComparator;
+import com.teradata.test.query.QueryExecutionException;
+import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
+import org.slf4j.Logger;
 
 import java.sql.JDBCType;
 import java.text.DecimalFormat;
@@ -21,10 +24,15 @@ import java.util.stream.Collectors;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.test.query.QueryResult.fromSqlIndex;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class QueryAssert
         extends AbstractAssert<QueryAssert, QueryResult>
 {
+
+    private static final Logger LOGGER = getLogger(QueryExecutor.class);
 
     private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("#0.00000000000");
 
@@ -38,11 +46,20 @@ public class QueryAssert
 
     public static QueryAssert assertThat(QueryResult queryResult)
     {
-        List<Comparator<Object>> comparators = queryResult.getColumnTypes().stream()
-                .map(QueryResultValueComparator::comparatorForType)
-                .collect(Collectors.toList());
-
+        List<Comparator<Object>> comparators = getComparators(queryResult);
         return new QueryAssert(queryResult, comparators);
+    }
+
+    public static QueryExecutionAssert assertThat(QueryCallback queryCallback)
+    {
+        QueryExecutionException executionException = null;
+        try {
+            queryCallback.executeQuery();
+        }
+        catch (QueryExecutionException e) {
+            executionException = e;
+        }
+        return new QueryExecutionAssert(ofNullable(executionException));
     }
 
     public QueryAssert hasRowsCount(int resultCount)
@@ -80,7 +97,10 @@ public class QueryAssert
         return hasColumns(Arrays.asList(expectedTypes));
     }
 
-    public QueryAssert hasRows(List<Row> rows)
+    /**
+     * Verifies that the actual result set contains all the given {@code rows}
+     */
+    public QueryAssert contains(List<Row> rows)
     {
         List<List<Object>> missingRows = newArrayList();
         for (Row row : rows) {
@@ -92,18 +112,44 @@ public class QueryAssert
         }
 
         if (!missingRows.isEmpty()) {
-            failWithMessage(buildHasRowsErrorMessage(missingRows));
+            failWithMessage(buildContainsMessage(missingRows));
         }
 
         return this;
     }
 
-    public QueryAssert hasRows(Row... rows)
+    /**
+     * @see #contains(java.util.List)
+     */
+    public QueryAssert contains(Row... rows)
     {
-        return hasRows(Arrays.asList(rows));
+        return contains(Arrays.asList(rows));
     }
 
-    public QueryAssert hasRowsExact(List<Row> rows)
+    /**
+     * Verifies that the actual result set consist of only {@code rows} in any order
+     */
+    public QueryAssert containsOnly(List<Row> rows)
+    {
+        hasRowsCount(rows.size());
+        contains(rows);
+
+        return this;
+    }
+
+    /**
+     * @see #containsOnly(java.util.List)
+     */
+    public QueryAssert containsOnly(Row... rows)
+    {
+        return containsOnly(Arrays.asList(rows));
+    }
+
+    /**
+     * Verifies that the actual result set equals to {@code rows}.
+     * ResultSet in different order or with any extra rows perceived as not same
+     */
+    public QueryAssert containsExactly(List<Row> rows)
     {
         hasRowsCount(rows.size());
         List<Integer> unequalRowsIndexes = newArrayList();
@@ -117,18 +163,28 @@ public class QueryAssert
         }
 
         if (!unequalRowsIndexes.isEmpty()) {
-            failWithMessage(buildHasRowsExactErrorMessage(unequalRowsIndexes, rows));
+            failWithMessage(buildContainsExactlyErrorMessage(unequalRowsIndexes, rows));
         }
 
         return this;
     }
 
-    public QueryAssert hasRowsExact(Row... rows)
+    /**
+     * @see #containsExactly(java.util.List)
+     */
+    public QueryAssert containsExactly(Row... rows)
     {
-        return hasRowsExact(Arrays.asList(rows));
+        return containsExactly(Arrays.asList(rows));
     }
 
-    private String buildHasRowsErrorMessage(List<List<Object>> missingRows)
+    private static List<Comparator<Object>> getComparators(QueryResult queryResult)
+    {
+        return queryResult.getColumnTypes().stream()
+                .map(QueryResultValueComparator::comparatorForType)
+                .collect(Collectors.toList());
+    }
+
+    private String buildContainsMessage(List<List<Object>> missingRows)
     {
         StringBuilder msg = new StringBuilder("Could not find rows:");
         appendRows(msg, missingRows);
@@ -142,11 +198,11 @@ public class QueryAssert
         rows.stream().forEach(row -> msg.append('\n').append(row));
     }
 
-    private String buildHasRowsExactErrorMessage(List<Integer> unequalRowsIndexes, List<Row> rows)
+    private String buildContainsExactlyErrorMessage(List<Integer> unequalRowsIndexes, List<Row> rows)
     {
         StringBuilder msg = new StringBuilder("Not equal rows:");
-        for (int i = 0; i < unequalRowsIndexes.size(); ++i) {
-            int unequalRowIndex = unequalRowsIndexes.get(i);
+        for (Integer unequalRowsIndex : unequalRowsIndexes) {
+            int unequalRowIndex = unequalRowsIndex;
             msg.append('\n');
             msg.append(unequalRowIndex);
             msg.append(" - expected: ");
@@ -224,6 +280,48 @@ public class QueryAssert
         }
 
         return column(index.get(), type, columnValuesAssert);
+    }
+
+    @FunctionalInterface
+    public static interface QueryCallback
+    {
+        QueryResult executeQuery()
+                throws QueryExecutionException;
+    }
+
+    public static class QueryExecutionAssert
+    {
+
+        private Optional<QueryExecutionException> executionExceptionOptional;
+
+        public QueryExecutionAssert(Optional<QueryExecutionException> executionExceptionOptional)
+        {
+            this.executionExceptionOptional = executionExceptionOptional;
+        }
+
+        public QueryExecutionAssert failsWithMessage(String... expectedErrorMessages)
+        {
+
+            if (!executionExceptionOptional.isPresent()) {
+                throw new AssertionError("Query did not fail as expected.");
+            }
+
+            QueryExecutionException executionException = executionExceptionOptional.get();
+
+            String exceptionMessage = executionException.getMessage();
+            LOGGER.debug("Query failed as expected with message: {}", exceptionMessage);
+            for (String expectedErrorMessage : expectedErrorMessages) {
+                if (!exceptionMessage.contains(expectedErrorMessage)) {
+                    throw new AssertionError(format(
+                            "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
+                            exceptionMessage,
+                            expectedErrorMessage
+                    ));
+                }
+            }
+
+            return this;
+        }
     }
 
     public static class Row

@@ -6,6 +6,7 @@ package com.teradata.test.internal.convention;
 
 import com.google.common.base.Splitter;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
+import com.teradata.test.query.QueryType;
 
 import java.util.Optional;
 import java.util.Set;
@@ -45,9 +46,5 @@ public class SqlQueryFileWrapper
 
     public Optional<QueryType> getQueryType(){
         return sqlFileParsingResult.getProperty(QUERY_TYPE_HEADER_PROPERTY).map(QueryType::valueOf);
-    }
-
-    public enum QueryType {
-        SELECT, UPDATE
     }
 }

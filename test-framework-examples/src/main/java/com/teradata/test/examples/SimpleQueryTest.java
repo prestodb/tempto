@@ -58,7 +58,7 @@ public class SimpleQueryTest
     {
         assertThat(query("select count(*) from nation"))
                 .hasRowsCount(1)
-                .hasRows(row(25));
+                .contains(row(25));
     }
 
     @Test(groups = "failing")

@@ -4,7 +4,9 @@
 
 package com.teradata.test.fulfillment.hive;
 
-import java.io.InputStream;
+import com.google.common.io.ByteSource;
+
+import java.util.Collection;
 
 /**
  * Responsible for providing data.
@@ -18,9 +20,9 @@ public interface DataSource
     String getPath();
 
     /**
-     * @return input stream of data
+     * @return list with table files data. For each byte source separate file will be created on HDFS
      */
-    InputStream data();
+    Collection<ByteSource> data();
 
     /**
      * Revision marker is used to determine if data should be regenerated. This

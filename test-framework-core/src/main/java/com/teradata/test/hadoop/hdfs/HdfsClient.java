@@ -20,6 +20,8 @@ public interface HdfsClient
 
     void createDirectory(String path, String username);
 
+    void delete(String path, String username);
+
     void saveFile(String path, String username, InputStream input);
 
     void loadFile(String path, String username, OutputStream outputStream);
@@ -39,6 +41,4 @@ public interface HdfsClient
      * @return length of a file stored in HDFS, -1 if file not exists
      */
     long getLength(String path, String username);
-
-    void delete(String path, String username);
 }

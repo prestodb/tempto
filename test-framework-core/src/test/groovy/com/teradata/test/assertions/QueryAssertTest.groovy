@@ -4,6 +4,7 @@
 
 package com.teradata.test.assertions
 
+import com.teradata.test.query.QueryExecutionException
 import com.teradata.test.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
 import spock.lang.Specification
@@ -142,7 +143,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRows(
+            .contains(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "SOUTH AMERICA")
     )
@@ -155,7 +156,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRows(
+            .contains(
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(1, "ALGERIA", "valid_value"),
     )
@@ -174,7 +175,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRows(
+            .contains(
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(1, "ALGERIA", "AFRICA"),
     )
@@ -187,7 +188,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsExact(
+            .containsExactly(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(3, "AUSTRIA", "EUROPE")
@@ -202,7 +203,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsExact(
+            .containsExactly(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "valid_value")
     )
@@ -217,7 +218,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsExact(
+            .containsExactly(
             row(2, "ARGENTINA", "SOUTH AMERICA"),
             row(1, "ALGERIA", "AFRICA")
     )
@@ -233,10 +234,41 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .hasRowsExact(
+            .containsExactly(
             row(1, "ALGERIA", "AFRICA"),
             row(2, "ARGENTINA", "SOUTH AMERICA")
     )
+
+    then:
+    noExceptionThrown()
+  }
+
+
+  def 'QueryExecutionAssert - not fail as expected'()
+  {
+    when:
+    assertThat({return null}).failsWithMessage("dummy")
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == "Query did not fail as expected."
+  }
+
+  def 'QueryExecutionAssert - wrong error message'()
+  {
+    when:
+    assertThat({throw new QueryExecutionException(new RuntimeException("foo bar"))}).failsWithMessage("dummy")
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == "Query failed with unexpected error message: 'java.lang.RuntimeException: foo bar' \n" +
+            " Expected error message was 'dummy'"
+  }
+
+  def 'QueryExecutionAssert - right error message'()
+  {
+    when:
+    assertThat({throw new QueryExecutionException(new RuntimeException("dummy"))}).failsWithMessage("dummy")
 
     then:
     noExceptionThrown()

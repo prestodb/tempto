@@ -22,6 +22,8 @@ import static com.teradata.test.assertions.QueryAssert.Row.row;
 public class QueryRowMapper
 {
 
+    private static final String NULL_STRING = "null";
+
     private final List<JDBCType> columnTypes;
 
     public QueryRowMapper(List<JDBCType> columnTypes)
@@ -46,6 +48,10 @@ public class QueryRowMapper
 
     private Object convertValue(String value, JDBCType expectedType)
     {
+        if(NULL_STRING.equals(value)){
+            return null;
+        }
+
         switch (expectedType) {
             case CHAR:
             case VARCHAR:
