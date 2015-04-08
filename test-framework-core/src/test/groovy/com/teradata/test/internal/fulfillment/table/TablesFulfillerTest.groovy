@@ -11,6 +11,7 @@ import com.teradata.test.fulfillment.table.TableDefinition
 import com.teradata.test.fulfillment.table.TableManager
 import com.teradata.test.fulfillment.table.TableManagerDispatcher
 import com.teradata.test.fulfillment.table.TablesState
+import com.teradata.test.hadoop.hdfs.HdfsClient
 import com.teradata.test.internal.fulfillment.hive.HiveDataSourceWriter
 import com.teradata.test.internal.fulfillment.hive.HiveTableManager
 import com.teradata.test.query.QueryExecutor
@@ -23,11 +24,12 @@ class TablesFulfillerTest
 {
   QueryExecutor queryExecutor = Mock()
   HiveDataSourceWriter dataSourceWriter = Mock()
+  HdfsClient hdfsClient = Mock()
 
-  def "test hive fulfill/cleanup"()
+  def "test immutable hive fulfill/cleanup"()
   {
     when:
-    TablesFulfiller fulfiller = getTablesFulfillerFor(new HiveTableManager(queryExecutor, dataSourceWriter))
+    TablesFulfiller fulfiller = getTablesFulfillerFor(new HiveTableManager(queryExecutor, dataSourceWriter, hdfsClient, "password"))
     def nationDataSource = Mock(DataSource)
     nationDataSource.getPath() >> '/some/table/in/hdfs'
     def nationDefinition = HiveTableDefinition.builder()
@@ -53,7 +55,7 @@ class TablesFulfillerTest
 
     then:
     1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
-    1 * dataSourceWriter.ensureDataOnHdfs(_)
+    1 * dataSourceWriter.ensureDataOnHdfs(_, Optional.empty())
     1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' LOCATION \'/some/table/in/hdfs\'')
 
     when:

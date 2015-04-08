@@ -8,10 +8,13 @@ import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
+import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.query.QueryExecutor;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
+
+import java.util.Optional;
 
 import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -23,27 +26,32 @@ public class HiveTableManager
 
     private final QueryExecutor queryExecutor;
     private final HiveDataSourceWriter hiveDataSourceWriter;
+    private final HdfsClient hdfsClient;
+    private final String hdfsUsername;
 
     @Inject
-    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor, HiveDataSourceWriter hiveDataSourceWriter)
+    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor, HiveDataSourceWriter hiveDataSourceWriter,
+            HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
     {
         this.queryExecutor = queryExecutor;
         this.hiveDataSourceWriter = hiveDataSourceWriter;
+        this.hdfsClient = hdfsClient;
+        this.hdfsUsername = hdfsUsername;
     }
 
     @Override
-    public TableInstance createImmutable(TableDefinition tableDefinition)
+    public HiveTableInstance createImmutable(TableDefinition tableDefinition)
     {
         HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
-        LOGGER.debug("creating table {}", tableDefinition.getName());
+        LOGGER.debug("creating immutable table {}", tableDefinition.getName());
         queryExecutor.executeQuery(dropTableDDL(tableDefinition.getName()));
-        hiveDataSourceWriter.ensureDataOnHdfs(hiveTableDefinition.getDataSource());
+        hiveDataSourceWriter.ensureDataOnHdfs(hiveTableDefinition.getDataSource(), Optional.<String>empty());
         queryExecutor.executeQuery(createTableDDL(hiveTableDefinition));
-        return new TableInstance(tableDefinition.getName(), tableDefinition.getName(), tableDefinition);
+        return new HiveTableInstance(tableDefinition.getName(), tableDefinition.getName(), hiveTableDefinition, Optional.<String>empty());
     }
 
     @Override
-    public TableInstance createMutable(TableDefinition tableDefinition)
+    public HiveTableInstance createMutable(TableDefinition tableDefinition)
     {
         throw new UnsupportedOperationException("not supported yet");
     }
@@ -51,7 +59,11 @@ public class HiveTableManager
     @Override
     public void drop(TableInstance tableInstance)
     {
-        queryExecutor.executeQuery(dropTableDDL(tableInstance.getNameInDatabase()));
+        HiveTableInstance hiveTableInstance = (HiveTableInstance) tableInstance;
+        queryExecutor.executeQuery(dropTableDDL(hiveTableInstance.getNameInDatabase()));
+        if (hiveTableInstance.getMutableDataHdfsDataPath().isPresent()) {
+            hdfsClient.delete(hiveTableInstance.getMutableDataHdfsDataPath().get(), hdfsUsername);
+        }
     }
 
     private String createTableDDL(HiveTableDefinition tableDefinition)

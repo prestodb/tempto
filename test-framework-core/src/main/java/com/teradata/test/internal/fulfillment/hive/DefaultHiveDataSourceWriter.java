@@ -37,9 +37,9 @@ public class DefaultHiveDataSourceWriter
     }
 
     @Override
-    public void ensureDataOnHdfs(DataSource dataSource)
+    public void ensureDataOnHdfs(DataSource dataSource, Optional<String> customDataSourcePath)
     {
-        String dataSourcePath = dataSource.getPath();
+        String dataSourcePath = customDataSourcePath.orElse(dataSource.getPath());
         String filePath = dataSourcePath + "/data";
 
         Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);

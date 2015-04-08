@@ -193,6 +193,22 @@ public class WebHDFSClient
         }
     }
 
+    @Override
+    public void delete(String path, String username)
+    {
+        Pair[] params = {Pair.of("recursive", "true")};
+        HttpGet removeFileOrDirectoryRequest = new HttpGet(buildUri(path, username, "DELETE", params));
+        try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
+            if (response.getStatusLine().getStatusCode() != SC_OK) {
+                throw invalidStatusException("DELETE", path, username, removeFileOrDirectoryRequest, response);
+            }
+            logger.debug("Removed file or directory {} - username: {}", path, username);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not remove file or directory " + path + " in hdfs, user: " + username, e);
+        }
+    }
+
     private String executeAndGetRedirectUri(HttpUriRequest request)
     {
         try (CloseableHttpResponse response = httpClient.execute(request)) {
