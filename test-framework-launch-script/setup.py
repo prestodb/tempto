@@ -11,8 +11,9 @@ setup(
     author='Teradata Corporation',
     author_email='anton.petrov@teradata.com',
     url='https://github.com/teradatalabs/test-framework',
-    packages=['argparse_extensions'],
-    py_modules=['test_common', 'test_runner', 'test_runner_argument_builder', 'test_runner_parser'],
+    packages=['argparse_extensions', 'runner'],
+    include_package_data=True,
+    package_data={'runner': ['*.xml']},
     keywords=['sql', 'hadoop', 'test-framework'],
-    entry_points={'console_scripts': ['product-test = test_runner:main']}
+    entry_points={'console_scripts': ['product-test = runner.test_runner:main']}
 )
