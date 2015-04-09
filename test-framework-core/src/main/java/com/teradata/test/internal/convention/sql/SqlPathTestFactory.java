@@ -7,7 +7,7 @@ package com.teradata.test.internal.convention.sql;
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.Requirement;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
-import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
+import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 
@@ -78,7 +78,7 @@ public class SqlPathTestFactory
         // TODO: requirements need to be based on actual convention based requirements
         List<Requirement> requirements = newArrayList();
         for (HiveTableDefinition tpchHiveTableDefinition : tableDefinitions) {
-            requirements.add(new ImmutableHiveTableRequirement(tpchHiveTableDefinition));
+            requirements.add(new ImmutableTableRequirement(tpchHiveTableDefinition));
         }
         return compose(requirements);
     }

@@ -9,6 +9,9 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithText
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.fulfillment.table.TableManagerDispatcher.getTableManagerDispatcher;
 
+/**
+ * Provides functionality of creating/dropping tables based on {@link TableDefinition}.
+ */
 public interface TableManager
 {
     TableInstance createImmutable(TableDefinition tableDefinition);

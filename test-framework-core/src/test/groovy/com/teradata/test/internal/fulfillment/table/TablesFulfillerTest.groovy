@@ -4,17 +4,7 @@
 
 package com.teradata.test.internal.fulfillment.table
 
-import com.teradata.test.fulfillment.hive.DataSource
-import com.teradata.test.fulfillment.hive.HiveTableDefinition
-import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement
-import com.teradata.test.fulfillment.table.TableDefinition
-import com.teradata.test.fulfillment.table.TableManager
-import com.teradata.test.fulfillment.table.TableManagerDispatcher
-import com.teradata.test.fulfillment.table.TablesState
-import com.teradata.test.hadoop.hdfs.HdfsClient
-import com.teradata.test.internal.fulfillment.hive.HiveDataSourceWriter
-import com.teradata.test.internal.fulfillment.hive.HiveTableManager
-import com.teradata.test.query.QueryExecutor
+import com.teradata.test.fulfillment.table.*
 import spock.lang.Specification
 
 import static com.google.common.collect.Iterables.getOnlyElement
@@ -22,59 +12,49 @@ import static com.google.common.collect.Iterables.getOnlyElement
 class TablesFulfillerTest
         extends Specification
 {
-  QueryExecutor queryExecutor = Mock()
-  HiveDataSourceWriter dataSourceWriter = Mock()
-  HdfsClient hdfsClient = Mock()
+  TableManager tableManager = Mock(TableManager)
+  TableManagerDispatcher tableManagerDispatcher = Mock(TableManagerDispatcher)
 
-  def "test immutable hive fulfill/cleanup"()
+  void setup()
   {
-    when:
-    TablesFulfiller fulfiller = getTablesFulfillerFor(new HiveTableManager(queryExecutor, dataSourceWriter, hdfsClient, "password"))
-    def nationDataSource = Mock(DataSource)
-    nationDataSource.getPath() >> '/some/table/in/hdfs'
-    def nationDefinition = HiveTableDefinition.builder()
-            .setName('nation')
-            .setDataSource(nationDataSource)
-            .setCreateTableDDLTemplate('CREATE TABLE %NAME%(' +
-            'n_nationid INT,' +
-            'n_name STRING) ' +
-            'ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' ' +
-            'LOCATION \'%LOCATION%\'')
-            .build()
+    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition) >> tableManager
+  }
 
-    def requirement = new ImmutableHiveTableRequirement(nationDefinition)
+  def "test immutable table fulfill/cleanup"()
+  {
+    setup:
+    def tableDefinition = getTableDefinition("nation")
+    def tableInstance = new TableInstance("nation", "nation", tableDefinition)
+    def requirement = new ImmutableTableRequirement(tableDefinition)
+
+    tableManager.createImmutable(tableDefinition) >> tableInstance
+
+    TablesFulfiller fulfiller = new TablesFulfiller(tableManagerDispatcher)
+
+    when:
     def states = fulfiller.fulfill([requirement] as Set)
 
     assert states.size() == 1
-    def state = getOnlyElement(states)
-    assert state.class == TablesState
-    def hiveTablesState = (TablesState) state
-    def nationTableInstance = hiveTablesState.getTableInstance('nation')
-    assert nationTableInstance.name == 'nation'
-    assert nationTableInstance.nameInDatabase == 'nation'
+    def state = (TablesState) getOnlyElement(states)
+    assert state.getTableInstance('nation') == tableInstance
 
     then:
-    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
-    1 * dataSourceWriter.ensureDataOnHdfs(_, Optional.empty())
-    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' LOCATION \'/some/table/in/hdfs\'')
+    1 * tableManagerDispatcher.getTableManagerFor(tableDefinition) >> tableManager
+    1 * tableManager.createImmutable(tableDefinition) >> tableInstance
 
     when:
     fulfiller.cleanup()
 
     then:
-    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
+    1 * tableManagerDispatcher.getTableManagerFor(tableInstance) >>> tableManager
+    1 * tableManager.drop(tableInstance)
     0 * _
   }
 
-  def getTablesFulfillerFor(HiveTableManager tableManager)
+  def getTableDefinition(String tableName)
   {
-    TableManagerDispatcher dispatcher = new TableManagerDispatcher() {
-      @Override
-      TableManager getTableManagerFor(TableDefinition tableDefinition)
-      {
-        return tableManager
-      }
-    }
-    return new TablesFulfiller(dispatcher)
+    def tableDefinition = Mock(TableDefinition)
+    tableDefinition.name >> tableName
+    return tableDefinition
   }
 }

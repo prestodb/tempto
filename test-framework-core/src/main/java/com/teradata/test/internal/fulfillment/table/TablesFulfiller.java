@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.teradata.test.Requirement;
 import com.teradata.test.context.State;
 import com.teradata.test.fulfillment.RequirementFulfiller;
-import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
+import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
@@ -44,10 +44,10 @@ public class TablesFulfiller
     public Set<State> fulfill(Set<Requirement> requirements)
     {
         LOGGER.debug("fulfilling tables");
-        Iterable<ImmutableHiveTableRequirement> tableRequirements = filter(requirements, ImmutableHiveTableRequirement.class);
+        Iterable<ImmutableTableRequirement> tableRequirements = filter(requirements, ImmutableTableRequirement.class);
         Map<String, TableInstance> instanceMap = newHashMap();
 
-        for (ImmutableHiveTableRequirement tableRequirement : tableRequirements) {
+        for (ImmutableTableRequirement tableRequirement : tableRequirements) {
             TableDefinition tableDefinition = tableRequirement.getTableDefinition();
             TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
             TableInstance instance = tableManager.createImmutable(tableRequirement.getTableDefinition());

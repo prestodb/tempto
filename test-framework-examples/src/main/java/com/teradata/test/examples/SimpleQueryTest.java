@@ -10,7 +10,7 @@ import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
-import com.teradata.test.fulfillment.hive.ImmutableHiveTableRequirement;
+import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import org.testng.annotations.Test;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
@@ -31,7 +31,7 @@ public class SimpleQueryTest
         @Override
         public Requirement getRequirements()
         {
-            return new ImmutableHiveTableRequirement(NATION);
+            return new ImmutableTableRequirement(NATION);
         }
     }
 
