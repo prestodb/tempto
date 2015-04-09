@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec python test-framework-launch-script/test_runner.py "$@"
+exec python test-framework-launch-script/runner/test_runner.py "$@"
