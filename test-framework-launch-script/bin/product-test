@@ -1,3 +1,5 @@
 #!/bin/sh
 
-exec python test-framework-launch-script/runner/test_runner.py "$@"
+SCRIPT_ROOT=$(readlink -f $(dirname $(readlink -f "$0"))/..)
+
+exec python $SCRIPT_ROOT/runner/test_runner.py "$@"
