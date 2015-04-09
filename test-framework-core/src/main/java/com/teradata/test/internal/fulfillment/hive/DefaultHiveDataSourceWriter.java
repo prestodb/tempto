@@ -40,10 +40,8 @@ public class DefaultHiveDataSourceWriter
     }
 
     @Override
-    public void ensureDataOnHdfs(DataSource dataSource, Optional<String> customDataSourcePath)
+    public void ensureDataOnHdfs(String dataSourcePath, DataSource dataSource)
     {
-        String dataSourcePath = customDataSourcePath.orElse(dataSource.getPath());
-
         Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);
         if (storedRevisionMarker.isPresent()) {
             if (storedRevisionMarker.get().equals(dataSource.revisionMarker())) {
@@ -58,13 +56,12 @@ public class DefaultHiveDataSourceWriter
 
         hdfsClient.delete(dataSourcePath, hdfsUsername);
         hdfsClient.createDirectory(dataSourcePath, hdfsUsername);
-        storeTableFiles(dataSource);
+        storeTableFiles(dataSourcePath, dataSource);
         hdfsClient.setXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME, dataSource.revisionMarker());
     }
 
-    private void storeTableFiles(DataSource dataSource)
+    private void storeTableFiles(String dataSourcePath, DataSource dataSource)
     {
-        String dataSourcePath = dataSource.getPath();
         int fileIndex = 0;
         for (ByteSource fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;

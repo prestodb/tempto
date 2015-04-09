@@ -11,12 +11,16 @@ import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
+import com.teradata.test.fulfillment.table.TableInstance;
+import com.teradata.test.fulfillment.table.TableManager;
 import org.testng.annotations.Test;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
+import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
 import static com.teradata.test.query.QueryExecutor.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,13 +40,22 @@ public class SimpleQueryTest
     }
 
     @BeforeTestWithContext
-    public void beforeTest() {
-       assertThat(testContextIfSet().isPresent()).isTrue();
+    public void beforeTest()
+    {
+        assertThat(testContextIfSet().isPresent()).isTrue();
     }
 
     @AfterTestWithContext
-    public void afterTest() {
+    public void afterTest()
+    {
         assertThat(testContextIfSet().isPresent()).isTrue();
+    }
+
+    @Test(groups = "query")
+    public void createAndDropMutableTable()
+    {
+        TableInstance instance = testContext().getDependency(TableManager.class, "hive").createMutable(NATION);
+        dropTableOnTestContextClose(instance);
     }
 
     @Test(groups = "query")
@@ -72,5 +85,4 @@ public class SimpleQueryTest
     {
         assertThat(1).isEqualTo(2);
     }
-
 }

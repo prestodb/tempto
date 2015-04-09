@@ -10,7 +10,6 @@ import com.teradata.test.internal.fulfillment.hive.tpch.TpchEntityByteSource;
 
 import java.util.Collection;
 
-import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
@@ -30,11 +29,10 @@ public class TpchDataSource
     }
 
     @Override
-    public String getPath()
+    public String getPathSuffix()
     {
         // {TESTS_PATH}/tpch/sf-{scaleFactor}/{tableName}
-        String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");
-        return format("%s/tpch/sf-%.2f/%s", testsPath, scaleFactor, table.name()).replaceAll("\\.", "_");
+        return format("tpch/sf-%.2f/%s", scaleFactor, table.name()).replaceAll("\\.", "_");
     }
 
     @Override

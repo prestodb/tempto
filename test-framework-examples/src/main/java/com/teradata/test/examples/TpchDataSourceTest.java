@@ -29,7 +29,7 @@ public class TpchDataSourceTest
     {
         TpchDataSource dataSource = new TpchDataSource(NATION, 1.0);
 
-        String path = dataSource.getPath();
+        String path =  "/product-test/" + dataSource.getPathSuffix();
 
         assertThat(path).isEqualTo("/product-test/tpch/sf-1_00/NATION");
 

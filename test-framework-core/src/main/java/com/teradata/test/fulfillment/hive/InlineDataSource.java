@@ -10,7 +10,6 @@ import static com.google.common.collect.Iterators.cycle;
 import static com.google.common.collect.Iterators.limit;
 import static com.google.common.io.ByteSource.concat;
 import static com.google.common.io.ByteSource.wrap;
-import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
@@ -67,11 +66,10 @@ public abstract class InlineDataSource
     }
 
     @Override
-    public String getPath()
+    public String getPathSuffix()
     {
         // {TESTS_PATH}/datasets/{dataSetName}
-        String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");
-        return format("%s/inline-tables/%s", testsPath, tableName);
+        return format("inline-tables/%s", tableName);
     }
 
     @Override

@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import static com.google.common.io.Files.asByteSource;
-import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static org.apache.commons.io.FileUtils.readFileToString;
@@ -30,11 +29,10 @@ public class FileBasedDataSource
     }
 
     @Override
-    public String getPath()
+    public String getPathSuffix()
     {
         // {TESTS_PATH}/datasets/{dataSetName}
-        String testsPath = testContext().getDependency(String.class, "tests.hdfs.path");
-        return format("%s/datasets/%s", testsPath, conventionTableDefinitionDescriptor.getName());
+        return format("datasets/%s", conventionTableDefinitionDescriptor.getName());
     }
 
     @Override

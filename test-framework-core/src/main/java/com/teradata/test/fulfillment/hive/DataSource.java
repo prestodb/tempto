@@ -13,11 +13,10 @@ import java.util.Collection;
  */
 public interface DataSource
 {
-
     /**
-     * @return path where data source data should be stored
+     * @return path suffix where data source data should be stored
      */
-    String getPath();
+    String getPathSuffix();
 
     /**
      * @return list with table files data. For each byte source separate file will be created on HDFS
