@@ -11,7 +11,7 @@ setup(
     author='Teradata Corporation',
     author_email='anton.petrov@teradata.com',
     url='https://github.com/teradatalabs/test-framework',
-    packages=['argparse_extensions', 'runner'],
+    packages=['runner', 'runner.argparse_extensions'],
     include_package_data=True,
     package_data={'runner': ['*.xml']},
     keywords=['sql', 'hadoop', 'test-framework'],
