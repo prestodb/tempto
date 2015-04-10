@@ -20,6 +20,7 @@ import java.lang.reflect.Method
 
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextSet
+import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
 
 class TestInitializationListenerTest
         extends Specification
@@ -55,7 +56,7 @@ class TestInitializationListenerTest
   {
     setup:
     def testClass = new TestClass()
-    def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller])
+    def listener = new TestInitializationListener([], [], [AFulfiller], [BFulfiller], emptyConfiguration())
     def iTestContext = getITestContext(successMethod, testClass)
     def iTestResult = getITestResult(successMethod, testClass)
 
@@ -87,7 +88,7 @@ class TestInitializationListenerTest
   {
     setup:
     def testClass = new TestClass()
-    def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller, CFulfiller])
+    def listener = new TestInitializationListener([], [], [AFulfiller], [BFulfiller, CFulfiller], emptyConfiguration())
     def iTestContext = getITestContext(failMethod, testClass)
     def iTestResult = getITestResult(failMethod, testClass)
 

@@ -4,6 +4,7 @@
 
 package com.teradata.test.internal.context;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -13,6 +14,7 @@ import com.teradata.test.context.TestContext;
 import com.teradata.test.context.TestContextCloseCallback;
 import org.slf4j.Logger;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -73,15 +75,10 @@ public class GuiceTestContext
     @Override
     public GuiceTestContext createChildContext(Iterable<State> newStatesIterable)
     {
-        return createChildContext(newStatesIterable, new Module[] {});
+        return createChildContext(newStatesIterable, emptyList());
     }
 
-    public GuiceTestContext createChildContext(Module... overrideModules)
-    {
-        return createChildContext(emptyList(), overrideModules);
-    }
-
-    public GuiceTestContext createChildContext(Iterable<State> newStatesIterable, Module... overrideModules)
+    public GuiceTestContext createChildContext(Iterable<State> newStatesIterable, Iterable<Module> overrideModules)
     {
         LOGGER.debug("Creating new test context from " + this);
 

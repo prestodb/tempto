@@ -23,6 +23,7 @@ dependencies {
   compile(libraries.reportng) {
     exclude group: 'org.testng', module: 'testng'
   }
+  compile libraries.reflections
 
   testCompile libraries.spock
   testCompile libraries.hsqldb

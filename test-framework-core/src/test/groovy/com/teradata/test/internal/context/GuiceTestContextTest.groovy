@@ -39,13 +39,13 @@ class GuiceTestContextTest
       }
     })
 
-    def context2 = context1.createChildContext(new Module() {
+    def context2 = context1.createChildContext([], [new Module() {
       @Override
       void configure(Binder binder)
       {
         binder.bind(DummyState).toInstance(state2)
       }
-    })
+    }])
 
     expect:
     assert context1.getDependency(DummyState) == state1

@@ -40,7 +40,8 @@ ext.versions = [
         commons_dbcp2: '2.1',
         hive         : '0.12.0-cdh5.1.2',
         hadoop       : '0.20.2',
-        presto       : '0.97'
+        presto       : '0.97',
+        reflections  : '0.9.9'
 ]
 
 ext.libraries = [
@@ -65,7 +66,8 @@ ext.libraries = [
         jsonpath     : "com.jayway.jsonpath:json-path:${versions.jsonpath}",
         hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
         hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}",
-        presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}"
+        presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}",
+        reflections  : "org.reflections:reflections:${versions.reflections}"
 ]
 
 ext.test_framework_core = project(':test-framework-core')

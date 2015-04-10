@@ -10,6 +10,7 @@ import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
+import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import com.teradata.test.query.QueryExecutor;
 import org.slf4j.Logger;
 
@@ -27,18 +28,18 @@ public class HiveTableManager
     private static final Logger LOGGER = getLogger(HiveTableManager.class);
 
     private final QueryExecutor queryExecutor;
-    private final HiveDataSourceWriter hiveDataSourceWriter;
+    private final HdfsDataSourceWriter hdfsDataSourceWriter;
     private final String testDataBasePath;
     private final HdfsClient hdfsClient;
     private final String hdfsUsername;
 
     @Inject
-    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor, HiveDataSourceWriter hiveDataSourceWriter,
+    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor, HdfsDataSourceWriter hdfsDataSourceWriter,
             @Named("tests.hdfs.path") String testDataBasePath,
             HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
     {
         this.queryExecutor = queryExecutor;
-        this.hiveDataSourceWriter = hiveDataSourceWriter;
+        this.hdfsDataSourceWriter = hdfsDataSourceWriter;
         this.testDataBasePath = testDataBasePath;
         this.hdfsClient = hdfsClient;
         this.hdfsUsername = hdfsUsername;
@@ -54,7 +55,7 @@ public class HiveTableManager
 
         DataSource dataSource = hiveTableDefinition.getDataSource();
         String tableDataPath = getImmutableTableHdfsPath(dataSource);
-        hiveDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
+        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
 
         String tableNameInDatabase = tableDefinition.getName();
         queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
@@ -73,7 +74,7 @@ public class HiveTableManager
 
         DataSource dataSource = hiveTableDefinition.getDataSource();
         String tableDataPath = getMutableTableHdfsPath(tableNameInDatabase);
-        hiveDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
+        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
 
         queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
 

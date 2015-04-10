@@ -2,7 +2,7 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.fulfillment.hive;
+package com.teradata.test.internal.hadoop.hdfs;
 
 import com.google.common.io.ByteSource;
 import com.teradata.test.fulfillment.hive.DataSource;
@@ -18,11 +18,11 @@ import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class DefaultHiveDataSourceWriter
-        implements HiveDataSourceWriter
+public class DefaultHdfsDataSourceWriter
+        implements HdfsDataSourceWriter
 {
 
-    private static final Logger LOGGER = getLogger(DefaultHiveDataSourceWriter.class);
+    private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
 
     /**
      * XAttr name stored on HDFS for each data source file.
@@ -33,7 +33,7 @@ public class DefaultHiveDataSourceWriter
     private final String hdfsUsername;
 
     @Inject
-    public DefaultHiveDataSourceWriter(HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
+    public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
     {
         this.hdfsClient = hdfsClient;
         this.hdfsUsername = hdfsUsername;

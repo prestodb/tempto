@@ -6,6 +6,7 @@ package com.teradata.test.internal.fulfillment.hive
 import com.teradata.test.fulfillment.hive.DataSource
 import com.teradata.test.fulfillment.hive.HiveTableDefinition
 import com.teradata.test.hadoop.hdfs.HdfsClient
+import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter
 import com.teradata.test.query.QueryExecutor
 import spock.lang.Specification
 
@@ -13,7 +14,7 @@ class HiveTableManagerTest
         extends Specification
 {
   QueryExecutor queryExecutor = Mock()
-  HiveDataSourceWriter dataSourceWriter = Mock()
+  HdfsDataSourceWriter dataSourceWriter = Mock()
   HdfsClient hdfsClient = Mock()
 
   def 'should create hive immutable table'()
