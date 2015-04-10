@@ -4,6 +4,8 @@
 
 package com.teradata.test.examples;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.teradata.test.AfterTestWithContext;
 import com.teradata.test.BeforeTestWithContext;
 import com.teradata.test.ProductTest;
@@ -17,7 +19,6 @@ import org.testng.annotations.Test;
 
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
-import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
@@ -39,6 +40,10 @@ public class SimpleQueryTest
         }
     }
 
+    @Inject()
+    @Named("hive")
+    TableManager tableManager;
+
     @BeforeTestWithContext
     public void beforeTest()
     {
@@ -54,7 +59,7 @@ public class SimpleQueryTest
     @Test(groups = "query")
     public void createAndDropMutableTable()
     {
-        TableInstance instance = testContext().getDependency(TableManager.class, "hive").createMutable(NATION);
+        TableInstance instance = tableManager.createMutable(NATION);
         dropTableOnTestContextClose(instance);
     }
 

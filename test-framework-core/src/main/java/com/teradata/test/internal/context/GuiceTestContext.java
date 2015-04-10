@@ -76,7 +76,8 @@ public class GuiceTestContext
         return createChildContext(newStatesIterable, new Module[] {});
     }
 
-    public GuiceTestContext createChildContext(Module... overrideModules) {
+    public GuiceTestContext createChildContext(Module... overrideModules)
+    {
         return createChildContext(emptyList(), overrideModules);
     }
 
@@ -94,16 +95,6 @@ public class GuiceTestContext
         return childTestContext;
     }
 
-    private Key<State> getKeyFor(State state)
-    {
-        if (state.getName().isPresent()) {
-            return Key.get((Class<State>) state.getClass(), named(state.getName().get()));
-        }
-        else {
-            return Key.get((Class<State>) state.getClass());
-        }
-    }
-
     @Override
     public void registerCloseCallback(TestContextCloseCallback callback)
     {
@@ -118,6 +109,21 @@ public class GuiceTestContext
 
         if (parent.isPresent()) {
             parent.get().children.remove(this);
+        }
+    }
+
+    public void injectMembers(Object instance)
+    {
+        injector.injectMembers(instance);
+    }
+
+    private Key<State> getKeyFor(State state)
+    {
+        if (state.getName().isPresent()) {
+            return Key.get((Class<State>) state.getClass(), named(state.getName().get()));
+        }
+        else {
+            return Key.get((Class<State>) state.getClass());
         }
     }
 

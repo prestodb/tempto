@@ -54,15 +54,17 @@ class TestInitializationListenerTest
   def 'positive flow'()
   {
     setup:
+    def testClass = new TestClass()
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller])
-    def iTestContext = getITestContext(successMethod)
-    def iTestResult = getITestResult(successMethod)
+    def iTestContext = getITestContext(successMethod, testClass)
+    def iTestResult = getITestResult(successMethod, testClass)
 
     when:
     listener.onStart(iTestContext)
     assertTestContextNotSet()
     listener.onTestStart(iTestResult)
     assertTestContextSet()
+    assert testClass.testContext != null
     listener.onTestSuccess(iTestResult)
     assertTestContextNotSet()
     listener.onFinish(iTestContext)
@@ -84,9 +86,10 @@ class TestInitializationListenerTest
   def 'failure during fulfillment'()
   {
     setup:
+    def testClass = new TestClass()
     def listener = new TestInitializationListener([], [AFulfiller], [BFulfiller, CFulfiller])
-    def iTestContext = getITestContext(failMethod)
-    def iTestResult = getITestResult(failMethod)
+    def iTestContext = getITestContext(failMethod, testClass)
+    def iTestResult = getITestResult(failMethod, testClass)
 
     when:
     listener.onStart(iTestContext)
@@ -113,19 +116,19 @@ class TestInitializationListenerTest
     EVENTS[0].object == EVENTS[6].object
   }
 
-  def getITestContext(Method method)
+  def getITestContext(Method method, TestClass testClass)
   {
     ITestContext suiteContext = Mock(ITestContext)
 
-    suiteContext.allTestMethods >> [getITestNGMethod(method)]
+    suiteContext.allTestMethods >> [getITestNGMethod(method, testClass)]
 
     return suiteContext
   }
 
-  def getITestResult(Method method)
+  def getITestResult(Method method, TestClass testClass)
   {
     ITestResult testResult = Mock(ITestResult)
-    testResult.method >> getITestNGMethod(method)
+    testResult.method >> getITestNGMethod(method, testClass)
     ITestClass iTestClass = Mock()
     testResult.testClass >> iTestClass
     testResult.instance >> testResult.method.instance
@@ -133,11 +136,11 @@ class TestInitializationListenerTest
     return testResult
   }
 
-  def getITestNGMethod(Method method)
+  def getITestNGMethod(Method method, TestClass testClass)
   {
     ITestNGMethod testMethod = Mock(ITestNGMethod)
     testMethod.method >> method
-    testMethod.instance >> new TestClass()
+    testMethod.instance >> testClass
     testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
     return testMethod
   }
@@ -156,6 +159,8 @@ class TestInitializationListenerTest
   static class TestClass
           implements RequirementsProvider
   {
+    @Inject
+    TestContext testContext
 
     @BeforeTestWithContext
     public void beforeMethod()

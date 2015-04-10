@@ -183,6 +183,8 @@ public class TestInitializationListener
         }
 
         pushAllTestContexts(testContextStack);
+        testContextStack.peek().injectMembers(testResult.getInstance());
+
         runBeforeWithContextMethods(testResult);
     }
 
