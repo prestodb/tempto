@@ -65,7 +65,7 @@ public class DefaultHdfsDataSourceWriter
         int fileIndex = 0;
         for (ByteSource fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;
-            LOGGER.info("Saving new file {} ({})", filePath, dataSource.revisionMarker());
+            LOGGER.debug("Saving new file {} ({})", filePath, dataSource.revisionMarker());
             try {
                 try (InputStream fileInputStream = fileContent.openStream()) {
                     hdfsClient.saveFile(filePath, hdfsUsername, fileInputStream);
