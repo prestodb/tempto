@@ -102,7 +102,7 @@ public class GuiceTestContext
     public void close()
     {
         copyOf(children).forEach(GuiceTestContext::close);
-        closeCallbacks.forEach(callback -> callback.testContextClosed(this));
+        Lists.reverse(closeCallbacks).forEach(callback -> callback.testContextClosed(this));
 
         if (parent.isPresent()) {
             parent.get().children.remove(this);
