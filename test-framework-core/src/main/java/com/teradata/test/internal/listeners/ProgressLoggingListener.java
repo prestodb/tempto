@@ -6,7 +6,6 @@ package com.teradata.test.internal.listeners;
 
 import com.google.common.base.Joiner;
 import com.teradata.test.internal.logging.TestFrameworkLoggingAppender;
-import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -26,13 +25,6 @@ public class ProgressLoggingListener
     private int failed;
     private long testStartTime;
 
-    private final TestMetadataReader testMetadataReader;
-
-    public ProgressLoggingListener()
-    {
-        this.testMetadataReader = new TestMetadataReader();
-    }
-
     @Override
     public void onStart(ITestContext context)
     {
@@ -43,14 +35,14 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
-        TestMetadataReader.TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
-        org.slf4j.MDC.put("test_id", testMetadata.testName);
+        String testName = testCase.getName();
+        org.slf4j.MDC.put("test_id", testName);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");
         started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, total, testMetadata.testName, Joiner.on(", ").join(testMetadata.testGroups));
+                started, total, testName, Joiner.on(", ").join(testCase.getMethod().getGroups()));
     }
 
     @Override

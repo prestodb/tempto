@@ -41,7 +41,8 @@ ext.versions = [
         hive         : '0.12.0-cdh5.1.2',
         hadoop       : '0.20.2',
         presto       : '0.97',
-        reflections  : '0.9.9'
+        reflections  : '0.9.9',
+        bytebuddy    : '0.5.6'
 ]
 
 ext.libraries = [
@@ -67,7 +68,8 @@ ext.libraries = [
         hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
         hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}",
         presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}",
-        reflections  : "org.reflections:reflections:${versions.reflections}"
+        reflections  : "org.reflections:reflections:${versions.reflections}",
+        bytebuddy    : "net.bytebuddy:byte-buddy:${versions.bytebuddy}"
 ]
 
 ext.test_framework_core = project(':test-framework-core')

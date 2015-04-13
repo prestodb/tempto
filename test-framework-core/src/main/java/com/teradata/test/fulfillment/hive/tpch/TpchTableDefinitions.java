@@ -15,7 +15,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("nation")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   n_nationkey     INT," +
                             "   n_name          STRING," +
                             "   n_regionkey     INT," +
@@ -29,7 +29,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("region")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   r_regionkey     INT," +
                             "   r_name          STRING," +
                             "   r_comment       STRING) " +
@@ -42,7 +42,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("part")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   p_partkey     INT," +
                             "   p_name        STRING," +
                             "   p_mfgr        STRING," +
@@ -61,7 +61,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("supplier")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   s_suppkey     INT," +
                             "   s_name        STRING," +
                             "   s_address     STRING," +
@@ -78,7 +78,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("partsupp")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   ps_partkey     INT," +
                             "   ps_suppkey     INT," +
                             "   ps_availqty    INT," +
@@ -93,7 +93,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("customer")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   c_custkey     INT," +
                             "   c_name        STRING," +
                             "   c_address     STRING," +
@@ -111,7 +111,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("orders")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   o_orderkey       INT," +
                             "   o_custkey        INT," +
                             "   o_orderstatus    STRING," +
@@ -130,7 +130,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder()
                     .setName("lineitem")
                     .setCreateTableDDLTemplate("" +
-                            "CREATE TABLE %NAME%(" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
                             "   l_orderkey      INT," +
                             "   l_partkey       INT," +
                             "   l_suppkey       INT," +

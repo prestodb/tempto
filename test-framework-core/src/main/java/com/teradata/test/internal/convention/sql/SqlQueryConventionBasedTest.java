@@ -13,17 +13,16 @@ import com.teradata.test.internal.convention.SqlQueryFileWrapper;
 import com.teradata.test.internal.convention.SqlResultFileWrapper;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
-import org.testng.annotations.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
+import static java.lang.Character.isAlphabetic;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -32,17 +31,15 @@ public class SqlQueryConventionBasedTest
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
 
     private final HeaderFileParser headerFileParser;
-    private final String testCaseName;
     private final Optional<File> beforeScriptPath;
     private final Optional<File> afterScriptPath;
     private final File queryFile;
     private final File resultFile;
     private final Requirement requirement;
 
-    public SqlQueryConventionBasedTest(String testCaseName, Optional<File> beforeScriptPath, Optional<File> afterScriptPath,
+    public SqlQueryConventionBasedTest(Optional<File> beforeScriptPath, Optional<File> afterScriptPath,
             File queryFile, File resultFile, Requirement requirement)
     {
-        this.testCaseName = testCaseName;
         this.beforeScriptPath = beforeScriptPath;
         this.afterScriptPath = afterScriptPath;
         this.queryFile = queryFile;
@@ -51,11 +48,10 @@ public class SqlQueryConventionBasedTest
         this.headerFileParser = new HeaderFileParser();
     }
 
-    @Test
+    @Override
     public void test()
-            throws IOException
     {
-        LOGGER.debug("Executing sql test: {}", getTestName());
+        LOGGER.debug("Executing sql test: {}", queryFile.getName());
 
         if (beforeScriptPath.isPresent()) {
             execute(beforeScriptPath.get().toString());
@@ -88,36 +84,39 @@ public class SqlQueryConventionBasedTest
     }
 
     @Override
+    public String testName()
+    {
+        String testName = FilenameUtils.getBaseName(queryFile.getParent());
+        if (!isAlphabetic(testName.charAt(0))) {
+            return "Test" + testName;
+        }
+        return testName;
+    }
+
+    @Override
+    public String testCaseName()
+    {
+        return FilenameUtils.getBaseName(queryFile.getName());
+    }
+
+    @Override
     public Requirement getRequirements()
     {
         return requirement;
     }
 
     @Override
-    public String getTestName()
+    public String[] testGroups()
     {
-        return testCaseName;
-    }
-
-    @Override
-    public Set<String> getTestGroups()
-    {
-        try {
-            return getSqlQueryFileWrapper().getTestGroups();
-        }
-        catch (IOException e) {
-            throw new RuntimeException("cannot parse query file", e);
-        }
+        return getSqlQueryFileWrapper().getTestGroups().toArray(new String[0]);
     }
 
     private SqlQueryFileWrapper getSqlQueryFileWrapper()
-            throws IOException
     {
         return new SqlQueryFileWrapper(headerFileParser.parseFile(queryFile));
     }
 
     private SqlResultFileWrapper getSqlResultFileWrapper()
-            throws IOException
     {
         ParsingResult parsedResultFile = headerFileParser.parseFile(resultFile);
         return new SqlResultFileWrapper(parsedResultFile);

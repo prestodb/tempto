@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * Parses files where first line can be single line header.
  * The line must start with -- marker, and define semicolon separeated map of params.
- *
+ * <p>
  * Example contents:
  * -- database: hive; groups: example_smoketest,blah
  * SOME BODY
@@ -42,12 +42,14 @@ public class HeaderFileParser
             .withKeyValueSeparator(Splitter.on(":").trimResults());
 
     public ParsingResult parseFile(File file)
-            throws IOException
     {
         try (
-                InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                InputStream inputStream = new BufferedInputStream(new FileInputStream(file))
         ) {
             return parseFile(inputStream);
+        }
+        catch (IOException e) {
+            throw new IllegalArgumentException("Could not load file {}" + file, e);
         }
     }
 

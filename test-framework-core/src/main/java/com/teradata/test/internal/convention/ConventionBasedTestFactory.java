@@ -27,11 +27,15 @@ public class ConventionBasedTestFactory
     private static final Logger LOGGER = getLogger(ConventionBasedTestFactory.class);
     private static final ConventionBasedTest[] NO_TEST_CASES = new ConventionBasedTest[0];
 
+    // TODO: make this configurable
+    private static final String TEST_PACKAGE = "com.teradata.tests";
     public static final String TESTCASES_PATH_PART = "testcases";
 
-    public static interface PathTestFactory
+    public interface PathTestFactory
     {
+
         boolean isSupportedPath(Path path);
+
         List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix, ConventionBasedTestFactory factory);
     }
 
@@ -55,6 +59,7 @@ public class ConventionBasedTestFactory
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<PathTestFactory> setupFactories()
     {
         ConventionTableDefinitionsProvider conventionTableDefinitionsProvider = new ConventionTableDefinitionsProvider();
@@ -62,7 +67,7 @@ public class ConventionBasedTestFactory
         return ImmutableList.of(
                 new RecursionPathTestFactory(),
                 new GeneratorPathTestFactory(),
-                new SqlPathTestFactory(availableTableDefinitions));
+                new SqlPathTestFactory(availableTableDefinitions, new ConventionBasedTestProxyGenerator(TEST_PACKAGE)));
     }
 
     public List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix)
@@ -86,7 +91,6 @@ public class ConventionBasedTestFactory
             throw new RuntimeException(e);
         }
     }
-
 
     private List<ConventionBasedTest> createTestsForRootPath(Path path)
     {

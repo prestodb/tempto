@@ -10,6 +10,7 @@ import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
+import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -21,7 +22,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
-import static com.teradata.test.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
 
 public class SqlPathTestFactory
         implements ConventionBasedTestFactory.PathTestFactory
@@ -29,15 +29,18 @@ public class SqlPathTestFactory
 
     // this is temporary stuff. we need some datasources registry stuff
     private final List<HiveTableDefinition> availableTableDefinitions;
+    private final ConventionBasedTestProxyGenerator proxyGenerator;
 
     private static final String TEST_FILE_EXTENSION = "sql";
     private static final String RESULT_FILE_EXTENSION = "result";
     private static final String BEFORE_SCRIPT_NAME = "before";
     private static final String AFTER_SCRIPT_NAME = "after";
 
-    public SqlPathTestFactory(List<HiveTableDefinition> availableTableDefinitions)
+    public SqlPathTestFactory(List<HiveTableDefinition> availableTableDefinitions,
+            ConventionBasedTestProxyGenerator proxyGenerator)
     {
         this.availableTableDefinitions = availableTableDefinitions;
+        this.proxyGenerator = proxyGenerator;
     }
 
     @Override
@@ -61,16 +64,12 @@ public class SqlPathTestFactory
         File afterScripFile = path.getParent().resolve(AFTER_SCRIPT_NAME).toFile();
         Optional<File> optionalAfterScriptFile = afterScripFile.isFile() ? Optional.of(afterScripFile) : Optional.<File>empty();
 
-        String testName = buildTestName(testNamePrefix, path);
         Requirement requirement = getRequirements(availableTableDefinitions);
-        return ImmutableList.of(new SqlQueryConventionBasedTest(
-                testName, optionalBeforeScriptFile, optionalAfterScriptFile,
-                testMethodFile, testMethodResult, requirement));
-    }
-
-    private String buildTestName(String namePrefix, Path testMethodPath)
-    {
-        return namePrefix + "." + getFilenameWithoutExtension(testMethodPath);
+        SqlQueryConventionBasedTest conventionTest = new SqlQueryConventionBasedTest(
+                optionalBeforeScriptFile, optionalAfterScriptFile,
+                testMethodFile, testMethodResult, requirement);
+        ConventionBasedTest proxiedConventionTest = proxyGenerator.generateProxy(conventionTest);
+        return ImmutableList.of(proxiedConventionTest);
     }
 
     private Requirement getRequirements(List<HiveTableDefinition> tableDefinitions)

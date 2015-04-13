@@ -20,6 +20,7 @@ dependencies {
   compile libraries.ioutils
   compile libraries.tpchgen
   compile libraries.jsonpath
+  compile libraries.bytebuddy
   compile(libraries.reportng) {
     exclude group: 'org.testng', module: 'testng'
   }

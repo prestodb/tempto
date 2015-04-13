@@ -1,7 +1,7 @@
 hdfs:
   username: hdfs
   webhdfs:
-    host: master
+    host: hadoop-master
     port: 50070
 
 databases:
@@ -10,7 +10,7 @@ databases:
 
   hive:
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
-    jdbc_url: jdbc:hive2://master:10000
+    jdbc_url: jdbc:hive2://hadoop-master:10000
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
@@ -18,7 +18,7 @@ databases:
 
   presto:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
-    jdbc_url: jdbc:presto://localhost:8080/hive/default
+    jdbc_url: jdbc:presto://presto-master:8080/hive/default
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false

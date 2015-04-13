@@ -6,11 +6,16 @@ package com.teradata.test.internal.convention;
 
 import com.teradata.test.ProductTest;
 import com.teradata.test.RequirementsProvider;
-import com.teradata.test.testmarkers.WithName;
-import com.teradata.test.testmarkers.WithTestGroups;
 
 public abstract class ConventionBasedTest
         extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
+        implements RequirementsProvider
 {
+    public abstract void test();
+
+    public abstract String testName();
+
+    public abstract String testCaseName();
+
+    public abstract String[] testGroups();
 }
