@@ -4,6 +4,7 @@
 
 package com.teradata.test.query;
 
+import java.io.Closeable;
 import java.sql.JDBCType;
 import java.util.Optional;
 
@@ -13,7 +14,7 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
 /**
  * Interface for executors of a sql queries.
  */
-public interface QueryExecutor
+public interface QueryExecutor extends Closeable
 {
 
     String DEFAULT_DB_NAME = "default";
@@ -57,6 +58,8 @@ public interface QueryExecutor
     {
         return new QueryParam(type, value);
     }
+
+    public void close();
 
     public static class QueryParam
     {

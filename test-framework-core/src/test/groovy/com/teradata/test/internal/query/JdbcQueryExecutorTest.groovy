@@ -4,6 +4,8 @@
 
 package com.teradata.test.internal.query
 
+import com.teradata.test.context.TestContext
+import com.teradata.test.internal.context.GuiceTestContext
 import com.teradata.test.query.JdbcConnectionsPool
 import com.teradata.test.query.JdbcConnectivityParamsState
 import com.teradata.test.query.JdbcQueryExecutor
@@ -33,11 +35,18 @@ class JdbcQueryExecutorTest
           '',
           true,
           empty())
-  private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool());
+
+  private static TestContext testContext = new GuiceTestContext();
+  private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool(), testContext);
 
   def setupSpec()
   {
     registerDriver(JDBC_STATE)
+  }
+
+  def cleanupSpec()
+  {
+    testContext.close();
   }
 
   void setup()
