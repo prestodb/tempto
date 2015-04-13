@@ -19,7 +19,6 @@ import zipfile
 
 PACKAGE_PREFIX = 'com.teradata.test.internal'
 
-LOGGING_LISTENER = PACKAGE_PREFIX + '.listeners.ProgressLoggingListener'
 ANNOTATION_LISTENER = PACKAGE_PREFIX + '.listeners.ProductTestAnnotationTransformer'
 TEST_METHOD_SELECTOR = PACKAGE_PREFIX + '.listeners.TestNameGroupNameMethodSelector:100'  # 100 is selector priority, anything bigger than default 10 is good
 SUITES_FILE = 'suites.json'

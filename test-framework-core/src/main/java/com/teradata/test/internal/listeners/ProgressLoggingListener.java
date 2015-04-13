@@ -6,6 +6,7 @@ package com.teradata.test.internal.listeners;
 
 import com.google.common.base.Joiner;
 import com.teradata.test.internal.logging.TestFrameworkLoggingAppender;
+import org.apache.log4j.MDC;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -16,6 +17,7 @@ public class ProgressLoggingListener
         implements ITestListener
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(ProgressLoggingListener.class);
+    public static final String MDC_TEST_ID_KEY = "test_id";
 
     private int total;
     private int started;
@@ -42,6 +44,7 @@ public class ProgressLoggingListener
     public void onTestStart(ITestResult testCase)
     {
         TestMetadataReader.TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
+        org.slf4j.MDC.put("test_id", testMetadata.testName);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");
@@ -88,6 +91,7 @@ public class ProgressLoggingListener
     @Override
     public void onFinish(ITestContext context)
     {
+        org.slf4j.MDC.remove(MDC_TEST_ID_KEY);
         LOGGER.info("");
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);

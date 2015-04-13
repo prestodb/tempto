@@ -44,7 +44,7 @@ import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 public class TestFrameworkLoggingAppender
         extends AppenderSkeleton
 {
-    private static final PatternLayout CONSOLE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] %m%n");
+    private static final PatternLayout CONSOLE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%X{test_id}] %m%n");
     private static final Level MINIMUM_CONSOLE_LEVEL = Level.INFO;
 
     private static final PatternLayout FILE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n");
