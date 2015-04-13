@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: lineitem
 SELECT
   l_returnflag,
   l_linestatus,

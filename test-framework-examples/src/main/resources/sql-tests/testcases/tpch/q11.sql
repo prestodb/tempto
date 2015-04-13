@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: partsupp,supplier,nation
 SELECT
   ps_partkey,
   sum(ps_supplycost * ps_availqty) AS value

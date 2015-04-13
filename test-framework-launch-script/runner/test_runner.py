@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
-from test_common import ANNOTATION_LISTENER, TEST_METHOD_SELECTOR
+from test_common import ANNOTATION_LISTENER
 from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
@@ -27,8 +27,7 @@ def listener_arguments():
         '-listener', 'org.uncommons.reportng.HTMLReporter,' +
         'org.uncommons.reportng.JUnitXMLReporter,' +
         'org.testng.reporters.XMLReporter,' +
-        ','.join([ANNOTATION_LISTENER]),
-        '-methodselectors', TEST_METHOD_SELECTOR
+        ','.join([ANNOTATION_LISTENER])
     ])
 
 

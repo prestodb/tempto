@@ -21,6 +21,7 @@ import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
+import com.teradata.test.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import com.teradata.test.internal.fulfillment.table.TablesFulfiller;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
@@ -46,6 +47,7 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.popAllTestC
 import static com.teradata.test.context.ThreadLocalTestContextHolder.pushAllTestContexts;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static com.teradata.test.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
 import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
 import static com.teradata.test.internal.initialization.ModulesHelper.getSuiteModules;

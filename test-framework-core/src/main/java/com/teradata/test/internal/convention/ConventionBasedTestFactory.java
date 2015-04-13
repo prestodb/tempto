@@ -5,11 +5,9 @@
 package com.teradata.test.internal.convention;
 
 import com.google.common.collect.ImmutableList;
-import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.internal.convention.generator.GeneratorPathTestFactory;
 import com.teradata.test.internal.convention.recursion.RecursionPathTestFactory;
 import com.teradata.test.internal.convention.sql.SqlPathTestFactory;
-import com.teradata.test.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import org.slf4j.Logger;
 import org.testng.annotations.Factory;
 
@@ -19,6 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+import static com.teradata.test.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -62,12 +61,10 @@ public class ConventionBasedTestFactory
     @SuppressWarnings("unchecked")
     private List<PathTestFactory> setupFactories()
     {
-        ConventionTableDefinitionsProvider conventionTableDefinitionsProvider = new ConventionTableDefinitionsProvider();
-        List<HiveTableDefinition> availableTableDefinitions = conventionTableDefinitionsProvider.getAvailableTableDefinitions();
         return ImmutableList.of(
                 new RecursionPathTestFactory(),
                 new GeneratorPathTestFactory(),
-                new SqlPathTestFactory(availableTableDefinitions, new ConventionBasedTestProxyGenerator(TEST_PACKAGE)));
+                new SqlPathTestFactory(tableDefinitionsRepository(), new ConventionBasedTestProxyGenerator(TEST_PACKAGE)));
     }
 
     public List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix)

@@ -7,8 +7,6 @@ package com.teradata.test.internal.convention.sql;
 import com.teradata.test.Requirement;
 import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.internal.convention.ConventionBasedTest;
-import com.teradata.test.internal.convention.HeaderFileParser;
-import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.convention.SqlQueryFileWrapper;
 import com.teradata.test.internal.convention.SqlResultFileWrapper;
 import com.teradata.test.query.QueryExecutor;
@@ -22,6 +20,8 @@ import java.util.Optional;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
+import static com.teradata.test.internal.convention.SqlQueryFileWrapper.sqlQueryFileWrapperFor;
+import static com.teradata.test.internal.convention.SqlResultFileWrapper.sqlResultFileWrapperFor;
 import static java.lang.Character.isAlphabetic;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -30,7 +30,6 @@ public class SqlQueryConventionBasedTest
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
 
-    private final HeaderFileParser headerFileParser;
     private final Optional<File> beforeScriptPath;
     private final Optional<File> afterScriptPath;
     private final File queryFile;
@@ -45,7 +44,6 @@ public class SqlQueryConventionBasedTest
         this.queryFile = queryFile;
         this.resultFile = resultFile;
         this.requirement = requirement;
-        this.headerFileParser = new HeaderFileParser();
     }
 
     @Override
@@ -57,8 +55,8 @@ public class SqlQueryConventionBasedTest
             execute(beforeScriptPath.get().toString());
         }
 
-        SqlQueryFileWrapper sqlQueryFileWrapper = getSqlQueryFileWrapper();
-        SqlResultFileWrapper resultFileWrapper = getSqlResultFileWrapper();
+        SqlQueryFileWrapper sqlQueryFileWrapper = sqlQueryFileWrapperFor(queryFile);
+        SqlResultFileWrapper resultFileWrapper = sqlResultFileWrapperFor(resultFile);
 
         QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFileWrapper);
 
@@ -108,18 +106,7 @@ public class SqlQueryConventionBasedTest
     @Override
     public String[] testGroups()
     {
-        return getSqlQueryFileWrapper().getTestGroups().toArray(new String[0]);
-    }
-
-    private SqlQueryFileWrapper getSqlQueryFileWrapper()
-    {
-        return new SqlQueryFileWrapper(headerFileParser.parseFile(queryFile));
-    }
-
-    private SqlResultFileWrapper getSqlResultFileWrapper()
-    {
-        ParsingResult parsedResultFile = headerFileParser.parseFile(resultFile);
-        return new SqlResultFileWrapper(parsedResultFile);
+        return sqlQueryFileWrapperFor(queryFile).getTestGroups().toArray(new String[0]);
     }
 
     private QueryExecutor getQueryExecutor(SqlQueryFileWrapper sqlQueryFileWrapper)

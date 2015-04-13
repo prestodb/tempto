@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: partsupp,part,supplier
 SELECT
   p_brand,
   p_type,

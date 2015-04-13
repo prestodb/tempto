@@ -4,10 +4,9 @@
 
 package com.teradata.test.internal.convention.tabledefinitions;
 
-import com.google.common.collect.Lists;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
-import com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions;
+import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 import com.teradata.test.internal.convention.ConventionTestsUtils;
 import com.teradata.test.internal.convention.HeaderFileParser;
@@ -33,6 +32,18 @@ public class ConventionTableDefinitionsProvider
 {
     private static final Logger LOGGER = getLogger(ConventionBasedTestFactory.class);
     public static final String DATASETS_PATH_PART = "datasets";
+
+    public void registerConventionTableDefinitions(TableDefinitionsRepository tableDefinitionsRepository)
+    {
+        getAllConventionBasedTableDefinitions().stream().forEach(tableDefinitionsRepository::register);
+    }
+
+    private List<HiveTableDefinition> getAllConventionBasedTableDefinitions()
+    {
+        return getAllConventionTableDefinitionDescriptors().stream()
+                .map(this::hiveTableDefinitionFor)
+                .collect(toList());
+    }
 
     private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors()
     {
@@ -63,26 +74,6 @@ public class ConventionTableDefinitionsProvider
         else {
             return emptyList();
         }
-    }
-
-    public List<HiveTableDefinition> getAvailableTableDefinitions()
-    {
-        List<HiveTableDefinition> result = Lists.newArrayList();
-        result.addAll(getAllConventionBasedTableDefinitions());
-        result.addAll(getAllTpchTableDefinitions());
-        return result;
-    }
-
-    private List<HiveTableDefinition> getAllTpchTableDefinitions()
-    {
-        return TpchTableDefinitions.TABLES;
-    }
-
-    private List<HiveTableDefinition> getAllConventionBasedTableDefinitions()
-    {
-        return getAllConventionTableDefinitionDescriptors().stream()
-                .map(this::hiveTableDefinitionFor)
-                .collect(toList());
     }
 
     private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinition)

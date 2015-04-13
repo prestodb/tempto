@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: lineitem,supplier
 CREATE VIEW revenue (supplier_no, total_revenue) AS
   SELECT
     l_suppkey,

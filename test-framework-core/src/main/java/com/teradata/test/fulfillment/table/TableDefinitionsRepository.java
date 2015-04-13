@@ -3,8 +3,12 @@
  */
 package com.teradata.test.fulfillment.table;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
+import com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions;
+import com.teradata.test.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 
+import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -14,9 +18,17 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class TableDefinitionsRepository
 {
-    private static final TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository();
+    private static final TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(
+            ImmutableList.<TableDefinition>builder()
+                    .addAll(TpchTableDefinitions.TABLES)
+                    .build());
 
-    public static TableDefinition registerTableDefinition(TableDefinition tableDefinition)
+    static {
+        // TODO: since TestNG has no listener that can be run before tests factory, this has to be initialized here
+        new ConventionTableDefinitionsProvider().registerConventionTableDefinitions(tableDefinitionsRepository());
+    }
+
+    public static <T extends TableDefinition> T registerTableDefinition(T tableDefinition)
     {
         return tableDefinitionsRepository().register(tableDefinition);
     }
@@ -33,7 +45,16 @@ public class TableDefinitionsRepository
 
     private final Map<String, TableDefinition> tableDefinitions = new MapMaker().makeMap();
 
-    public TableDefinition register(TableDefinition tableDefinition)
+    public TableDefinitionsRepository()
+    {
+    }
+
+    public TableDefinitionsRepository(Collection<TableDefinition> tableDefinitions)
+    {
+        tableDefinitions.stream().forEach(this::register);
+    }
+
+    public <T extends TableDefinition> T register(T tableDefinition)
     {
         checkState(!tableDefinitions.containsKey(tableDefinition.getName()), "duplicated table definition: %s", tableDefinition.getName());
         tableDefinitions.put(tableDefinition.getName(), tableDefinition);

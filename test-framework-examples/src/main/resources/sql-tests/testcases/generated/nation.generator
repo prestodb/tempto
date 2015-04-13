@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cat >$1/generated_nation.sql << EOF
--- database: hive
+-- database: hive; tables: sample_table
 SELECT * FROM sample_table
 EOF
 

@@ -8,6 +8,7 @@ import com.google.common.base.Splitter;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.query.QueryType;
 
+import java.io.File;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,24 +20,37 @@ public class SqlQueryFileWrapper
 
     private static final String GROUPS_HEADER_PROPERTY = "groups";
     private static final String DATABASE_HEADER_PROPERTY = "database";
+    private static final String TABLES_HEADER_PROPERTY = "tables";
     private static final String QUERY_TYPE_HEADER_PROPERTY = "queryType";
-    private static final Splitter GROUPS_HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
-
+    private static final Splitter HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final ParsingResult sqlFileParsingResult;
+
+    public static SqlQueryFileWrapper sqlQueryFileWrapperFor(File queryFile)
+    {
+        return new SqlQueryFileWrapper(new HeaderFileParser().parseFile(queryFile));
+    }
 
     public SqlQueryFileWrapper(ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
     }
 
-    public String getDatabaseName(){
+    public String getDatabaseName()
+    {
         return sqlFileParsingResult.getProperty(DATABASE_HEADER_PROPERTY).orElse(DEFAULT_DB_NAME);
     }
 
-    public Set<String> getTestGroups(){
+    public Set<String> getTableDefinitionNames()
+    {
+        String tablesProperty = sqlFileParsingResult.getProperty(TABLES_HEADER_PROPERTY).orElse("");
+        return newHashSet(HEADER_PROPERTY_SPLITTER.split(tablesProperty));
+    }
+
+    public Set<String> getTestGroups()
+    {
         String groupsProperty = sqlFileParsingResult.getProperty(GROUPS_HEADER_PROPERTY).orElse("");
-        return newHashSet(GROUPS_HEADER_PROPERTY_SPLITTER.split(groupsProperty));
+        return newHashSet(HEADER_PROPERTY_SPLITTER.split(groupsProperty));
     }
 
     public String getContent()
@@ -44,7 +58,8 @@ public class SqlQueryFileWrapper
         return sqlFileParsingResult.getContent();
     }
 
-    public Optional<QueryType> getQueryType(){
+    public Optional<QueryType> getQueryType()
+    {
         return sqlFileParsingResult.getProperty(QUERY_TYPE_HEADER_PROPERTY).map(QueryType::valueOf);
     }
 }

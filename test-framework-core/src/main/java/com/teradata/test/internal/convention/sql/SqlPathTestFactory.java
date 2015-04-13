@@ -6,8 +6,8 @@ package com.teradata.test.internal.convention.sql;
 
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.Requirement;
-import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
+import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator;
@@ -20,26 +20,26 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.test.Requirements.compose;
+import static com.teradata.test.internal.convention.SqlQueryFileWrapper.sqlQueryFileWrapperFor;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
+import static java.util.stream.Collectors.toList;
 
 public class SqlPathTestFactory
         implements ConventionBasedTestFactory.PathTestFactory
 {
-
-    // this is temporary stuff. we need some datasources registry stuff
-    private final List<HiveTableDefinition> availableTableDefinitions;
-    private final ConventionBasedTestProxyGenerator proxyGenerator;
-
     private static final String TEST_FILE_EXTENSION = "sql";
     private static final String RESULT_FILE_EXTENSION = "result";
     private static final String BEFORE_SCRIPT_NAME = "before";
     private static final String AFTER_SCRIPT_NAME = "after";
 
-    public SqlPathTestFactory(List<HiveTableDefinition> availableTableDefinitions,
+    private final TableDefinitionsRepository tableDefinitionsRepository;
+    private final ConventionBasedTestProxyGenerator proxyGenerator;
+
+    public SqlPathTestFactory(TableDefinitionsRepository tableDefinitionsRepository,
             ConventionBasedTestProxyGenerator proxyGenerator)
     {
-        this.availableTableDefinitions = availableTableDefinitions;
+        this.tableDefinitionsRepository = tableDefinitionsRepository;
         this.proxyGenerator = proxyGenerator;
     }
 
@@ -64,7 +64,7 @@ public class SqlPathTestFactory
         File afterScripFile = path.getParent().resolve(AFTER_SCRIPT_NAME).toFile();
         Optional<File> optionalAfterScriptFile = afterScripFile.isFile() ? Optional.of(afterScripFile) : Optional.<File>empty();
 
-        Requirement requirement = getRequirements(availableTableDefinitions);
+        Requirement requirement = getRequirements(testMethodFile);
         SqlQueryConventionBasedTest conventionTest = new SqlQueryConventionBasedTest(
                 optionalBeforeScriptFile, optionalAfterScriptFile,
                 testMethodFile, testMethodResult, requirement);
@@ -72,13 +72,13 @@ public class SqlPathTestFactory
         return ImmutableList.of(proxiedConventionTest);
     }
 
-    private Requirement getRequirements(List<HiveTableDefinition> tableDefinitions)
+    private Requirement getRequirements(File testMethodFile)
     {
-        // TODO: requirements need to be based on actual convention based requirements
         List<Requirement> requirements = newArrayList();
-        for (HiveTableDefinition tpchHiveTableDefinition : tableDefinitions) {
-            requirements.add(new ImmutableTableRequirement(tpchHiveTableDefinition));
-        }
+        requirements.addAll(sqlQueryFileWrapperFor(testMethodFile).getTableDefinitionNames()
+                .stream()
+                .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName)))
+                .collect(toList()));
         return compose(requirements);
     }
 }

@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: supplier,nation,partsupp,part,lineitem
 SELECT
   s_name,
   s_address

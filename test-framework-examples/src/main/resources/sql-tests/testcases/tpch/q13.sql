@@ -1,4 +1,4 @@
--- database: presto; groups: tpch,quarantine
+-- database: presto; groups: tpch,quarantine; tables: customer,orders
 SELECT
   c_count,
   count(*) AS custdist
