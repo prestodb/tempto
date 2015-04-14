@@ -42,5 +42,6 @@ setup(
     include_package_data=True,
     package_data={'runner': ['*.xml']},
     keywords=['sql', 'hadoop', 'test-framework'],
-    entry_points={'console_scripts': ['product-test = runner.test_runner:main']}
+    entry_points={'console_scripts': ['product-test = runner.test_runner:main']},
+    install_requires=['argparse>=1.3.0']
 )
