@@ -21,7 +21,6 @@ import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
-import com.teradata.test.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import com.teradata.test.internal.fulfillment.table.TablesFulfiller;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
@@ -47,13 +46,13 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.popAllTestC
 import static com.teradata.test.context.ThreadLocalTestContextHolder.pushAllTestContexts;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
-import static com.teradata.test.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
 import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.test.internal.initialization.ModulesHelper.getClasses;
+import static com.teradata.test.internal.initialization.ModulesHelper.getSuiteModuleProviders;
 import static com.teradata.test.internal.initialization.ModulesHelper.getSuiteModules;
+import static com.teradata.test.internal.initialization.ModulesHelper.getTestMethodModuleProviders;
 import static com.teradata.test.internal.initialization.ModulesHelper.getTestModules;
-import static com.teradata.test.internal.initialization.ModulesHelper.scanForSuiteModuleProviders;
-import static com.teradata.test.internal.initialization.ModulesHelper.scanForTestMethodModuleProviders;
 import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -62,52 +61,71 @@ public class TestInitializationListener
 {
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
-    private final static List<Class<? extends RequirementFulfiller>> SUITE_FULFILLERS = ImmutableList.of(
+    private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
             TablesFulfiller.class
     );
 
-    private static final List<Class<? extends RequirementFulfiller>> TEST_METHOD_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();
+    private static final List<Class<? extends RequirementFulfiller>> BUILTIN_TEST_METHOD_LEVEL_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();
 
     private final List<? extends SuiteModuleProvider> suiteModuleProviders;
     private final List<? extends TestMethodModuleProvider> testMethodModuleProviders;
-    private final List<Class<? extends RequirementFulfiller>> suiteFulfillers;
-    private final List<Class<? extends RequirementFulfiller>> testMethodFulfillers;
+    private final List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers;
+    private final List<Class<? extends RequirementFulfiller>> testMethodLevelFulfillers;
     private final Configuration configuration;
 
     private Optional<TestContextStack<GuiceTestContext>> suiteTestContextStack = Optional.empty();
 
     public TestInitializationListener()
     {
-        this(scanForSuiteModuleProviders(), scanForTestMethodModuleProviders(),
-                SUITE_FULFILLERS, TEST_METHOD_FULFILLERS,
+        this(getSuiteModuleProviders(), getTestMethodModuleProviders(),
+                getSuiteLevelFulfillers(), getTestMethodLevelFulfillers(),
                 createTestConfiguration());
+    }
+
+    private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers() {
+        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.TestLevel.class);
+    }
+
+    private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers() {
+        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.SuiteLevel.class);
+    }
+
+    private static List<Class<? extends RequirementFulfiller>> scanFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
+    {
+        Set<Class<? extends RequirementFulfiller>> scannedFulfillers = getClasses(RequirementFulfiller.class);
+        scannedFulfillers.removeAll(builtinFulfillers);
+        scannedFulfillers.removeIf(c -> c.getAnnotation(filterAnnotation) != null);
+        ImmutableList.Builder<Class<? extends RequirementFulfiller>> resultFulfillers = ImmutableList.builder();
+        resultFulfillers.addAll(builtinFulfillers);
+        resultFulfillers.addAll(scannedFulfillers);
+        return resultFulfillers.build();
     }
 
     public TestInitializationListener(
             List<? extends SuiteModuleProvider> suiteModuleProviders,
             List<? extends TestMethodModuleProvider> testMethodModuleProviders,
-            List<Class<? extends RequirementFulfiller>> suiteFulfillers,
-            List<Class<? extends RequirementFulfiller>> testMethodFulfillers,
+            List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers,
+            List<Class<? extends RequirementFulfiller>> testMethodLevelFulfillers,
             Configuration configuration)
     {
         this.suiteModuleProviders = suiteModuleProviders;
         this.testMethodModuleProviders = testMethodModuleProviders;
-        this.suiteFulfillers = suiteFulfillers;
-        this.testMethodFulfillers = testMethodFulfillers;
+        this.suiteLevelFulfillers = suiteLevelFulfillers;
+        this.testMethodLevelFulfillers = testMethodLevelFulfillers;
         this.configuration = configuration;
     }
 
     @Override
     public void onStart(ITestContext context)
     {
-        Module suiteModule = combine(combine(getSuiteModules(suiteModuleProviders, configuration)), bind(suiteFulfillers), bind(testMethodFulfillers));
+        Module suiteModule = combine(combine(getSuiteModules(suiteModuleProviders, configuration)), bind(suiteLevelFulfillers), bind(testMethodLevelFulfillers));
         GuiceTestContext initSuiteTestContext = new GuiceTestContext(suiteModule);
         TestContextStack<GuiceTestContext> suiteTextContextStack = new TestContextStack<>();
         suiteTextContextStack.push(initSuiteTestContext);
 
         try {
             Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
-            doFulfillment(suiteTextContextStack, suiteFulfillers, allTestsRequirements);
+            doFulfillment(suiteTextContextStack, suiteLevelFulfillers, allTestsRequirements);
         }
         catch (RuntimeException e) {
             LOGGER.error("cannot initialize test suite", e);
@@ -124,7 +142,7 @@ public class TestInitializationListener
             return;
         }
 
-        doCleanup(suiteTestContextStack.get(), suiteFulfillers);
+        doCleanup(suiteTestContextStack.get(), suiteLevelFulfillers);
     }
 
     @Override
@@ -137,7 +155,7 @@ public class TestInitializationListener
 
         try {
             Set<Requirement> testSpecificRequirements = getTestSpecificRequirements(testResult.getMethod());
-            doFulfillment(testContextStack, testMethodFulfillers, testSpecificRequirements);
+            doFulfillment(testContextStack, testMethodLevelFulfillers, testSpecificRequirements);
         }
         catch (RuntimeException e) {
             LOGGER.debug("error within test initialization", e);
@@ -180,7 +198,7 @@ public class TestInitializationListener
         }
         finally {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
-            doCleanup(testContextStack, testMethodFulfillers);
+            doCleanup(testContextStack, testMethodLevelFulfillers);
         }
     }
 
@@ -191,7 +209,7 @@ public class TestInitializationListener
         }
         catch (RuntimeException e) {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
-            doCleanup(testContextStack, testMethodFulfillers);
+            doCleanup(testContextStack, testMethodLevelFulfillers);
             throw e;
         }
     }
@@ -223,6 +241,7 @@ public class TestInitializationListener
 
         try {
             for (Class<? extends RequirementFulfiller> fulfillerClass : fulfillerClasses) {
+                LOGGER.debug("Fulfilling using {}", fulfillerClass);
                 GuiceTestContext testContext = testContextStack.peek();
                 runWithTextContext(testContext, () -> {
                     RequirementFulfiller fulfiller = testContext.getDependency(fulfillerClass);
@@ -244,10 +263,11 @@ public class TestInitializationListener
         // one base test context plus one test context for each fulfiller
         checkState(testContextStack.size() == fulfillerClasses.size() + 1);
 
-        for (Class<? extends RequirementFulfiller> fulillerClass : reverse(fulfillerClasses)) {
+        for (Class<? extends RequirementFulfiller> fulfillerClass : reverse(fulfillerClasses)) {
+            LOGGER.debug("Cleaning for fulfiller {}", fulfillerClass);
             TestContext testContext = testContextStack.pop();
             testContext.close();
-            runWithTextContext(testContext, () -> testContextStack.peek().getDependency(fulillerClass).cleanup());
+            runWithTextContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup());
         }
 
         // remove close init test context too

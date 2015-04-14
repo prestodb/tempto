@@ -13,12 +13,12 @@ import static java.util.stream.Collectors.toList;
 
 public final class ModulesHelper
 {
-    public static List<? extends SuiteModuleProvider> scanForSuiteModuleProviders()
+    public static List<? extends SuiteModuleProvider> getSuiteModuleProviders()
     {
         return instantiate(getClasses(SuiteModuleProvider.class));
     }
 
-    public static List<? extends TestMethodModuleProvider> scanForTestMethodModuleProviders()
+    public static List<? extends TestMethodModuleProvider> getTestMethodModuleProviders()
     {
         return instantiate(getClasses(TestMethodModuleProvider.class));
     }
@@ -39,9 +39,9 @@ public final class ModulesHelper
                 .collect(toList());
     }
 
-    private static <T> Set<Class<? extends T>> getClasses(Class<T> clazz)
+    public static <T> Set<Class<? extends T>> getClasses(Class<T> clazz)
     {
-        Reflections reflections = new Reflections("com.teradata.test.internal");
+        Reflections reflections = new Reflections("com.teradata");
         return reflections.getSubTypesOf(clazz);
     }
 
