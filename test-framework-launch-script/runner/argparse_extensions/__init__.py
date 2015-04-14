@@ -16,4 +16,3 @@ def ensure_arg_is_list(value):
         return [value]
     else:
         return value
-

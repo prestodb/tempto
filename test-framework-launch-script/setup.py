@@ -2,7 +2,34 @@
 # Copyright 2015, Teradata, Inc. All rights reserved.
 #
 
-from setuptools import setup
+import os
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+# =====================================================
+# Welcome to HackLand! We monkey patch the _get_rc_file
+# method of PyPIRCCommand so that we can read a .pypirc
+# that is located in the current directory. This enables
+# us to check it in with the code and not require
+# developers to create files in their home directory.
+from distutils.config import PyPIRCCommand
+
+
+def get_custom_rc_file(self):
+    home_pypi = os.path.join(os.path.expanduser('~'),
+                             '.pypirc')
+    local_pypi = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        '.pypirc')
+    return local_pypi if os.path.exists(local_pypi) \
+        else home_pypi
+
+PyPIRCCommand._get_rc_file = get_custom_rc_file
+# Thank you for visiting HackLand!
+# =====================================================
 
 setup(
     name='product-test',

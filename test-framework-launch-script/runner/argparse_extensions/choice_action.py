@@ -1,7 +1,8 @@
 # Copyright Teradata Inc., 2015"
 
 import argparse
-from argparse_extensions import ensure_arg_is_list, lower_case_list
+
+from . import ensure_arg_is_list, lower_case_list
 
 
 def choice_action(choice_func, case_sensitive=True):
