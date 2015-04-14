@@ -79,3 +79,8 @@ ext.third_party_deps = project(':third-party-deps')
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
 }
+
+task packageAndUploadLaunchScript(type: Exec) {
+  workingDir 'test-framework-launch-script/'
+  commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
+}
