@@ -32,28 +32,28 @@ class TestRunnerArgumentBuilder(object):
         return ''
 
     @property
-    def test_names_system_property(self):
-        if self.__args.test_names is not None:
-            return '-Dcom.teradata.test.names=' + self.__args.test_names
-        return ''
-
-    @property
-    def groups_system_property(self):
-        groups_or_suites = self.__groups_or_suites_string()
-        if groups_or_suites is not None:
-            return '-Dcom.teradata.test.groups=' + groups_or_suites
-        return ''
-
-    @property
-    def exclude_groups_system_property(self):
-        if self.__args.excluded_groups:
-            return '-Dcom.teradata.test.exclude_groups=' + ','.join(self.__args.excluded_groups)
+    def methods_argument(self):
+        if self.__args.methods is not None:
+            return '-methods ' + self.__args.methods
         return ''
 
     @property
     def classes_argument(self):
         if self.__args.classes is not None:
             return '-testclass ' + self.__args.classes
+        return ''
+
+    @property
+    def excluded_groups_argument(self):
+        if self.__args.excluded_groups:
+            return '-excludegroups ' + ','.join(self.__args.excluded_groups)
+        return ''
+
+    @property
+    def groups_argument(self):
+        groups_or_suites = self.__groups_or_suites_string()
+        if groups_or_suites is not None:
+            return '-groups ' + groups_or_suites
         return ''
 
 

@@ -65,11 +65,11 @@ def run_testng(test_runner_argument_builder):
         'java', '-classpath', classpath,
         test_runner_argument_builder.system_properties,
         test_runner_argument_builder.test_java_properties,
-        test_runner_argument_builder.groups_system_property,
-        test_runner_argument_builder.exclude_groups_system_property,
-        test_runner_argument_builder.test_names_system_property,
         'org.testng.TestNG', test_runner_argument_builder.suite_xml_if_no_classes_methods,
+        test_runner_argument_builder.methods_argument,
         test_runner_argument_builder.classes_argument,
+        test_runner_argument_builder.groups_argument,
+        test_runner_argument_builder.excluded_groups_argument,
         metadata_arguments(test_runner_argument_builder), listener_arguments(),
         '-d ', test_runner_argument_builder.report_dir])
     result = subprocess.call(cmd_to_run, shell=True)
