@@ -49,11 +49,9 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext
 import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
 import static com.teradata.test.internal.initialization.ModulesHelper.getClasses;
-import static com.teradata.test.internal.initialization.ModulesHelper.getSuiteModuleProviders;
-import static com.teradata.test.internal.initialization.ModulesHelper.getSuiteModules;
-import static com.teradata.test.internal.initialization.ModulesHelper.getTestMethodModuleProviders;
-import static com.teradata.test.internal.initialization.ModulesHelper.getTestModules;
+import static com.teradata.test.internal.initialization.ModulesHelper.instantiate;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class TestInitializationListener
@@ -82,11 +80,13 @@ public class TestInitializationListener
                 createTestConfiguration());
     }
 
-    private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers() {
+    private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()
+    {
         return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.TestLevel.class);
     }
 
-    private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers() {
+    private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers()
+    {
         return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.SuiteLevel.class);
     }
 
@@ -99,6 +99,16 @@ public class TestInitializationListener
         resultFulfillers.addAll(builtinFulfillers);
         resultFulfillers.addAll(scannedFulfillers);
         return resultFulfillers.build();
+    }
+
+    public static List<? extends SuiteModuleProvider> getSuiteModuleProviders()
+    {
+        return instantiate(getClasses(SuiteModuleProvider.class));
+    }
+
+    public static List<? extends TestMethodModuleProvider> getTestMethodModuleProviders()
+    {
+        return instantiate(getClasses(TestMethodModuleProvider.class));
     }
 
     public TestInitializationListener(
@@ -118,7 +128,7 @@ public class TestInitializationListener
     @Override
     public void onStart(ITestContext context)
     {
-        Module suiteModule = combine(combine(getSuiteModules(suiteModuleProviders, configuration)), bind(suiteLevelFulfillers), bind(testMethodLevelFulfillers));
+        Module suiteModule = combine(combine(getSuiteModules()), bind(suiteLevelFulfillers), bind(testMethodLevelFulfillers));
         GuiceTestContext initSuiteTestContext = new GuiceTestContext(suiteModule);
         TestContextStack<GuiceTestContext> suiteTextContextStack = new TestContextStack<>();
         suiteTextContextStack.push(initSuiteTestContext);
@@ -149,7 +159,7 @@ public class TestInitializationListener
     public void onTestStart(ITestResult testResult)
     {
         checkState(suiteTestContextStack.isPresent(), "test suite not initialized");
-        GuiceTestContext initTestContext = suiteTestContextStack.get().peek().createChildContext(emptyList(), getTestModules(testMethodModuleProviders, configuration, testResult));
+        GuiceTestContext initTestContext = suiteTestContextStack.get().peek().createChildContext(emptyList(), getTestModules(testResult));
         TestContextStack<GuiceTestContext> testContextStack = new TestContextStack<>();
         testContextStack.push(initTestContext);
 
@@ -272,6 +282,22 @@ public class TestInitializationListener
 
         // remove close init test context too
         testContextStack.peek().close();
+    }
+
+    private List<Module> getSuiteModules()
+    {
+        return suiteModuleProviders
+                .stream()
+                .map(provider -> provider.getModule(configuration))
+                .collect(toList());
+    }
+
+    private List<Module> getTestModules(ITestResult testResult)
+    {
+        return testMethodModuleProviders
+                .stream()
+                .map(provider -> provider.getModule(configuration, testResult))
+                .collect(toList());
     }
 
     private <T> Module bind(List<Class<? extends T>> classes)

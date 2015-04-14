@@ -1,51 +1,45 @@
 package com.teradata.test.internal.initialization;
 
-import com.google.inject.Module;
-import com.teradata.test.configuration.Configuration;
 import org.reflections.Reflections;
-import org.testng.ITestResult;
+import org.reflections.scanners.FieldAnnotationsScanner;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
+import static org.reflections.util.ClasspathHelper.forPackage;
 
 public final class ModulesHelper
 {
-    public static List<? extends SuiteModuleProvider> getSuiteModuleProviders()
+    private static final String PACKAGES_PREFIX = "com.teradata";
+
+    public static <T> T getStaticFieldValue(Field field)
     {
-        return instantiate(getClasses(SuiteModuleProvider.class));
+        try {
+            return (T) field.get(null);
+        }
+        catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static List<? extends TestMethodModuleProvider> getTestMethodModuleProviders()
+    public static Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation)
     {
-        return instantiate(getClasses(TestMethodModuleProvider.class));
-    }
-
-    public static List<Module> getSuiteModules(List<? extends SuiteModuleProvider> suiteModuleProviders, Configuration configuration)
-    {
-        return suiteModuleProviders
-                .stream()
-                .map(provider -> provider.getModule(configuration))
-                .collect(toList());
-    }
-
-    public static List<Module> getTestModules(List<? extends TestMethodModuleProvider> testMethodModuleProviders, Configuration configuration, ITestResult testResult)
-    {
-        return testMethodModuleProviders
-                .stream()
-                .map(provider -> provider.getModule(configuration, testResult))
-                .collect(toList());
+        Reflections reflections = new Reflections(forPackage(PACKAGES_PREFIX),
+                new FieldAnnotationsScanner(), ModulesHelper.class.getClassLoader());
+        return reflections.getFieldsAnnotatedWith(annotation);
     }
 
     public static <T> Set<Class<? extends T>> getClasses(Class<T> clazz)
     {
-        Reflections reflections = new Reflections("com.teradata");
+        Reflections reflections = new Reflections(PACKAGES_PREFIX);
         return reflections.getSubTypesOf(clazz);
     }
 
-    private static <T> List<? extends T> instantiate(Collection<Class<? extends T>> classes)
+    public static <T> List<? extends T> instantiate(Collection<Class<? extends T>> classes)
     {
         return classes
                 .stream()

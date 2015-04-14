@@ -4,13 +4,12 @@
 
 package com.teradata.test.fulfillment.hive.tpch;
 
-import com.google.common.collect.ImmutableList;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
-
-import java.util.List;
+import com.teradata.test.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
 public class TpchTableDefinitions
 {
+    @RepositoryTableDefinition
     public static final HiveTableDefinition NATION =
             HiveTableDefinition.builder()
                     .setName("nation")
@@ -25,6 +24,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition REGION =
             HiveTableDefinition.builder()
                     .setName("region")
@@ -38,6 +38,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.REGION, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition PART =
             HiveTableDefinition.builder()
                     .setName("part")
@@ -57,6 +58,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.PART, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition SUPPLIER =
             HiveTableDefinition.builder()
                     .setName("supplier")
@@ -74,6 +76,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition PART_SUPPLIER =
             HiveTableDefinition.builder()
                     .setName("partsupp")
@@ -89,6 +92,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition CUSTOMER =
             HiveTableDefinition.builder()
                     .setName("customer")
@@ -107,6 +111,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.CUSTOMER, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition ORDERS =
             HiveTableDefinition.builder()
                     .setName("orders")
@@ -126,6 +131,7 @@ public class TpchTableDefinitions
                     .setDataSource(new TpchDataSource(TpchTable.ORDERS, 1.0))
                     .build();
 
+    @RepositoryTableDefinition
     public static final HiveTableDefinition LINE_ITEM =
             HiveTableDefinition.builder()
                     .setName("lineitem")
@@ -151,6 +157,4 @@ public class TpchTableDefinitions
                             "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, 1.0))
                     .build();
-
-    public static final List<HiveTableDefinition> TABLES = ImmutableList.of(NATION, REGION, PART, SUPPLIER, PART_SUPPLIER, CUSTOMER, ORDERS, LINE_ITEM);
 }
