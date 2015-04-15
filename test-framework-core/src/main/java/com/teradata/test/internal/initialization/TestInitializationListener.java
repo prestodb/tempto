@@ -48,8 +48,8 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithText
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
-import static com.teradata.test.internal.initialization.ModulesHelper.getClasses;
-import static com.teradata.test.internal.initialization.ModulesHelper.instantiate;
+import static com.teradata.test.internal.ReflectionHelper.getClasses;
+import static com.teradata.test.internal.ReflectionHelper.instantiate;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;

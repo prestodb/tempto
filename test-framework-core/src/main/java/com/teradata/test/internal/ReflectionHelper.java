@@ -1,4 +1,4 @@
-package com.teradata.test.internal.initialization;
+package com.teradata.test.internal;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -12,7 +12,7 @@ import java.util.Set;
 import static java.util.stream.Collectors.toList;
 import static org.reflections.util.ClasspathHelper.forPackage;
 
-public final class ModulesHelper
+public final class ReflectionHelper
 {
     private static final String PACKAGES_PREFIX = "com.teradata";
 
@@ -29,7 +29,7 @@ public final class ModulesHelper
     public static Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation)
     {
         Reflections reflections = new Reflections(forPackage(PACKAGES_PREFIX),
-                new FieldAnnotationsScanner(), ModulesHelper.class.getClassLoader());
+                new FieldAnnotationsScanner(), ReflectionHelper.class.getClassLoader());
         return reflections.getFieldsAnnotatedWith(annotation);
     }
 
@@ -54,7 +54,7 @@ public final class ModulesHelper
                 .collect(toList());
     }
 
-    private ModulesHelper()
+    private ReflectionHelper()
     {
     }
 }

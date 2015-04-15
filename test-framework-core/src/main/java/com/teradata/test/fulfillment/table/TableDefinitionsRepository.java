@@ -5,7 +5,7 @@ package com.teradata.test.fulfillment.table;
 
 import com.google.common.collect.MapMaker;
 import com.teradata.test.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
-import com.teradata.test.internal.initialization.ModulesHelper;
+import com.teradata.test.internal.ReflectionHelper;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.teradata.test.internal.initialization.ModulesHelper.getFieldsAnnotatedWith;
+import static com.teradata.test.internal.ReflectionHelper.getFieldsAnnotatedWith;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -37,7 +37,7 @@ public class TableDefinitionsRepository
     private static List<TableDefinition> SCANNED_TABLE_DEFINITIONS =
             getFieldsAnnotatedWith(RepositoryTableDefinition.class)
                     .stream()
-                    .map(ModulesHelper::<TableDefinition>getStaticFieldValue)
+                    .map(ReflectionHelper::<TableDefinition>getStaticFieldValue)
                     .collect(toList());
 
     private static TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(SCANNED_TABLE_DEFINITIONS);
