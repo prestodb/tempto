@@ -9,8 +9,6 @@ import io.airlift.tpch.TpchEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.util.Enumeration;
 import java.util.Iterator;
 
 /**
@@ -24,66 +22,54 @@ public class TpchEntityByteSource<T extends TpchEntity>
         extends ByteSource
 {
 
-    private static final String NEW_LINE = "\n";
-    private static final int EOF = -1;
-
-    private final Iterable<T> rowsIterable;
+    private final IterableTpchEntityInputStream<T> inputStream;
 
     public TpchEntityByteSource(Iterable<T> iterable)
     {
-        this.rowsIterable = iterable;
+        this.inputStream = new IterableTpchEntityInputStream<>(iterable);
     }
 
     @Override
     public InputStream openStream()
             throws IOException
     {
-        final Iterator<T> rowsIterator = rowsIterable.iterator();
-        return new SequenceInputStream(new Enumeration<InputStream>()
-        {
-            private boolean nextIsNewLine = false;
-
-            @Override
-            public boolean hasMoreElements()
-            {
-                return rowsIterator.hasNext();
-            }
-
-            @Override
-            public InputStream nextElement()
-            {
-                if (nextIsNewLine) {
-                    nextIsNewLine = false;
-                    return toInputStream(NEW_LINE);
-                }
-                else {
-                    nextIsNewLine = true;
-                    return toInputStream(rowsIterator.next().toLine());
-                }
-            }
-        });
+        return this.inputStream;
     }
 
-    private InputStream toInputStream(String string)
+    private static class IterableTpchEntityInputStream<T extends TpchEntity>
+            extends InputStream
     {
 
-        return new InputStream()
+        private final Iterator<T> rowIterator;
+        private CharSequence currentLine;
+        private int currentReadLineIndex;
+        private boolean newLinePrinted = true;
+
+        public IterableTpchEntityInputStream(Iterable<T> iterable)
         {
+            this.rowIterator = iterable.iterator();
+        }
 
-            private int position = 0;
-            private int stringLength = string.length();
-
-            @Override
-            public int read()
-                    throws IOException
-            {
-                if (position < stringLength) {
-                    return string.charAt(position++);
+        // TODO: implement read(byte[]) if this is slow
+        @Override
+        public int read()
+                throws IOException
+        {
+            if (currentLine == null || currentReadLineIndex >= currentLine.length()) {
+                if (rowIterator.hasNext()) {
+                    newLinePrinted = currentLine == null;
+                    currentReadLineIndex = 0;
+                    currentLine = rowIterator.next().toLine();
                 }
                 else {
-                    return EOF;
+                    return -1;
                 }
             }
-        };
+            if (!newLinePrinted) {
+                newLinePrinted = true;
+                return '\n';
+            }
+            return currentLine.charAt(currentReadLineIndex++);
+        }
     }
 }

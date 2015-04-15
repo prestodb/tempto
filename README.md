@@ -74,9 +74,10 @@ refer to the **Configuration** section below.
 ```Shell
 $ cd test-framework
 $ bin/product-test \
-     --tests-classpath test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar \
+     --tests-classpath test-framework-core/build/libs/test-framework-core-all.jar:test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar \
      --tests-package=com.teradata.test.examples \
-     --exclude-groups quarantine
+     --exclude-groups quarantine \
+     --report-dir /tmp
 Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
 ...
 [2015-04-02 15:21:48] Completed 18 tests
