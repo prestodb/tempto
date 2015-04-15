@@ -32,6 +32,7 @@ public class QueryExecutorModuleProvider
             @Override
             protected void configure()
             {
+                bind(JdbcConnectionsPool.class).toInstance(jdbcConnectionsPool);
                 Set<String> definedJdcbConnectionNames = jdbcConnectionsConfiguration.getDefinedJdcbConnectionNames();
                 for (String connectionName : definedJdcbConnectionNames) {
                     bindDatabaseConnectionBeans(connectionName);
@@ -51,7 +52,6 @@ public class QueryExecutorModuleProvider
                     {
                         Key<QueryExecutor> queryExecutorKey = Key.get(QueryExecutor.class, named(connectionName));
                         bind(JdbcConnectivityParamsState.class).to(connectivityStateKey);
-                        bind(JdbcConnectionsPool.class).toInstance(jdbcConnectionsPool);
                         bind(queryExecutorKey).to(JdbcQueryExecutor.class);
                         expose(queryExecutorKey);
                     }

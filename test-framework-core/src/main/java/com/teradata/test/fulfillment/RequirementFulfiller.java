@@ -15,7 +15,6 @@ import java.util.Set;
 
 public interface RequirementFulfiller
 {
-
     /**
      * Apply annotation to fulfillers which should be evaluated at suite level.
      */

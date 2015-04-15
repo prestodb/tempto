@@ -94,7 +94,11 @@ public class SqlQueryConventionBasedTest
     @Override
     public String testCaseName()
     {
-        return FilenameUtils.getBaseName(queryFile.getName());
+        String testCaseName = FilenameUtils.getBaseName(queryFile.getName());
+        if (!isAlphabetic(testCaseName.charAt(0))) {
+            return "test_" + testCaseName;
+        }
+        return testCaseName;
     }
 
     @Override

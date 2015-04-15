@@ -94,7 +94,7 @@ public class TestInitializationListener
     {
         Set<Class<? extends RequirementFulfiller>> scannedFulfillers = getClasses(RequirementFulfiller.class);
         scannedFulfillers.removeAll(builtinFulfillers);
-        scannedFulfillers.removeIf(c -> c.getAnnotation(filterAnnotation) != null);
+        scannedFulfillers.removeIf(c -> c.getAnnotation(filterAnnotation) == null);
         ImmutableList.Builder<Class<? extends RequirementFulfiller>> resultFulfillers = ImmutableList.builder();
         resultFulfillers.addAll(builtinFulfillers);
         resultFulfillers.addAll(scannedFulfillers);
