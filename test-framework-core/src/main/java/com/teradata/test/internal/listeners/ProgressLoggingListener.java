@@ -35,15 +35,17 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
-        String testName = testCase.getName();
-        org.slf4j.MDC.put("test_id", testName);
+        String testId = getMdcTestId(testCase);
+        org.slf4j.MDC.put("test_id", testId);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");
         started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, total, testName, Joiner.on(", ").join(testCase.getMethod().getGroups()));
+                started, total, testId, Joiner.on(", ").join(testCase.getMethod().getGroups()));
     }
+
+    private String getMdcTestId(ITestResult testCase) {return testCase.getTestClass().getRealClass().getSimpleName() + "." + testCase.getName();}
 
     @Override
     public void onTestSuccess(ITestResult testCase)

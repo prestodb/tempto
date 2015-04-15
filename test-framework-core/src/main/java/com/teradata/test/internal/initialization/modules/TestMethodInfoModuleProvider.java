@@ -17,7 +17,7 @@ public class TestMethodInfoModuleProvider
 {
     public Module getModule(Configuration configuration, ITestResult testResult)
     {
-        TestInfo testInfo = new TestInfo(testResult.getMethod().getClass().getName() + "." + testResult.getMethod().getMethodName(), new Date());
+        TestInfo testInfo = new TestInfo(testResult.getTestClass().getRealClass().getName() + "." + testResult.getMethod().getMethodName());
         return new AbstractModule()
         {
             @Override

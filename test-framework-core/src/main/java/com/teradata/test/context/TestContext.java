@@ -4,6 +4,8 @@
 
 package com.teradata.test.context;
 
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 
 public interface TestContext
@@ -18,6 +20,18 @@ public interface TestContext
     <T> T getDependency(Class<T> dependencyClass);
 
     <T> T getDependency(Class<T> dependencyClass, String dependencyName);
+
+    /**
+     * Same as {@link #getDependency(Class)} but will return Optional.empty() if no binding is present for
+     * given class.
+     */
+    <T> Optional<T> getOptionalDependency(Class<T> dependencyClass);
+
+    /**
+     * Same as {@link #getDependency(Class, String)} but will return Optional.empty() if no binding is present for
+     * given class.
+     */
+    <T> Optional<T> getOptionalDependency(Class<T> dependencyClass, String dependencyName);
 
     /**
      * Creates a new child {@link TestContext} with new {@link com.google.inject.Injector}

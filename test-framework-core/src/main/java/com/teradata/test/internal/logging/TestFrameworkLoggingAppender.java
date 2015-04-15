@@ -33,12 +33,12 @@ import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 
 /**
  * This class is a custom log appender that is responsible for two things:
- * <p/>
+ * <p>
  * <ol>
  * <li>Writing out messages to the console when they meet the minimum level</li>
  * <li>Writing out messages to a per-test file when they meet the minimum level</li>
  * </ol>
- * <p/>
+ * <p>
  * For now, the console and file levels are defined statically, as well as the output patterns.
  */
 public class TestFrameworkLoggingAppender
@@ -54,6 +54,7 @@ public class TestFrameworkLoggingAppender
     private LoadingCache<String, PrintWriter> printWriterCache = buildPrintWriterCache();
 
     private final String logsDirectory = selectLogsDirectory();
+    private Date markerTime = new Date();
 
     private LoadingCache<String, PrintWriter> buildPrintWriterCache()
     {
@@ -75,7 +76,7 @@ public class TestFrameworkLoggingAppender
 
     private String selectLogsDirectory()
     {
-        return getTempDirectoryPath()+"/testlogs/" + DATE_FORMAT.format(new Date());
+        return getTempDirectoryPath() + "/testlogs/" + DATE_FORMAT.format(new Date());
     }
 
     @Override
@@ -153,16 +154,20 @@ public class TestFrameworkLoggingAppender
     private Optional<String> getCurrentTestLogFileName()
     {
         Optional<TestContext> testContext = testContextIfSet();
-        if (testContext.isPresent()) {
-            try {
-                TestInfo testInfo = testContext.get().getDependency(TestInfo.class);
-                return Optional.of(logsDirectory + "/" + testInfo.getTestName() + "_" + DATE_FORMAT.format(testInfo.getExecutionStart()));
+        try {
+            String testName = "SUITE";
+            if (testContext.isPresent()) {
+                Optional<TestInfo> testInfo = testContext.get().getOptionalDependency(TestInfo.class);
+                if (testInfo.isPresent()) {
+                    testName = testInfo.get().getTestName();
+                }
             }
-            catch (ConfigurationException e) {
-                System.err.append("Could not load TestInfo");
-            }
+            return Optional.of(logsDirectory + "/" + testName + "_" + DATE_FORMAT.format(markerTime));
         }
-        return Optional.empty();
+        catch (ConfigurationException e) {
+            System.err.append("Could not load TestInfo");
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -182,7 +187,8 @@ public class TestFrameworkLoggingAppender
     /**
      * Returns logs directory for configured TestFrameworkLoggingAppender.
      */
-    public static Optional<String> getSelectedLogsDirectory() {
+    public static Optional<String> getSelectedLogsDirectory()
+    {
         Enumeration allAppenders = Logger.getRootLogger().getAllAppenders();
         while (allAppenders.hasMoreElements()) {
             Appender appender = (Appender) allAppenders.nextElement();

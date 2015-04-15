@@ -73,6 +73,28 @@ public class GuiceTestContext
     }
 
     @Override
+    public <T> Optional<T> getOptionalDependency(Class<T> dependencyClass)
+    {
+        return getOptionalDependency(Key.get(dependencyClass));
+    }
+
+    @Override
+    public <T> Optional<T> getOptionalDependency(Class<T> dependencyClass, String dependencyName)
+    {
+        return getOptionalDependency(Key.get(dependencyClass, named(dependencyName)));
+    }
+
+    public <T> Optional<T> getOptionalDependency(Key key)
+    {
+        if (injector.getExistingBinding(key) != null) {
+            return Optional.of(getDependency(key));
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public GuiceTestContext createChildContext(Iterable<State> newStatesIterable)
     {
         return createChildContext(newStatesIterable, emptyList());
