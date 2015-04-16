@@ -62,8 +62,8 @@ public class SimpleQueryTest
     {
         TableInstance instance = tableManager.createMutable(
                 like(NATION)
-                        .withData("v1.0", "")
-                        .withName("some_other_table_name")
+                        .setNoData()
+                        .setName("some_other_table_name")
                         .build()
         );
         dropTableOnTestContextClose(instance);
