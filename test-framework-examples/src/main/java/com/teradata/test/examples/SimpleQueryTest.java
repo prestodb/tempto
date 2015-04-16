@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static com.teradata.test.fulfillment.hive.HiveTableDefinition.like;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
 import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
 import static com.teradata.test.query.QueryExecutor.query;
@@ -59,7 +60,12 @@ public class SimpleQueryTest
     @Test(groups = "query")
     public void createAndDropMutableTable()
     {
-        TableInstance instance = tableManager.createMutable(NATION);
+        TableInstance instance = tableManager.createMutable(
+                like(NATION)
+                        .withData("v1.0", "")
+                        .withName("some_other_table_name")
+                        .build()
+        );
         dropTableOnTestContextClose(instance);
     }
 

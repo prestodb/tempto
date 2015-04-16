@@ -56,6 +56,16 @@ public class HiveTableDefinition
         return new HiveTableDefinitionBuilder();
     }
 
+    public static LikeTableDefinitionBuilder like(HiveTableDefinition hiveTableDefinition)
+    {
+
+        LikeTableDefinitionBuilder likeTableDefinitionBuilder = new LikeTableDefinitionBuilder();
+        likeTableDefinitionBuilder.setName(hiveTableDefinition.getName());
+        likeTableDefinitionBuilder.setCreateTableDDLTemplate(hiveTableDefinition.createTableDDLTemplate);
+        likeTableDefinitionBuilder.setDataSource(hiveTableDefinition.getDataSource());
+        return likeTableDefinitionBuilder;
+    }
+
     public static class HiveTableDefinitionBuilder
     {
 
@@ -106,6 +116,46 @@ public class HiveTableDefinition
         public HiveTableDefinition build()
         {
             return new HiveTableDefinition(name, createTableDDLTemplate, dataSource);
+        }
+    }
+
+    public static class LikeTableDefinitionBuilder
+            extends HiveTableDefinitionBuilder
+    {
+        public LikeTableDefinitionBuilder withName(String name)
+        {
+            setName(name);
+            return this;
+        }
+
+        public LikeTableDefinitionBuilder withDataSource(DataSource dataSource)
+        {
+            setDataSource(dataSource);
+            return this;
+        }
+
+        public LikeTableDefinitionBuilder withNoData(String revision)
+        {
+            setData(revision, "");
+            return this;
+        }
+
+        public LikeTableDefinitionBuilder withData(String revision, String data)
+        {
+            setData(revision, data);
+            return this;
+        }
+
+        public LikeTableDefinitionBuilder withRows(String revision, int rowsCount, String rowData)
+        {
+            setRows(revision, rowsCount, rowData);
+            return this;
+        }
+
+        public LikeTableDefinitionBuilder withRows(String revision, int splitCount, int rowsInEachSplit, String rowData)
+        {
+            setRows(revision, splitCount, rowsInEachSplit, rowData);
+            return this;
         }
     }
 
