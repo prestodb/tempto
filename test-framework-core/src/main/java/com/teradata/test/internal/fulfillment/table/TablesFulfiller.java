@@ -37,7 +37,8 @@ public class TablesFulfiller
 
     private TableManagerDispatcher tableManagerDispatcher;
 
-    private final Map<String, TableInstance> instanceMap = newHashMap();
+    private final Map<String, TableInstance> immutableTableInstances = newHashMap();
+    private final Map<String, TableInstance> mutableTableInstances = newHashMap();
 
     @Inject
     public TablesFulfiller(TableManagerDispatcher tableManagerDispatcher)
@@ -60,30 +61,36 @@ public class TablesFulfiller
                 .map(MutableTableRequirement::getTableDefinition)
                 .forEach(this::createMutableTable);
 
-        return ImmutableSet.of(new TablesState(instanceMap));
+        return ImmutableSet.of(new TablesState(immutableTableInstances, mutableTableInstances));
     }
 
     @Override
     public void cleanup()
     {
         LOGGER.debug("cleaning up tables");
-        instanceMap.values().forEach(tableInstance -> tableManagerDispatcher.getTableManagerFor(tableInstance).drop(tableInstance));
-    }
-
-    private void createMutableTable(TableDefinition tableDefinition)
-    {
-        TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
-        TableInstance instance = tableManager.createMutable(tableDefinition);
-        checkState(!instanceMap.containsKey(instance.getName()));
-        instanceMap.put(instance.getName(), instance);
+        cleanup(immutableTableInstances.values());
+        cleanup(mutableTableInstances.values());
     }
 
     private void createImmutableTable(TableDefinition tableDefinition)
     {
         TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
         TableInstance instance = tableManager.createImmutable(tableDefinition);
-        checkState(!instanceMap.containsKey(instance.getName()));
-        instanceMap.put(instance.getName(), instance);
+        checkState(!immutableTableInstances.containsKey(instance.getName()));
+        immutableTableInstances.put(instance.getName(), instance);
+    }
+
+    private void createMutableTable(TableDefinition tableDefinition)
+    {
+        TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
+        TableInstance instance = tableManager.createMutable(tableDefinition);
+        checkState(!mutableTableInstances.containsKey(instance.getName()));
+        mutableTableInstances.put(instance.getName(), instance);
+    }
+
+    private void cleanup(Collection<TableInstance> tableInstances)
+    {
+        tableInstances.forEach(tableInstance -> tableManagerDispatcher.getTableManagerFor(tableInstance).drop(tableInstance));
     }
 
     private <T> List<T> filter(Collection collection, Class<T> clazz)

@@ -24,30 +24,40 @@ class TablesFulfillerTest
   {
     setup:
     def tableDefinition = getTableDefinition("nation")
-    def tableInstance = new TableInstance("nation", "nation", tableDefinition)
-    def requirement = new ImmutableTableRequirement(tableDefinition)
 
-    tableManager.createImmutable(tableDefinition) >> tableInstance
+    def immutableTableInstance = new TableInstance("nation", "nation_immutable", tableDefinition)
+    def immutableTableRequirement = new ImmutableTableRequirement(tableDefinition)
+
+    def mutableTableInstance = new TableInstance("nation", "nation_mutable", tableDefinition)
+    def mutableTableRequirement = new MutableTableRequirement(tableDefinition)
+
+    tableManager.createImmutable(tableDefinition) >> immutableTableInstance
+    tableManager.createMutable(tableDefinition) >> mutableTableInstance
 
     TablesFulfiller fulfiller = new TablesFulfiller(tableManagerDispatcher)
 
     when:
-    def states = fulfiller.fulfill([requirement] as Set)
+    def states = fulfiller.fulfill([immutableTableRequirement, mutableTableRequirement] as Set)
 
     assert states.size() == 1
     def state = (TablesState) getOnlyElement(states)
-    assert state.getTableInstance('nation') == tableInstance
+    assert state.getTableInstance('nation') != null
+    assert state.getImmutableTableInstance('nation') == immutableTableInstance
+    assert state.getMutableTableInstance('nation') == mutableTableInstance
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(tableDefinition) >> tableManager
-    1 * tableManager.createImmutable(tableDefinition) >> tableInstance
+    2 * tableManagerDispatcher.getTableManagerFor(tableDefinition) >> tableManager
+    1 * tableManager.createImmutable(tableDefinition) >> immutableTableInstance
+    1 * tableManager.createMutable(tableDefinition) >> mutableTableInstance
 
     when:
     fulfiller.cleanup()
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(tableInstance) >>> tableManager
-    1 * tableManager.drop(tableInstance)
+    1 * tableManagerDispatcher.getTableManagerFor(immutableTableInstance) >>> tableManager
+    1 * tableManagerDispatcher.getTableManagerFor(mutableTableInstance) >>> tableManager
+    1 * tableManager.drop(immutableTableInstance)
+    1 * tableManager.drop(mutableTableInstance)
     0 * _
   }
 
