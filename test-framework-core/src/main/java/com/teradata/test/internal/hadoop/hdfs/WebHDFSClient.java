@@ -82,7 +82,8 @@ public class WebHDFSClient
     @Override
     public void createDirectory(String path, String username)
     {
-        HttpPut mkdirRequest = new HttpPut(buildUri(path, username, "MKDIRS"));
+        // TODO: reconsider permission=777
+        HttpPut mkdirRequest = new HttpPut(buildUri(path, username, "MKDIRS", Pair.of("permission", "777")));
         try (CloseableHttpResponse response = httpClient.execute(mkdirRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("MKDIRS", path, username, mkdirRequest, response);
