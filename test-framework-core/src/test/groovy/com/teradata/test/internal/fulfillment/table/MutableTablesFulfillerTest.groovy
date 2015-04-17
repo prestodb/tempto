@@ -9,7 +9,7 @@ import spock.lang.Specification
 
 import static com.google.common.collect.Iterables.getOnlyElement
 
-class TablesFulfillerTest
+class MutableTablesFulfillerTest
         extends Specification
 {
   TableManager tableManager = Mock(TableManager)
@@ -20,43 +20,35 @@ class TablesFulfillerTest
     tableManagerDispatcher.getTableManagerFor(_ as TableDefinition) >> tableManager
   }
 
-  def "test immutable table fulfill/cleanup"()
+  def "test mutable table fulfill/cleanup"()
   {
     setup:
     def tableDefinition = getTableDefinition("nation")
 
-    def immutableTableInstance = new TableInstance("nation", "nation_immutable", tableDefinition)
-    def immutableTableRequirement = new ImmutableTableRequirement(tableDefinition)
-
     def mutableTableInstance = new TableInstance("nation", "nation_mutable", tableDefinition)
     def mutableTableRequirement = new MutableTableRequirement(tableDefinition)
 
-    tableManager.createImmutable(tableDefinition) >> immutableTableInstance
     tableManager.createMutable(tableDefinition) >> mutableTableInstance
 
-    TablesFulfiller fulfiller = new TablesFulfiller(tableManagerDispatcher)
+    MutableTablesFulfiller fulfiller = new MutableTablesFulfiller(tableManagerDispatcher)
 
     when:
-    def states = fulfiller.fulfill([immutableTableRequirement, mutableTableRequirement] as Set)
+    def states = fulfiller.fulfill([mutableTableRequirement] as Set)
 
     assert states.size() == 1
-    def state = (TablesState) getOnlyElement(states)
-    assert state.getTableInstance('nation') != null
-    assert state.getImmutableTableInstance('nation') == immutableTableInstance
-    assert state.getMutableTableInstance('nation') == mutableTableInstance
+    def state = (MutableTablesState) getOnlyElement(states)
+    assert state.get('nation') != null
+    assert state.get('nation') == mutableTableInstance
 
     then:
-    2 * tableManagerDispatcher.getTableManagerFor(tableDefinition) >> tableManager
-    1 * tableManager.createImmutable(tableDefinition) >> immutableTableInstance
+    1 * tableManagerDispatcher.getTableManagerFor(tableDefinition) >> tableManager
     1 * tableManager.createMutable(tableDefinition) >> mutableTableInstance
 
     when:
     fulfiller.cleanup()
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(immutableTableInstance) >>> tableManager
     1 * tableManagerDispatcher.getTableManagerFor(mutableTableInstance) >>> tableManager
-    1 * tableManager.drop(immutableTableInstance)
     1 * tableManager.drop(mutableTableInstance)
     0 * _
   }

@@ -21,7 +21,8 @@ import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
-import com.teradata.test.internal.fulfillment.table.TablesFulfiller;
+import com.teradata.test.internal.fulfillment.table.ImmutableTablesFulfiller;
+import com.teradata.test.internal.fulfillment.table.MutableTablesFulfiller;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -60,10 +61,12 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
-            TablesFulfiller.class
+            ImmutableTablesFulfiller.class
     );
 
-    private static final List<Class<? extends RequirementFulfiller>> BUILTIN_TEST_METHOD_LEVEL_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of();
+    private static final List<Class<? extends RequirementFulfiller>> BUILTIN_TEST_METHOD_LEVEL_FULFILLERS = ImmutableList.<Class<? extends RequirementFulfiller>>of(
+            MutableTablesFulfiller.class
+    );
 
     private final List<? extends SuiteModuleProvider> suiteModuleProviders;
     private final List<? extends TestMethodModuleProvider> testMethodModuleProviders;
