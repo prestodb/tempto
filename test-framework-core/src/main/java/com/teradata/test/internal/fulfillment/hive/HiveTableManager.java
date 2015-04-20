@@ -6,6 +6,7 @@ package com.teradata.test.internal.fulfillment.hive;
 import com.google.inject.Inject;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
+import com.teradata.test.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
@@ -19,6 +20,7 @@ import javax.inject.Named;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -49,22 +51,21 @@ public class HiveTableManager
     public HiveTableInstance createImmutable(TableDefinition tableDefinition)
     {
         HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
-        LOGGER.debug("creating immutable table {}", tableDefinition.getName());
-
-        queryExecutor.executeQuery(dropTableDDL(tableDefinition.getName()));
-
-        DataSource dataSource = hiveTableDefinition.getDataSource();
-        String tableDataPath = getImmutableTableHdfsPath(dataSource);
-        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
-
         String tableNameInDatabase = tableDefinition.getName();
+        LOGGER.debug("creating immutable table {}", tableNameInDatabase);
+
+        queryExecutor.executeQuery(dropTableDDL(tableNameInDatabase));
+
+        String tableDataPath = getImmutableTableHdfsPath(hiveTableDefinition.getDataSource());
+        uploadTableData(hiveTableDefinition, tableDataPath);
+
         queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
 
         return new HiveTableInstance(tableNameInDatabase, tableNameInDatabase, hiveTableDefinition, Optional.<String>empty());
     }
 
     @Override
-    public HiveTableInstance createMutable(TableDefinition tableDefinition)
+    public HiveTableInstance createMutable(TableDefinition tableDefinition, State state)
     {
         HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
 
@@ -72,9 +73,10 @@ public class HiveTableManager
         String tableNameInDatabase = tableDefinition.getName() + "_" + tableSuffix;
         LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
 
-        DataSource dataSource = hiveTableDefinition.getDataSource();
         String tableDataPath = getMutableTableHdfsPath(tableNameInDatabase);
-        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
+        if (state == LOADED) {
+            uploadTableData(hiveTableDefinition, tableDataPath);
+        }
 
         queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
 
@@ -90,6 +92,12 @@ public class HiveTableManager
         if (hiveTableInstance.getMutableDataHdfsDataPath().isPresent()) {
             hdfsClient.delete(hiveTableInstance.getMutableDataHdfsDataPath().get(), hdfsUsername);
         }
+    }
+
+    private void uploadTableData(HiveTableDefinition hiveTableDefinition, String tableDataPath)
+    {
+        DataSource dataSource = hiveTableDefinition.getDataSource();
+        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
     }
 
     private String getImmutableTableHdfsPath(DataSource dataSource)

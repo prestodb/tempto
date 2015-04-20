@@ -51,7 +51,6 @@ public class MutableTablesFulfiller
 
         filter(requirements, MutableTableRequirement.class)
                 .stream()
-                .map(MutableTableRequirement::getTableDefinition)
                 .forEach(this::createMutableTable);
 
         return ImmutableSet.of(new MutableTablesState(tableInstances));
@@ -64,12 +63,15 @@ public class MutableTablesFulfiller
         cleanup(tableInstances.values());
     }
 
-    private void createMutableTable(TableDefinition tableDefinition)
+    private void createMutableTable(MutableTableRequirement mutableTableRequirement)
     {
+        TableDefinition tableDefinition = mutableTableRequirement.getTableDefinition();
+        String name = mutableTableRequirement.getName();
+        checkState(!tableInstances.containsKey(name));
+
         TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
-        TableInstance instance = tableManager.createMutable(tableDefinition);
-        checkState(!tableInstances.containsKey(instance.getName()));
-        tableInstances.put(instance.getName(), instance);
+        TableInstance instance = tableManager.createMutable(tableDefinition, mutableTableRequirement.getState());
+        tableInstances.put(name, instance);
     }
 
     private void cleanup(Collection<TableInstance> tableInstances)

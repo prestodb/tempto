@@ -4,9 +4,11 @@
 package com.teradata.test.fulfillment.table;
 
 import com.teradata.test.context.TestContext;
+import com.teradata.test.fulfillment.table.MutableTableRequirement.State;
 
 import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.test.fulfillment.table.TableManagerDispatcher.getTableManagerDispatcher;
 
 /**
@@ -16,7 +18,12 @@ public interface TableManager
 {
     TableInstance createImmutable(TableDefinition tableDefinition);
 
-    TableInstance createMutable(TableDefinition tableDefinition);
+    TableInstance createMutable(TableDefinition tableDefinition, State state);
+
+    default TableInstance createMutable(TableDefinition tableDefinition)
+    {
+        return createMutable(tableDefinition, LOADED);
+    }
 
     void drop(TableInstance tableInstance);
 
@@ -36,6 +43,11 @@ public interface TableManager
     public static TableInstance createImmutableTable(TableDefinition tableDefinition)
     {
         return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createImmutable(tableDefinition);
+    }
+
+    public static TableInstance createMutableTable(TableDefinition tableDefinition, State state)
+    {
+        return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createMutable(tableDefinition, state);
     }
 
     public static TableInstance createMutableTable(TableDefinition tableDefinition)

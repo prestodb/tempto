@@ -13,6 +13,7 @@ import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
+import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
 import org.testng.annotations.Test;
@@ -22,6 +23,7 @@ import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.fulfillment.hive.HiveTableDefinition.like;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
 import static com.teradata.test.query.QueryExecutor.query;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,13 +62,16 @@ public class SimpleQueryTest
     @Test(groups = "query")
     public void createAndDropMutableTable()
     {
-        TableInstance instance = tableManager.createMutable(
-                like(NATION)
-                        .setNoData()
-                        .setName("some_other_table_name")
-                        .build()
-        );
-        dropTableOnTestContextClose(instance);
+        TableDefinition tableDefinition = like(NATION)
+                .setNoData()
+                .setName("some_other_table_name")
+                .build();
+
+        TableInstance instanceCreated = tableManager.createMutable(tableDefinition, CREATED);
+        TableInstance instanceLoaded = tableManager.createMutable(tableDefinition);
+
+        dropTableOnTestContextClose(instanceCreated);
+        dropTableOnTestContextClose(instanceLoaded);
     }
 
     @Test(groups = "query")
