@@ -10,6 +10,8 @@ import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.query.QueryRowMapper;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +36,12 @@ public class SqlResultFileWrapper
     public static SqlResultFileWrapper sqlResultFileWrapperFor(File resultFile)
     {
         return new SqlResultFileWrapper(new HeaderFileParser().parseFile(resultFile));
+    }
+
+    public static SqlResultFileWrapper sqlResultFileWrapperFor(InputStream inputStream)
+            throws IOException
+    {
+        return new SqlResultFileWrapper(new HeaderFileParser().parseFile(inputStream));
     }
 
     public SqlResultFileWrapper(ParsingResult sqlFileParsingResult)

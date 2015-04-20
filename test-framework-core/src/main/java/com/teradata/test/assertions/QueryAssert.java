@@ -22,9 +22,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.query.QueryResult.fromSqlIndex;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
 import static java.lang.String.format;
+import static java.sql.JDBCType.INTEGER;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -175,6 +177,18 @@ public class QueryAssert
     public QueryAssert containsExactly(Row... rows)
     {
         return containsExactly(Arrays.asList(rows));
+    }
+
+    /**
+     * Verifies number of rows updated/inserted by last update query
+     */
+    public QueryAssert updatedRowsCountIsEqualTo(int count)
+    {
+        hasRowsCount(1);
+        hasColumnsCount(1);
+        hasColumns(INTEGER);
+        containsExactly(row(count));
+        return this;
     }
 
     private static List<Comparator<Object>> getComparators(QueryResult queryResult)

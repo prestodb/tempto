@@ -58,6 +58,7 @@ public class QueryResultValueComparator
             case LONGVARBINARY:
                 return binaryEqual(actual, expected);
             case BIT:
+            case BOOLEAN:
                 return booleanEqual(actual, expected);
             case TINYINT:
             case SMALLINT:
