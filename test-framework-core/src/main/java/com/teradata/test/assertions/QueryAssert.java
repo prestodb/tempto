@@ -72,6 +72,17 @@ public class QueryAssert
         return this;
     }
 
+    public QueryAssert hasNoRows() {
+        return hasRowsCount(0);
+    }
+
+    public QueryAssert hasRows() {
+        if (actual.getRowsCount() == 0) {
+            failWithMessage("Expected some rows to be returned from query");
+        }
+        return this;
+    }
+
     public QueryAssert hasColumnsCount(int columnCount)
     {
         if (actual.getColumnsCount() != columnCount) {

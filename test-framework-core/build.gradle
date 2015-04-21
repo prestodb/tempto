@@ -49,7 +49,7 @@ publishing {
     mavenJava(MavenPublication) {
       groupId 'com.teradata.test'
       artifactId 'framework-core'
-      version '1.0.3-SNAPSHOT'
+      version '1.0.4-SNAPSHOT'
 
       from components.java
 

@@ -57,6 +57,25 @@ public class QueryAssertTest
     noExceptionThrown()
   }
 
+  def 'hasRows - correct'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasRows()
+
+    then:
+    noExceptionThrown()
+  }
+
+  def 'hasNoRows - fails'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasNoRows()
+
+    then:
+    def e = thrown(AssertionError)
+    e.message.startsWith('Expected row count to be <0>, but was <2>; rows=')
+  }
+
   def 'extractingColumn fails - no such column index'()
   {
     when:
