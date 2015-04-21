@@ -6,6 +6,11 @@ package com.teradata.test.fulfillment.table;
 import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.table.MutableTableRequirement.State;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
@@ -16,6 +21,19 @@ import static com.teradata.test.fulfillment.table.TableManagerDispatcher.getTabl
  */
 public interface TableManager
 {
+    /**
+     * {@link TableManager} classes annotated with this annotation
+     * will be automatically scanned for.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.TYPE})
+    public @interface AutoTableManager
+    {
+        Class<? extends TableDefinition> tableDefinitionClass();
+
+        String name();
+    }
+
     TableInstance createImmutable(TableDefinition tableDefinition);
 
     TableInstance createMutable(TableDefinition tableDefinition, State state);

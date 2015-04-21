@@ -10,6 +10,7 @@ import com.teradata.test.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
+import com.teradata.test.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import com.teradata.test.query.QueryExecutor;
@@ -24,6 +25,7 @@ import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.
 import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
+@AutoTableManager(tableDefinitionClass = HiveTableDefinition.class, name = "hive")
 public class HiveTableManager
         implements TableManager
 {

@@ -8,17 +8,21 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-import com.google.inject.name.Named;
 import com.teradata.test.configuration.Configuration;
+import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableManager;
+import com.teradata.test.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.test.fulfillment.table.TableManagerDispatcher;
 import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
-import com.teradata.test.internal.fulfillment.hive.HiveTableManager;
 
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
+import static com.teradata.test.fulfillment.table.TableManagerDispatcher.tableManagerMapBinderFor;
+import static com.teradata.test.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 
-// TODO: provide proper dispatching here
 @AutoModuleProvider
 public class TableManagerDispatcherModuleProvider
         implements SuiteModuleProvider
@@ -30,14 +34,24 @@ public class TableManagerDispatcherModuleProvider
             @Override
             protected void configure()
             {
-                bind(Key.get(TableManager.class, named("hive"))).to(HiveTableManager.class);
+                getAnnotatedSubTypesOf(TableManager.class, AutoTableManager.class).stream().forEach(
+                        tableManagerClass -> {
+                            AutoTableManager annotation = tableManagerClass.getAnnotation(AutoTableManager.class);
+                            tableManagerMapBinderFor(binder()).addBinding(annotation.tableDefinitionClass()).to(tableManagerClass);
+                            bind(Key.get(TableManager.class, named(annotation.name()))).to(tableManagerClass);
+                        }
+                );
             }
 
             @Inject
             @Provides
-            public TableManagerDispatcher defaultTableManagerDispatcher(@Named("hive") TableManager tableManager)
+            public TableManagerDispatcher defaultTableManagerDispatcher(Map<Class, TableManager> tableManagers)
             {
-                return tableDefinition -> tableManager;
+                return tableDefinition -> {
+                    Class<? extends TableDefinition> clazz = tableDefinition.getClass();
+                    checkState(tableManagers.containsKey(clazz), "Table manager for %s is not registered", clazz);
+                    return tableManagers.get(clazz);
+                };
             }
         };
     }

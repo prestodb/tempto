@@ -3,6 +3,10 @@
  */
 package com.teradata.test.fulfillment.table;
 
+import com.google.inject.Binder;
+import com.google.inject.multibindings.MapBinder;
+
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 
 /**
@@ -20,5 +24,10 @@ public interface TableManagerDispatcher
     public static TableManagerDispatcher getTableManagerDispatcher()
     {
         return testContext().getDependency(TableManagerDispatcher.class);
+    }
+
+    public static MapBinder<Class<? extends TableDefinition>, TableManager> tableManagerMapBinderFor(Binder binder)
+    {
+        return (MapBinder<Class<? extends TableDefinition>, TableManager>) newMapBinder(binder, TableDefinition.class.getClass(), TableManager.class);
     }
 }
