@@ -88,12 +88,12 @@ public class TestInitializationListener
 
     private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.AutoFulfillerTestLevel.class);
+        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.AutoTestLevelFulfiller.class);
     }
 
     private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.AutoFulfillerSuiteLevel.class);
+        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.AutoSuiteLevelFulfiller.class);
     }
 
     private static List<Class<? extends RequirementFulfiller>> scanFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
