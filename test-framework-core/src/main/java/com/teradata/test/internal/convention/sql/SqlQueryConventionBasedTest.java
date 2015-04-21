@@ -60,7 +60,12 @@ public class SqlQueryConventionBasedTest
 
         QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFileWrapper);
 
-        QueryResult queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType());
+        QueryResult queryResult;
+        if (sqlQueryFileWrapper.getQueryType().isPresent()) {
+            queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType().get());
+        } else {
+            queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent());
+        }
 
         QueryAssert queryAssert = assertThat(queryResult)
                 .hasColumns(resultFileWrapper.getTypes());

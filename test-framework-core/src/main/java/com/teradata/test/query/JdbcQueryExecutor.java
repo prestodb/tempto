@@ -53,11 +53,10 @@ public class JdbcQueryExecutor
     }
 
     @Override
-    public QueryResult executeQuery(String sql, Optional<QueryType> queryType, QueryParam... params)
+    public QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException
     {
-        boolean isSelect = queryType.isPresent() ? queryType.get() == SELECT : isSelect(sql);
-        return execute(sql, isSelect, params);
+        return execute(sql, queryType == SELECT, params);
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)

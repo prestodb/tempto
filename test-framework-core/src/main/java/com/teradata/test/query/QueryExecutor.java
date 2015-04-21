@@ -31,7 +31,7 @@ public interface QueryExecutor extends Closeable
     /**
      * Force given query to be executed as update
      */
-    QueryResult executeQuery(String sql, Optional<QueryType> queryType, QueryParam... params)
+    QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException;
 
     /**
@@ -43,7 +43,7 @@ public interface QueryExecutor extends Closeable
         return defaultQueryExecutor().executeQuery(sql, params);
     }
 
-    public static QueryResult query(String sql, Optional<QueryType> queryType, QueryParam... params)
+    public static QueryResult query(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException
     {
         return defaultQueryExecutor().executeQuery(sql, queryType, params);
