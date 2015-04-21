@@ -19,6 +19,9 @@ import com.teradata.test.RequirementsProvider;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
+import com.teradata.test.initialization.AutoModuleProvider;
+import com.teradata.test.initialization.SuiteModuleProvider;
+import com.teradata.test.initialization.TestMethodModuleProvider;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
 import com.teradata.test.internal.fulfillment.table.ImmutableTablesFulfiller;
@@ -47,10 +50,10 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.popAllTestC
 import static com.teradata.test.context.ThreadLocalTestContextHolder.pushAllTestContexts;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static com.teradata.test.internal.ReflectionHelper.getAnnotatedSubTypesOf;
+import static com.teradata.test.internal.ReflectionHelper.instantiate;
 import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
-import static com.teradata.test.internal.ReflectionHelper.getClasses;
-import static com.teradata.test.internal.ReflectionHelper.instantiate;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -85,33 +88,30 @@ public class TestInitializationListener
 
     private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.TestLevel.class);
+        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.AutoFulfillerTestLevel.class);
     }
 
     private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.SuiteLevel.class);
+        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.AutoFulfillerSuiteLevel.class);
     }
 
     private static List<Class<? extends RequirementFulfiller>> scanFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
     {
-        Set<Class<? extends RequirementFulfiller>> scannedFulfillers = getClasses(RequirementFulfiller.class);
-        scannedFulfillers.removeAll(builtinFulfillers);
-        scannedFulfillers.removeIf(c -> c.getAnnotation(filterAnnotation) == null);
         ImmutableList.Builder<Class<? extends RequirementFulfiller>> resultFulfillers = ImmutableList.builder();
         resultFulfillers.addAll(builtinFulfillers);
-        resultFulfillers.addAll(scannedFulfillers);
+        resultFulfillers.addAll(getAnnotatedSubTypesOf(RequirementFulfiller.class, filterAnnotation));
         return resultFulfillers.build();
     }
 
     public static List<? extends SuiteModuleProvider> getSuiteModuleProviders()
     {
-        return instantiate(getClasses(SuiteModuleProvider.class));
+        return instantiate(getAnnotatedSubTypesOf(SuiteModuleProvider.class, AutoModuleProvider.class));
     }
 
     public static List<? extends TestMethodModuleProvider> getTestMethodModuleProviders()
     {
-        return instantiate(getClasses(TestMethodModuleProvider.class));
+        return instantiate(getAnnotatedSubTypesOf(TestMethodModuleProvider.class, AutoModuleProvider.class));
     }
 
     public TestInitializationListener(

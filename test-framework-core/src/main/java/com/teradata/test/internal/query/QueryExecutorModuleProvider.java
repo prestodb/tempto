@@ -9,7 +9,8 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.teradata.test.configuration.Configuration;
-import com.teradata.test.internal.initialization.SuiteModuleProvider;
+import com.teradata.test.initialization.AutoModuleProvider;
+import com.teradata.test.initialization.SuiteModuleProvider;
 import com.teradata.test.query.JdbcConnectionsPool;
 import com.teradata.test.query.JdbcConnectivityParamsState;
 import com.teradata.test.query.JdbcQueryExecutor;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 import static com.google.inject.name.Names.named;
 
+@AutoModuleProvider
 public class QueryExecutorModuleProvider
         implements SuiteModuleProvider
 {

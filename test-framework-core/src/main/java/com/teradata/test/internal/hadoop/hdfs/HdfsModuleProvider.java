@@ -8,8 +8,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
-import com.teradata.test.internal.initialization.SuiteModuleProvider;
+import com.teradata.test.initialization.AutoModuleProvider;
+import com.teradata.test.initialization.SuiteModuleProvider;
 
+@AutoModuleProvider
 public class HdfsModuleProvider
         implements SuiteModuleProvider
 {

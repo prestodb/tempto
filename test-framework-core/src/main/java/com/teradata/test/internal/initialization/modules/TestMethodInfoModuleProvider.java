@@ -7,10 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.internal.TestInfo;
-import com.teradata.test.internal.initialization.TestMethodModuleProvider;
+import com.teradata.test.initialization.TestMethodModuleProvider;
 import org.testng.ITestResult;
-
-import java.util.Date;
 
 public class TestMethodInfoModuleProvider
         implements TestMethodModuleProvider

@@ -20,14 +20,14 @@ public interface RequirementFulfiller
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
-    public @interface SuiteLevel {}
+    public @interface AutoFulfillerSuiteLevel {}
 
     /**
-     * Apply annotation to fulfiller which should be evaluated at testLevel
+     * Apply annotation to fulfillers which should be evaluated at testLevel.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
-    public @interface TestLevel {}
+    public @interface AutoFulfillerTestLevel {}
 
     Set<State> fulfill(Set<Requirement> requirements);
 

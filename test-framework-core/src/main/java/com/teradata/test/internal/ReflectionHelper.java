@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.reflections.util.ClasspathHelper.forPackage;
@@ -33,10 +34,10 @@ public final class ReflectionHelper
         return reflections.getFieldsAnnotatedWith(annotation);
     }
 
-    public static <T> Set<Class<? extends T>> getClasses(Class<T> clazz)
+    public static <T> Set<Class<? extends T>> getAnnotatedSubTypesOf(Class<T> clazz, Class<? extends Annotation> annotation)
     {
         Reflections reflections = new Reflections(PACKAGES_PREFIX);
-        return reflections.getSubTypesOf(clazz);
+        return reflections.getSubTypesOf(clazz).stream().filter(c -> c.getAnnotation(annotation) != null).collect(Collectors.toSet());
     }
 
     public static <T> List<? extends T> instantiate(Collection<Class<? extends T>> classes)

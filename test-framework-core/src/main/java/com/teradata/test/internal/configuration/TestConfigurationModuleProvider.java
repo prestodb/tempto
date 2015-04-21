@@ -7,7 +7,8 @@ package com.teradata.test.internal.configuration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.teradata.test.configuration.Configuration;
-import com.teradata.test.internal.initialization.SuiteModuleProvider;
+import com.teradata.test.initialization.AutoModuleProvider;
+import com.teradata.test.initialization.SuiteModuleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 import static com.google.inject.name.Names.named;
 
+@AutoModuleProvider
 public class TestConfigurationModuleProvider
         implements SuiteModuleProvider
 {

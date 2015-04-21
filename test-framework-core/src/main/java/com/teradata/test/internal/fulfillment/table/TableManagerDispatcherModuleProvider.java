@@ -12,12 +12,14 @@ import com.google.inject.name.Named;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.fulfillment.table.TableManager;
 import com.teradata.test.fulfillment.table.TableManagerDispatcher;
+import com.teradata.test.initialization.AutoModuleProvider;
+import com.teradata.test.initialization.SuiteModuleProvider;
 import com.teradata.test.internal.fulfillment.hive.HiveTableManager;
-import com.teradata.test.internal.initialization.SuiteModuleProvider;
 
 import static com.google.inject.name.Names.named;
 
 // TODO: provide proper dispatching here
+@AutoModuleProvider
 public class TableManagerDispatcherModuleProvider
         implements SuiteModuleProvider
 {
