@@ -67,7 +67,7 @@ public class QueryAssert
     public QueryAssert hasRowsCount(int resultCount)
     {
         if (actual.getRowsCount() != resultCount) {
-            failWithMessage("Expected row count to be <%s>, but was <%s>", resultCount, actual.getRowsCount());
+            failWithMessage("Expected row count to be <%s>, but was <%s>; rows=%s", resultCount, actual.getRowsCount(), actual.rows());
         }
         return this;
     }

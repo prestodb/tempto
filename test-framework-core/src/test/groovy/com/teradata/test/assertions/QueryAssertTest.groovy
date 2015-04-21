@@ -45,7 +45,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected row count to be <3>, but was <2>'
+    e.message.startsWith('Expected row count to be <3>, but was <2>; rows=')
   }
 
   def 'hasResultCount'()
@@ -196,7 +196,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected row count to be <3>, but was <2>'
+    e.message.startsWith('Expected row count to be <3>, but was <2>; rows=')
   }
 
   def 'hasRowsInOrder - different value - no row'()
