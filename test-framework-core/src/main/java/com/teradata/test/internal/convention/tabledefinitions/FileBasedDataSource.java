@@ -41,7 +41,7 @@ public class FileBasedDataSource
         File dataFile = conventionTableDefinitionDescriptor.getDataFile();
 
         if (!dataFile.exists()) {
-            throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDdlFile() + " should exist");
+            throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDataFile() + " should exist");
         }
 
         return singleton(asByteSource(dataFile));

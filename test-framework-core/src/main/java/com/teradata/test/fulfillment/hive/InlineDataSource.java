@@ -10,6 +10,8 @@ import static com.google.common.collect.Iterators.cycle;
 import static com.google.common.collect.Iterators.limit;
 import static com.google.common.io.ByteSource.concat;
 import static com.google.common.io.ByteSource.wrap;
+import static com.google.common.io.Resources.asByteSource;
+import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
@@ -26,7 +28,17 @@ public abstract class InlineDataSource
         this.revisionMarker = revisionMarker;
     }
 
-    public static InlineDataSource createStringDataSource(String tableName, String revisionMarker, String data)
+    public static DataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource) {
+        return new InlineDataSource(tableName, revisionMarker) {
+            @Override
+            public Collection<ByteSource> data()
+            {
+                return singleton(asByteSource(getResource(dataResource)));
+            }
+        };
+    }
+
+    public static DataSource createStringDataSource(String tableName, String revisionMarker, String data)
     {
         return new InlineDataSource(tableName, revisionMarker)
         {
@@ -38,7 +50,7 @@ public abstract class InlineDataSource
         };
     }
 
-    public static InlineDataSource createSameRowDataSource(String tableName, String revisionMarker, int splitCount, int rowsInEachSplit, String rowData)
+    public static DataSource createSameRowDataSource(String tableName, String revisionMarker, int splitCount, int rowsInEachSplit, String rowData)
     {
         return new InlineDataSource(tableName, revisionMarker)
         {
