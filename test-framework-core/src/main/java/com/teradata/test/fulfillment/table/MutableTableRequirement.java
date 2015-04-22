@@ -77,6 +77,7 @@ public class MutableTableRequirement
         public MutableTableRequirementBuilder(TableDefinition tableDefinition)
         {
             this.tableDefinition = tableDefinition;
+            this.name = tableDefinition.getName();
         }
 
         public MutableTableRequirementBuilder withName(String name)
