@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -117,7 +118,13 @@ public class WebHDFSClient
         Pair<String, String> params = Pair.of("overwrite", "true");
         String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, username, "CREATE", params)));
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
-        writeRequest.setEntity(new InputStreamEntity(input));
+
+        try {
+            writeRequest.setEntity(new BufferedHttpEntity(new InputStreamEntity(input)));
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not create buffered http entity", e);
+        }
 
         try (CloseableHttpResponse response = httpClient.execute(writeRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
