@@ -4,6 +4,7 @@
 
 package com.teradata.test.assertions
 
+import com.google.common.collect.HashBiMap
 import com.teradata.test.query.QueryExecutionException
 import com.teradata.test.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
@@ -20,11 +21,11 @@ public class QueryAssertTest
 
   private final QueryResult NATION_JOIN_REGION_QUERY_RESULT = new QueryResult(
           [INTEGER, VARCHAR, VARCHAR],
-          [
+          HashBiMap.create([
                   "n.nationkey": 1,
                   "n.name"     : 2,
                   "r.name"     : 3
-          ],
+          ]),
           [
                   [1, "ALGERIA", "AFRICA"],
                   [2, "ARGENTINA", "SOUTH AMERICA"]

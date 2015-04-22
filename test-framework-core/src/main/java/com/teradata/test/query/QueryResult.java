@@ -4,17 +4,25 @@
 
 package com.teradata.test.query;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.log.output.db.ColumnType;
 
 import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.sql.JDBCType.INTEGER;
 import static java.util.Collections.emptyMap;
@@ -30,10 +38,10 @@ public class QueryResult
 {
 
     private final List<JDBCType> columnTypes;
-    private final Map<String, Integer> columnNamesIndexes;
+    private final BiMap<String, Integer> columnNamesIndexes;
     private final List<List<Object>> values;
 
-    private QueryResult(List<JDBCType> columnTypes, Map<String, Integer> columnNamesIndexes, List<List<Object>> values)
+    private QueryResult(List<JDBCType> columnTypes, BiMap<String, Integer> columnNamesIndexes, List<List<Object>> values)
     {
         this.columnTypes = columnTypes;
         this.values = values;
@@ -84,6 +92,25 @@ public class QueryResult
                 .collect(toList());
     }
 
+    public QueryResult project(int... sqlColumnIndexes)
+    {
+        List<JDBCType> projectedColumnTypes = newArrayList();
+        List<String> projectedColumnNames = newArrayList();
+        for (int sqlColumnIndex : sqlColumnIndexes) {
+            projectedColumnTypes.add(columnTypes.get(fromSqlIndex(sqlColumnIndex)));
+            projectedColumnNames.add(columnNamesIndexes.inverse().get(sqlColumnIndex));
+        }
+        QueryResultBuilder queryResultBuilder = new QueryResultBuilder(projectedColumnTypes, projectedColumnNames);
+        for (List<Object> valueList : values) {
+            List<Object> projectedValueList = Lists.newArrayList();
+            for (int sqlColumnIndex : sqlColumnIndexes) {
+                projectedValueList.add(valueList.get(fromSqlIndex(sqlColumnIndex)));
+            }
+            queryResultBuilder.addRow(projectedValueList);
+        }
+        return queryResultBuilder.build();
+    }
+
     /**
      * In SQL/JDBC column indexing starts form 1. This method returns SQL index for given Java index.
      *
@@ -113,23 +140,48 @@ public class QueryResult
     public static QueryResult forSingleIntegerValue(int value)
             throws SQLException
     {
-        return new QueryResult(ImmutableList.of(INTEGER), emptyMap(), ImmutableList.of(ImmutableList.of(value)));
+        return new QueryResult(ImmutableList.of(INTEGER), HashBiMap.create(), ImmutableList.of(ImmutableList.of(value)));
     }
 
     static class QueryResultBuilder
     {
 
         private final List<JDBCType> columnTypes = newArrayList();
-        private final Map<String, Integer> columnNamesIndexes = newHashMap();
+        private final BiMap<String, Integer> columnNamesIndexes = HashBiMap.create();
         private final List<List<Object>> values = newArrayList();
 
-        private QueryResultBuilder(ResultSetMetaData metaData)
+        QueryResultBuilder(ResultSetMetaData metaData)
                 throws SQLException
         {
             for (int sqlColumnIndex = 1; sqlColumnIndex <= metaData.getColumnCount(); ++sqlColumnIndex) {
                 columnTypes.add(JDBCType.valueOf(metaData.getColumnType(sqlColumnIndex)));
                 columnNamesIndexes.put(metaData.getColumnName(sqlColumnIndex), sqlColumnIndex);
             }
+        }
+
+        QueryResultBuilder(List<JDBCType> columnTypes, List<String> columnNames)
+        {
+            checkState(columnTypes.size() == columnNames.size(),
+                    "inconsistent number of entries in columnTypes and columnNames lists %s != %s",
+                    columnTypes.size(), columnNames.size());
+            this.columnTypes.addAll(columnTypes);
+            int sqlColumnIndex = 1;
+            for (String columnName : columnNames) {
+                columnNamesIndexes.put(columnName, sqlColumnIndex);
+                sqlColumnIndex++;
+            }
+        }
+
+        public QueryResultBuilder addRow(Object... rowValues)
+        {
+            return addRow(Arrays.asList(rowValues));
+        }
+
+        public QueryResultBuilder addRow(List<Object> rowValues)
+        {
+            Preconditions.checkState(rowValues.size() == columnTypes.size(), "expected %s objects", columnTypes.size());
+            values.add(newArrayList(rowValues));
+            return this;
         }
 
         public QueryResultBuilder addRows(ResultSet rs)

@@ -273,7 +273,7 @@ public class QueryAssert
             Object expectedValue = expectedRow.get(i);
             Object actualValue = actualRow.get(i);
 
-            if (columnComparators.get(i).compare(actualValue, expectedValue) != 0) {
+            if (columnComparators.get(i).compare(expectedValue, actualValue) != 0) {
                 return false;
             }
         }
