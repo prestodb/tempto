@@ -23,14 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private final static ThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new ThreadLocal<TestContextStack<TestContext>>()
-    {
-        @Override
-        protected TestContextStack<TestContext> initialValue()
-        {
-            return new TestContextStack<>();
-        }
-    };
+    private final static ThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new InheritableThreadLocal<>();
 
     public static TestContext testContext()
     {
@@ -40,6 +33,10 @@ public final class ThreadLocalTestContextHolder
 
     public static Optional<TestContext> testContextIfSet()
     {
+        if (testContextStackThreadLocal.get() == null) {
+            return Optional.empty();
+        }
+
         TestContextStack<TestContext> testContextStack = testContextStackThreadLocal.get();
         return !testContextStack.empty() ? Optional.of(testContextStack.peek()) : Optional.<TestContext>empty();
     }
@@ -57,18 +54,25 @@ public final class ThreadLocalTestContextHolder
 
     public static void pushTestContext(TestContext testContext)
     {
+        ensureTestContextStack();
         testContextStackThreadLocal.get().push(testContext);
     }
 
     public static TestContext popTestContext()
     {
         assertTestContextSet();
-        return testContextStackThreadLocal.get().pop();
+
+        TestContextStack<TestContext> testContextStack = testContextStackThreadLocal.get();
+        TestContext testContext = testContextStack.pop();
+        if (testContextStack.empty()) {
+            testContextStackThreadLocal.remove();
+        }
+        return testContext;
     }
 
     public static void pushAllTestContexts(TestContextStack<? extends TestContext> testContextStack)
     {
-        testContextStack.forEach(com.teradata.test.context.ThreadLocalTestContextHolder::pushTestContext);
+        testContextStack.forEach(ThreadLocalTestContextHolder::pushTestContext);
     }
 
     public static TestContextStack<TestContext> popAllTestContexts()
@@ -80,12 +84,19 @@ public final class ThreadLocalTestContextHolder
 
     public static void assertTestContextNotSet()
     {
-        checkState(testContextStackThreadLocal.get().empty(), "test context should not be set for current thread");
+        checkState(testContextStackThreadLocal.get() == null, "test context should not be set for current thread");
     }
 
     public static void assertTestContextSet()
     {
-        checkState(!testContextStackThreadLocal.get().empty(), "test context not set for current thread");
+        checkState(testContextStackThreadLocal.get() != null && !testContextStackThreadLocal.get().empty(), "test context not set for current thread");
+    }
+
+    private static void ensureTestContextStack()
+    {
+        if (testContextStackThreadLocal.get() == null) {
+            testContextStackThreadLocal.set(new TestContextStack<>());
+        }
     }
 
     private ThreadLocalTestContextHolder() {}

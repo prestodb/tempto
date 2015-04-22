@@ -56,4 +56,37 @@ class ThreadLocalTestContextHolderTest
     expect:
     testContext() == mockTestContext
   }
+
+  def "test context should propagate from parent to child, but not between siblings"()
+  {
+    setup:
+    TestContext mockTestContext = Mock()
+
+    pushTestContext(mockTestContext)
+    popTestContext()
+
+    runAndWait(new Runnable() {
+      @Override
+      void run()
+      {
+        assertTestContextNotSet()
+        pushTestContext(mockTestContext)
+      }
+    })
+
+    runAndWait(new Runnable() {
+      @Override
+      void run()
+      {
+        assertTestContextNotSet()
+      }
+    })
+  }
+
+  def runAndWait(Runnable runnable)
+  {
+    def thread = new Thread(runnable)
+    thread.start()
+    thread.join()
+  }
 }
