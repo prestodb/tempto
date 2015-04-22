@@ -57,10 +57,10 @@ public class QueryAssertTest
     noExceptionThrown()
   }
 
-  def 'hasRows - correct'()
+  def 'hasAnyRows - correct'()
   {
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasRows()
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasAnyRows()
 
     then:
     noExceptionThrown()
