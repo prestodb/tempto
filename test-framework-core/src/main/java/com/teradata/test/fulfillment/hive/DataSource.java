@@ -4,7 +4,7 @@
 
 package com.teradata.test.fulfillment.hive;
 
-import com.google.common.io.ByteSource;
+import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
 import java.util.Collection;
 
@@ -19,9 +19,10 @@ public interface DataSource
     String getPathSuffix();
 
     /**
-     * @return list with table files data. For each byte source separate file will be created on HDFS
+     * @return collection with table files {@link RepeatableContentProducer}.
+     * For each {@link RepeatableContentProducer} separate file will be created on HDFS
      */
-    Collection<ByteSource> data();
+    Collection<RepeatableContentProducer> data();
 
     /**
      * Revision marker is used to determine if data should be regenerated. This

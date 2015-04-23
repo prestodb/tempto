@@ -6,6 +6,7 @@ package com.teradata.test.hadoop.hdfs;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
@@ -17,12 +18,26 @@ import static java.nio.charset.Charset.defaultCharset;
  */
 public interface HdfsClient
 {
+    /**
+     * Interface of an object that can open same input stream multiple times.
+     */
+    @FunctionalInterface
+    interface RepeatableContentProducer
+    {
+        /**
+         * @return a content {@link InputStream}. It will be automatically closed after use.
+         */
+        InputStream getInputStream()
+                throws IOException;
+    }
 
     void createDirectory(String path, String username);
 
     void delete(String path, String username);
 
     void saveFile(String path, String username, InputStream input);
+
+    void saveFile(String path, String username, RepeatableContentProducer repeatableContentProducer);
 
     void loadFile(String path, String username, OutputStream outputStream);
 

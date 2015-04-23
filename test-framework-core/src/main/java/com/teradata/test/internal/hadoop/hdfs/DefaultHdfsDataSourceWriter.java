@@ -4,16 +4,14 @@
 
 package com.teradata.test.internal.hadoop.hdfs;
 
-import com.google.common.io.ByteSource;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
+import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -63,17 +61,10 @@ public class DefaultHdfsDataSourceWriter
     private void storeTableFiles(String dataSourcePath, DataSource dataSource)
     {
         int fileIndex = 0;
-        for (ByteSource fileContent : dataSource.data()) {
+        for (RepeatableContentProducer fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;
             LOGGER.debug("Saving new file {} ({})", filePath, dataSource.revisionMarker());
-            try {
-                try (InputStream fileInputStream = fileContent.openStream()) {
-                    hdfsClient.saveFile(filePath, hdfsUsername, fileInputStream);
-                }
-            }
-            catch (IOException e) {
-                throw new RuntimeException("Could not save file " + filePath + " in hdfs, user: " + hdfsUsername, e);
-            }
+            hdfsClient.saveFile(filePath, hdfsUsername, fileContent);
             fileIndex++;
         }
     }

@@ -4,8 +4,8 @@
 
 package com.teradata.test.fulfillment.hive.tpch;
 
-import com.google.common.io.ByteSource;
 import com.teradata.test.fulfillment.hive.DataSource;
+import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.test.internal.fulfillment.hive.tpch.TpchEntityByteSource;
 
 import java.util.Collection;
@@ -36,11 +36,11 @@ public class TpchDataSource
     }
 
     @Override
-    public Collection<ByteSource> data()
+    public Collection<RepeatableContentProducer> data()
     {
         @SuppressWarnings("unchecked")
         Iterable<? extends io.airlift.tpch.TpchEntity> tableDataGenerator = table.getTpchTableEntity().createGenerator(scaleFactor, 1, 1);
-        return singleton(new TpchEntityByteSource<>(tableDataGenerator));
+        return singleton(() -> new TpchEntityByteSource<>(tableDataGenerator).openStream());
     }
 
     @Override

@@ -10,6 +10,7 @@ import com.teradata.test.hadoop.hdfs.HdfsClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,6 +20,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -39,6 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.net.HostAndPort.fromParts;
 import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
+import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
@@ -115,16 +118,33 @@ public class WebHDFSClient
     @Override
     public void saveFile(String path, String username, InputStream input)
     {
-        Pair<String, String> params = Pair.of("overwrite", "true");
-        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, username, "CREATE", params)));
-        HttpPut writeRequest = new HttpPut(writeRedirectUri);
-
         try {
-            writeRequest.setEntity(new BufferedHttpEntity(new InputStreamEntity(input)));
+            saveFile(path, username, new BufferedHttpEntity(new InputStreamEntity(input)));
         }
         catch (IOException e) {
             throw new RuntimeException("Could not create buffered http entity", e);
         }
+    }
+
+    @Override
+    public void saveFile(String path, String username, RepeatableContentProducer repeatableContentProducer)
+    {
+        saveFile(path, username, new EntityTemplate((OutputStream outputStream) -> {
+            try (InputStream inputStream = repeatableContentProducer.getInputStream()) {
+                copyLarge(inputStream, outputStream);
+            }
+            catch (IOException e) {
+                throw new RuntimeException("could not copy input stream", e);
+            }
+        }));
+    }
+
+    private void saveFile(String path, String username, HttpEntity entity)
+    {
+        Pair<String, String> params = Pair.of("overwrite", "true");
+        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, username, "CREATE", params)));
+        HttpPut writeRequest = new HttpPut(writeRedirectUri);
+        writeRequest.setEntity(entity);
 
         try (CloseableHttpResponse response = httpClient.execute(writeRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {

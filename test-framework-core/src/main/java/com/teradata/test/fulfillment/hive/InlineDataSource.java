@@ -1,6 +1,7 @@
 package com.teradata.test.fulfillment.hive;
 
 import com.google.common.io.ByteSource;
+import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
 import java.util.AbstractCollection;
 import java.util.Collection;
@@ -10,7 +11,6 @@ import static com.google.common.collect.Iterators.cycle;
 import static com.google.common.collect.Iterators.limit;
 import static com.google.common.io.ByteSource.concat;
 import static com.google.common.io.ByteSource.wrap;
-import static com.google.common.io.Resources.asByteSource;
 import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -28,12 +28,14 @@ public abstract class InlineDataSource
         this.revisionMarker = revisionMarker;
     }
 
-    public static DataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource) {
-        return new InlineDataSource(tableName, revisionMarker) {
+    public static DataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource)
+    {
+        return new InlineDataSource(tableName, revisionMarker)
+        {
             @Override
-            public Collection<ByteSource> data()
+            public Collection<RepeatableContentProducer> data()
             {
-                return singleton(asByteSource(getResource(dataResource)));
+                return singleton(() -> getResource(dataResource).openStream());
             }
         };
     }
@@ -43,9 +45,9 @@ public abstract class InlineDataSource
         return new InlineDataSource(tableName, revisionMarker)
         {
             @Override
-            public Collection<ByteSource> data()
+            public Collection<RepeatableContentProducer> data()
             {
-                return singleton(wrap(data.getBytes()));
+                return singleton(() -> wrap(data.getBytes()).openStream());
             }
         };
     }
@@ -55,16 +57,16 @@ public abstract class InlineDataSource
         return new InlineDataSource(tableName, revisionMarker)
         {
             @Override
-            public Collection<ByteSource> data()
+            public Collection<RepeatableContentProducer> data()
             {
-                return new AbstractCollection<ByteSource>()
+                return new AbstractCollection<RepeatableContentProducer>()
                 {
                     @Override
-                    public Iterator<ByteSource> iterator()
+                    public Iterator<RepeatableContentProducer> iterator()
                     {
                         ByteSource singleRowSource = concat(wrap(rowData.getBytes()), wrap("\n".getBytes()));
                         ByteSource singleSplitSource = concat(limit(cycle(singleRowSource), rowsInEachSplit));
-                        return limit(cycle(singleSplitSource), splitCount);
+                        return limit(cycle(singleSplitSource::openStream), splitCount);
                     }
 
                     @Override
