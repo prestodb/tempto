@@ -139,9 +139,6 @@ public class WebHDFSClient
             try (InputStream inputStream = repeatableContentProducer.getInputStream()) {
                 copyLarge(inputStream, outputStream);
             }
-            catch (IOException e) {
-                throw new RuntimeException("could not copy input stream", e);
-            }
         };
     }
 
