@@ -169,7 +169,7 @@ public class TestFrameworkLoggingAppender
             if (testContext.isPresent()) {
                 Optional<TestInfo> testInfo = testContext.get().getOptionalDependency(TestInfo.class);
                 if (testInfo.isPresent()) {
-                    testName = testInfo.get().getTestName();
+                    testName = testInfo.get().getLongTestId();
                 }
             }
             return Optional.of(logsDirectory + "/" + testName);

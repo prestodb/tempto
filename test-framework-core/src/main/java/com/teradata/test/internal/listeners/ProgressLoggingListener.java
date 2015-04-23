@@ -5,6 +5,7 @@
 package com.teradata.test.internal.listeners;
 
 import com.google.common.base.Joiner;
+import com.teradata.test.internal.TestInfo;
 import com.teradata.test.internal.initialization.RequirementsExtender;
 import com.teradata.test.internal.logging.TestFrameworkLoggingAppender;
 import org.slf4j.Logger;
@@ -46,7 +47,10 @@ public class ProgressLoggingListener
                 started, getMethodsCountFromContext(testCase.getTestContext()), testId, Joiner.on(", ").join(testCase.getMethod().getGroups()));
     }
 
-    private String getMdcTestId(ITestResult testCase) {return testCase.getTestClass().getRealClass().getSimpleName() + "." + testCase.getName();}
+    private String getMdcTestId(ITestResult testCase)
+    {
+        return new TestInfo(testCase).getShortTestId();
+    }
 
     @Override
     public void onTestSuccess(ITestResult testCase)

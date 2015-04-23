@@ -17,6 +17,8 @@ import com.teradata.test.fulfillment.table.MutableTablesState;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
+import org.junit.After;
+import org.junit.Before;
 import org.testng.annotations.Test;
 
 import static com.teradata.test.Requirements.allOf;
@@ -52,6 +54,16 @@ public class SimpleQueryTest
     @Inject()
     @Named("hive")
     TableManager tableManager;
+
+    @Before
+    public void someBefore() {
+        // just to check if having @Before method does not break anything
+    }
+
+    @After
+    public void someAfter() {
+        // just to check if having @After method does not break anything
+    }
 
     @BeforeTestWithContext
     public void beforeTest()

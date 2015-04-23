@@ -4,23 +4,24 @@
 
 package com.teradata.test.internal;
 
+import org.testng.ITestResult;
+
 public class TestInfo
 {
-    private final String testName;
+    private final ITestResult testResult;
 
-    public TestInfo(String testName)
+    public TestInfo(ITestResult testResult)
     {
-        this.testName = testName;
+        this.testResult = testResult;
     }
 
-    public String getTestName()
+    public String getLongTestId()
     {
-        return testName;
+        return testResult.getTestClass().getRealClass().getName() + "." + testResult.getMethod().getMethodName() + "_" + testResult.getStartMillis();
     }
 
-    @Override
-    public String toString()
+    public String getShortTestId()
     {
-        return testName;
+        return testResult.getTestClass().getRealClass().getSimpleName() + "." + testResult.getName() + "_" + testResult.getStartMillis();
     }
 }

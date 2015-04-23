@@ -12,6 +12,7 @@ import org.testng.IMethodInterceptor;
 import org.testng.ITestContext;
 import org.testng.ITestNGMethod;
 import org.testng.internal.MethodInstance;
+import org.testng.internal.TestNGMethod;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -57,7 +58,8 @@ public class RequirementsExtender
             }
             else {
                 for (Set<Requirement> requirementSet : testSpecificRequirements) {
-                    newMethods.add(new MethodInstance(new RequirementsAwareTestNGMethod(method.getMethod().clone(), requirementSet)));
+                    TestNGMethod clonedMethod = (TestNGMethod) method.getMethod().clone();
+                    newMethods.add(new MethodInstance(new RequirementsAwareTestNGMethod(clonedMethod, requirementSet)));
                 }
             }
         }

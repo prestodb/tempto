@@ -11,13 +11,15 @@ import com.teradata.test.internal.TestInfo;
 import com.teradata.test.initialization.TestMethodModuleProvider;
 import org.testng.ITestResult;
 
+import java.util.Date;
+
 @AutoModuleProvider
 public class TestMethodInfoModuleProvider
         implements TestMethodModuleProvider
 {
     public Module getModule(Configuration configuration, ITestResult testResult)
     {
-        TestInfo testInfo = new TestInfo(testResult.getTestClass().getRealClass().getName() + "." + testResult.getMethod().getMethodName());
+        TestInfo testInfo = new TestInfo(testResult);
         return new AbstractModule()
         {
             @Override
