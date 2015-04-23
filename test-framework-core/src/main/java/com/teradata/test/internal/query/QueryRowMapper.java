@@ -59,6 +59,7 @@ public class QueryRowMapper
             case LONGNVARCHAR:
                 return value;
             case BINARY:
+            case BOOLEAN:
             case VARBINARY:
             case LONGVARBINARY:
                 return Boolean.valueOf(value);
