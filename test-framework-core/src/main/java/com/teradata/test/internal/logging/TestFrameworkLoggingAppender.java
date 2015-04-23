@@ -54,7 +54,6 @@ public class TestFrameworkLoggingAppender
     private LoadingCache<String, PrintWriter> printWriterCache = buildPrintWriterCache();
 
     private final String logsDirectory = selectLogsDirectory();
-    private Date markerTime = new Date();
 
     private LoadingCache<String, PrintWriter> buildPrintWriterCache()
     {
@@ -74,11 +73,13 @@ public class TestFrameworkLoggingAppender
                 });
     }
 
-    private String getRootLogsDirectory() {
+    private String getRootLogsDirectory()
+    {
         String userLogsDir = System.getProperty("com.teradata.test.root.logs.dir");
         if (userLogsDir != null) {
             return userLogsDir;
-        } else {
+        }
+        else {
             return getTempDirectoryPath() + "/testlogs";
         }
     }
@@ -171,7 +172,7 @@ public class TestFrameworkLoggingAppender
                     testName = testInfo.get().getTestName();
                 }
             }
-            return Optional.of(logsDirectory + "/" + testName + "_" + DATE_FORMAT.format(markerTime));
+            return Optional.of(logsDirectory + "/" + testName);
         }
         catch (ConfigurationException e) {
             System.err.append("Could not load TestInfo");

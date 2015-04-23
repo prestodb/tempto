@@ -6,10 +6,12 @@ package com.teradata.test.internal.initialization.modules;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.teradata.test.configuration.Configuration;
+import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.internal.TestInfo;
 import com.teradata.test.initialization.TestMethodModuleProvider;
 import org.testng.ITestResult;
 
+@AutoModuleProvider
 public class TestMethodInfoModuleProvider
         implements TestMethodModuleProvider
 {

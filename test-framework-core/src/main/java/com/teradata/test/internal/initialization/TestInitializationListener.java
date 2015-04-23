@@ -38,12 +38,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
-import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.popAllTestContexts;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.pushAllTestContexts;
