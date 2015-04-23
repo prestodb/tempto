@@ -28,6 +28,7 @@ public class SqlResultFileWrapper
 
     private static final String DEFAULT_IGNORE_ORDER = "false";
     private static final String DEFAULT_IGNORE_EXCESS = "false";
+    private static final String DEFAULT_TRIM_VALUES = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
     private final ParsingResult sqlFileParsingResult;
@@ -56,6 +57,9 @@ public class SqlResultFileWrapper
 
         QueryRowMapper rowMapper = new QueryRowMapper(getTypes());
         Splitter valuesSplitter = Splitter.on(delimiter);
+        if (isTrimValues()) {
+            valuesSplitter = valuesSplitter.trimResults();
+        }
 
         for (String line : sqlFileParsingResult.getContentLines()) {
             List<String> rowValues = parseLine(line, delimiter, valuesSplitter);
@@ -95,6 +99,11 @@ public class SqlResultFileWrapper
     public boolean isIgnoreExcessRows()
     {
         return Boolean.valueOf(sqlFileParsingResult.getProperty("ignoreExcessRows").orElse(DEFAULT_IGNORE_EXCESS));
+    }
+
+    public boolean isTrimValues()
+    {
+        return Boolean.valueOf(sqlFileParsingResult.getProperty("trimValues").orElse(DEFAULT_TRIM_VALUES));
     }
 
     private String getDelimiter()
