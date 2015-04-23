@@ -45,6 +45,55 @@ framework will remotely interact with your cluster.
 **TODO:** we should include here information which jar to use as dependency, and where to put file with properties,
 how to setup maven plugins...
 
+## Logging
+
+Test framework uses SLF4J for logging.
+
+### Log file per test
+
+If you are using log4j as your SLF4J backend we provide an appender which allows logging output of
+each test and suite fulfillment process to separate files. To use that configure LOG4J appender as below:
+
+```
+log4j.rootLogger=INFO, TEST_FRAMEWORK_LOGGING_APPENDER
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.test.internal.logging.TestFrameworkLoggingAppender
+log4j.category.com.teradata.test=DEBUG
+log4j.category.org.reflections=WARN
+```
+
+With this appender for each test suite run new logs directory is created within /tmp/testlogs. Name of directory
+corresponds to time when test framework is run (e.g. /tmp/testlogs/2015-04-22_15-23-09).
+Log messages coming from different tests are logged to separate files.
+
+This appender also logs all INFO+ messages to console. (subject to change)
+
+Example contents of log directory:
+```
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectAllDatatypesOrc_2015-04-22_15-23-09
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectAllDatatypesParquetFile_2015-04-22_15-23-09
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectAllDatatypesRcfile_2015-04-22_15-23-09
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectAllDatatypesTextFile_2015-04-22_15-23-09
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectBinaryColumnTextFile_2015-04-22_15-23-09
+com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectVarcharColumnForOrc_2015-04-22_15-23-09
+SUITE_2015-04-22_15-23-09
+```
+
+If you want to override root location of logs you can use com.teradata.test.root.logs.dir
+```
+java -Dcom.teradata.test.root.logs.dir=/my/root/logs/dir ...
+```
+
+### logging test id
+
+Test framework sets up 'test_id' entry in SLF4J logs context (MDC). It corresponds to name of test currently being run.
+It can be used in logging patterns. If you are using log4j as a backend you can use it as below:
+```
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.Target=System.out
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L [%X{test_id}] - %m%n
+```
+
 ## Example test run
 
 The steps below will run the example tests that come with the framework. They act as a basic

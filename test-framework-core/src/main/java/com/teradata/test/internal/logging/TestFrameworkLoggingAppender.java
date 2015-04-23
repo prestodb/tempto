@@ -74,9 +74,18 @@ public class TestFrameworkLoggingAppender
                 });
     }
 
+    private String getRootLogsDirectory() {
+        String userLogsDir = System.getProperty("com.teradata.test.root.logs.dir");
+        if (userLogsDir != null) {
+            return userLogsDir;
+        } else {
+            return getTempDirectoryPath() + "/testlogs";
+        }
+    }
+
     private String selectLogsDirectory()
     {
-        return getTempDirectoryPath() + "/testlogs/" + DATE_FORMAT.format(new Date());
+        return getRootLogsDirectory() + "/" + DATE_FORMAT.format(new Date());
     }
 
     @Override
