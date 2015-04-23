@@ -260,7 +260,7 @@ public class QueryAssert
     private boolean containsRow(List<Object> expectedRow)
     {
         for (int i = 0; i < actual.getRowsCount(); i++) {
-            if (rowsEqual(actual.row(i), expectedRow)) {
+            if (rowsEqual(expectedRow, actual.row(i))) {
                 return true;
             }
         }
