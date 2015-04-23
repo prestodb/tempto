@@ -13,9 +13,7 @@ import com.google.inject.Module;
 import com.google.inject.Singleton;
 import com.teradata.test.AfterTestWithContext;
 import com.teradata.test.BeforeTestWithContext;
-import com.teradata.test.CompositeRequirement;
 import com.teradata.test.Requirement;
-import com.teradata.test.RequirementsProvider;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
@@ -53,7 +51,6 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithText
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.test.internal.ReflectionHelper.instantiate;
-import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor;
 import static com.teradata.test.internal.configuration.TestConfigurationFactory.createTestConfiguration;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -138,7 +135,7 @@ public class TestInitializationListener
         suiteTextContextStack.push(initSuiteTestContext);
 
         try {
-            Set<Requirement> allTestsRequirements = getAllTestsRequirements(context);
+            Set<Requirement> allTestsRequirements = resolveAllTestsRequirements(context);
             doFulfillment(suiteTextContextStack, suiteLevelFulfillers, allTestsRequirements);
         }
         catch (RuntimeException e) {
@@ -317,42 +314,23 @@ public class TestInitializationListener
         return combine(modules);
     }
 
-    private Set<Requirement> getAllTestsRequirements(ITestContext context)
+    private Set<Requirement> resolveAllTestsRequirements(ITestContext context)
     {
+        // we cannot assume that context contains RequirementsAwareTestNGMethod instances here
+        // as interceptor is for some reason called after onStart() which uses this method.
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            allTestsRequirements.addAll(getTestSpecificRequirements(iTestNGMethod));
+            Set<Set<Requirement>> requirementsSets = RequirementsExtender.resolveTestSpecificRequirements(iTestNGMethod);
+            for (Set<Requirement> requirementsSet : requirementsSets) {
+                allTestsRequirements.addAll(requirementsSet);
+            }
         }
         return allTestsRequirements;
     }
 
     private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod)
     {
-        Method javaTestMethod = getJavaMethodFromTestMethod(testMethod);
-        CompositeRequirement compositeRequirement = getAnnotationBasedRequirementsFor(javaTestMethod);
-        Optional<Requirement> providedRequirement = getExplicitRequirementsFor(testMethod.getInstance());
-        if (providedRequirement.isPresent()) {
-            compositeRequirement = compose(providedRequirement.get(), compositeRequirement);
-        }
-
-        Set<Set<Requirement>> requirementSets = compositeRequirement.getRequirementsSets();
-        checkArgument(requirementSets.size() == 1, "multiple sets of requirements per test are not supported yet");
-        return getOnlyElement(requirementSets);
-    }
-
-    private Optional<Requirement> getExplicitRequirementsFor(Object testClassInstance)
-    {
-        if (testClassInstance instanceof RequirementsProvider) {
-            return Optional.of(((RequirementsProvider) testClassInstance).getRequirements());
-        }
-        else {
-            return Optional.empty();
-        }
-    }
-
-    private Method getJavaMethodFromTestMethod(ITestNGMethod method)
-    {
-        return method.getConstructorOrMethod().getMethod();
+        return ((RequirementsAwareTestNGMethod)testMethod).getRequirements();
     }
 
     private void setSuiteTestContextStack(TestContextStack<GuiceTestContext> suiteTestContextStack)

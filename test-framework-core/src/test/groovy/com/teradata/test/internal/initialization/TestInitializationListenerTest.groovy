@@ -3,6 +3,7 @@
  */
 package com.teradata.test.internal.initialization
 
+import com.google.common.collect.Iterables
 import com.google.inject.Inject
 import com.teradata.test.*
 import com.teradata.test.context.State
@@ -18,9 +19,12 @@ import spock.lang.Specification
 
 import java.lang.reflect.Method
 
+import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextSet
 import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
+import static com.teradata.test.internal.initialization.RequirementsExtender.resolveTestSpecificRequirements
+import static java.util.Collections.emptySet
 
 class TestInitializationListenerTest
         extends Specification
@@ -143,7 +147,8 @@ class TestInitializationListenerTest
     testMethod.method >> method
     testMethod.instance >> testClass
     testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
-    return testMethod
+    def requirements = resolveTestSpecificRequirements(testMethod);
+    return new RequirementsAwareTestNGMethod(testMethod, getOnlyElement(requirements))
   }
 
   def getSuccessMethod()

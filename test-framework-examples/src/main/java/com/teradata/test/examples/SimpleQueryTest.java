@@ -13,18 +13,24 @@ import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
+import com.teradata.test.fulfillment.table.MutableTablesState;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableInstance;
 import com.teradata.test.fulfillment.table.TableManager;
 import org.testng.annotations.Test;
 
+import static com.teradata.test.Requirements.allOf;
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.test.fulfillment.hive.HiveTableDefinition.like;
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATION;
+import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.REGION;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.CREATED;
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
+import static com.teradata.test.fulfillment.table.TableRequirements.mutableTable;
 import static com.teradata.test.query.QueryExecutor.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -88,6 +94,28 @@ public class SimpleQueryTest
         assertThat(query("select count(*) from nation"))
                 .hasRowsCount(1)
                 .contains(row(25));
+    }
+
+    private static class MultipleTablesTestRequirements
+            implements RequirementsProvider
+    {
+
+        @Override
+        public Requirement getRequirements()
+        {
+            return allOf(
+                    mutableTable(NATION, "table", LOADED),
+                    mutableTable(REGION, "table", LOADED));
+        }
+    }
+
+    @Test(groups = "query")
+    @Requires(MultipleTablesTestRequirements.class)
+    public void selectAllFromMultipleTables()
+    {
+        MutableTablesState mutableTablesState = testContext().getDependency(MutableTablesState.class);
+        TableInstance tableInstance = mutableTablesState.get("table");
+        assertThat(query("select * from " + tableInstance.getNameInDatabase())).hasAnyRows();
     }
 
     @Test(groups = "failing")
