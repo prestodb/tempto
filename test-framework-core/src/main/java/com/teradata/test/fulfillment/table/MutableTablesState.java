@@ -8,9 +8,16 @@ import com.teradata.test.fulfillment.NamedObjectsState;
 
 import java.util.Map;
 
+import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+
 public class MutableTablesState
-       extends NamedObjectsState<TableInstance>
+        extends NamedObjectsState<TableInstance>
 {
+
+    public static MutableTablesState mutableTablesState()
+    {
+        return testContext().getDependency(MutableTablesState.class);
+    }
 
     public MutableTablesState(Map<String, TableInstance> mutableTableInstances)
     {
