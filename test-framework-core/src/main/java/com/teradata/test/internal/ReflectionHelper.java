@@ -44,15 +44,27 @@ public final class ReflectionHelper
     {
         return classes
                 .stream()
-                .map(clazz -> {
-                    try {
-                        return clazz.newInstance();
-                    }
-                    catch (InstantiationException | IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+                .map(ReflectionHelper::instantiate)
                 .collect(toList());
+    }
+
+    public static <T> T instantiate(String className) {
+        try {
+            return instantiate((Class<T>) Class.forName(className));
+        }
+        catch (ClassNotFoundException e) {
+            throw new RuntimeException("Unable to find specified class: " + className, e);
+        }
+    }
+
+    private static <T> T instantiate(Class<? extends T> clazz)
+    {
+        try {
+            return clazz.newInstance();
+        }
+        catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private ReflectionHelper()

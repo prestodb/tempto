@@ -22,6 +22,7 @@ public class SqlQueryFileWrapper
     private static final String DATABASE_HEADER_PROPERTY = "database";
     private static final String TABLES_HEADER_PROPERTY = "tables";
     private static final String QUERY_TYPE_HEADER_PROPERTY = "queryType";
+    private static final String REQUIRES_HEADER_PROPERTY = "requires";
     private static final Splitter HEADER_PROPERTY_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final ParsingResult sqlFileParsingResult;
@@ -43,14 +44,23 @@ public class SqlQueryFileWrapper
 
     public Set<String> getTableDefinitionNames()
     {
-        String tablesProperty = sqlFileParsingResult.getProperty(TABLES_HEADER_PROPERTY).orElse("");
-        return newHashSet(HEADER_PROPERTY_SPLITTER.split(tablesProperty));
+        return getPropertyValues(TABLES_HEADER_PROPERTY);
     }
 
     public Set<String> getTestGroups()
     {
-        String groupsProperty = sqlFileParsingResult.getProperty(GROUPS_HEADER_PROPERTY).orElse("");
-        return newHashSet(HEADER_PROPERTY_SPLITTER.split(groupsProperty));
+        return getPropertyValues(GROUPS_HEADER_PROPERTY);
+    }
+
+    public Set<String> getRequirementClassNames()
+    {
+        return getPropertyValues(REQUIRES_HEADER_PROPERTY);
+    }
+
+    private Set<String> getPropertyValues(String property)
+    {
+        String propertyValue = sqlFileParsingResult.getProperty(property).orElse("");
+        return newHashSet(HEADER_PROPERTY_SPLITTER.split(propertyValue));
     }
 
     public String getContent()

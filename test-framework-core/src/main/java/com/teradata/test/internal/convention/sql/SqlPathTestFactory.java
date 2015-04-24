@@ -6,8 +6,10 @@ package com.teradata.test.internal.convention.sql;
 
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.Requirement;
+import com.teradata.test.RequirementsProvider;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
+import com.teradata.test.internal.ReflectionHelper;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator;
@@ -16,6 +18,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -79,6 +82,16 @@ public class SqlPathTestFactory
                 .stream()
                 .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName)))
                 .collect(toList()));
+        requirements.addAll(sqlQueryFileWrapperFor(testMethodFile).getRequirementClassNames()
+                .stream()
+                .map(this::getRequirementsFromClass)
+                .collect(toList()));
         return compose(requirements);
+    }
+
+    private Requirement getRequirementsFromClass(String requirementClassName)
+    {
+        RequirementsProvider requirementsProvider = ReflectionHelper.instantiate(requirementClassName);
+        return requirementsProvider.getRequirements();
     }
 }
