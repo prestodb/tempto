@@ -407,5 +407,11 @@ public abstract class DelegateTestNGMethod
     }
 
     @Override
+    public String toString()
+    {
+        return delegate.toString();
+    }
+
+    @Override
     abstract public ITestNGMethod clone();
 }
