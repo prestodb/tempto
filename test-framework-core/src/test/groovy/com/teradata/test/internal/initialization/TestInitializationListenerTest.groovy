@@ -3,7 +3,6 @@
  */
 package com.teradata.test.internal.initialization
 
-import com.google.common.collect.Iterables
 import com.google.inject.Inject
 import com.teradata.test.*
 import com.teradata.test.context.State
@@ -24,7 +23,7 @@ import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestC
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextSet
 import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
 import static com.teradata.test.internal.initialization.RequirementsExtender.resolveTestSpecificRequirements
-import static java.util.Collections.emptySet
+import static com.teradata.test.internal.initialization.TestInitializationListener.scanForFulfillersAndSort
 
 class TestInitializationListenerTest
         extends Specification
@@ -161,6 +160,18 @@ class TestInitializationListenerTest
     return TestClass.getMethod('testMethodFailed')
   }
 
+  def 'scan for user fulfillers should sort them by their priority'() {
+    when:
+    def fulfillers = scanForFulfillersAndSort(RequirementFulfiller.AutoTestLevelFulfiller.class);
+
+    then:
+    fulfillers.size() == 4
+    fulfillers[0] == CFulfiller.class // with priority 5
+    fulfillers[1] == DummyFulfiller.class // with priority 1
+    fulfillers[2] == AFulfiller.class // with default priority 0
+    fulfillers[3] == BFulfiller.class // with priority -5
+  }
+
   @Requires(ARequirement)
   static class TestClass
           implements RequirementsProvider
@@ -206,6 +217,7 @@ class TestInitializationListenerTest
     }
   }
 
+  @RequirementFulfiller.AutoTestLevelFulfiller
   static class AFulfiller
           extends DummyFulfiller
   {
@@ -216,6 +228,7 @@ class TestInitializationListenerTest
     }
   }
 
+  @RequirementFulfiller.AutoTestLevelFulfiller(priority = -5)
   static class BFulfiller
           extends DummyFulfiller
   {
@@ -236,6 +249,7 @@ class TestInitializationListenerTest
     }
   }
 
+  @RequirementFulfiller.AutoTestLevelFulfiller(priority = 5)
   static class CFulfiller
           extends DummyFulfiller
   {
@@ -252,6 +266,7 @@ class TestInitializationListenerTest
     }
   }
 
+  @RequirementFulfiller.AutoTestLevelFulfiller(priority = 1)
   static class DummyFulfiller
           implements RequirementFulfiller
   {

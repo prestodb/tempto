@@ -17,9 +17,12 @@ import com.teradata.test.Requirement;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.context.TestContext;
 import com.teradata.test.fulfillment.RequirementFulfiller;
+import com.teradata.test.fulfillment.RequirementFulfiller.AutoSuiteLevelFulfiller;
+import com.teradata.test.fulfillment.RequirementFulfiller.AutoTestLevelFulfiller;
 import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
 import com.teradata.test.initialization.TestMethodModuleProvider;
+import com.teradata.test.internal.RequirementFulfillerByPriorityComparator;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
 import com.teradata.test.internal.fulfillment.table.ImmutableTablesFulfiller;
@@ -83,20 +86,30 @@ public class TestInitializationListener
 
     private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, RequirementFulfiller.AutoTestLevelFulfiller.class);
+        return collectFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, AutoTestLevelFulfiller.class);
     }
 
     private static List<Class<? extends RequirementFulfiller>> getSuiteLevelFulfillers()
     {
-        return scanFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, RequirementFulfiller.AutoSuiteLevelFulfiller.class);
+        return collectFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, AutoSuiteLevelFulfiller.class);
     }
 
-    private static List<Class<? extends RequirementFulfiller>> scanFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
+    private static List<Class<? extends RequirementFulfiller>> collectFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
     {
         ImmutableList.Builder<Class<? extends RequirementFulfiller>> resultFulfillers = ImmutableList.builder();
         resultFulfillers.addAll(builtinFulfillers);
-        resultFulfillers.addAll(getAnnotatedSubTypesOf(RequirementFulfiller.class, filterAnnotation));
+        resultFulfillers.addAll(scanForFulfillersAndSort(filterAnnotation));
+
         return resultFulfillers.build();
+    }
+
+    // package scope due testing
+    static List<Class<? extends RequirementFulfiller>> scanForFulfillersAndSort(Class<? extends Annotation> filterAnnotation)
+    {
+        return getAnnotatedSubTypesOf(RequirementFulfiller.class, filterAnnotation)
+                .stream()
+                .sorted(new RequirementFulfillerByPriorityComparator().reversed())
+                .collect(toList());
     }
 
     public static List<? extends SuiteModuleProvider> getSuiteModuleProviders()
@@ -327,7 +340,7 @@ public class TestInitializationListener
 
     private Set<Requirement> getTestSpecificRequirements(ITestNGMethod testMethod)
     {
-        return ((RequirementsAwareTestNGMethod)testMethod).getRequirements();
+        return ((RequirementsAwareTestNGMethod) testMethod).getRequirements();
     }
 
     private void setSuiteTestContextStack(TestContextStack<GuiceTestContext> suiteTestContextStack)

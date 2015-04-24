@@ -37,7 +37,10 @@ public final class ReflectionHelper
     public static <T> Set<Class<? extends T>> getAnnotatedSubTypesOf(Class<T> clazz, Class<? extends Annotation> annotation)
     {
         Reflections reflections = new Reflections(PACKAGES_PREFIX);
-        return reflections.getSubTypesOf(clazz).stream().filter(c -> c.getAnnotation(annotation) != null).collect(Collectors.toSet());
+        return reflections.getSubTypesOf(clazz)
+                .stream()
+                .filter(c -> c.getAnnotation(annotation) != null)
+                .collect(Collectors.toSet());
     }
 
     public static <T> List<? extends T> instantiate(Collection<Class<? extends T>> classes)

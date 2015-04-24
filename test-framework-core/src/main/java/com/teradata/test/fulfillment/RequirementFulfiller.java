@@ -15,19 +15,38 @@ import java.util.Set;
 
 public interface RequirementFulfiller
 {
+
+    public static final int DEFAULT_PRIORITY = 0;
+
     /**
      * Apply annotation to fulfillers which should be evaluated at suite level.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
-    public @interface AutoSuiteLevelFulfiller {}
+    public @interface AutoSuiteLevelFulfiller
+    {
+        /**
+         * With priority you can manage the order of fulfiller execution.
+         * With higher priority fulfiller will {@link com.teradata.test.fulfillment.RequirementFulfiller#fulfill()} sooner
+         * and {@link com.teradata.test.fulfillment.RequirementFulfiller#clenup()} later.
+         */
+        int priority() default DEFAULT_PRIORITY;
+    }
 
     /**
      * Apply annotation to fulfillers which should be evaluated at testLevel.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
-    public @interface AutoTestLevelFulfiller {}
+    public @interface AutoTestLevelFulfiller
+    {
+        /**
+         * With priority you can manage the order of fulfiller execution.
+         * With higher priority fulfiller will {@link com.teradata.test.fulfillment.RequirementFulfiller#fulfill()} sooner
+         * and {@link com.teradata.test.fulfillment.RequirementFulfiller#clenup()} later.
+         */
+        int priority() default DEFAULT_PRIORITY;
+    }
 
     Set<State> fulfill(Set<Requirement> requirements);
 
