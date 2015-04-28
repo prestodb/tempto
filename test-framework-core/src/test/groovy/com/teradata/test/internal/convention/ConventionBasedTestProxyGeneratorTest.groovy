@@ -10,6 +10,8 @@ import org.testng.annotations.Test
 import spock.lang.Specification
 
 import java.lang.reflect.Method
+import java.nio.file.Path
+import java.nio.file.Paths
 
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -22,8 +24,8 @@ class ConventionBasedTestProxyGeneratorTest
   def 'testGenerateProxy'()
   {
     when:
-    File queryFile = file("convention/sample-test/query1.sql")
-    File resultFile = file("convention/sample-test/query1.sql")
+    Path queryFile = file("convention/sample-test/query1.sql")
+    Path resultFile = file("convention/sample-test/query1.sql")
     Requirement requirement = Mock(Requirement)
     ConventionBasedTest testInstance = new SqlQueryConventionBasedTest(Optional.empty(), Optional.empty(), queryFile, resultFile, requirement)
 
@@ -39,8 +41,8 @@ class ConventionBasedTestProxyGeneratorTest
     assertThat(testAnnotation.groups()).containsOnly("tpch", "quarantine")
   }
 
-  private File file(String path)
+  private Path file(String path)
   {
-    new File(getClass().getClassLoader().getResource(path).getPath())
+    Paths.get(getClass().getClassLoader().getResource(path).getPath())
   }
 }

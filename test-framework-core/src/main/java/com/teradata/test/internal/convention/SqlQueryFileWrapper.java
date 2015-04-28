@@ -8,7 +8,7 @@ import com.google.common.base.Splitter;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.query.QueryType;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,7 +27,7 @@ public class SqlQueryFileWrapper
 
     private final ParsingResult sqlFileParsingResult;
 
-    public static SqlQueryFileWrapper sqlQueryFileWrapperFor(File queryFile)
+    public static SqlQueryFileWrapper sqlQueryFileWrapperFor(Path queryFile)
     {
         return new SqlQueryFileWrapper(new HeaderFileParser().parseFile(queryFile));
     }

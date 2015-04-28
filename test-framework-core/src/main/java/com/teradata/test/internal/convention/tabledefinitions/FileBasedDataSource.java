@@ -7,14 +7,15 @@ package com.teradata.test.internal.convention.tabledefinitions;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collection;
 
 import static java.lang.String.format;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.newInputStream;
+import static java.nio.file.Files.readAllBytes;
 import static java.util.Collections.singleton;
-import static org.apache.commons.io.FileUtils.readFileToString;
 
 public class FileBasedDataSource
         implements DataSource
@@ -38,13 +39,13 @@ public class FileBasedDataSource
     @Override
     public Collection<RepeatableContentProducer> data()
     {
-        File dataFile = conventionTableDefinitionDescriptor.getDataFile();
+        Path dataFile = conventionTableDefinitionDescriptor.getDataFile();
 
-        if (!dataFile.exists()) {
+        if (!exists(dataFile)) {
             throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDataFile() + " should exist");
         }
 
-        return singleton(() -> new FileInputStream(dataFile));
+        return singleton(() -> newInputStream(dataFile));
     }
 
     @Override
@@ -52,7 +53,7 @@ public class FileBasedDataSource
     {
         try {
             if (revisionMarker == null) {
-                revisionMarker = readFileToString(conventionTableDefinitionDescriptor.getRevisionFile());
+                revisionMarker = new String(readAllBytes(conventionTableDefinitionDescriptor.getRevisionFile()));
             }
             return revisionMarker;
         }

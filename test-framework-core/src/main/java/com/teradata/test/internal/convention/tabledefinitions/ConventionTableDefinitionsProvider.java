@@ -8,22 +8,24 @@ import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
-import com.teradata.test.internal.convention.ConventionTestsUtils;
 import com.teradata.test.internal.convention.HeaderFileParser;
 import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static com.teradata.test.fulfillment.hive.HiveTableDefinition.hiveTableDefinition;
+import static com.teradata.test.internal.convention.ConventionTestsUtils.getConventionsTestsUri;
+import static com.teradata.test.internal.convention.ConventionTestsUtils.processPathFromUri;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.newDirectoryStream;
+import static java.nio.file.Files.newInputStream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -47,12 +49,13 @@ public class ConventionTableDefinitionsProvider
 
     private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors()
     {
-        Optional<Path> dataSetsPath = ConventionTestsUtils.getConventionsTestsPath(DATASETS_PATH_PART);
-        if (!dataSetsPath.isPresent()) {
+        Optional<URI> dataSetsUri = getConventionsTestsUri(DATASETS_PATH_PART);
+        if (!dataSetsUri.isPresent()) {
+            LOGGER.debug("No convention table definitions");
             return emptyList();
         }
         else {
-            return getAllConventionTableDefinitionDescriptors(dataSetsPath.get());
+            return processPathFromUri(dataSetsUri.get(), this::getAllConventionTableDefinitionDescriptors);
         }
     }
 
@@ -63,7 +66,6 @@ public class ConventionTableDefinitionsProvider
 
             try {
                 return StreamSupport.stream(newDirectoryStream(dataSetsPath, "*.ddl").spliterator(), false)
-                        .map(Path::toFile)
                         .map(ddlFile -> new ConventionTableDefinitionDescriptor(ddlFile, changeExtension(ddlFile, "data"), changeExtension(ddlFile, "data-revision")))
                         .collect(toList());
             }
@@ -84,7 +86,7 @@ public class ConventionTableDefinitionsProvider
 
     private String createTableDDLTemplate(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
     {
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(conventionTableDefinitionDescriptor.getDdlFile()))) {
+        try (InputStream inputStream = new BufferedInputStream(newInputStream(conventionTableDefinitionDescriptor.getDdlFile()))) {
             return new HeaderFileParser().parseFile(inputStream).getContent();
         }
         catch (IOException e) {

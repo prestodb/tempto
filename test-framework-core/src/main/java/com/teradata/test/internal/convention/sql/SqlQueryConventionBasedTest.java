@@ -14,7 +14,7 @@ import com.teradata.test.query.QueryResult;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import static com.teradata.test.assertions.QueryAssert.assertThat;
@@ -30,17 +30,17 @@ public class SqlQueryConventionBasedTest
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
 
-    private final Optional<File> beforeScriptPath;
-    private final Optional<File> afterScriptPath;
-    private final File queryFile;
-    private final File resultFile;
+    private final Optional<Path> beforeScriptPath;
+    private final Optional<Path> afterScriptPath;
+    private final Path queryFile;
+    private final Path resultFile;
     private final Requirement requirement;
 
-    public SqlQueryConventionBasedTest(Optional<File> beforeScriptPath, Optional<File> afterScriptPath,
-            File queryFile, File resultFile, Requirement requirement)
+    public SqlQueryConventionBasedTest(Optional<Path> beforeScriptFile, Optional<Path> afterScriptFile,
+            Path queryFile, Path resultFile, Requirement requirement)
     {
-        this.beforeScriptPath = beforeScriptPath;
-        this.afterScriptPath = afterScriptPath;
+        this.beforeScriptPath = beforeScriptFile;
+        this.afterScriptPath = afterScriptFile;
         this.queryFile = queryFile;
         this.resultFile = resultFile;
         this.requirement = requirement;
@@ -49,7 +49,7 @@ public class SqlQueryConventionBasedTest
     @Override
     public void test()
     {
-        LOGGER.debug("Executing sql test: {}", queryFile.getName());
+        LOGGER.debug("Executing sql test: {}", queryFile.getFileName());
 
         if (beforeScriptPath.isPresent()) {
             execute(beforeScriptPath.get().toString());
@@ -63,7 +63,8 @@ public class SqlQueryConventionBasedTest
         QueryResult queryResult;
         if (sqlQueryFileWrapper.getQueryType().isPresent()) {
             queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType().get());
-        } else {
+        }
+        else {
             queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent());
         }
 
@@ -89,7 +90,7 @@ public class SqlQueryConventionBasedTest
     @Override
     public String testName()
     {
-        String testName = FilenameUtils.getBaseName(queryFile.getParent());
+        String testName = FilenameUtils.getBaseName(queryFile.getParent().toString());
         if (!isAlphabetic(testName.charAt(0))) {
             return "Test" + testName;
         }
@@ -99,7 +100,7 @@ public class SqlQueryConventionBasedTest
     @Override
     public String testCaseName()
     {
-        String testCaseName = FilenameUtils.getBaseName(queryFile.getName());
+        String testCaseName = FilenameUtils.getBaseName(queryFile.getFileName().toString());
         if (!isAlphabetic(testCaseName.charAt(0))) {
             return "test_" + testCaseName;
         }

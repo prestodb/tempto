@@ -4,24 +4,26 @@
 
 package com.teradata.test.internal.convention.tabledefinitions;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isRegularFile;
 
 class ConventionTableDefinitionDescriptor
 {
     private final String name;
-    private final File ddlFile;
-    private final File dataFile;
-    private final File revisionFile;
+    private final Path ddlFile;
+    private final Path dataFile;
+    private final Path revisionFile;
 
-    public ConventionTableDefinitionDescriptor(File ddlFile, File dataFile, File revisionFile)
+    public ConventionTableDefinitionDescriptor(Path ddlFile, Path dataFile, Path revisionFile)
     {
-        checkArgument(ddlFile.exists() && ddlFile.isFile(), "Invalid file: %s", ddlFile);
-        checkArgument(dataFile.exists() && dataFile.isFile(), "Invalid file: %s", dataFile);
-        checkArgument(revisionFile.exists() && revisionFile.isFile(), "Invalid file: %s", revisionFile);
+        checkArgument(exists(ddlFile) && isRegularFile(ddlFile), "Invalid file: %s", ddlFile);
+        checkArgument(exists(dataFile) && isRegularFile(dataFile), "Invalid file: %s", dataFile);
+        checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "Invalid file: %s", revisionFile);
 
         this.name = getFilenameWithoutExtension(ddlFile);
         this.ddlFile = ddlFile;
@@ -34,17 +36,17 @@ class ConventionTableDefinitionDescriptor
         return name;
     }
 
-    public File getDdlFile()
+    public Path getDdlFile()
     {
         return ddlFile;
     }
 
-    public File getDataFile()
+    public Path getDataFile()
     {
         return dataFile;
     }
 
-    public File getRevisionFile()
+    public Path getRevisionFile()
     {
         return revisionFile;
     }

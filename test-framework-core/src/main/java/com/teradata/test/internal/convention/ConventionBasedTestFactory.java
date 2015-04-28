@@ -12,12 +12,15 @@ import org.slf4j.Logger;
 import org.testng.annotations.Factory;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 import static com.teradata.test.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
+import static com.teradata.test.internal.convention.ConventionTestsUtils.getConventionsTestsUri;
+import static com.teradata.test.internal.convention.ConventionTestsUtils.processPathFromUri;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -45,12 +48,14 @@ public class ConventionBasedTestFactory
     {
         LOGGER.debug("Loading file based test cases");
         try {
-            Optional<Path> productTestPath = ConventionTestsUtils.getConventionsTestsPath(TESTCASES_PATH_PART);
-            if (!productTestPath.isPresent()) {
+            Optional<URI> productTestUri = getConventionsTestsUri(TESTCASES_PATH_PART);
+            if (!productTestUri.isPresent()) {
+                LOGGER.info("No convention tests cases");
                 return NO_TEST_CASES;
             }
+
             factories = setupFactories();
-            return createTestsForRootPath(productTestPath.get()).toArray(new ConventionBasedTest[0]);
+            return processPathFromUri(productTestUri.get(), this::createTestsForRootPath);
         }
         catch (Exception e) {
             LOGGER.error("Could not create file test", e);
@@ -89,8 +94,8 @@ public class ConventionBasedTestFactory
         }
     }
 
-    private List<ConventionBasedTest> createTestsForRootPath(Path path)
+    private ConventionBasedTest[] createTestsForRootPath(Path path)
     {
-        return createTestsForPath(path, "sql_tests");
+        return createTestsForPath(path, "sql_tests").toArray(new ConventionBasedTest[0]);
     }
 }

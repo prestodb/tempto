@@ -8,16 +8,16 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getFirst;
+import static java.nio.file.Files.newInputStream;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.IOUtils.readLines;
@@ -41,15 +41,15 @@ public class HeaderFileParser
             .trimResults()
             .withKeyValueSeparator(Splitter.on(":").trimResults());
 
-    public ParsingResult parseFile(File file)
+    public ParsingResult parseFile(Path path)
     {
         try (
-                InputStream inputStream = new BufferedInputStream(new FileInputStream(file))
+                InputStream inputStream = new BufferedInputStream(newInputStream(path))
         ) {
             return parseFile(inputStream);
         }
         catch (IOException e) {
-            throw new IllegalArgumentException("Could not load file {}" + file, e);
+            throw new IllegalArgumentException("Could not load file " + path, e);
         }
     }
 

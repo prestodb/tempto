@@ -18,7 +18,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -26,6 +25,8 @@ import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.internal.convention.SqlQueryFileWrapper.sqlQueryFileWrapperFor;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isRegularFile;
 import static java.util.stream.Collectors.toList;
 
 public class SqlPathTestFactory
@@ -53,19 +54,18 @@ public class SqlPathTestFactory
     }
 
     @Override
-    public List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix, ConventionBasedTestFactory factory)
+    public List<ConventionBasedTest> createTestsForPath(Path testMethodFile, String testNamePrefix, ConventionBasedTestFactory factory)
     {
-        File testMethodFile = path.toFile();
-        File testMethodResult = changeExtension(testMethodFile, RESULT_FILE_EXTENSION);
+        Path testMethodResult = changeExtension(testMethodFile, RESULT_FILE_EXTENSION);
 
-        checkState(testMethodFile.exists() && testMethodFile.isFile(), "Could not find file: %s", testMethodFile.getAbsolutePath());
-        checkState(testMethodResult.exists() && testMethodResult.isFile(), "Could not find file: %s", testMethodResult.getAbsolutePath());
+        checkState(exists(testMethodFile) && isRegularFile(testMethodFile), "Could not find file: %s", testMethodFile.toAbsolutePath());
+        checkState(exists(testMethodResult) && isRegularFile(testMethodResult), "Could not find file: %s", testMethodResult.toAbsolutePath());
 
-        File beforeScriptFile = path.getParent().resolve(BEFORE_SCRIPT_NAME).toFile();
-        Optional<File> optionalBeforeScriptFile = beforeScriptFile.isFile() ? Optional.of(beforeScriptFile) : Optional.<File>empty();
+        Path beforeScriptFile = testMethodFile.getParent().resolve(BEFORE_SCRIPT_NAME);
+        Optional<Path> optionalBeforeScriptFile = isRegularFile(beforeScriptFile) ? Optional.of(beforeScriptFile) : Optional.<Path>empty();
 
-        File afterScripFile = path.getParent().resolve(AFTER_SCRIPT_NAME).toFile();
-        Optional<File> optionalAfterScriptFile = afterScripFile.isFile() ? Optional.of(afterScripFile) : Optional.<File>empty();
+        Path afterScripFile = testMethodFile.getParent().resolve(AFTER_SCRIPT_NAME);
+        Optional<Path> optionalAfterScriptFile = isRegularFile(afterScripFile) ? Optional.of(afterScripFile) : Optional.<Path>empty();
 
         Requirement requirement = getRequirements(testMethodFile);
         SqlQueryConventionBasedTest conventionTest = new SqlQueryConventionBasedTest(
@@ -75,7 +75,7 @@ public class SqlPathTestFactory
         return ImmutableList.of(proxiedConventionTest);
     }
 
-    private Requirement getRequirements(File testMethodFile)
+    private Requirement getRequirements(Path testMethodFile)
     {
         List<Requirement> requirements = newArrayList();
         requirements.addAll(sqlQueryFileWrapperFor(testMethodFile).getTableDefinitionNames()

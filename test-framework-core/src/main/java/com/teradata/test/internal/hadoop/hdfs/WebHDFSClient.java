@@ -80,13 +80,6 @@ public class WebHDFSClient
         this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
     }
 
-    @PreDestroy
-    public void closeHttpClient()
-            throws IOException
-    {
-        httpClient.close();
-    }
-
     @Override
     public void createDirectory(String path, String username)
     {

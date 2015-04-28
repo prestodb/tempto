@@ -9,9 +9,9 @@ import com.teradata.test.assertions.QueryAssert.Row;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.query.QueryRowMapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +34,7 @@ public class SqlResultFileWrapper
     private final ParsingResult sqlFileParsingResult;
     private List<JDBCType> types;
 
-    public static SqlResultFileWrapper sqlResultFileWrapperFor(File resultFile)
+    public static SqlResultFileWrapper sqlResultFileWrapperFor(Path resultFile)
     {
         return new SqlResultFileWrapper(new HeaderFileParser().parseFile(resultFile));
     }
