@@ -24,7 +24,8 @@ import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 
 import javax.annotation.PreDestroy;
@@ -62,6 +63,8 @@ public class WebHDFSClient
     private static final JsonPath GET_XATTR_JSON_PATH = JsonPath.compile("$.XAttrs");
     private static final JsonPath GET_XATTR_VALUE_JSON_PATH = JsonPath.compile("$.XAttrs.[0].value");
 
+    private static final int NUMBER_OF_RETRIES = 3;
+
     private final HostAndPort nameNode;
 
     private final CloseableHttpClient httpClient;
@@ -74,7 +77,7 @@ public class WebHDFSClient
         this.nameNode = fromParts(checkNotNull(webHdfsNameNodeHost), webHdfsNameNodePort);
         checkArgument(webHdfsNameNodePort > 0, "Invalid name node WebHDFS port number: %s", webHdfsNameNodePort);
 
-        this.httpClient = HttpClients.createDefault();
+        this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
     }
 
     @PreDestroy
