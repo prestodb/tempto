@@ -9,15 +9,12 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Optional;
 
-import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
 import static com.teradata.test.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.test.query.QueryResult.toSqlIndex;
 import static com.teradata.test.query.QueryType.SELECT;
@@ -32,8 +29,8 @@ public class JdbcQueryExecutor
 
     @Inject
     public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState,
-                             JdbcConnectionsPool jdbcConnectionsPool,
-                             TestContext testContext)
+            JdbcConnectionsPool jdbcConnectionsPool,
+            TestContext testContext)
             throws SQLException
     {
         this(jdbcConnectionsPool.connectionFor(jdbcParamsState), testContext);
@@ -57,6 +54,19 @@ public class JdbcQueryExecutor
             throws QueryExecutionException
     {
         return execute(sql, queryType == SELECT, params);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface)
+            throws SQLException
+    {
+        return connection.isWrapperFor(iface);
+    }
+
+    public <T> T unwrap(Class<T> iface)
+            throws SQLException
+    {
+        return connection.unwrap(iface);
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)

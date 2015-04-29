@@ -6,15 +6,17 @@ package com.teradata.test.query;
 
 import java.io.Closeable;
 import java.sql.JDBCType;
-import java.util.Optional;
+import java.sql.Wrapper;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 
 /**
- * Interface for executors of a sql queries.
+ * Interface for executors of a sql queries. {@link QueryExecutor} is
+ * a wrapper for JDBC {@link java.sql.Connection}.
  */
-public interface QueryExecutor extends Closeable
+public interface QueryExecutor
+        extends Closeable, Wrapper
 {
 
     String DEFAULT_DB_NAME = "default";
