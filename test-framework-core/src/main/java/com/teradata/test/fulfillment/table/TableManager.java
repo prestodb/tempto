@@ -11,7 +11,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static com.teradata.test.context.ThreadLocalTestContextHolder.runWithTextContext;
+import static com.teradata.test.context.TestContextDsl.runWithTextContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.test.fulfillment.table.TableManagerDispatcher.getTableManagerDispatcher;

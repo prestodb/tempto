@@ -40,7 +40,7 @@ public class QueryAssert
 
     private final List<Comparator<Object>> columnComparators;
 
-    protected QueryAssert(QueryResult actual, List<Comparator<Object>> columnComparators)
+    private QueryAssert(QueryResult actual, List<Comparator<Object>> columnComparators)
     {
         super(actual, QueryAssert.class);
         this.columnComparators = columnComparators;

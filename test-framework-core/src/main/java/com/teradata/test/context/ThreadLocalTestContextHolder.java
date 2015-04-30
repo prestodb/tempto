@@ -41,17 +41,6 @@ public final class ThreadLocalTestContextHolder
         return !testContextStack.empty() ? Optional.of(testContextStack.peek()) : Optional.<TestContext>empty();
     }
 
-    public static void runWithTextContext(TestContext testContext, Runnable runnable)
-    {
-        pushTestContext(testContext);
-        try {
-            runnable.run();
-        }
-        finally {
-            popTestContext();
-        }
-    }
-
     public static void pushTestContext(TestContext testContext)
     {
         ensureTestContextStack();

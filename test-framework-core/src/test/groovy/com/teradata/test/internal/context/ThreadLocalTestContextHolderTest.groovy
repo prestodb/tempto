@@ -85,8 +85,23 @@ class ThreadLocalTestContextHolderTest
 
   def runAndWait(Runnable runnable)
   {
-    def thread = new Thread(runnable)
+    def throwables = []
+    def thread = new Thread(new Runnable() {
+      @Override
+      void run() {
+        try {
+          runnable.run()
+        } catch (Throwable e) {
+          throwables.add(e)
+        }
+      }
+    })
+
     thread.start()
     thread.join()
+
+    if (!throwables.isEmpty()) {
+      throw throwables[0]
+    }
   }
 }
