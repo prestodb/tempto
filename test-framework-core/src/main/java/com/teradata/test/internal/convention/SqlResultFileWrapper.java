@@ -5,6 +5,7 @@
 package com.teradata.test.internal.convention;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.teradata.test.assertions.QueryAssert.Row;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.query.QueryRowMapper;
@@ -15,11 +16,13 @@ import java.nio.file.Path;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.teradata.test.assertions.QueryAssert.Row.row;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class SqlResultFileWrapper
 {
@@ -29,6 +32,7 @@ public class SqlResultFileWrapper
     private static final String DEFAULT_IGNORE_ORDER = "false";
     private static final String DEFAULT_IGNORE_EXCESS = "false";
     private static final String DEFAULT_TRIM_VALUES = "false";
+    private static final String JOIN_ALL_VALUES_TO_ONE = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
     private final ParsingResult sqlFileParsingResult;
@@ -66,6 +70,14 @@ public class SqlResultFileWrapper
             values.add(rowMapper.mapToRow(rowValues));
         }
 
+        if (isJoinAllRowsToOne()) {
+            checkState(getTypes().size() == 1, "Expected single column result when 'joinAllRowsToOne' property is set, types: %s", getTypes());
+            String joinedRows = values.stream()
+                    .map(row -> (String) row.getValues().get(0))
+                    .collect(joining("\n"));
+            return ImmutableList.of(row(joinedRows));
+        }
+
         return values;
     }
 
@@ -77,7 +89,7 @@ public class SqlResultFileWrapper
 
             types = StreamSupport.stream(TYPES_SPLITTER.split(typesProperty.get()).spliterator(), false)
                     .map(JDBCType::valueOf)
-                    .collect(Collectors.toList());
+                    .collect(toList());
         }
         return types;
     }
@@ -104,6 +116,11 @@ public class SqlResultFileWrapper
     public boolean isTrimValues()
     {
         return Boolean.valueOf(sqlFileParsingResult.getProperty("trimValues").orElse(DEFAULT_TRIM_VALUES));
+    }
+
+    public boolean isJoinAllRowsToOne()
+    {
+        return Boolean.valueOf(sqlFileParsingResult.getProperty("joinAllRowsToOne").orElse(JOIN_ALL_VALUES_TO_ONE));
     }
 
     private String getDelimiter()
