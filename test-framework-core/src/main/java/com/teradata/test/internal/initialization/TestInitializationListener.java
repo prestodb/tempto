@@ -44,7 +44,7 @@ import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
-import static com.teradata.test.context.TestContextDsl.runWithTextContext;
+import static com.teradata.test.context.TestContextDsl.runWithTestContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.popAllTestContexts;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.pushAllTestContexts;
@@ -265,7 +265,7 @@ public class TestInitializationListener
             for (Class<? extends RequirementFulfiller> fulfillerClass : fulfillerClasses) {
                 LOGGER.debug("Fulfilling using {}", fulfillerClass);
                 GuiceTestContext testContext = testContextStack.peek();
-                runWithTextContext(testContext, () -> {
+                runWithTestContext(testContext, () -> {
                     RequirementFulfiller fulfiller = testContext.getDependency(fulfillerClass);
                     GuiceTestContext testContextWithNewStates = testContext.createChildContext(fulfiller.fulfill(requirements));
                     successfulFulfillerClasses.add(fulfillerClass);
@@ -289,7 +289,7 @@ public class TestInitializationListener
             LOGGER.debug("Cleaning for fulfiller {}", fulfillerClass);
             TestContext testContext = testContextStack.pop();
             testContext.close();
-            runWithTextContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup());
+            runWithTestContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup());
         }
 
         // remove close init test context too

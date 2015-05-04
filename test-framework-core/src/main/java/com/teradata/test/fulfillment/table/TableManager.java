@@ -11,7 +11,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static com.teradata.test.context.TestContextDsl.runWithTextContext;
+import static com.teradata.test.context.TestContextDsl.runWithTestContext;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.test.fulfillment.table.TableManagerDispatcher.getTableManagerDispatcher;
@@ -50,7 +50,7 @@ public interface TableManager
      */
     default void dropOnTestContextClose(TestContext testContext, TableInstance tableInstance)
     {
-        testContext.registerCloseCallback(context -> runWithTextContext(context, () -> drop(tableInstance)));
+        testContext.registerCloseCallback(context -> runWithTestContext(context, () -> drop(tableInstance)));
     }
 
     default void dropOnTestContextClose(TableInstance tableInstance)

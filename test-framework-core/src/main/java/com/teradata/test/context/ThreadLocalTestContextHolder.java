@@ -23,7 +23,20 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class ThreadLocalTestContextHolder
 {
-    private final static ThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new InheritableThreadLocal<>();
+    private final static ThreadLocal<TestContextStack<TestContext>> testContextStackThreadLocal = new InheritableThreadLocal<TestContextStack<TestContext>>()
+    {
+        protected TestContextStack<TestContext> childValue(TestContextStack<TestContext> parentTestContextStack)
+        {
+            if (parentTestContextStack != null) {
+                checkState(!parentTestContextStack.empty());
+                TestContextStack<TestContext> childTestContextStack = new TestContextStack<>();
+                childTestContextStack.push(parentTestContextStack.peek());
+                return childTestContextStack;
+            }
+
+            return null;
+        }
+    };
 
     public static TestContext testContext()
     {
@@ -37,8 +50,7 @@ public final class ThreadLocalTestContextHolder
             return Optional.empty();
         }
 
-        TestContextStack<TestContext> testContextStack = testContextStackThreadLocal.get();
-        return !testContextStack.empty() ? Optional.of(testContextStack.peek()) : Optional.<TestContext>empty();
+        return Optional.of(testContext());
     }
 
     public static void pushTestContext(TestContext testContext)
@@ -56,6 +68,7 @@ public final class ThreadLocalTestContextHolder
         if (testContextStack.empty()) {
             testContextStackThreadLocal.remove();
         }
+
         return testContext;
     }
 

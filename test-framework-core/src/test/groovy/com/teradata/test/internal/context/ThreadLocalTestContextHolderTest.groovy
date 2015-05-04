@@ -5,8 +5,12 @@
 package com.teradata.test.internal.context
 
 import com.teradata.test.context.TestContext
+import org.apache.commons.lang3.tuple.Pair
 import spock.lang.Specification
 
+import java.util.concurrent.CountDownLatch
+
+import static com.teradata.test.context.TestContextDsl.withChildTestContext
 import static com.teradata.test.context.ThreadLocalTestContextHolder.*
 
 class ThreadLocalTestContextHolderTest
@@ -57,7 +61,7 @@ class ThreadLocalTestContextHolderTest
     testContext() == mockTestContext
   }
 
-  def "test context should propagate from parent to child, but not between siblings"()
+  def "empty test context should not propagate from parent to child"()
   {
     setup:
     TestContext mockTestContext = Mock()
@@ -65,7 +69,7 @@ class ThreadLocalTestContextHolderTest
     pushTestContext(mockTestContext)
     popTestContext()
 
-    runAndWait(new Runnable() {
+    runAndJoin(new Runnable() {
       @Override
       void run()
       {
@@ -74,34 +78,101 @@ class ThreadLocalTestContextHolderTest
       }
     })
 
-    runAndWait(new Runnable() {
+    assertTestContextNotSet()
+  }
+
+  def "parent test context after child start should not propagate to child"()
+  {
+    setup:
+    TestContext mockTestContext = Mock()
+
+    CountDownLatch latch = new CountDownLatch(1)
+    def threadAndThrowables = run(new Runnable() {
       @Override
       void run()
       {
+        latch.await()
         assertTestContextNotSet()
       }
     })
+
+    pushTestContext(mockTestContext)
+    latch.countDown()
+
+    join(threadAndThrowables)
   }
 
-  def runAndWait(Runnable runnable)
+  def "test context should propagate from parent to child"()
+  {
+    setup:
+    TestContext mockTestContext = Mock()
+    TestContext childTestContext = Mock()
+    mockTestContext.createChildContext() >> childTestContext
+
+    pushTestContext(mockTestContext)
+
+    runAndJoin(new Runnable() {
+      @Override
+      void run()
+      {
+        assert testContext() == mockTestContext
+        popTestContext()
+      }
+    })
+
+    runAndJoin(new Runnable() {
+      @Override
+      void run()
+      {
+        assert testContext() == mockTestContext
+        popTestContext()
+      }
+    })
+
+    runAndJoin(withChildTestContext(new Runnable() {
+      @Override
+      void run()
+      {
+        assert testContext() == childTestContext
+        popTestContext()
+      }
+    }))
+
+    assert testContext() == mockTestContext
+  }
+
+  def run(Runnable runnable)
   {
     def throwables = []
     def thread = new Thread(new Runnable() {
       @Override
-      void run() {
+      void run()
+      {
         try {
           runnable.run()
-        } catch (Throwable e) {
+        }
+        catch (Throwable e) {
           throwables.add(e)
         }
       }
     })
 
     thread.start()
-    thread.join()
 
-    if (!throwables.isEmpty()) {
-      throw throwables[0]
+    return Pair.of(thread, throwables)
+  }
+
+  def join(Pair<Thread, List<Throwable>> threadAndThrowables)
+  {
+    threadAndThrowables.left.join()
+
+    if (!threadAndThrowables.right.isEmpty()) {
+      throw threadAndThrowables.right[0]
     }
+  }
+
+  def runAndJoin(Runnable runnable)
+  {
+    join(run(runnable))
   }
 }
