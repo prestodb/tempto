@@ -116,6 +116,7 @@ public class JdbcQueryExecutor
     {
         return QueryResult.builder(rs.getMetaData())
                 .addRows(rs)
+                .setJdbcResultSet(rs)
                 .build();
     }
 

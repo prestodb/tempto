@@ -10,6 +10,8 @@ import com.teradata.test.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
 import spock.lang.Specification
 
+import java.sql.ResultSet
+
 import static com.teradata.test.assertions.QueryAssert.Row.row
 import static com.teradata.test.assertions.QueryAssert.assertThat
 import static java.sql.JDBCType.INTEGER
@@ -29,7 +31,7 @@ public class QueryAssertTest
           [
                   [1, "ALGERIA", "AFRICA"],
                   [2, "ARGENTINA", "SOUTH AMERICA"]
-          ]);
+          ], Optional.of(Mock(ResultSet)));
 
   private final ColumnValuesAssert EMPTY_COLUMN_VALUE_ASSERT = new ColumnValuesAssert<Object>() {
     @Override

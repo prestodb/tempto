@@ -9,8 +9,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import org.apache.log.output.db.ColumnType;
+
+import javax.swing.text.html.Option;
 
 import java.sql.JDBCType;
 import java.sql.ResultSet;
@@ -18,14 +18,12 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.sql.JDBCType.INTEGER;
-import static java.util.Collections.emptyMap;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
@@ -40,12 +38,14 @@ public class QueryResult
     private final List<JDBCType> columnTypes;
     private final BiMap<String, Integer> columnNamesIndexes;
     private final List<List<Object>> values;
+    private final Optional<ResultSet> jdbcResultSet;
 
-    private QueryResult(List<JDBCType> columnTypes, BiMap<String, Integer> columnNamesIndexes, List<List<Object>> values)
+    private QueryResult(List<JDBCType> columnTypes, BiMap<String, Integer> columnNamesIndexes, List<List<Object>> values, Optional<ResultSet> jdbcResultSet)
     {
         this.columnTypes = columnTypes;
         this.values = values;
         this.columnNamesIndexes = columnNamesIndexes;
+        this.jdbcResultSet = jdbcResultSet;
     }
 
     public int getRowsCount()
@@ -108,6 +108,9 @@ public class QueryResult
             }
             queryResultBuilder.addRow(projectedValueList);
         }
+        if (jdbcResultSet.isPresent()) {
+            queryResultBuilder.setJdbcResultSet(jdbcResultSet.get());
+        }
         return queryResultBuilder.build();
     }
 
@@ -140,7 +143,12 @@ public class QueryResult
     public static QueryResult forSingleIntegerValue(int value)
             throws SQLException
     {
-        return new QueryResult(ImmutableList.of(INTEGER), HashBiMap.create(), ImmutableList.of(ImmutableList.of(value)));
+        return new QueryResult(ImmutableList.of(INTEGER), HashBiMap.create(), ImmutableList.of(ImmutableList.of(value)), Optional.empty());
+    }
+
+    public Optional<ResultSet> getJdbcResultSet()
+    {
+        return jdbcResultSet;
     }
 
     static class QueryResultBuilder
@@ -149,6 +157,7 @@ public class QueryResult
         private final List<JDBCType> columnTypes = newArrayList();
         private final BiMap<String, Integer> columnNamesIndexes = HashBiMap.create();
         private final List<List<Object>> values = newArrayList();
+        private Optional<ResultSet> jdbcResultSet = Optional.empty();
 
         QueryResultBuilder(ResultSetMetaData metaData)
                 throws SQLException
@@ -199,9 +208,14 @@ public class QueryResult
             return this;
         }
 
+        public QueryResultBuilder setJdbcResultSet(ResultSet rs) {
+            this.jdbcResultSet = Optional.of(rs);
+            return this;
+        }
+
         public QueryResult build()
         {
-            return new QueryResult(columnTypes, columnNamesIndexes, values);
+            return new QueryResult(columnTypes, columnNamesIndexes, values, jdbcResultSet);
         }
     }
 }
