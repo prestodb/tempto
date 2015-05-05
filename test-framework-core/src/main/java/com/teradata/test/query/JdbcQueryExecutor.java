@@ -57,16 +57,9 @@ public class JdbcQueryExecutor
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface)
-            throws SQLException
+    public Connection getConnection()
     {
-        return connection.isWrapperFor(iface);
-    }
-
-    public <T> T unwrap(Class<T> iface)
-            throws SQLException
-    {
-        return connection.unwrap(iface);
+        return connection;
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)

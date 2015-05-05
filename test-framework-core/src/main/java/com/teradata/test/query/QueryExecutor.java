@@ -5,18 +5,17 @@
 package com.teradata.test.query;
 
 import java.io.Closeable;
+import java.sql.Connection;
 import java.sql.JDBCType;
-import java.sql.Wrapper;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 
 /**
- * Interface for executors of a sql queries. {@link QueryExecutor} is
- * a wrapper for JDBC {@link java.sql.Connection}.
+ * Interface for executors of a sql queries.
  */
 public interface QueryExecutor
-        extends Closeable, Wrapper
+        extends Closeable
 {
 
     String DEFAULT_DB_NAME = "default";
@@ -35,6 +34,8 @@ public interface QueryExecutor
      */
     QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException;
+
+    Connection getConnection();
 
     /**
      * Executes given query on DB setup in test context.
