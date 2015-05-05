@@ -40,19 +40,19 @@ public class ExampleQueryAssertTest
     }
 
     @Test(enabled = false)
-    public void testContainsExactly()
+    public void testContainsOnly()
     {
         assertThat(query("SELECT n.nationkey, n.name, r.name FROM nation n " +
                 "INNER JOIN region r ON n.regionkey = r.regionkey " +
                 "WHERE name like 'A%' ORDER BY n.name"))
                 .hasColumns(INTEGER, VARCHAR, VARCHAR)
-                .contains(
+                .containsOnly(
                         row(7, "ARGENTINA", "SOUTH AMERICA"),
                         row(1, "ALGERIA", "AFRICA"));
     }
 
     @Test(enabled = false)
-    public void testContainsExactlyInOrder()
+    public void testContainsExactly()
     {
         assertThat(query("SELECT n.nationkey, n.name, r.name FROM nation n " +
                         "INNER JOIN region r ON n.regionkey = r.regionkey " +
