@@ -15,7 +15,7 @@ import static org.reflections.util.ClasspathHelper.forPackage;
 
 public final class ReflectionHelper
 {
-    private static final String PACKAGES_PREFIX = "com.teradata";
+    private static final String PACKAGES_PREFIX = "com";
 
     public static <T> T getStaticFieldValue(Field field)
     {
