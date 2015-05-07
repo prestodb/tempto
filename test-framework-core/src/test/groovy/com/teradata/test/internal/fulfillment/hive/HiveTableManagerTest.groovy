@@ -21,71 +21,106 @@ class HiveTableManagerTest
   QueryExecutor queryExecutor = Mock()
   HdfsDataSourceWriter dataSourceWriter = Mock()
   HdfsClient hdfsClient = Mock()
-  UUIDGenerator uuidGenerator = new DefaultUUIDGenerator()
+  UUIDGenerator uuidGenerator = Mock()
 
   def 'should create hive immutable table'()
   {
     setup:
     HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
+    def expectedTableLocation = '/tests-path/some/table/in/hdfs'
+    def expectedTableName = 'nation'
+    def expectedTableNameInDatabase = "nation"
 
     when:
     def nationDefinition = getNationHiveTableDefinition()
     def nationTableInstance = tableManager.createImmutable(nationDefinition)
 
-    assert nationTableInstance.name == 'nation'
-    assert nationTableInstance.nameInDatabase == 'nation'
 
     then:
-    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
-    1 * dataSourceWriter.ensureDataOnHdfs('/tests-path/some/table/in/hdfs', _)
-    1 * queryExecutor.executeQuery('CREATE TABLE nation(n_nationid INT,n_name STRING) ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' LOCATION \'/tests-path/some/table/in/hdfs\'')
+    nationTableInstance.name == expectedTableName
+    nationTableInstance.nameInDatabase == expectedTableNameInDatabase
+
+    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
+    1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
+    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
 
     when:
     tableManager.drop(nationTableInstance)
 
     then:
-    1 * queryExecutor.executeQuery('DROP TABLE IF EXISTS nation')
+    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
     0 * _
   }
 
-  def 'should create hive mutable table'()
+  def 'should create hive mutable table loaded'()
   {
     setup:
     HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
 
-    when:
-    def nationDefinition = getNationHiveTableDefinition()
-    def nationTableInstanceCreated = tableManager.createMutable(nationDefinition, CREATED)
-    def nationTableInstanceLoaded = tableManager.createMutable(nationDefinition, LOADED)
-
-    def nationNameInDatabaseCreated = nationTableInstanceCreated.nameInDatabase
-    def nationNameInDatabaseLoaded = nationTableInstanceLoaded.nameInDatabase
-
-    def nationHdfsLocationCreated = "/tests-path/mutable_tables/${nationTableInstanceCreated.nameInDatabase}"
-    def nationHdfsLocationLoaded = "/tests-path/mutable_tables/${nationTableInstanceLoaded.nameInDatabase}"
-
-    then:
-    1 * dataSourceWriter.ensureDataOnHdfs(_, _) >> { String dataPath, _ ->
-      dataPath ==~ /\/tests-path\/mutable_tables\/nation_\w+/
-    }
-
-    2 * queryExecutor.executeQuery(
-            { it ==~ /CREATE TABLE nation_\w+\(n_nationid INT,n_name STRING\) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\|' LOCATION '\/tests-path\/mutable_tables\/nation_\w+'/ },
-            _)
+    uuidGenerator.randomUUID() >> "randomSuffix"
+    def expectedTableLocation = "/tests-path/mutable_tables/nation_randomSuffix"
+    def expectedTableName = "nation"
+    def expectedTableNameInDatabase = "nation_randomSuffix"
 
     when:
-    tableManager.drop(nationTableInstanceCreated)
-    tableManager.drop(nationTableInstanceLoaded)
+    def tableDefinition = getNationHiveTableDefinition()
+    def tableInstance = tableManager.createMutable(tableDefinition, LOADED)
 
     then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${nationNameInDatabaseCreated}")
-    1 * hdfsClient.delete(nationHdfsLocationCreated, _)
+    tableInstance.nameInDatabase == expectedTableNameInDatabase
+    tableInstance.name == expectedTableName
+    1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
+    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
 
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${nationNameInDatabaseLoaded}")
-    1 * hdfsClient.delete(nationHdfsLocationLoaded, _)
+    when:
+    tableManager.drop(tableInstance)
 
+    then:
+    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
+    1 * hdfsClient.delete(expectedTableLocation, _)
     0 * _
   }
+
+  def 'should create hive mutable table created'()
+  {
+    setup:
+    HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
+
+    uuidGenerator.randomUUID() >> "randomSuffix"
+    def expectedTableLocation = "/tests-path/mutable_tables/nation_randomSuffix"
+    def expectedTableName = "nation"
+    def expectedTableNameInDatabase = "nation_randomSuffix"
+
+    when:
+    def tableDefinition = getNationHiveTableDefinition()
+    def tableInstance = tableManager.createMutable(tableDefinition, CREATED)
+
+    then:
+    tableInstance.nameInDatabase == expectedTableNameInDatabase
+    tableInstance.name == expectedTableName
+    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
+
+    when:
+    tableManager.drop(tableInstance)
+
+    then:
+    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
+    1 * hdfsClient.delete(expectedTableLocation, _)
+    0 * _
+  }
+
+  private String expandDDLTemplate(String template, String tableName, String location)
+  {
+    return template.replace('%NAME%', tableName).replaceAll('%LOCATION%', location);
+  }
+
+  private static final String NATION_DDL_TEMPLATE = '''
+    CREATE TABLE %NAME%(
+            n_nationid INT,
+            n_name STRING)
+            ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+            LOCATION '%LOCATION%'
+'''
 
   def getNationHiveTableDefinition()
   {
@@ -94,11 +129,7 @@ class HiveTableManagerTest
     return HiveTableDefinition.builder()
             .setName('nation')
             .setDataSource(nationDataSource)
-            .setCreateTableDDLTemplate('CREATE TABLE %NAME%(' +
-            'n_nationid INT,' +
-            'n_name STRING) ' +
-            'ROW FORMAT DELIMITED FIELDS TERMINATED BY \'|\' ' +
-            'LOCATION \'%LOCATION%\'')
+            .setCreateTableDDLTemplate(NATION_DDL_TEMPLATE)
             .build()
   }
 }
