@@ -7,6 +7,8 @@ import com.teradata.test.fulfillment.hive.DataSource
 import com.teradata.test.fulfillment.hive.HiveTableDefinition
 import com.teradata.test.hadoop.hdfs.HdfsClient
 import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter
+import com.teradata.test.internal.uuid.DefaultUUIDGenerator
+import com.teradata.test.internal.uuid.UUIDGenerator
 import com.teradata.test.query.QueryExecutor
 import spock.lang.Specification
 
@@ -19,11 +21,12 @@ class HiveTableManagerTest
   QueryExecutor queryExecutor = Mock()
   HdfsDataSourceWriter dataSourceWriter = Mock()
   HdfsClient hdfsClient = Mock()
+  UUIDGenerator uuidGenerator = new DefaultUUIDGenerator()
 
   def 'should create hive immutable table'()
   {
     setup:
-    HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, "/tests-path", hdfsClient, "password")
+    HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
 
     when:
     def nationDefinition = getNationHiveTableDefinition()
@@ -48,7 +51,7 @@ class HiveTableManagerTest
   def 'should create hive mutable table'()
   {
     setup:
-    HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, "/tests-path", hdfsClient, "password")
+    HiveTableManager tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
 
     when:
     def nationDefinition = getNationHiveTableDefinition()

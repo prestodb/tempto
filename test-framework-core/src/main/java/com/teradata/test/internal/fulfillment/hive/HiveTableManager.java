@@ -13,6 +13,7 @@ import com.teradata.test.fulfillment.table.TableManager;
 import com.teradata.test.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter;
+import com.teradata.test.internal.uuid.UUIDGenerator;
 import com.teradata.test.query.QueryExecutor;
 import org.slf4j.Logger;
 
@@ -33,17 +34,22 @@ public class HiveTableManager
 
     private final QueryExecutor queryExecutor;
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
+    private final UUIDGenerator uuidGenerator;
     private final String testDataBasePath;
     private final HdfsClient hdfsClient;
     private final String hdfsUsername;
 
     @Inject
-    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor, HdfsDataSourceWriter hdfsDataSourceWriter,
+    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor,
+            HdfsDataSourceWriter hdfsDataSourceWriter,
+            UUIDGenerator uuidGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
-            HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
+            HdfsClient hdfsClient, @Named("hdfs.username")
+    String hdfsUsername)
     {
         this.queryExecutor = queryExecutor;
         this.hdfsDataSourceWriter = hdfsDataSourceWriter;
+        this.uuidGenerator = uuidGenerator;
         this.testDataBasePath = testDataBasePath;
         this.hdfsClient = hdfsClient;
         this.hdfsUsername = hdfsUsername;
@@ -71,7 +77,7 @@ public class HiveTableManager
     {
         HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
 
-        String tableSuffix = UUID.randomUUID().toString().replace("-", "");
+        String tableSuffix = uuidGenerator.randomUUID().replace("-", "");
         String tableNameInDatabase = tableDefinition.getName() + "_" + tableSuffix;
         LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
 
