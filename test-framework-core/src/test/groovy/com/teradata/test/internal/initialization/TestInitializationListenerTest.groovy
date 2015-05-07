@@ -165,11 +165,10 @@ class TestInitializationListenerTest
     def fulfillers = scanForFulfillersAndSort(RequirementFulfiller.AutoTestLevelFulfiller.class);
 
     then:
-    fulfillers.size() == 4
+    fulfillers.size() == 3
     fulfillers[0] == CFulfiller.class // with priority 5
-    fulfillers[1] == DummyFulfiller.class // with priority 1
-    fulfillers[2] == AFulfiller.class // with default priority 0
-    fulfillers[3] == BFulfiller.class // with priority -5
+    fulfillers[1] == AFulfiller.class // with default priority 0
+    fulfillers[2] == BFulfiller.class // with priority -5
   }
 
   @Requires(ARequirement)
@@ -266,7 +265,6 @@ class TestInitializationListenerTest
     }
   }
 
-  @RequirementFulfiller.AutoTestLevelFulfiller(priority = 1)
   static class DummyFulfiller
           implements RequirementFulfiller
   {

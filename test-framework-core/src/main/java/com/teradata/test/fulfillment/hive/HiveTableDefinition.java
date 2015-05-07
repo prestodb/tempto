@@ -37,14 +37,9 @@ public class HiveTableDefinition
         return dataSource;
     }
 
-    public String getCreateTableDDLTemplate(String location)
+    public String getCreateTableDDL(String name, String location)
     {
-        return getCreateTableDDLTemplate(getName(), location);
-    }
-
-    public String getCreateTableDDLTemplate(String name, String location)
-    {
-        return createTableDDLTemplate.replace(NAME_TEMPLATE, name).replace(LOCATION_TEMPLATE, location).replaceAll("\'", "''");
+        return createTableDDLTemplate.replace(NAME_TEMPLATE, name).replace(LOCATION_TEMPLATE, location);
     }
 
     public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, DataSource dataSource)

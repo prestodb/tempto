@@ -61,7 +61,7 @@ public class HiveTableManager
         String tableDataPath = getImmutableTableHdfsPath(hiveTableDefinition.getDataSource());
         uploadTableData(hiveTableDefinition, tableDataPath);
 
-        queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
+        queryExecutor.executeQuery(hiveTableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
 
         return new HiveTableInstance(tableNameInDatabase, tableNameInDatabase, hiveTableDefinition, Optional.<String>empty());
     }
@@ -80,7 +80,7 @@ public class HiveTableManager
             uploadTableData(hiveTableDefinition, tableDataPath);
         }
 
-        queryExecutor.executeQuery(createTableDDL(hiveTableDefinition, tableNameInDatabase, tableDataPath));
+        queryExecutor.executeQuery(hiveTableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
 
         return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, hiveTableDefinition, Optional.of(tableDataPath));
     }
@@ -110,12 +110,6 @@ public class HiveTableManager
     private String getMutableTableHdfsPath(String tableName)
     {
         return testDataBasePath + "/mutable_tables/" + tableName;
-    }
-
-    private String createTableDDL(HiveTableDefinition tableDefinition, String tableName, String tableDataPath)
-    {
-        String escapedFormat = tableDefinition.getCreateTableDDLTemplate(tableName, tableDataPath);
-        return format(escapedFormat, tableDefinition.getDataSource().getPathSuffix());
     }
 
     private String dropTableDDL(String tableName)
