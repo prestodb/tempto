@@ -330,7 +330,7 @@ public class TestInitializationListener
         // as interceptor is for some reason called after onStart() which uses this method.
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            Set<Set<Requirement>> requirementsSets = RequirementsExtender.resolveTestSpecificRequirements(iTestNGMethod);
+            Set<Set<Requirement>> requirementsSets = new RequirementsExpander().resolveTestSpecificRequirements(iTestNGMethod);
             for (Set<Requirement> requirementsSet : requirementsSets) {
                 allTestsRequirements.addAll(requirementsSet);
             }

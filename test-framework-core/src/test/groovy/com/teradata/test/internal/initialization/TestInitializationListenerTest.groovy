@@ -9,6 +9,7 @@ import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
 import com.teradata.test.context.TestContextCloseCallback
 import com.teradata.test.fulfillment.RequirementFulfiller
+import com.teradata.test.internal.DefaultRequirementsCollector
 import org.testng.ITestClass
 import org.testng.ITestContext
 import org.testng.ITestNGMethod
@@ -22,7 +23,6 @@ import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextNotSet
 import static com.teradata.test.context.ThreadLocalTestContextHolder.assertTestContextSet
 import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
-import static com.teradata.test.internal.initialization.RequirementsExtender.resolveTestSpecificRequirements
 import static com.teradata.test.internal.initialization.TestInitializationListener.scanForFulfillersAndSort
 
 class TestInitializationListenerTest
@@ -54,6 +54,8 @@ class TestInitializationListenerTest
   {
     EVENTS = []
   }
+
+  def requirementsExpander = new RequirementsExpander()
 
   def 'positive flow'()
   {
@@ -146,7 +148,7 @@ class TestInitializationListenerTest
     testMethod.method >> method
     testMethod.instance >> testClass
     testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
-    def requirements = resolveTestSpecificRequirements(testMethod);
+    def requirements = requirementsExpander.resolveTestSpecificRequirements(testMethod);
     return new RequirementsAwareTestNGMethod(testMethod, getOnlyElement(requirements))
   }
 

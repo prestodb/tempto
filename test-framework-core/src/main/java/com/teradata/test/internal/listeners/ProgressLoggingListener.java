@@ -6,7 +6,6 @@ package com.teradata.test.internal.listeners;
 
 import com.google.common.base.Joiner;
 import com.teradata.test.internal.TestInfo;
-import com.teradata.test.internal.initialization.RequirementsExtender;
 import com.teradata.test.internal.logging.TestFrameworkLoggingAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +13,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import static com.teradata.test.internal.initialization.RequirementsExtender.getMethodsCountFromContext;
+import static com.teradata.test.internal.initialization.RequirementsExpander.getMethodsCountFromContext;
 
 public class ProgressLoggingListener
         implements ITestListener

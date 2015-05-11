@@ -8,6 +8,7 @@ import com.teradata.test.CompositeRequirement
 import com.teradata.test.Requirement
 import com.teradata.test.RequirementsProvider
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository
+import com.teradata.test.internal.DefaultRequirementsCollector
 import com.teradata.test.internal.RequirementsCollector
 import com.teradata.test.internal.convention.ConventionBasedTest
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator
@@ -77,7 +78,6 @@ class SqlPathTestFactoryTest
 
   private boolean containsRequirement(Requirement requirement, Class<? extends Requirement> requirementClass)
   {
-    RequirementsCollector requirementsCollector = new RequirementsCollector()
     if (requirement instanceof CompositeRequirement) {
       return (requirement as CompositeRequirement).requirementsSets.any {
         it.any {

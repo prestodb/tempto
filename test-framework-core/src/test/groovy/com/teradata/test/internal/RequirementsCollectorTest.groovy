@@ -13,10 +13,7 @@ import com.teradata.test.RequirementsProvider
 import com.teradata.test.Requires
 import spock.lang.Specification
 
-import static com.teradata.test.Requirements.allOf
 import static com.teradata.test.Requirements.compose
-import static com.teradata.test.Requirements.compose
-import static com.teradata.test.internal.RequirementsCollector.getAnnotationBasedRequirementsFor
 import static java.util.Arrays.asList
 
 public class RequirementsCollectorTest
@@ -27,10 +24,12 @@ public class RequirementsCollectorTest
   private static final def C = req('c')
   private static final def D = req('d')
 
+  def requirementsCollector = DefaultRequirementsCollector.getInstance()
+
   def "should list method requirements"()
   {
     expect:
-    getAnnotationBasedRequirementsFor(method).requirementsSets == expectedRequirementSets
+    requirementsCollector.getAnnotationBasedRequirementsFor(method).requirementsSets == expectedRequirementSets
 
     where:
     method                                        | expectedRequirementSets

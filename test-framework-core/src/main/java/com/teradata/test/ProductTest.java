@@ -4,14 +4,14 @@
 
 package com.teradata.test;
 
-import com.teradata.test.internal.initialization.RequirementsExtender;
+import com.teradata.test.internal.initialization.RequirementsExpander;
 import com.teradata.test.internal.initialization.TestInitializationListener;
 import com.teradata.test.internal.listeners.ProgressLoggingListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Listeners;
 
-@Listeners({RequirementsExtender.class, TestInitializationListener.class, ProgressLoggingListener.class})
+@Listeners({RequirementsExpander.class, TestInitializationListener.class, ProgressLoggingListener.class})
 public class ProductTest
 {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ProductTest.class);
