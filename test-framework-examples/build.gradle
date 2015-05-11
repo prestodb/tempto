@@ -7,4 +7,6 @@ apply plugin: 'java'
 dependencies {
   compile test_framework_core
   compile libraries.testng
+  compile libraries.slf4j_api
+  compile libraries.slf4j_log4j
 }

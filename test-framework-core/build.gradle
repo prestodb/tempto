@@ -14,7 +14,7 @@ dependencies {
   compile libraries.testng
   compile libraries.commons_lang3
   compile libraries.commons_dbcp2
-  compile libraries.slf4j
+  compile libraries.slf4j_api
   compile libraries.snakeyaml
   compile libraries.httpclient
   compile libraries.ioutils
