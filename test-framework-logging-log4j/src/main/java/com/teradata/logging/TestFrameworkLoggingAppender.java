@@ -2,15 +2,17 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.logging;
+package com.teradata.logging;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.google.inject.ConfigurationException;
-import com.teradata.test.internal.TestInfo;
 import com.teradata.test.context.TestContext;
+import com.teradata.test.context.ThreadLocalTestContextHolder;
+import com.teradata.test.internal.TestInfo;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;

@@ -52,13 +52,5 @@ publishing {
       artifacts = ["$libsDir/presto-jdbc-all.jar"]
     }
   }
-
-
-  repositories.maven {
-    url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
-    credentials {
-      username 'automation'
-      password 'hadoopdb'
-    }
-  }
+  repositories.maven publish_maven_repository
 }

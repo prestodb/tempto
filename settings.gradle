@@ -2,5 +2,6 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 include 'test-framework-core'
+include 'test-framework-logging-log4j'
 include 'test-framework-examples'
 include 'third-party-deps'

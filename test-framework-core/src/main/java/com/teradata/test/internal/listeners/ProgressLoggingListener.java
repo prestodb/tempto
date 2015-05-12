@@ -6,7 +6,6 @@ package com.teradata.test.internal.listeners;
 
 import com.google.common.base.Joiner;
 import com.teradata.test.internal.TestInfo;
-import com.teradata.test.internal.logging.TestFrameworkLoggingAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -93,6 +92,5 @@ public class ProgressLoggingListener
         LOGGER.info("");
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
-        LOGGER.info("For tests logs see: {}", TestFrameworkLoggingAppender.getSelectedLogsDirectory().orElse("N/A"));
     }
 }

@@ -5,6 +5,7 @@
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 plugins.withType(JavaPlugin) {
   sourceCompatibility = 1.8
@@ -74,8 +75,19 @@ ext.libraries = [
 ]
 
 ext.test_framework_core = project(':test-framework-core')
+ext.test_framework_logging_log4j = project(':test-framework-logging-log4j')
 ext.test_framework_examples = project(':test-framework-examples')
 ext.third_party_deps = project(':third-party-deps')
+
+ext.test_framework_version = '1.0.11-SNAPSHOT'
+ext.publish_maven_repository  =  {
+  url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
+  credentials {
+    username 'automation'
+    password 'hadoopdb'
+  }
+}
+
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
@@ -85,3 +97,4 @@ task packageAndUploadLaunchScript(type: Exec) {
   workingDir 'test-framework-launch-script/'
   commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
 }
+

@@ -56,7 +56,7 @@ each test and suite fulfillment process to separate files. To use that configure
 
 ```
 log4j.rootLogger=INFO, TEST_FRAMEWORK_LOGGING_APPENDER
-log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.test.internal.logging.TestFrameworkLoggingAppender
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.logging.TestFrameworkLoggingAppender
 log4j.category.com.teradata.test=DEBUG
 log4j.category.org.reflections=WARN
 ```
