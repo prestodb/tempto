@@ -44,8 +44,8 @@ public class CliProcess
     public List<String> readRemainingLines()
     {
         List<String> lines = newArrayList();
-        while (output.hasNextLine()) {
-            lines.add(output.nextLine());
+        while (outputHasNextLine()) {
+            lines.add(nextOutputLine());
         }
         return lines;
     }
@@ -53,15 +53,20 @@ public class CliProcess
     public String nextOutputLine()
     {
         String nextLine = output.nextLine();
-        LOGGER.debug("next line: {}", nextLine);
+        LOGGER.debug("Next child process line: {}", nextLine);
         return nextLine;
     }
 
     public String nextOutputToken()
     {
         String next = output.next();
-        LOGGER.debug("next token: {}", next);
+        LOGGER.debug("Next child process token: {}", next);
         return next;
+    }
+
+    public boolean outputHasNextLine()
+    {
+        return output.hasNextLine();
     }
 
     public boolean outputHasNext(Pattern pattern)

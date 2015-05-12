@@ -19,7 +19,7 @@ class JavaProcessTest
     child.getInput().println(EXPECTED_LINE)
 
     expect:
-    child.nextOutputLine() == PRODUCED_LINE
+    child.readRemainingLines() == [PRODUCED_LINE]
     child.waitWithTimeoutAndKill()
   }
 }
