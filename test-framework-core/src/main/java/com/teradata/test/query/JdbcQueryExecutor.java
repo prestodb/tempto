@@ -86,7 +86,7 @@ public class JdbcQueryExecutor
         try (Statement statement = connection.createStatement()) {
             if (isSelect) {
                 ResultSet rs = statement.executeQuery(sql);
-                return buildQueryResult(rs);
+                return QueryResult.forResultSet(rs);
             }
             else {
                 return forSingleIntegerValue(statement.executeUpdate(sql));
@@ -103,21 +103,12 @@ public class JdbcQueryExecutor
 
             if (isSelect) {
                 ResultSet rs = statement.executeQuery();
-                return buildQueryResult(rs);
+                return QueryResult.forResultSet(rs);
             }
             else {
                 return forSingleIntegerValue(statement.executeUpdate());
             }
         }
-    }
-
-    private QueryResult buildQueryResult(ResultSet rs)
-            throws SQLException
-    {
-        return QueryResult.builder(rs.getMetaData())
-                .addRows(rs)
-                .setJdbcResultSet(rs)
-                .build();
     }
 
     boolean isSelect(String sql)

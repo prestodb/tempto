@@ -10,8 +10,6 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import javax.swing.text.html.Option;
-
 import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -20,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.sql.JDBCType.INTEGER;
@@ -114,6 +111,11 @@ public class QueryResult
         return queryResultBuilder.build();
     }
 
+    public Optional<ResultSet> getJdbcResultSet()
+    {
+        return jdbcResultSet;
+    }
+
     /**
      * In SQL/JDBC column indexing starts form 1. This method returns SQL index for given Java index.
      *
@@ -146,12 +148,16 @@ public class QueryResult
         return new QueryResult(ImmutableList.of(INTEGER), HashBiMap.create(), ImmutableList.of(ImmutableList.of(value)), Optional.empty());
     }
 
-    public Optional<ResultSet> getJdbcResultSet()
+    public static QueryResult forResultSet(ResultSet rs)
+            throws SQLException
     {
-        return jdbcResultSet;
+        return QueryResult.builder(rs.getMetaData())
+                .addRows(rs)
+                .setJdbcResultSet(rs)
+                .build();
     }
 
-    static class QueryResultBuilder
+    public static class QueryResultBuilder
     {
 
         private final List<JDBCType> columnTypes = newArrayList();
@@ -208,7 +214,8 @@ public class QueryResult
             return this;
         }
 
-        public QueryResultBuilder setJdbcResultSet(ResultSet rs) {
+        public QueryResultBuilder setJdbcResultSet(ResultSet rs)
+        {
             this.jdbcResultSet = Optional.of(rs);
             return this;
         }
