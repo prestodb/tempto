@@ -8,10 +8,10 @@ import spock.lang.Specification
 import static JavaProcessLauncher.defaultJavaProcessLauncher
 import static com.teradata.test.process.TestClassWithMain.*
 
-class JavaProcessTest
+class JavaProcessLauncherTest
         extends Specification
 {
-  def 'test execute Java process'()
+  def 'test execute CLI Java process'()
           throws IOException, InterruptedException
   {
     setup:
