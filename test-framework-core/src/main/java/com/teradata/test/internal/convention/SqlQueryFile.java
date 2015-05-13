@@ -15,7 +15,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.teradata.test.query.QueryExecutor.DEFAULT_DB_NAME;
 
-public class SqlQueryFileWrapper
+public class SqlQueryFile
 {
 
     private static final String GROUPS_HEADER_PROPERTY = "groups";
@@ -27,12 +27,12 @@ public class SqlQueryFileWrapper
 
     private final ParsingResult sqlFileParsingResult;
 
-    public static SqlQueryFileWrapper sqlQueryFileWrapperFor(Path queryFile)
+    public static SqlQueryFile sqlQueryFileFor(Path queryFile)
     {
-        return new SqlQueryFileWrapper(new HeaderFileParser().parseFile(queryFile));
+        return new SqlQueryFile(new HeaderFileParser().parseFile(queryFile));
     }
 
-    public SqlQueryFileWrapper(ParsingResult sqlFileParsingResult)
+    public SqlQueryFile(ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
     }

@@ -14,7 +14,6 @@ import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +21,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.test.Requirements.compose;
-import static com.teradata.test.internal.convention.SqlQueryFileWrapper.sqlQueryFileWrapperFor;
+import static com.teradata.test.internal.convention.SqlQueryFile.sqlQueryFileFor;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
 import static java.nio.file.Files.exists;
@@ -78,11 +77,11 @@ public class SqlPathTestFactory
     private Requirement getRequirements(Path testMethodFile)
     {
         List<Requirement> requirements = newArrayList();
-        requirements.addAll(sqlQueryFileWrapperFor(testMethodFile).getTableDefinitionNames()
+        requirements.addAll(sqlQueryFileFor(testMethodFile).getTableDefinitionNames()
                 .stream()
                 .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName)))
                 .collect(toList()));
-        requirements.addAll(sqlQueryFileWrapperFor(testMethodFile).getRequirementClassNames()
+        requirements.addAll(sqlQueryFileFor(testMethodFile).getRequirementClassNames()
                 .stream()
                 .map(this::getRequirementsFromClass)
                 .collect(toList()));

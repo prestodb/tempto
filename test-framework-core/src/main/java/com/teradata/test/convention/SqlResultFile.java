@@ -2,11 +2,12 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.convention;
+package com.teradata.test.convention;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.assertions.QueryAssert.Row;
+import com.teradata.test.internal.convention.HeaderFileParser;
 import com.teradata.test.internal.convention.HeaderFileParser.ParsingResult;
 import com.teradata.test.internal.query.QueryRowMapper;
 
@@ -24,7 +25,7 @@ import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class SqlResultFileWrapper
+public class SqlResultFile
 {
 
     private static final String DEFAULT_DELIMITER = "|";
@@ -38,18 +39,18 @@ public class SqlResultFileWrapper
     private final ParsingResult sqlFileParsingResult;
     private List<JDBCType> types;
 
-    public static SqlResultFileWrapper sqlResultFileWrapperFor(Path resultFile)
+    public static SqlResultFile sqlResultFileFor(Path resultFile)
     {
-        return new SqlResultFileWrapper(new HeaderFileParser().parseFile(resultFile));
+        return new SqlResultFile(new HeaderFileParser().parseFile(resultFile));
     }
 
-    public static SqlResultFileWrapper sqlResultFileWrapperFor(InputStream inputStream)
+    public static SqlResultFile sqlResultFileFor(InputStream inputStream)
             throws IOException
     {
-        return new SqlResultFileWrapper(new HeaderFileParser().parseFile(inputStream));
+        return new SqlResultFile(new HeaderFileParser().parseFile(inputStream));
     }
 
-    public SqlResultFileWrapper(ParsingResult sqlFileParsingResult)
+    public SqlResultFile(ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
     }

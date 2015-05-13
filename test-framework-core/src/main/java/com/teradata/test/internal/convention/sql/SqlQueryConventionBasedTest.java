@@ -5,10 +5,9 @@
 package com.teradata.test.internal.convention.sql;
 
 import com.teradata.test.Requirement;
-import com.teradata.test.assertions.QueryAssert;
 import com.teradata.test.internal.convention.ConventionBasedTest;
-import com.teradata.test.internal.convention.SqlQueryFileWrapper;
-import com.teradata.test.internal.convention.SqlResultFileWrapper;
+import com.teradata.test.internal.convention.SqlQueryFile;
+import com.teradata.test.convention.SqlResultFile;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import org.apache.commons.io.FilenameUtils;
@@ -20,8 +19,8 @@ import java.util.Optional;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
-import static com.teradata.test.internal.convention.SqlQueryFileWrapper.sqlQueryFileWrapperFor;
-import static com.teradata.test.internal.convention.SqlResultFileWrapper.sqlResultFileWrapperFor;
+import static com.teradata.test.internal.convention.SqlQueryFile.sqlQueryFileFor;
+import static com.teradata.test.convention.SqlResultFile.sqlResultFileFor;
 import static java.lang.Character.isAlphabetic;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -55,32 +54,20 @@ public class SqlQueryConventionBasedTest
             execute(beforeScriptPath.get().toString());
         }
 
-        SqlQueryFileWrapper sqlQueryFileWrapper = sqlQueryFileWrapperFor(queryFile);
-        SqlResultFileWrapper resultFileWrapper = sqlResultFileWrapperFor(resultFile);
+        SqlQueryFile sqlQueryFile = sqlQueryFileFor(queryFile);
+        SqlResultFile sqlResultFile = sqlResultFileFor(resultFile);
 
-        QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFileWrapper);
+        QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFile);
 
         QueryResult queryResult;
-        if (sqlQueryFileWrapper.getQueryType().isPresent()) {
-            queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent(), sqlQueryFileWrapper.getQueryType().get());
+        if (sqlQueryFile.getQueryType().isPresent()) {
+            queryResult = queryExecutor.executeQuery(sqlQueryFile.getContent(), sqlQueryFile.getQueryType().get());
         }
         else {
-            queryResult = queryExecutor.executeQuery(sqlQueryFileWrapper.getContent());
+            queryResult = queryExecutor.executeQuery(sqlQueryFile.getContent());
         }
 
-        QueryAssert queryAssert = assertThat(queryResult)
-                .hasColumns(resultFileWrapper.getTypes());
-
-        if (resultFileWrapper.isIgnoreOrder()) {
-            queryAssert.contains(resultFileWrapper.getRows());
-        }
-        else {
-            queryAssert.containsExactly(resultFileWrapper.getRows());
-        }
-
-        if (!resultFileWrapper.isIgnoreExcessRows()) {
-            queryAssert.hasRowsCount(resultFileWrapper.getRows().size());
-        }
+        assertThat(queryResult).matchesFile(sqlResultFile);
 
         if (afterScriptPath.isPresent()) {
             execute(afterScriptPath.get().toString());
@@ -116,12 +103,12 @@ public class SqlQueryConventionBasedTest
     @Override
     public String[] testGroups()
     {
-        return sqlQueryFileWrapperFor(queryFile).getTestGroups().toArray(new String[0]);
+        return sqlQueryFileFor(queryFile).getTestGroups().toArray(new String[0]);
     }
 
-    private QueryExecutor getQueryExecutor(SqlQueryFileWrapper sqlQueryFileWrapper)
+    private QueryExecutor getQueryExecutor(SqlQueryFile sqlQueryFile)
     {
-        String database = sqlQueryFileWrapper.getDatabaseName();
+        String database = sqlQueryFile.getDatabaseName();
         try {
             return testContext().getDependency(QueryExecutor.class, database);
         }

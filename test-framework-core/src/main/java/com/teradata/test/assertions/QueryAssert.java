@@ -4,6 +4,7 @@
 
 package com.teradata.test.assertions;
 
+import com.teradata.test.convention.SqlResultFile;
 import com.teradata.test.internal.query.QueryResultValueComparator;
 import com.teradata.test.query.QueryExecutionException;
 import com.teradata.test.query.QueryExecutor;
@@ -62,6 +63,24 @@ public class QueryAssert
             executionException = e;
         }
         return new QueryExecutionAssert(ofNullable(executionException));
+    }
+
+    public QueryAssert matchesFile(SqlResultFile sqlResultFile)
+    {
+        hasColumns(sqlResultFile.getTypes());
+
+        if (sqlResultFile.isIgnoreOrder()) {
+            contains(sqlResultFile.getRows());
+        }
+        else {
+            containsExactly(sqlResultFile.getRows());
+        }
+
+        if (!sqlResultFile.isIgnoreExcessRows()) {
+            hasRowsCount(sqlResultFile.getRows().size());
+        }
+
+        return this;
     }
 
     public QueryAssert hasRowsCount(int resultCount)
