@@ -23,6 +23,16 @@ class AbstractConfigurationTest
     configuration.getIntMandatory(KEY) == 10
   }
 
+  def 'get present integer value from String'()
+  {
+    when:
+    setupGetObject(KEY, '10')
+
+    then:
+    configuration.getInt(KEY) == Optional.of(10)
+    configuration.getIntMandatory(KEY) == 10
+  }
+
   def 'non-mandatory get integer not present value'()
   {
     when:
@@ -57,12 +67,12 @@ class AbstractConfigurationTest
   def 'get integer for non matching type'()
   {
     when:
-    setupGetObject(KEY, 'ala')
+    setupGetObject(KEY, [])
     configuration.getInt(KEY)
 
     then:
     def e = thrown(IllegalStateException)
-    e.message == 'expected java.lang.Integer value for key a.b.c but got java.lang.String'
+    e.message == 'expected java.lang.Integer value for key a.b.c but got java.util.ArrayList'
   }
 
   def 'get present string value'()
