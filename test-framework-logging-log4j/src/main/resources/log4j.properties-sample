@@ -1,0 +1,23 @@
+#
+# Copyright 2015, Teradata, Inc. All rights reserved.
+#
+
+# Set root logger to INFO and add a custom appender.
+log4j.rootLogger=TRACE, CONSOLE, TEST_FRAMEWORK_LOGGING_APPENDER
+
+log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
+log4j.appender.CONSOLE.Target=System.out
+log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
+log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%c{1}:%L] [%X{test_id}] - %m%n
+log4j.appender.CONSOLE.Threshold=INFO
+
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.logging.TestFrameworkLoggingAppender
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER.layout=org.apache.log4j.PatternLayout
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER.layout.conversionPattern=[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n
+
+
+log4j.category.org.apache.http=INFO
+log4j.category.com.jayway.jsonpath=WARN
+log4j.category.org.apache.thrift=WARN
+log4j.category.org.apache.hive=WARN
+log4j.category.org.reflections=WARN

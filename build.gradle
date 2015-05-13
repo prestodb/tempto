@@ -79,7 +79,7 @@ ext.test_framework_logging_log4j = project(':test-framework-logging-log4j')
 ext.test_framework_examples = project(':test-framework-examples')
 ext.third_party_deps = project(':third-party-deps')
 
-ext.test_framework_version = '1.0.13-SNAPSHOT'
+ext.test_framework_version = '1.0.15-SNAPSHOT'
 ext.publish_maven_repository  =  {
   url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
   credentials {

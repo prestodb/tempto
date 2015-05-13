@@ -10,12 +10,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 import com.google.inject.ConfigurationException;
 import com.teradata.test.context.TestContext;
-import com.teradata.test.context.ThreadLocalTestContextHolder;
 import com.teradata.test.internal.TestInfo;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.spi.LoggingEvent;
@@ -46,16 +43,16 @@ import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 public class TestFrameworkLoggingAppender
         extends AppenderSkeleton
 {
-    private static final PatternLayout CONSOLE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%X{test_id}] %m%n");
-    private static final Level MINIMUM_CONSOLE_LEVEL = Level.INFO;
-
-    private static final PatternLayout FILE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n");
-    private static final Level MINIMUM_FILE_LEVEL = Level.TRACE;
+    private static final PatternLayout DEFAULT_FILE_OUTPUT_FORMAT = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'_'HH-mm-ss");
 
-    private LoadingCache<String, PrintWriter> printWriterCache = buildPrintWriterCache();
-
+    private final LoadingCache<String, PrintWriter> printWriterCache = buildPrintWriterCache();
     private final String logsDirectory = selectLogsDirectory();
+
+    public TestFrameworkLoggingAppender()
+    {
+        setLayout(DEFAULT_FILE_OUTPUT_FORMAT);
+    }
 
     private LoadingCache<String, PrintWriter> buildPrintWriterCache()
     {
@@ -96,47 +93,18 @@ public class TestFrameworkLoggingAppender
     {
         checkState(!closed, "Cannot append to a closed TestFrameworkLoggingAppender");
 
-        if (shouldWriteToConsole(event)) {
-            writeToConsole(CONSOLE_OUTPUT_FORMAT.format(event));
-            String[] throwableStack = event.getThrowableStrRep();
-            if (throwableStack != null) {
-                for (String throwableElement : throwableStack) {
-                    if (CONSOLE_OUTPUT_FORMAT.ignoresThrowable()) {
-                        writeToConsole(formatThrowableElement(throwableElement));
-                    }
-                }
-            }
-        }
-
-        if (shouldWriteToFile(event)) {
-            writeToFile(FILE_OUTPUT_FORMAT.format(event));
-            String[] throwableStack = event.getThrowableStrRep();
-            if (throwableStack != null) {
-                for (String throwableElement : throwableStack) {
-                    if (FILE_OUTPUT_FORMAT.ignoresThrowable()) {
-                        writeToFile(formatThrowableElement(throwableElement));
-                    }
+        writeToFile(getLayout().format(event));
+        String[] throwableStack = event.getThrowableStrRep();
+        if (throwableStack != null) {
+            for (String throwableElement : throwableStack) {
+                if (getLayout().ignoresThrowable()) {
+                    writeToFile(formatThrowableElement(throwableElement));
                 }
             }
         }
     }
 
     private String formatThrowableElement(String throwableElement) {return "   " + throwableElement + "\n";}
-
-    private boolean shouldWriteToConsole(LoggingEvent loggingEvent)
-    {
-        return loggingEvent.getLevel().isGreaterOrEqual(MINIMUM_CONSOLE_LEVEL);
-    }
-
-    private void writeToConsole(String message)
-    {
-        System.out.print(message);
-    }
-
-    private boolean shouldWriteToFile(LoggingEvent loggingEvent)
-    {
-        return loggingEvent.getLevel().isGreaterOrEqual(MINIMUM_FILE_LEVEL);
-    }
 
     private void writeToFile(String message)
     {
@@ -193,7 +161,7 @@ public class TestFrameworkLoggingAppender
     @Override
     public boolean requiresLayout()
     {
-        return false;
+        return true;
     }
 
     /**
