@@ -1,3 +1,8 @@
 value:
   both: global
   global: global
+
+resolve:
+  both: ${value.both}
+  global: ${value.global}
+  local: ${value.local}

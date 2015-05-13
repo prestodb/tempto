@@ -3,6 +3,9 @@
  */
 package com.teradata.test.configuration;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -54,4 +57,6 @@ public interface Configuration
      * Keys for returned configuration are stripped of this prefix.
      */
     Configuration getSubconfiguration(String keyPrefix);
+
+    Map<String, Object> asMap();
 }

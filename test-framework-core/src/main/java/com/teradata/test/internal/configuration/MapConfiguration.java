@@ -61,13 +61,17 @@ public class MapConfiguration
     {
         Optional<Object> object = getObject(key);
         if (object.isPresent() && object.get() instanceof Map) {
-            throw new IllegalArgumentException("Provided key <" + key + "> for non leaf configuration property");
+            return Optional.empty();
         }
         return object;
     }
 
     private Optional<Object> getObject(String key)
     {
+        if (map.containsKey(key)) {
+            return Optional.of(map.get(key));
+        }
+
         List<String> keyParts = KeyUtils.splitKey(key);
         Iterator<String> keyPartsIterator = keyParts.iterator();
 

@@ -4,9 +4,11 @@
 
 package com.teradata.test.internal.configuration;
 
+import com.google.common.collect.ImmutableMap;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.configuration.KeyUtils;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -42,8 +44,7 @@ public abstract class AbstractConfiguration
     public Optional<Integer> getInt(String key)
     {
         Optional<Object> optionalValue = get(key);
-        checkValueOfType(key, optionalValue, Integer.class);
-        return (Optional) optionalValue;
+        return checkValueOfTypeOrParseIfNeeded(key, optionalValue, Integer.class, Integer::parseInt);
     }
 
     @Override
@@ -64,8 +65,7 @@ public abstract class AbstractConfiguration
     public Optional<Boolean> getBoolean(String key)
     {
         Optional<Object> optionalValue = get(key);
-        checkValueOfType(key, optionalValue, Boolean.class);
-        return (Optional) optionalValue;
+        return checkValueOfTypeOrParseIfNeeded(key, optionalValue, Boolean.class, Boolean::parseBoolean);
     }
 
     @Override
@@ -91,14 +91,18 @@ public abstract class AbstractConfiguration
                 .collect(toSet());
     }
 
-    private void checkValueOfType(String key, Optional<Object> optionalValue, Class<?> expectedClass)
+    private <T> Optional<T> checkValueOfTypeOrParseIfNeeded(String key, Optional<Object> optionalValue, Class<T> expectedClass, Parser<T> parser)
     {
         if (optionalValue.isPresent()) {
             Object value = optionalValue.get();
-            if (!(expectedClass.isAssignableFrom(value.getClass()))) {
+            if (value instanceof String) {
+                return Optional.of(parser.parse((String) value));
+            }
+            else if (!(expectedClass.isAssignableFrom(value.getClass()))) {
                 throw new IllegalStateException(format("expected %s value for key %s but got %s", expectedClass.getName(), key, value.getClass().getName()));
             }
         }
+        return (Optional<T>) optionalValue;
     }
 
     private void checkValuePresent(Optional<?> value, String valueNotFoundErrorMessage)
@@ -109,4 +113,38 @@ public abstract class AbstractConfiguration
     }
 
     private String standardValueNotFoundMessage(String key) {return String.format("could not find value for key %s", key);}
+
+    @Override
+    public Map<String, Object> asMap()
+    {
+        ImmutableMap.Builder<String, Object> mapBuilder = ImmutableMap.<String, Object>builder();
+
+        for (String key : listKeys()) {
+            mapBuilder.put(key, get(key).get());
+        }
+
+        return mapBuilder.build();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return asMap().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (o instanceof AbstractConfiguration) {
+            return asMap().equals(((Configuration) o).asMap());
+        }
+        else {
+            return false;
+        }
+    }
+
+    private interface Parser<T>
+    {
+        T parse(String s);
+    }
 }

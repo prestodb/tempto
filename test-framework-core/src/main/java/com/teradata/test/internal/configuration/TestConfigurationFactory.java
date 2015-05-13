@@ -28,9 +28,13 @@ public class TestConfigurationFactory
     private static final String DEFAULT_TEST_CONFIGURATION_URI = CLASSPATH_PROTOCOL + "/test-configuration.yaml";
     private static final String LOCAL_DEFAULT_TEST_CONFIGURATION_URI = CLASSPATH_PROTOCOL + "/test-configuration-local.yaml";
 
+    // TODO @Inject, unstatic this class
+    private static final ConfigurationVariableResolver CONFIGURATION_VARIABLE_RESOLVER = new ConfigurationVariableResolver();
+
     public static Configuration createTestConfiguration()
     {
-        return new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration());
+        Configuration configuration = new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration());
+        return CONFIGURATION_VARIABLE_RESOLVER.resolve(configuration);
     }
 
     private static Configuration readTestConfiguration()

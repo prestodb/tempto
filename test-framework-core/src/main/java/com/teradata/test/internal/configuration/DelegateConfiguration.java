@@ -6,6 +6,7 @@ package com.teradata.test.internal.configuration;
 
 import com.teradata.test.configuration.Configuration;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -91,5 +92,23 @@ public abstract class DelegateConfiguration
     public Configuration getSubconfiguration(String keyPrefix)
     {
         return getDelegate().getSubconfiguration(keyPrefix);
+    }
+
+    @Override
+    public Map<String, Object> asMap()
+    {
+        return getDelegate().asMap();
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return getDelegate().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        return getDelegate().equals(o);
     }
 }

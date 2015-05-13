@@ -7,6 +7,8 @@ package com.teradata.test.internal.configuration
 import com.teradata.test.internal.configuration.MapConfiguration
 import spock.lang.Specification
 
+import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
+
 class MapConfigurationTest
         extends Specification
 {
@@ -18,7 +20,8 @@ class MapConfigurationTest
                                   [
                                           c: 'ala',
                                           d: 'ela'
-                                  ]
+                                  ],
+                          'e': 'tola'
                   ],
                   'x': [
                           'y': 10
@@ -29,7 +32,7 @@ class MapConfigurationTest
   def 'test list keys'()
   {
     expect:
-    configuration.listKeys() == ['a.b.c', 'a.b.d', 'x.y'] as Set
+    configuration.listKeys() == ['a.b.c', 'a.b.d', 'a.e', 'x.y'] as Set
   }
 
   def 'test get objects'()
@@ -46,15 +49,20 @@ class MapConfigurationTest
     setup:
     def subConfigurationA = configuration.getSubconfiguration('a')
     def subConfigurationAB = configuration.getSubconfiguration('a.b')
+    def subConfigurationX = configuration.getSubconfiguration('x')
+    def subConfigurationXY = configuration.getSubconfiguration('x.y')
 
     expect:
-    subConfigurationA.listKeys() == ['b.c', 'b.d'] as Set
+    subConfigurationA.listKeys() == ['b.c', 'b.d', 'e'] as Set
     subConfigurationAB.listKeys() == ['c', 'd'] as Set
     subConfigurationA.getString('b.c') == Optional.of('ala')
     subConfigurationA.getString('b.d') == Optional.of('ela')
     subConfigurationAB.getString('c') == Optional.of('ala')
     subConfigurationAB.getString('d') == Optional.of('ela')
-    subConfigurationA.listKeyPrefixes(1) == ['b'] as Set
+    subConfigurationA.listKeyPrefixes(1) == ['b', 'e'] as Set
+    subConfigurationX.listKeyPrefixes(1) == ['y'] as Set
+    subConfigurationX.getSubconfiguration('y') == emptyConfiguration()
+    subConfigurationXY.listKeyPrefixes(1) == [] as Set
   }
 
 }
