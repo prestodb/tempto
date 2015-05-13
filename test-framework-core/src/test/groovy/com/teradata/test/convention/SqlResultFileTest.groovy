@@ -2,9 +2,9 @@
  * Copyright 2013-2015, Teradata, Inc. All rights reserved.
  */
 
-package com.teradata.test.internal.convention
+package com.teradata.test.convention
 
-import com.teradata.test.convention.SqlResultFile
+import com.teradata.test.internal.convention.HeaderFileParser
 import spock.lang.Specification
 
 import java.sql.Date
