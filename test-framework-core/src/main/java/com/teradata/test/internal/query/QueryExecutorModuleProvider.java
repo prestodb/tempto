@@ -8,6 +8,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
+import com.google.inject.Singleton;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
@@ -54,7 +55,7 @@ public class QueryExecutorModuleProvider
                     {
                         Key<QueryExecutor> queryExecutorKey = Key.get(QueryExecutor.class, named(connectionName));
                         bind(JdbcConnectivityParamsState.class).to(connectivityStateKey);
-                        bind(queryExecutorKey).to(JdbcQueryExecutor.class);
+                        bind(queryExecutorKey).to(JdbcQueryExecutor.class).in(Singleton.class);
                         expose(queryExecutorKey);
                     }
                 };

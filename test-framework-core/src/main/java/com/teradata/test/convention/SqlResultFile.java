@@ -21,6 +21,7 @@ import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.io.Resources.getResource;
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -38,6 +39,16 @@ public class SqlResultFile
 
     private final ParsingResult sqlFileParsingResult;
     private List<JDBCType> types;
+
+    public static SqlResultFile sqlResultFileForResource(String resourceName)
+    {
+        try {
+            return sqlResultFileFor(getResource(resourceName).openStream());
+        }
+        catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
 
     public static SqlResultFile sqlResultFileFor(Path resultFile)
     {
