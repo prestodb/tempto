@@ -6,7 +6,20 @@ apply plugin: 'java'
 
 dependencies {
   compile test_framework_core
+  compile test_framework_logging_log4j
   compile libraries.testng
   compile libraries.slf4j_api
   compile libraries.slf4j_log4j
 }
+
+task buildFatJar(type: Jar, dependsOn: assemble) {
+  appendix = 'all'
+  from sourceSets.main.output
+  from {
+    configurations.runtime.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
+}
+
+build.dependsOn.add(buildFatJar)

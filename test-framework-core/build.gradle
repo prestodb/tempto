@@ -30,15 +30,6 @@ dependencies {
   testCompile libraries.dbutils
 }
 
-task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = 'all'
-  from sourceSets.main.output
-  from {configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
-}
-
 task sourceJar(type: Jar) {
   from sourceSets.main.allJava
 }
@@ -56,6 +47,16 @@ publishing {
     }
   }
   repositories.maven publish_maven_repository
+}
+
+task buildFatJar(type: Jar, dependsOn: assemble) {
+  appendix = 'all'
+  from sourceSets.main.output
+  from {
+    configurations.runtime.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
 }
 
 build.dependsOn.add(buildFatJar)

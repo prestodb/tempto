@@ -12,16 +12,6 @@ dependencies {
   compile libraries.log4j
   compile libraries.slf4j_api
   compile libraries.reflections
-
-}
-
-task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = 'all'
-  from sourceSets.main.output
-  from {configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
 }
 
 task sourceJar(type: Jar) {
@@ -43,4 +33,3 @@ publishing {
   repositories.maven publish_maven_repository
 }
 
-build.dependsOn.add(buildFatJar)
