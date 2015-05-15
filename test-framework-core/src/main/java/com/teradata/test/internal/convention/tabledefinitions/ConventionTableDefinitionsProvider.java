@@ -15,6 +15,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import static com.teradata.test.fulfillment.hive.HiveTableDefinition.hiveTableDe
 import static com.teradata.test.internal.convention.ConventionTestsUtils.getConventionsTestsUri;
 import static com.teradata.test.internal.convention.ConventionTestsUtils.processPathFromUri;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
+import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Collections.emptyList;
@@ -42,26 +44,22 @@ public class ConventionTableDefinitionsProvider
 
     private List<HiveTableDefinition> getAllConventionBasedTableDefinitions()
     {
-        return getAllConventionTableDefinitionDescriptors().stream()
-                .map(this::hiveTableDefinitionFor)
-                .collect(toList());
-    }
-
-    private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors()
-    {
         Optional<URI> dataSetsUri = getConventionsTestsUri(DATASETS_PATH_PART);
         if (!dataSetsUri.isPresent()) {
             LOGGER.debug("No convention table definitions");
             return emptyList();
         }
         else {
-            return processPathFromUri(dataSetsUri.get(), this::getAllConventionTableDefinitionDescriptors);
+            return processPathFromUri(dataSetsUri.get(), p -> getAllConventionTableDefinitionDescriptors(p)
+                    .stream()
+                    .map(this::hiveTableDefinitionFor)
+                    .collect(toList()));
         }
     }
 
     private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors(Path dataSetsPath)
     {
-        if (dataSetsPath.toFile().exists()) {
+        if (exists(dataSetsPath)) {
             LOGGER.debug("Data sets configuration for path: {}", dataSetsPath);
 
             try {
