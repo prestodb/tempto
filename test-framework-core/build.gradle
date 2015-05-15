@@ -24,6 +24,7 @@ dependencies {
     exclude group: 'org.testng', module: 'testng'
   }
   compile libraries.reflections
+  compile libraries.jsch
 
   testCompile libraries.spock
   testCompile libraries.hsqldb

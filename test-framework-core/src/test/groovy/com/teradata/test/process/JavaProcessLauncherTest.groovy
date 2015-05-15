@@ -15,11 +15,11 @@ class JavaProcessLauncherTest
           throws IOException, InterruptedException
   {
     setup:
-    CliProcess child = new CliProcess(defaultJavaProcessLauncher().launch(TestClassWithMain.class, [EXPECTED_ARGUMENT]))
+    LocalCliProcess child = new LocalCliProcess(defaultJavaProcessLauncher().launch(TestClassWithMain.class, [EXPECTED_ARGUMENT]))
     child.getInput().println(EXPECTED_LINE)
 
     expect:
-    child.readRemainingLines() == [PRODUCED_LINE]
-    child.waitWithTimeoutAndKill()
+    child.readRemainingOutputLines() == [PRODUCED_LINE]
+    child.waitForWithTimeoutAndKill()
   }
 }
