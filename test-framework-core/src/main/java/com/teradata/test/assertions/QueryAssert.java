@@ -40,17 +40,18 @@ public class QueryAssert
     private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("#0.00000000000");
 
     private final List<Comparator<Object>> columnComparators;
+    private final List<JDBCType> columnTypes;
 
-    private QueryAssert(QueryResult actual, List<Comparator<Object>> columnComparators)
+    private QueryAssert(QueryResult actual)
     {
         super(actual, QueryAssert.class);
-        this.columnComparators = columnComparators;
+        this.columnComparators = getComparators(actual);
+        this.columnTypes = actual.getColumnTypes();
     }
 
     public static QueryAssert assertThat(QueryResult queryResult)
     {
-        List<Comparator<Object>> comparators = getComparators(queryResult);
-        return new QueryAssert(queryResult, comparators);
+        return new QueryAssert(queryResult);
     }
 
     public static QueryExecutionAssert assertThat(QueryCallback queryCallback)
@@ -67,17 +68,27 @@ public class QueryAssert
 
     public QueryAssert matchesFile(SqlResultFile sqlResultFile)
     {
-        hasColumns(sqlResultFile.getTypes());
+        if (sqlResultFile.getExpectedTypes().isPresent()) {
+            hasColumns(sqlResultFile.getExpectedTypes().get());
+        }
+
+        List<Row> rows = null;
+        try {
+            rows = sqlResultFile.getRows(columnTypes);
+        } catch (Exception e) {
+            failWithMessage("Could not map expected file content to query column types; types=%s; content=<%s>; error=<%s>",
+                    columnTypes, sqlResultFile.getFileContent(), e.getMessage());
+        }
 
         if (sqlResultFile.isIgnoreOrder()) {
-            contains(sqlResultFile.getRows());
+            contains(rows);
         }
         else {
-            containsExactly(sqlResultFile.getRows());
+            containsExactly(rows);
         }
 
         if (!sqlResultFile.isIgnoreExcessRows()) {
-            hasRowsCount(sqlResultFile.getRows().size());
+            hasRowsCount(rows.size());
         }
 
         return this;

@@ -4,10 +4,13 @@
 
 package com.teradata.test.internal.convention;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.io.ByteStreams;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getFirst;
 import static java.nio.file.Files.newInputStream;
@@ -56,7 +60,8 @@ public class HeaderFileParser
     public ParsingResult parseFile(InputStream fileInput)
             throws IOException
     {
-        List<String> lines = readLines(fileInput);
+        byte[] fileBytes = ByteStreams.toByteArray(fileInput);
+        List<String> lines = readLines(new ByteArrayInputStream(fileBytes));
         String firstLine = getFirst(lines, "");
 
         Map<String, String> commentProperties;
@@ -72,7 +77,7 @@ public class HeaderFileParser
 
         List<String> contentFiltered = filterContent(contentLines);
 
-        return new ParsingResult(commentProperties, contentFiltered);
+        return new ParsingResult(new String(fileBytes, UTF_8), commentProperties, contentFiltered);
     }
 
     /**
@@ -99,11 +104,13 @@ public class HeaderFileParser
 
     public static class ParsingResult
     {
+        private final String originalContent;
         private final Map<String, String> commentProperties;
         private final List<String> contentLines;
 
-        private ParsingResult(Map<String, String> commentProperties, List<String> contentLines)
+        private ParsingResult(String originalContent, Map<String, String> commentProperties, List<String> contentLines)
         {
+            this.originalContent = originalContent;
             this.commentProperties = commentProperties;
             this.contentLines = contentLines;
         }
@@ -111,6 +118,10 @@ public class HeaderFileParser
         public Optional<String> getProperty(String key)
         {
             return Optional.ofNullable(commentProperties.get(key));
+        }
+
+        public String getOriginalContent() {
+            return originalContent;
         }
 
         public List<String> getContentLines()
@@ -121,7 +132,7 @@ public class HeaderFileParser
         /**
          * @return returns lines joined by ' ' character
          */
-        public String getContent()
+        public String getContentAsSingleLine()
         {
             return Joiner.on(' ').join(contentLines);
         }

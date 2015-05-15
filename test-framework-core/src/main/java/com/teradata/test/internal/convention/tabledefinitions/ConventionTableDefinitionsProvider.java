@@ -87,7 +87,7 @@ public class ConventionTableDefinitionsProvider
     private String createTableDDLTemplate(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
     {
         try (InputStream inputStream = new BufferedInputStream(newInputStream(conventionTableDefinitionDescriptor.getDdlFile()))) {
-            return new HeaderFileParser().parseFile(inputStream).getContent();
+            return new HeaderFileParser().parseFile(inputStream).getContentAsSingleLine();
         }
         catch (IOException e) {
             throw new IllegalStateException("Could not open ddl file: " + conventionTableDefinitionDescriptor.getDdlFile());

@@ -5,6 +5,8 @@
 package com.teradata.test.assertions
 
 import com.google.common.collect.HashBiMap
+import com.teradata.test.convention.SqlResultFile
+import com.teradata.test.internal.convention.HeaderFileParser
 import com.teradata.test.query.QueryExecutionException
 import com.teradata.test.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
@@ -265,11 +267,101 @@ public class QueryAssertTest
     noExceptionThrown()
   }
 
+  def 'Matches file - ok - with types'()
+  {
+    def parsingResult = parseResultFor('''\
+-- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR|VARCHAR
+1|ALGERIA|AFRICA|
+2|ARGENTINA|SOUTH AMERICA|
+''')
+
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+
+    then:
+    noExceptionThrown()
+  }
+
+  def 'Matches file - failed - wrong explicit types in result file'()
+  {
+    def parsingResult = parseResultFor('''\
+-- delimiter: |; ignoreOrder: false; types: INTEGER|INTEGER|INTEGER
+1|ALGERIA|AFRICA|
+2|ARGENTINA|SOUTH AMERICA|
+''')
+
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+
+    then:
+    def e = thrown(AssertionError.class);
+    e.getMessage() == "Expected <1> column of type <INTEGER>, but was <VARCHAR>, actual columns: [INTEGER, VARCHAR, VARCHAR]"
+  }
+
+  def 'Matches file - ok - no explicit types'()
+  {
+    def parsingResult = parseResultFor('''\
+-- delimiter: |; ignoreOrder: false
+1|ALGERIA|AFRICA|
+2|ARGENTINA|SOUTH AMERICA|
+''')
+
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+
+    then:
+    noExceptionThrown()
+  }
+
+  def 'Matches file - failed - wrong value'()
+  {
+    def parsingResult = parseResultFor('''\
+-- delimiter: |; ignoreOrder: false
+1|ALGERIA|AFRICA|
+3|ARGENTINA|SOUTH AMERICA|
+''')
+
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+
+    then:
+    def e = thrown(AssertionError.class)
+    e.getMessage() == '''\
+Not equal rows:
+1 - expected: <3|ARGENTINA|SOUTH AMERICA|>
+1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'''
+  }
+
+  def 'Matches file - failed - cannot map expected result to types from db result'()
+  {
+    def parsingResult = parseResultFor('''\
+-- delimiter: |; ignoreOrder: false
+A|ALGERIA|AFRICA|
+B|ARGENTINA|SOUTH AMERICA|
+''')
+
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+
+    then:
+    def e = thrown(AssertionError.class)
+    e.getMessage() == '''Could not map expected file content to query column types; types=[INTEGER, VARCHAR, VARCHAR]; content=<-- delimiter: |; ignoreOrder: false
+A|ALGERIA|AFRICA|
+B|ARGENTINA|SOUTH AMERICA|
+>; error=<For input string: "A">'''
+  }
+
+  private HeaderFileParser.ParsingResult parseResultFor(String fileContent)
+  {
+    new HeaderFileParser().parseFile(new ByteArrayInputStream(
+            fileContent.getBytes()
+    ))
+  }
 
   def 'QueryExecutionAssert - not fail as expected'()
   {
     when:
-    assertThat({return null}).failsWithMessage("dummy")
+    assertThat({ return null }).failsWithMessage("dummy")
 
     then:
     def e = thrown(AssertionError)
@@ -279,7 +371,7 @@ public class QueryAssertTest
   def 'QueryExecutionAssert - wrong error message'()
   {
     when:
-    assertThat({throw new QueryExecutionException(new RuntimeException("foo bar"))}).failsWithMessage("dummy")
+    assertThat({ throw new QueryExecutionException(new RuntimeException("foo bar")) }).failsWithMessage("dummy")
 
     then:
     def e = thrown(AssertionError)
@@ -290,7 +382,7 @@ public class QueryAssertTest
   def 'QueryExecutionAssert - right error message'()
   {
     when:
-    assertThat({throw new QueryExecutionException(new RuntimeException("dummy"))}).failsWithMessage("dummy")
+    assertThat({ throw new QueryExecutionException(new RuntimeException("dummy")) }).failsWithMessage("dummy")
 
     then:
     noExceptionThrown()

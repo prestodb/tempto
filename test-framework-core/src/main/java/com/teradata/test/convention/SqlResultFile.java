@@ -17,7 +17,6 @@ import java.nio.file.Path;
 import java.sql.JDBCType;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -25,6 +24,7 @@ import static com.google.common.io.Resources.getResource;
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
 public class SqlResultFile
 {
@@ -38,7 +38,7 @@ public class SqlResultFile
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
     private final ParsingResult sqlFileParsingResult;
-    private List<JDBCType> types;
+    private final Optional<List<JDBCType>> expectedTypes;
 
     public static SqlResultFile sqlResultFileForResource(String resourceName)
     {
@@ -64,14 +64,24 @@ public class SqlResultFile
     public SqlResultFile(ParsingResult sqlFileParsingResult)
     {
         this.sqlFileParsingResult = sqlFileParsingResult;
+        this.expectedTypes = parseExpectedTypes(sqlFileParsingResult);
     }
 
-    public List<Row> getRows()
+    private Optional<List<JDBCType>> parseExpectedTypes(ParsingResult sqlFileParsingResult) {
+        Optional<String> typesProperty = sqlFileParsingResult.getProperty("types");
+
+        return typesProperty.map(
+                value -> stream(TYPES_SPLITTER.split(value).spliterator(), false)
+                        .map(JDBCType::valueOf)
+                        .collect(toList()));
+    }
+
+    public List<Row> getRows(List<JDBCType> columnTypes)
     {
         List<Row> values = newArrayList();
         String delimiter = getDelimiter();
 
-        QueryRowMapper rowMapper = new QueryRowMapper(getTypes());
+        QueryRowMapper rowMapper = new QueryRowMapper(columnTypes);
         Splitter valuesSplitter = Splitter.on(delimiter);
         if (isTrimValues()) {
             valuesSplitter = valuesSplitter.trimResults();
@@ -83,9 +93,9 @@ public class SqlResultFile
         }
 
         if (isJoinAllRowsToOne()) {
-            checkState(getTypes().size() == 1, "Expected single column result when 'joinAllRowsToOne' property is set, types: %s", getTypes());
+            checkState(columnTypes.size() == 1, "Expected single column result when 'joinAllRowsToOne' property is set, columnTypes: %s", columnTypes);
             String joinedRows = values.stream()
-                    .map(row -> (String) row.getValues().get(0))
+                    .map(row -> String.valueOf(row.getValues().get(0)))
                     .collect(joining("\n"));
             return ImmutableList.of(row(joinedRows));
         }
@@ -93,17 +103,13 @@ public class SqlResultFile
         return values;
     }
 
-    public List<JDBCType> getTypes()
-    {
-        if (types == null) {
-            Optional<String> typesProperty = sqlFileParsingResult.getProperty("types");
-            checkState(typesProperty.isPresent(), "Could not find 'types' property in .result file");
+    public String getFileContent() {
+        return sqlFileParsingResult.getOriginalContent();
+    }
 
-            types = StreamSupport.stream(TYPES_SPLITTER.split(typesProperty.get()).spliterator(), false)
-                    .map(JDBCType::valueOf)
-                    .collect(toList());
-        }
-        return types;
+    public Optional<List<JDBCType>> getExpectedTypes()
+    {
+        return expectedTypes;
     }
 
     private List<String> parseLine(String line, String delimiter, Splitter valuesSplitter)

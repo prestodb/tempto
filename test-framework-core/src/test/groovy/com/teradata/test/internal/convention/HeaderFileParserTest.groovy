@@ -27,7 +27,7 @@ class HeaderFileParserTest
     parsingResult.getContentLines().size() == 2
     parsingResult.getContentLines().get(0) == "content line 1"
     parsingResult.getContentLines().get(1) == "content line 2"
-    parsingResult.getContent() == "content line 1 content line 2"
+    parsingResult.getContentAsSingleLine() == "content line 1 content line 2"
   }
 
   def 'parse file no comment properties'()
@@ -41,6 +41,6 @@ class HeaderFileParserTest
     parsingResult.getContentLines().size() == 2
     parsingResult.getContentLines().get(0) == "content line 1"
     parsingResult.getContentLines().get(1) == "content line 2"
-    parsingResult.getContent() == "content line 1 content line 2"
+    parsingResult.getContentAsSingleLine() == "content line 1 content line 2"
   }
 }

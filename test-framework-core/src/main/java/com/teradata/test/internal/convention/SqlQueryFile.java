@@ -65,7 +65,7 @@ public class SqlQueryFile
 
     public String getContent()
     {
-        return sqlFileParsingResult.getContent();
+        return sqlFileParsingResult.getContentAsSingleLine();
     }
 
     public Optional<QueryType> getQueryType()

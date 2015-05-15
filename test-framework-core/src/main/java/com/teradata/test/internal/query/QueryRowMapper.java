@@ -33,7 +33,7 @@ public class QueryRowMapper
 
     public Row mapToRow(List<String> values)
     {
-        checkState(values.size() == columnTypes.size(), "Expected {} values in row: {}", columnTypes.size(), values);
+        checkState(values.size() == columnTypes.size(), "Expected %s values in row: %s", columnTypes.size(), values);
 
         Object[] rowValues = new Object[values.size()];
         for (int i = 0; i < values.size(); ++i) {
