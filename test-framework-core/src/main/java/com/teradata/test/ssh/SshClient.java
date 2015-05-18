@@ -16,13 +16,10 @@ public interface SshClient
     /**
      * Executes command on a remote machine.
      */
-    CliProcess execute(List<String> command);
+    CliProcess execute(String command);
 
-    default void executeAndWait(List<String> command)
-            throws InterruptedException
-    {
-        execute(command).waitForWithTimeoutAndKill();
-    }
+
+    CliProcess execute(List<String> command);
 
     /**
      * Uploads file to a remote machine. It works like SCP.

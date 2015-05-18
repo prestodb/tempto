@@ -24,10 +24,8 @@ class JSchCliProcess
     JSchCliProcess(ChannelExec channel)
             throws IOException
     {
-        super(channel.getInputStream(), channel.getOutputStream());
+        super(channel.getInputStream(), channel.getErrStream() , channel.getOutputStream());
         this.channel = channel;
-
-        channel.setErrStream(System.err);
     }
 
     void connect()
@@ -42,6 +40,7 @@ class JSchCliProcess
     {
         Thread thread = new Thread(() -> {
             readRemainingOutputLines();
+            readRemainingErrorLines();
             // active waiting based on http://www.jcraft.com/jsch/examples/Exec.java.html example
             while (!channel.isClosed()) {
                 try {
@@ -56,15 +55,28 @@ class JSchCliProcess
         thread.join(timeout.toMillis());
 
         if (!channel.isClosed()) {
-            channel.disconnect();
+            close();
             thread.join();
             throw new RuntimeException("SSH channel did not finish within given timeout");
         }
 
-        channel.disconnect();
+        close();
         int exitStatus = channel.getExitStatus();
         if (channel.getExitStatus() != 0) {
             throw new RuntimeException("SSH command exited with status: " + exitStatus);
         }
+    }
+
+    /**
+     * Terminates process and closes all related streams
+     */
+    @Override
+    public void close()
+    {
+        // close channel first
+        channel.disconnect();
+
+        // close all related streams than
+        super.close();
     }
 }

@@ -16,7 +16,7 @@ class JavaProcessLauncherTest
   {
     setup:
     LocalCliProcess child = new LocalCliProcess(defaultJavaProcessLauncher().launch(TestClassWithMain.class, [EXPECTED_ARGUMENT]))
-    child.getInput().println(EXPECTED_LINE)
+    child.getProcessInput().println(EXPECTED_LINE)
 
     expect:
     child.readRemainingOutputLines() == [PRODUCED_LINE]

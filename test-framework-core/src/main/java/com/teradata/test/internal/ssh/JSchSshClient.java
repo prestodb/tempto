@@ -63,11 +63,11 @@ public class JSchSshClient
     }
 
     @Override
-    public CliProcess execute(List<String> command)
+    public CliProcess execute(String command)
     {
         try {
             ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
-            channel.setCommand(Joiner.on(' ').join(quote(command)));
+            channel.setCommand(command);
             JSchCliProcess process = new JSchCliProcess(channel);
             process.connect();
             return process;
@@ -75,6 +75,12 @@ public class JSchSshClient
         catch (JSchException | IOException exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    @Override
+    public CliProcess execute(List<String> command)
+    {
+        return execute(Joiner.on(' ').join(quote(command)));
     }
 
     @Override
@@ -137,11 +143,6 @@ public class JSchSshClient
         }
     }
 
-    private Iterable<String> quote(List<String> command)
-    {
-        return transform(command, (String s) -> "\"" + s + "\"");
-    }
-
     private Session getActiveSession()
             throws JSchException
     {
@@ -166,5 +167,10 @@ public class JSchSshClient
         java.util.Properties config = new java.util.Properties();
         config.put("StrictHostKeyChecking", "no");
         return config;
+    }
+
+    private Iterable<String> quote(List<String> command)
+    {
+        return transform(command, (String s) -> "\"" + s + "\"");
     }
 }

@@ -28,3 +28,9 @@ tests:
   hdfs:
     path: /product-test
 
+ssh_roles:
+  td_express:
+    host: ${TD_EXPRESS_HOST}
+    port: 22
+    user: root
+    password: root
