@@ -13,6 +13,7 @@ import com.teradata.test.internal.ReflectionHelper;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator;
+import com.teradata.test.internal.convention.SqlTestsFileUtils;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -62,9 +63,11 @@ public class SqlPathTestFactory
 
         Path beforeScriptFile = testMethodFile.getParent().resolve(BEFORE_SCRIPT_NAME);
         Optional<Path> optionalBeforeScriptFile = isRegularFile(beforeScriptFile) ? Optional.of(beforeScriptFile) : Optional.<Path>empty();
+        optionalBeforeScriptFile.ifPresent(SqlTestsFileUtils::makeExecutable);
 
         Path afterScripFile = testMethodFile.getParent().resolve(AFTER_SCRIPT_NAME);
         Optional<Path> optionalAfterScriptFile = isRegularFile(afterScripFile) ? Optional.of(afterScripFile) : Optional.<Path>empty();
+        optionalAfterScriptFile.ifPresent(SqlTestsFileUtils::makeExecutable);
 
         Requirement requirement = getRequirements(testMethodFile);
         SqlQueryConventionBasedTest conventionTest = new SqlQueryConventionBasedTest(

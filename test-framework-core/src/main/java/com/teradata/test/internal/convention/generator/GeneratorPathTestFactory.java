@@ -15,6 +15,7 @@ import static com.google.common.io.Files.createTempDir;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
+import static com.teradata.test.internal.convention.SqlTestsFileUtils.makeExecutable;
 
 public class GeneratorPathTestFactory
         implements ConventionBasedTestFactory.PathTestFactory
@@ -34,6 +35,7 @@ public class GeneratorPathTestFactory
         String newPrefix = testNamePrefix + "." + getFilenameWithoutExtension(path);
         File tmpTestsDirectory = createTempDir();
         tmpTestsDirectory.deleteOnExit();
+        makeExecutable(path);
         execute(path.toFile().toString(), tmpTestsDirectory.toString());
         return factory.createTestsForChildrenOfPath(tmpTestsDirectory.toPath(), newPrefix);
     }

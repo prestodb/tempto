@@ -14,16 +14,13 @@ import org.slf4j.Logger;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static com.teradata.test.fulfillment.hive.HiveTableDefinition.hiveTableDefinition;
-import static com.teradata.test.internal.convention.ConventionTestsUtils.getConventionsTestsUri;
-import static com.teradata.test.internal.convention.ConventionTestsUtils.processPathFromUri;
+import static com.teradata.test.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
@@ -44,16 +41,16 @@ public class ConventionTableDefinitionsProvider
 
     private List<HiveTableDefinition> getAllConventionBasedTableDefinitions()
     {
-        Optional<URI> dataSetsUri = getConventionsTestsUri(DATASETS_PATH_PART);
-        if (!dataSetsUri.isPresent()) {
+        Optional<Path> dataSetsPath = getConventionsTestsPath(DATASETS_PATH_PART);
+        if (!dataSetsPath.isPresent()) {
             LOGGER.debug("No convention table definitions");
             return emptyList();
         }
         else {
-            return processPathFromUri(dataSetsUri.get(), p -> getAllConventionTableDefinitionDescriptors(p)
+            return getAllConventionTableDefinitionDescriptors(dataSetsPath.get())
                     .stream()
                     .map(this::hiveTableDefinitionFor)
-                    .collect(toList()));
+                    .collect(toList());
         }
     }
 
