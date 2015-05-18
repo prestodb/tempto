@@ -29,6 +29,7 @@ dependencies {
   testCompile libraries.spock
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
+  testCompile libraries.mina_sshd
 }
 
 task sourceJar(type: Jar) {

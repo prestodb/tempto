@@ -5,22 +5,35 @@ package com.teradata.test.internal.ssh
 
 import com.google.common.io.Files
 import com.teradata.test.process.CliProcess
-import spock.lang.Ignore
+import org.apache.sshd.SshServer
+import org.apache.sshd.common.NamedFactory
+import org.apache.sshd.server.Command
+import org.apache.sshd.server.CommandFactory
+import org.apache.sshd.server.PasswordAuthenticator
+import org.apache.sshd.server.UserAuth
+import org.apache.sshd.server.auth.UserAuthPassword
+import org.apache.sshd.server.command.ScpCommandFactory
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
+import org.apache.sshd.server.session.ServerSession
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.time.Duration
 
+import static Thread.sleep
 import static java.nio.charset.StandardCharsets.UTF_8
 
 public class JSchSshClientTest
         extends Specification
 {
-  private final def HOST = 'master'
-  private final def PORT = 22
-  private final def USER = 'root'
-  private final def PASSWORD = 'vagrant'
+  private static final def HOST = 'localhost'
+  private static final def PORT = 1234
+  private static final def USER = 'test'
+  private static final def PASSWORD = 'password'
 
-  @Ignore
+  @Shared
+  private SshServer sshd
+
   def 'should connect end execute command on master'()
   {
     setup:
@@ -35,7 +48,6 @@ public class JSchSshClientTest
     line == 'hello world'
   }
 
-  @Ignore
   def 'should fail when invalid ssh command'()
   {
     setup:
@@ -49,12 +61,11 @@ public class JSchSshClientTest
     thrown(RuntimeException)
   }
 
-  @Ignore
   def 'should fail when timeouted'()
   {
     setup:
     JSchSshClient client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
-    CliProcess process = client.execute(['sleep', '10'])
+    CliProcess process = client.execute(['sleep', '5'])
 
     when:
     process.waitForWithTimeoutAndKill(Duration.ofMillis(100));
@@ -63,22 +74,20 @@ public class JSchSshClientTest
     thrown(RuntimeException)
   }
 
-  @Ignore
   def 'should upload file'()
   {
     setup:
     def client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
     def file = fileWithContent('hello world')
     def suffix = UUID.randomUUID()
-    client.upload(file, '/tmp/test_file.txt' + suffix)
+    def fileName = "/tmp/test_file.txt_${suffix}"
+    client.upload(file, fileName)
 
     when:
-    CliProcess process = client.execute(['cat', '/tmp/test_file.txt' + suffix])
-    String line = process.nextOutputLine()
-    process.waitForWithTimeoutAndKill()
+    def content = Files.toString(new File(fileName), UTF_8)
 
     then:
-    line == 'hello world'
+    content == 'hello world'
   }
 
   def fileWithContent(String content)
@@ -87,5 +96,57 @@ public class JSchSshClientTest
     temp.deleteOnExit()
     Files.write(content, temp, UTF_8)
     return temp.toPath()
+  }
+
+  def setupSpec()
+  {
+    sshd = SshServer.setUpDefaultServer()
+    sshd.setPort(PORT)
+    sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+
+    setupAuthentication()
+    setupCommandFactories()
+
+    sshd.start()
+  }
+
+  private void setupAuthentication()
+  {
+    List<NamedFactory<UserAuth>> userAuthFactories = new ArrayList<NamedFactory<UserAuth>>()
+    userAuthFactories.add(new UserAuthPassword.Factory())
+    sshd.setUserAuthFactories(userAuthFactories)
+
+    sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
+      public boolean authenticate(String username, String password, ServerSession session)
+      {
+        return USER.equals(username) && PASSWORD.equals(password);
+      }
+    });
+  }
+
+  private void setupCommandFactories()
+  {
+    CommandFactory delegateFactory = new CommandFactory() {
+      @Override
+      Command createCommand(String command)
+      {
+        if (command == '"echo" "hello world"') {
+          return new TestCommand('hello world\n', 0)
+        }
+        else if (command == '"sleep" "5"') {
+          sleep(5000);
+          return new TestCommand('', 0);
+        }
+        else {
+          return new TestCommand("Unknown command: ${command}\n", 1)
+        }
+      }
+    }
+    sshd.setCommandFactory(new ScpCommandFactory(delegateFactory))
+  }
+
+  def cleanupSpec()
+  {
+    sshd.stop()
   }
 }

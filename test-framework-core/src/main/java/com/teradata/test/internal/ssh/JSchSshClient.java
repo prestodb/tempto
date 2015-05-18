@@ -82,13 +82,24 @@ public class JSchSshClient
     {
         try {
             ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
-            String command = "scp  -t " + remotePath;
+            String command = "scp -t " + remotePath;
             channel.setCommand(command);
 
             OutputStream out = channel.getOutputStream();
             InputStream in = channel.getInputStream();
 
-            channel.connect();
+            sendSCPFile(file, channel, in, out);
+        }
+        catch (JSchException | IOException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private void sendSCPFile(Path file, ChannelExec channel, InputStream in, OutputStream out)
+            throws IOException, JSchException
+    {
+        channel.connect();
+        try {
             checkAck(channel, in);
 
             sendSCPHandshake(file, out);
@@ -101,11 +112,9 @@ public class JSchSshClient
 
             out.flush();
             checkAck(channel, in);
-
-            channel.disconnect();
         }
-        catch (JSchException | IOException exception) {
-            throw new RuntimeException(exception);
+        finally {
+            channel.disconnect();
         }
     }
 

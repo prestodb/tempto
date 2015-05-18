@@ -44,7 +44,8 @@ ext.versions = [
         presto       : '0.97',
         reflections  : '0.9.9',
         bytebuddy    : '0.5.6',
-        jsch         : '0.1.52'
+        jsch         : '0.1.52',
+        mina_sshd    : '0.14.0'
 ]
 
 ext.libraries = [
@@ -73,7 +74,8 @@ ext.libraries = [
         presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}",
         reflections  : "org.reflections:reflections:${versions.reflections}",
         bytebuddy    : "net.bytebuddy:byte-buddy:${versions.bytebuddy}",
-        jsch         : "com.jcraft:jsch:${versions.jsch}"
+        jsch         : "com.jcraft:jsch:${versions.jsch}",
+        mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}"
 ]
 
 ext.test_framework_core = project(':test-framework-core')
