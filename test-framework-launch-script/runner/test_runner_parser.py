@@ -60,7 +60,14 @@ class TestRunnerParser(object):
             dest='test_configuration',
             metavar='TEST_CONFIGURATION_URI',
             default='classpath:/test-configuration.yaml',
-            help='URI to Test configuration YAML file'
+            help='URI to Test configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.'
+        )
+        test_organization_arguments.add_argument(
+            '--test-configuration-local',
+            dest='test_configuration_local',
+            metavar='TEST_CONFIGURATION_LOCAL_URI',
+            default='classpath:/test-configuration-local.yaml',
+            help='URI to Test configuration local YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.'
         )
         test_organization_arguments.add_argument(
             '--list-suites',

@@ -56,8 +56,6 @@ class TestRunnerArgumentBuilder(object):
             return '-groups ' + groups_or_suites
         return ''
 
-
-
     @property
     def testng_verbosity(self):
         return self.__args.testng_verbosity
@@ -92,12 +90,25 @@ class TestRunnerArgumentBuilder(object):
     def system_properties(self):
         return self.__joined_string_excluding_nulls_for([
             self.__logs_collection_string(),
-            self.__test_configuration_argument()
+            self.__test_configuration_argument(),
+            self.__test_configuration_local_argument()
         ])
 
+    def __test_configuration_local_argument(self):
+        return self.__resource_file_argument(self.__args.test_configuration_local, "test.configuration.local")
+
     def __test_configuration_argument(self):
-        if self.__args.test_configuration is not None:
-            return '-Dtest-configuration=' + self.__args.test_configuration
+        return self.__resource_file_argument(self.__args.test_configuration, "test.configuration")
+
+    def __resource_file_argument(self, resource_path, argument_key):
+        if resource_path is not None:
+            if resource_path.startswith('file:') or resource_path.startswith('classpath:'):
+                resource_uri = resource_path
+            elif os.path.isfile(resource_path):
+                resource_uri = 'file:' + resource_path
+            else:
+                resource_uri = 'classpath:' + resource_path
+            return '-D%s=%s' % (argument_key,resource_uri)
         return ''
 
     def __logs_collection_string(self):
