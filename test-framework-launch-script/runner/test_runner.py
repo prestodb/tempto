@@ -23,9 +23,9 @@ def check(popen_args):
 def listener_arguments():
     return ' '.join([
         '-usedefaultlisteners', 'false',
-        '-listener', 'org.uncommons.reportng.HTMLReporter,' +
-        'org.uncommons.reportng.JUnitXMLReporter,' +
+        '-listener',
         'org.testng.reporters.XMLReporter,' +
+        'org.testng.reporters.jq.Main,' +
         ','.join([ANNOTATION_LISTENER])
     ])
 
@@ -41,7 +41,7 @@ def metadata_arguments(test_runner_argument_builder):
 def show_results_location(test_runner_argument_builder):
     sys.stdout.write(
         'See ' + os.path.join(test_runner_argument_builder.report_dir,
-                              'html/index.html for detailed results.\n')
+                              'index.html for detailed results.\n')
     )
 
 
