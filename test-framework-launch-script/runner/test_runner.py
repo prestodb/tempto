@@ -6,9 +6,8 @@ import os
 import subprocess
 import sys
 
-from test_common import FAILURE, SUCCESS, USER_INTERRUPTION
+from test_common import USER_INTERRUPTION
 from test_common import ANNOTATION_LISTENER
-from test_common import get_sorted_groups, get_sorted_suites, get_suite_groups
 from test_runner_argument_builder import TestRunnerArgumentBuilder
 from test_runner_parser import TestRunnerParser
 
@@ -89,73 +88,12 @@ def remove_user_args(sys_args):
             sys_args.pop(index)
             return
 
-
-def list_suites(tests_classpath):
-    sys.stdout.write('Available suites:\n\n\t')
-    sys.stdout.write('\n\t'.join(get_sorted_suites(tests_classpath)))
-    sys.stdout.write('\n')
-    return SUCCESS
-
-
-def list_groups(tests_classpath):
-    sys.stdout.write('Available groups:\n\n\t')
-    sys.stdout.write('\n\t'.join(get_sorted_groups(tests_classpath)))
-    sys.stdout.write('\n')
-    return SUCCESS
-
-
-def list_suite_groups(suites, tests_classpath):
-    sys.stdout.write(
-        'Available groups for suites [{suites}]:\n'.format(
-            suites=' '.join(suites)
-        )
-    )
-    for suite in suites:
-        sys.stdout.write('\n\t' + suite + '\n\t' + '=' * len(suite))
-        sys.stdout.write('\n\t\t')
-        try:
-            sys.stdout.write('\n\t\t'.join(get_suite_groups(suite, tests_classpath)))
-        except KeyError:
-            sys.stdout.write('[NO GROUPS]\n')
-            return FAILURE
-        sys.stdout.write('\n')
-
-
-def which_suite(group, tests_classpath):
-    sys.stdout.write(group + ': ')
-    suites=[]
-    for suite in get_sorted_suites(tests_classpath):
-        if group in get_suite_groups(suite, tests_classpath):
-            suites.append(suite)
-    if not suites:
-        sys.stdout.write('[NO SUITES]\n')
-        return FAILURE
-    sys.stdout.write(', '.join(suites) + '\n')
-    return SUCCESS
-
-
-def determine_list_suite_groups(args):
-    if args.list_suite_groups == 'all':
-        return list_suite_groups(get_sorted_suites(args.tests_classpath), args.tests_classpath)
-    else:
-        return list_suite_groups([args.list_suite_groups], args.tests_classpath)
-
-
 def main():
     try:
         parser = TestRunnerParser()
         args = parser.parse_args()
         test_runner_argument_builder = TestRunnerArgumentBuilder(parser, args)
-        if args.list_groups:
-            return list_groups(args.tests_classpath)
-        elif args.list_suites:
-            return list_suites(args.tests_classpath)
-        elif args.list_suite_groups is not None:
-            return determine_list_suite_groups(args)
-        elif args.which_suite:
-            return which_suite(args.which_suite, args.tests_classpath)
-        else:
-            return run_testng(test_runner_argument_builder)
+        return run_testng(test_runner_argument_builder)
     except KeyboardInterrupt:
         sys.stderr.write('\nInterruption detected.  Exiting.\n')
         return USER_INTERRUPTION

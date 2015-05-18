@@ -6,9 +6,6 @@ import os
 import tempfile
 from string import Template
 
-from test_common import get_suite_groups
-
-
 class TestRunnerArgumentBuilder(object):
     """
     This class is responsible for taking in
@@ -51,25 +48,22 @@ class TestRunnerArgumentBuilder(object):
 
     @property
     def groups_argument(self):
-        groups_or_suites = self.__groups_or_suites_string()
-        if groups_or_suites is not None:
-            return '-groups ' + groups_or_suites
+        groups = self.__groups_string()
+        if groups is not None:
+            return '-groups ' + groups
         return ''
 
     @property
     def testng_verbosity(self):
         return self.__args.testng_verbosity
 
-    def __groups_or_suites_string(self):
+    def __groups_string(self):
         """
         Returns which groups or suites were specified.
         """
         groups = []
         if self.__args.groups is not None:
             groups += self.__args.groups
-        if self.__args.suites:
-            for suite in self.__args.suites:
-                groups += get_suite_groups(suite, self.__args.tests_classpath)
         if groups:
             return ','.join(groups)
 

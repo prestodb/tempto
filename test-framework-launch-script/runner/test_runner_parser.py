@@ -4,11 +4,9 @@
 
 import argparse
 
-from test_common import get_groups, get_suites
 from argparse_extensions import comma_separated_list, lower_case_list
 from argparse_extensions.choice_action import choice_action
 from argparse_extensions.combine_action import CombineAction
-from argparse_extensions.store_action import StoreAction
 from argparse_extensions.action_list import action_list
 
 
@@ -70,34 +68,6 @@ class TestRunnerParser(object):
             help='URI to Test configuration local YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.'
         )
         test_organization_arguments.add_argument(
-            '--list-suites',
-            dest='list_suites',
-            action='store_true',
-            help='Prints a list of all suites available in the framework.'
-        )
-        test_organization_arguments.add_argument(
-            '--list-groups', '--list',
-            dest='list_groups',
-            action='store_true',
-            help='Prints a list of all groups available in the framework.'
-        )
-        test_organization_arguments.add_argument(
-            '--groups-in-suite', '--list-suite-groups',
-            metavar='SUITE',
-            dest='list_suite_groups',
-            type=TestRunnerParser.__lower_case_string(),
-            action=action_list([choice_action(TestRunnerParser.__get_suites(['all']), case_sensitive=False), StoreAction]),
-            help='Prints a list of the group(s) in a given suite. Possible values {%(choices)s}'
-        )
-        test_organization_arguments.add_argument(
-            '--suites-for-group', '--which-suite',
-            metavar='GROUP',
-            dest='which_suite',
-            type=TestRunnerParser.__lower_case_string(),
-            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), StoreAction]),
-            help='Prints a list of the suite(s) a given group belongs to. Possible values {%(choices)s}'
-        )
-        test_organization_arguments.add_argument(
             '--report-dir',
             metavar='DIR',
             dest='report_dir',
@@ -122,16 +92,7 @@ class TestRunnerParser(object):
             dest='groups',
             default=[],
             type=TestRunnerParser.__lower_case_comma_separated_list(),
-            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), CombineAction]),
             help='List of test groups to be included in the selection, case-insensitive. Possible values {%(choices)s}'
-        )
-        groups_suites.add_argument(
-            '--suites',
-            metavar='SUITE[,SUITE...]',
-            dest='suites',
-            type=TestRunnerParser.__lower_case_comma_separated_list(),
-            action=action_list([choice_action(TestRunnerParser.__get_suites(), case_sensitive=False), CombineAction]),
-            help='List of test suites to be included in the selection, case-insensitive. Possible values {%(choices)s}'
         )
 
         test_selection_arguments.add_argument(
@@ -159,7 +120,6 @@ class TestRunnerParser(object):
             metavar='GROUP[,GROUP...]',
             default=[],
             type=TestRunnerParser.__lower_case_comma_separated_list(),
-            action=action_list([choice_action(TestRunnerParser.__get_groups(), case_sensitive=False), CombineAction]),
             help='List of test groups to be *excluded* from the selection, case-insensitive. Possible values {%(choices)s}'
         )
 
@@ -198,14 +158,6 @@ class TestRunnerParser(object):
             default='0',
             help='The verbosity level at which TestNG will log'
         )
-
-    @staticmethod
-    def __get_groups(additional_groups=[]):
-        return lambda namespace: get_groups(namespace.tests_classpath) + additional_groups
-
-    @staticmethod
-    def __get_suites(additional_suites=[]):
-        return lambda namespace: get_suites(namespace.tests_classpath) + additional_suites
 
     @staticmethod
     def __classpath():
