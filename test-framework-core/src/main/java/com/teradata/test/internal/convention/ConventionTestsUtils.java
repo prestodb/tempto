@@ -84,6 +84,7 @@ public final class ConventionTestsUtils
         String scheme = uri.getScheme();
         if (scheme.equals(FILE_SCHEME)) {
             action.accept(Paths.get(uri));
+            return;
         }
 
         if (!scheme.equals(JAR_SCHEME)) {
