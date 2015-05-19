@@ -6,7 +6,8 @@ apply plugin: "java"
 
 dependencies {
   compile libraries.commons_cli
-  compile libraries.slf4j
+  compile libraries.slf4j_api
+  compile libraries.slf4j_log4j
   compile libraries.postgresql_jdbc
 }
 
