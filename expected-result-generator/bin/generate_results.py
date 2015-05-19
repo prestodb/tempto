@@ -65,13 +65,6 @@ def get_test_list(parser, args):
         return generate_test_list(args.s, parser)
 
 
-def usage(parser, message):
-    parser.print_help()
-    print
-    print message
-    exit(1)
-
-
 def usage(parser, error_message):
     parser.print_help()
     if (error_message):
