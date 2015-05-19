@@ -73,12 +73,15 @@ ext.libraries = [
         reflections  : "org.reflections:reflections:${versions.reflections}",
         bytebuddy    : "net.bytebuddy:byte-buddy:${versions.bytebuddy}",
         jsch         : "com.jcraft:jsch:${versions.jsch}",
-        mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}"
+        mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}",
+        postgresql_jdbc    : "org.postgresql:postgresql:9.3-1102-jdbc4",
+        commons_cli  : "commons-cli:commons-cli:1.2"
 ]
 
 ext.test_framework_core = project(':test-framework-core')
 ext.test_framework_logging_log4j = project(':test-framework-logging-log4j')
 ext.test_framework_examples = project(':test-framework-examples')
+ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
 
 ext.test_framework_version = '1.0.20-SNAPSHOT' // changed by losipiuk

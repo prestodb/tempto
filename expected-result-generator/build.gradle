@@ -1,0 +1,20 @@
+/*
+ * Copyright 2015, Teradata, Inc. All rights reserved.
+ */
+
+apply plugin: "java"
+
+dependencies {
+  compile libraries.commons_cli
+  compile libraries.slf4j
+  compile libraries.postgresql_jdbc
+}
+
+task buildRunnableJar(type: Jar, dependsOn: build) {
+  appendix = "all"
+  from sourceSets.main.output
+  from { configurations.testRuntime.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+
+

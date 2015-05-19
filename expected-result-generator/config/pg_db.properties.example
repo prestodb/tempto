@@ -1,0 +1,7 @@
+#
+# This file provides the information that is needed to connect to the database.
+#
+user=hadapt
+password=hadapt
+jdbc_url=jdbc:postgresql://cobbler.td.teradata.com:5432/tpcds
+
