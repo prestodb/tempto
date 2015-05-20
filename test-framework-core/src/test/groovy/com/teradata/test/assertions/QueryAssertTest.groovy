@@ -14,8 +14,10 @@ import spock.lang.Specification
 
 import java.sql.ResultSet
 
+import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.test.assertions.QueryAssert.Row.row
 import static com.teradata.test.assertions.QueryAssert.assertThat
+import static com.teradata.test.internal.convention.HeaderFileParser.SectionParsingResult
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
 
@@ -347,15 +349,12 @@ B|ARGENTINA|SOUTH AMERICA|
     def e = thrown(AssertionError.class)
     e.getMessage() == '''Could not map expected file content to query column types; types=[INTEGER, VARCHAR, VARCHAR]; content=<-- delimiter: |; ignoreOrder: false
 A|ALGERIA|AFRICA|
-B|ARGENTINA|SOUTH AMERICA|
->; error=<For input string: "A">'''
+B|ARGENTINA|SOUTH AMERICA|>; error=<For input string: "A">'''
   }
 
-  private HeaderFileParser.ParsingResult parseResultFor(String fileContent)
+  private SectionParsingResult parseResultFor(String fileContent)
   {
-    new HeaderFileParser().parseFile(new ByteArrayInputStream(
-            fileContent.getBytes()
-    ))
+    getOnlyElement(new HeaderFileParser().parseFile(new ByteArrayInputStream(fileContent.getBytes())));
   }
 
   def 'QueryExecutionAssert - not fail as expected'()
