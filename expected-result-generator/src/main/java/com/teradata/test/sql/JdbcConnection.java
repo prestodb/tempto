@@ -151,7 +151,7 @@ public class JdbcConnection {
         if (rs == null) {
           LOGGER.warn("NULL result set from query: {}", sql);
         } else {
-          resultFileWriter.write("-- delimiter: |; ignoreOrder: false;\n");
+          resultFileWriter.write("-- delimiter: |; ignoreOrder: true;\n");
           while (rs.next()) {
             resultFileWriter.write(rowToString(rs));
           }

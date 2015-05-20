@@ -115,17 +115,14 @@ public class SqlResultGenerator {
           if (query.length() > 0) {
             query.append(' ');
           }
-          if (line.contains(";")) {
-            int semicolon = line.lastIndexOf(';');
-            query.append(line.substring(0, semicolon));
-            LOGGER.info("Executing query: {}", query.toString());
-            connection.executeQueryToFile(query.toString(), resultFile);
-            // Test framework only allows one query per file, so we're done.
-            break;
-          }
-          else {
-            query.append(line);
-          }
+          query.append(line);
+        }
+        // We've read the whole file.  Execute the query, if there is one.
+        if (query.length() > 0) {
+          LOGGER.info("Executing query: {}", query.toString());
+          connection.executeQueryToFile(query.toString(), resultFile);
+        } else {
+          LOGGER.warn("File {} did not contain a query.", testFile);
         }
       }
       catch (SQLException e) {

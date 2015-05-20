@@ -18,10 +18,9 @@ Each test is written as a pair of files: test.sql, and test.result.
 
 **test.sql**
 
-This file contains one SQL statement, which must end with a semicolon (;).
+This file contains one SQL statement, which must NOT end with a semicolon (;).
 Statements may span multiple lines.  Comment lines
-may appear before or after the SQL statement.
-Comments are identified by "--".
+may appear before the SQL statement.  Comments are identified by "--".
 
 Generating the result file
 --------------------------
