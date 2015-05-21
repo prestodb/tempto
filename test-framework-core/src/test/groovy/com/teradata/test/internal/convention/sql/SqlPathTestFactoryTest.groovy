@@ -8,10 +8,9 @@ import com.teradata.test.CompositeRequirement
 import com.teradata.test.Requirement
 import com.teradata.test.RequirementsProvider
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository
-import com.teradata.test.internal.DefaultRequirementsCollector
-import com.teradata.test.internal.RequirementsCollector
 import com.teradata.test.internal.convention.ConventionBasedTest
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator
+import org.apache.commons.io.FilenameUtils
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Shared
@@ -33,24 +32,69 @@ class SqlPathTestFactoryTest
   {
     TableDefinitionsRepository tableDefinitionsRepositoryMock = Mock()
     ConventionBasedTestProxyGenerator conventionBasedTestProxyGeneratorMock = new ConventionBasedTestProxyGenerator('test')
-    conventionBasedTestProxyGeneratorMock.generateProxy(_) >> Mock(ConventionBasedTest)
     sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock)
   }
 
-  def createConventionTestWithRequires()
+  def shouldCreateConventionTestWithRequires()
   {
     setup:
-    Path testPath = getPathForConventionTest("-- requires: ${DummyRequirementsProvider.class.name}")
+    Path testPath = getPathForConventionTest("-- requires: ${DummyRequirementsProvider1.class.name}; groups:foo")
 
     when:
     List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
 
     then:
     conventionBasedTests.size() == 1
-    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement)
+    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
+    conventionBasedTests.get(0).testCaseName() == FilenameUtils.getBaseName(testPath.getFileName().toString()) + '_1'
+    conventionBasedTests.get(0).testGroups() == ['foo']
   }
 
-  def createConventionTestWithWrongRequires()
+  def shouldUseSectionNameAsTestName()
+  {
+    setup:
+    Path testPath = getPathForConventionTest("-- name:foo_boo")
+
+    when:
+    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+    then:
+    conventionBasedTests.size() == 1
+    conventionBasedTests.get(0).testCaseName() == 'foo_boo'
+  }
+
+  def shouldCreateTestsWithMultipleSections()
+  {
+    setup:
+    Path testPath = getPathForConventionTest(
+            """
+-- requires: ${DummyRequirementsProvider1.class.name}
+--! name: query_1; requires: ${DummyRequirementsProvider2.class.name}
+query 1 sql
+--!
+query 1 result
+--! name: query_2
+query 2 sql
+--!
+query 2 result
+""", Optional.empty())
+
+    when:
+    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+    then:
+    conventionBasedTests.size() == 2
+
+    conventionBasedTests.get(0).testCaseName() == 'query_1'
+    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
+    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement2)
+
+    conventionBasedTests.get(1).testCaseName() == 'query_2'
+    containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement1)
+    !containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement2)
+  }
+
+  def shouldCreateConventionTestWithWrongRequires()
   {
     setup:
     Path testPath = getPathForConventionTest("-- requires: not.existing.Requirement")
@@ -63,15 +107,60 @@ class SqlPathTestFactoryTest
     ex.message == 'Unable to find specified class: not.existing.Requirement'
   }
 
+  def shouldFailInvalidQueryName()
+  {
+    setup:
+    Path testPath = getPathForConventionTest("-- name: query^")
+
+    when:
+    sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+    then:
+    IllegalArgumentException e = thrown()
+    e.message == 'Not a valid Java identifier: query^'
+  }
+
+  def shouldFailNoResultsFile()
+  {
+    setup:
+    Path testPath = getPathForConventionTest("--", Optional.empty())
+
+    when:
+    sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+    then:
+    IllegalStateException e = thrown()
+    e.message == 'Could not find file: ' + new File(testPath.toString().replace('.tmp', '.result'))
+  }
+
+  def shouldFailInvalidNumberOfSections()
+  {
+    setup:
+    Path testPath = getPathForConventionTest("--\n--!", Optional.empty())
+
+    when:
+    sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+    then:
+    IllegalStateException e = thrown()
+    e.message == 'First section should contain properties, next sections should represent query and results'
+  }
+
   private Path getPathForConventionTest(String conventionTestContent)
+  {
+    getPathForConventionTest(conventionTestContent, Optional.of(''))
+  }
+
+  private Path getPathForConventionTest(String conventionTestContent, Optional<String> resultFileContent)
   {
     def file = temporaryFolder.newFile()
     file.write conventionTestContent
     def testPath = Paths.get(file.path)
 
-    // mock result file
-    File resultFile = new File(testPath.toString().replace('.tmp', '.result'))
-    resultFile.createNewFile()
+    if (resultFileContent.isPresent()) {
+      File resultFile = new File(testPath.toString().replace('.tmp', '.result'))
+      resultFile.write(resultFileContent.get())
+    }
 
     return testPath
   }
@@ -84,22 +173,38 @@ class SqlPathTestFactoryTest
           containsRequirement(it, requirementClass)
         }
       }
-    } else {
+    }
+    else {
       return requirementClass.isInstance(requirement)
     }
   }
 
-  public static class DummyRequirementsProvider
+  public static class DummyRequirementsProvider1
           implements RequirementsProvider
   {
     @Override
     Requirement getRequirements()
     {
-      return new DummyRequirement()
+      return new DummyRequirement1()
     }
   }
 
-  public static class DummyRequirement
+  public static class DummyRequirementsProvider2
+          implements RequirementsProvider
+  {
+    @Override
+    Requirement getRequirements()
+    {
+      return new DummyRequirement2()
+    }
+  }
+
+  public static class DummyRequirement1
+          implements Requirement
+  {
+  }
+
+  public static class DummyRequirement2
           implements Requirement
   {
   }

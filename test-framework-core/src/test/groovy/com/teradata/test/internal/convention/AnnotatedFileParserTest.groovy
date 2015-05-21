@@ -7,13 +7,13 @@ package com.teradata.test.internal.convention
 import spock.lang.Specification
 
 import static com.google.common.collect.Iterables.getOnlyElement
-import static com.teradata.test.internal.convention.HeaderFileParser.SectionParsingResult
+import static AnnotatedFileParser.SectionParsingResult
 import static org.apache.commons.io.IOUtils.toInputStream
 
-class HeaderFileParserTest
+class AnnotatedFileParserTest
         extends Specification
 {
-  private HeaderFileParser fileParser = new HeaderFileParser()
+  private AnnotatedFileParser fileParser = new AnnotatedFileParser()
 
   def 'parse file with comments and properties'()
   {

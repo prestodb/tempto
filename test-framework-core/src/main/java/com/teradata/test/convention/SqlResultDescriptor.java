@@ -7,8 +7,9 @@ package com.teradata.test.convention;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.assertions.QueryAssert.Row;
-import com.teradata.test.internal.convention.HeaderFileParser;
-import com.teradata.test.internal.convention.HeaderFileParser.SectionParsingResult;
+import com.teradata.test.internal.convention.AnnotatedFileParser;
+import com.teradata.test.internal.convention.AnnotatedFileParser.SectionParsingResult;
+import com.teradata.test.internal.convention.SqlDescriptor;
 import com.teradata.test.internal.query.QueryRowMapper;
 
 import java.io.IOException;
@@ -16,18 +17,21 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.sql.JDBCType;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.io.Resources.getResource;
 import static com.teradata.test.assertions.QueryAssert.Row.row;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
-public class SqlResultFile
+public class SqlResultDescriptor
+        extends SqlDescriptor
 {
 
     private static final String DEFAULT_DELIMITER = "|";
@@ -38,34 +42,38 @@ public class SqlResultFile
     private static final String JOIN_ALL_VALUES_TO_ONE = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
 
-    private final SectionParsingResult sqlFileSectionParsingResult;
     private final Optional<List<JDBCType>> expectedTypes;
 
-    public static SqlResultFile sqlResultFileForResource(String resourceName)
+    public static SqlResultDescriptor sqlResultDescriptorForResource(String resourceName)
     {
         try {
-            return sqlResultFileFor(getResource(resourceName).openStream());
+            return sqlResultDescriptorFor(getResource(resourceName).openStream());
         }
         catch (IOException exception) {
             throw new RuntimeException(exception);
         }
     }
 
-    public static SqlResultFile sqlResultFileFor(Path resultFile)
+    public static SqlResultDescriptor sqlResultDescriptorFor(Path resultDescriptorFile)
     {
-        return new SqlResultFile(getOnlyElement(new HeaderFileParser().parseFile(resultFile)));
+        return new SqlResultDescriptor(getOnlyElement(new AnnotatedFileParser().parseFile(resultDescriptorFile)));
     }
 
-    public static SqlResultFile sqlResultFileFor(InputStream inputStream)
+    public static SqlResultDescriptor sqlResultDescriptorFor(InputStream inputStream)
             throws IOException
     {
-        return new SqlResultFile(getOnlyElement(new HeaderFileParser().parseFile(inputStream)));
+        return new SqlResultDescriptor(getOnlyElement(new AnnotatedFileParser().parseFile(inputStream)));
     }
 
-    public SqlResultFile(SectionParsingResult sqlFileSectionParsingResult)
+    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult)
     {
-        this.sqlFileSectionParsingResult = sqlFileSectionParsingResult;
-        this.expectedTypes = parseExpectedTypes(sqlFileSectionParsingResult);
+        this(sqlSectionParsingResult, newHashMap());
+    }
+
+    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult, Map<String, String> baseProperties)
+    {
+        super(sqlSectionParsingResult, baseProperties);
+        this.expectedTypes = parseExpectedTypes(sqlSectionParsingResult);
     }
 
     private Optional<List<JDBCType>> parseExpectedTypes(SectionParsingResult sqlFileSectionParsingResult)
@@ -89,7 +97,7 @@ public class SqlResultFile
             valuesSplitter = valuesSplitter.trimResults();
         }
 
-        for (String line : sqlFileSectionParsingResult.getContentLines()) {
+        for (String line : sqlSectionParsingResult.getContentLines()) {
             List<String> rowValues = parseLine(line, delimiter, valuesSplitter);
             values.add(rowMapper.mapToRow(rowValues));
         }
@@ -103,11 +111,6 @@ public class SqlResultFile
         }
 
         return values;
-    }
-
-    public String getFileContent()
-    {
-        return sqlFileSectionParsingResult.getOriginalContent();
     }
 
     public Optional<List<JDBCType>> getExpectedTypes()
@@ -126,26 +129,26 @@ public class SqlResultFile
 
     public boolean isIgnoreOrder()
     {
-        return Boolean.valueOf(sqlFileSectionParsingResult.getProperty("ignoreOrder").orElse(DEFAULT_IGNORE_ORDER));
+        return Boolean.valueOf(getPropertyValue("ignoreOrder").orElse(DEFAULT_IGNORE_ORDER));
     }
 
     public boolean isIgnoreExcessRows()
     {
-        return Boolean.valueOf(sqlFileSectionParsingResult.getProperty("ignoreExcessRows").orElse(DEFAULT_IGNORE_EXCESS));
+        return Boolean.valueOf(getPropertyValue("ignoreExcessRows").orElse(DEFAULT_IGNORE_EXCESS));
     }
 
     public boolean isTrimValues()
     {
-        return Boolean.valueOf(sqlFileSectionParsingResult.getProperty("trimValues").orElse(DEFAULT_TRIM_VALUES));
+        return Boolean.valueOf(getPropertyValue("trimValues").orElse(DEFAULT_TRIM_VALUES));
     }
 
     public boolean isJoinAllRowsToOne()
     {
-        return Boolean.valueOf(sqlFileSectionParsingResult.getProperty("joinAllRowsToOne").orElse(JOIN_ALL_VALUES_TO_ONE));
+        return Boolean.valueOf(getPropertyValue("joinAllRowsToOne").orElse(JOIN_ALL_VALUES_TO_ONE));
     }
 
     private String getDelimiter()
     {
-        return sqlFileSectionParsingResult.getProperty("delimiter").orElse(DEFAULT_DELIMITER);
+        return getPropertyValue("delimiter").orElse(DEFAULT_DELIMITER);
     }
 }

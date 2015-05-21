@@ -4,7 +4,7 @@
 
 package com.teradata.test.assertions;
 
-import com.teradata.test.convention.SqlResultFile;
+import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.internal.query.QueryResultValueComparator;
 import com.teradata.test.query.QueryExecutionException;
 import com.teradata.test.query.QueryExecutor;
@@ -66,28 +66,28 @@ public class QueryAssert
         return new QueryExecutionAssert(ofNullable(executionException));
     }
 
-    public QueryAssert matchesFile(SqlResultFile sqlResultFile)
+    public QueryAssert matches(SqlResultDescriptor sqlResultDescriptor)
     {
-        if (sqlResultFile.getExpectedTypes().isPresent()) {
-            hasColumns(sqlResultFile.getExpectedTypes().get());
+        if (sqlResultDescriptor.getExpectedTypes().isPresent()) {
+            hasColumns(sqlResultDescriptor.getExpectedTypes().get());
         }
 
         List<Row> rows = null;
         try {
-            rows = sqlResultFile.getRows(columnTypes);
+            rows = sqlResultDescriptor.getRows(columnTypes);
         } catch (Exception e) {
             failWithMessage("Could not map expected file content to query column types; types=%s; content=<%s>; error=<%s>",
-                    columnTypes, sqlResultFile.getFileContent(), e.getMessage());
+                    columnTypes, sqlResultDescriptor.getOriginalContent(), e.getMessage());
         }
 
-        if (sqlResultFile.isIgnoreOrder()) {
+        if (sqlResultDescriptor.isIgnoreOrder()) {
             contains(rows);
         }
         else {
             containsExactly(rows);
         }
 
-        if (!sqlResultFile.isIgnoreExcessRows()) {
+        if (!sqlResultDescriptor.isIgnoreExcessRows()) {
             hasRowsCount(rows.size());
         }
 

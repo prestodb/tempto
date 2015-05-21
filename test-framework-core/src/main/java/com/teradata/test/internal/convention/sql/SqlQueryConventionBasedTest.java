@@ -5,9 +5,9 @@
 package com.teradata.test.internal.convention.sql;
 
 import com.teradata.test.Requirement;
+import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.internal.convention.ConventionBasedTest;
-import com.teradata.test.internal.convention.SqlQueryFile;
-import com.teradata.test.convention.SqlResultFile;
+import com.teradata.test.internal.convention.SqlQueryDescriptor;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
 import org.apache.commons.io.FilenameUtils;
@@ -19,8 +19,6 @@ import java.util.Optional;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
-import static com.teradata.test.internal.convention.SqlQueryFile.sqlQueryFileFor;
-import static com.teradata.test.convention.SqlResultFile.sqlResultFileFor;
 import static java.lang.Character.isAlphabetic;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -32,42 +30,44 @@ public class SqlQueryConventionBasedTest
     private final Optional<Path> beforeScriptPath;
     private final Optional<Path> afterScriptPath;
     private final Path queryFile;
-    private final Path resultFile;
+    private final int testNumber;
+    private final SqlQueryDescriptor queryDescriptor;
+    private final SqlResultDescriptor resultDescriptor;
     private final Requirement requirement;
 
     public SqlQueryConventionBasedTest(Optional<Path> beforeScriptFile, Optional<Path> afterScriptFile,
-            Path queryFile, Path resultFile, Requirement requirement)
+            Path queryFile, int testNumber, SqlQueryDescriptor queryDescriptor, SqlResultDescriptor resultDescriptor,
+            Requirement requirement)
     {
         this.beforeScriptPath = beforeScriptFile;
         this.afterScriptPath = afterScriptFile;
         this.queryFile = queryFile;
-        this.resultFile = resultFile;
+        this.testNumber = testNumber;
+        this.queryDescriptor = queryDescriptor;
+        this.resultDescriptor = resultDescriptor;
         this.requirement = requirement;
     }
 
     @Override
     public void test()
     {
-        LOGGER.debug("Executing sql test: {}", queryFile.getFileName());
+        LOGGER.debug("Executing sql test: {}#{}", queryFile.getFileName(), queryDescriptor.getName());
 
         if (beforeScriptPath.isPresent()) {
             execute(beforeScriptPath.get().toString());
         }
 
-        SqlQueryFile sqlQueryFile = sqlQueryFileFor(queryFile);
-        SqlResultFile sqlResultFile = sqlResultFileFor(resultFile);
-
-        QueryExecutor queryExecutor = getQueryExecutor(sqlQueryFile);
+        QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
 
         QueryResult queryResult;
-        if (sqlQueryFile.getQueryType().isPresent()) {
-            queryResult = queryExecutor.executeQuery(sqlQueryFile.getContent(), sqlQueryFile.getQueryType().get());
+        if (queryDescriptor.getQueryType().isPresent()) {
+            queryResult = queryExecutor.executeQuery(queryDescriptor.getContent(), queryDescriptor.getQueryType().get());
         }
         else {
-            queryResult = queryExecutor.executeQuery(sqlQueryFile.getContent());
+            queryResult = queryExecutor.executeQuery(queryDescriptor.getContent());
         }
 
-        assertThat(queryResult).matchesFile(sqlResultFile);
+        assertThat(queryResult).matches(resultDescriptor);
 
         if (afterScriptPath.isPresent()) {
             execute(afterScriptPath.get().toString());
@@ -87,10 +87,18 @@ public class SqlQueryConventionBasedTest
     @Override
     public String testCaseName()
     {
-        String testCaseName = FilenameUtils.getBaseName(queryFile.getFileName().toString());
+        String testCaseName;
+        if (queryDescriptor.getName().isPresent()) {
+            testCaseName = queryDescriptor.getName().get().replaceAll("\\s", "");
+        }
+        else {
+            testCaseName = FilenameUtils.getBaseName(queryFile.getFileName().toString()) + "_" + testNumber;
+        }
+
         if (!isAlphabetic(testCaseName.charAt(0))) {
             return "test_" + testCaseName;
         }
+
         return testCaseName;
     }
 
@@ -103,12 +111,12 @@ public class SqlQueryConventionBasedTest
     @Override
     public String[] testGroups()
     {
-        return sqlQueryFileFor(queryFile).getTestGroups().toArray(new String[0]);
+        return queryDescriptor.getTestGroups().toArray(new String[0]);
     }
 
-    private QueryExecutor getQueryExecutor(SqlQueryFile sqlQueryFile)
+    private QueryExecutor getQueryExecutor(SqlQueryDescriptor sqlQueryDescriptor)
     {
-        String database = sqlQueryFile.getDatabaseName();
+        String database = sqlQueryDescriptor.getDatabaseName();
         try {
             return testContext().getDependency(QueryExecutor.class, database);
         }

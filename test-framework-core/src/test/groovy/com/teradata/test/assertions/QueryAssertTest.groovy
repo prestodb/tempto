@@ -5,8 +5,8 @@
 package com.teradata.test.assertions
 
 import com.google.common.collect.HashBiMap
-import com.teradata.test.convention.SqlResultFile
-import com.teradata.test.internal.convention.HeaderFileParser
+import com.teradata.test.convention.SqlResultDescriptor
+import com.teradata.test.internal.convention.AnnotatedFileParser
 import com.teradata.test.query.QueryExecutionException
 import com.teradata.test.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
@@ -17,7 +17,7 @@ import java.sql.ResultSet
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.test.assertions.QueryAssert.Row.row
 import static com.teradata.test.assertions.QueryAssert.assertThat
-import static com.teradata.test.internal.convention.HeaderFileParser.SectionParsingResult
+import static AnnotatedFileParser.SectionParsingResult
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
 
@@ -278,7 +278,7 @@ public class QueryAssertTest
 ''')
 
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matches(new SqlResultDescriptor(parsingResult))
 
     then:
     noExceptionThrown()
@@ -293,7 +293,7 @@ public class QueryAssertTest
 ''')
 
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matches(new SqlResultDescriptor(parsingResult))
 
     then:
     def e = thrown(AssertionError.class);
@@ -309,7 +309,7 @@ public class QueryAssertTest
 ''')
 
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matches(new SqlResultDescriptor(parsingResult))
 
     then:
     noExceptionThrown()
@@ -324,7 +324,7 @@ public class QueryAssertTest
 ''')
 
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matches(new SqlResultDescriptor(parsingResult))
 
     then:
     def e = thrown(AssertionError.class)
@@ -343,7 +343,7 @@ B|ARGENTINA|SOUTH AMERICA|
 ''')
 
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matchesFile(new SqlResultFile(parsingResult))
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).matches(new SqlResultDescriptor(parsingResult))
 
     then:
     def e = thrown(AssertionError.class)
@@ -354,7 +354,7 @@ B|ARGENTINA|SOUTH AMERICA|>; error=<For input string: "A">'''
 
   private SectionParsingResult parseResultFor(String fileContent)
   {
-    getOnlyElement(new HeaderFileParser().parseFile(new ByteArrayInputStream(fileContent.getBytes())));
+    getOnlyElement(new AnnotatedFileParser().parseFile(new ByteArrayInputStream(fileContent.getBytes())));
   }
 
   def 'QueryExecutionAssert - not fail as expected'()

@@ -4,12 +4,11 @@
 
 package com.teradata.test.internal.convention.tabledefinitions;
 
-import com.google.common.collect.Iterables;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.fulfillment.hive.HiveTableDefinition;
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.test.internal.convention.ConventionBasedTestFactory;
-import com.teradata.test.internal.convention.HeaderFileParser;
+import com.teradata.test.internal.convention.AnnotatedFileParser;
 import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
@@ -84,7 +83,7 @@ public class ConventionTableDefinitionsProvider
     private String createTableDDLTemplate(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
     {
         try (InputStream inputStream = new BufferedInputStream(newInputStream(conventionTableDefinitionDescriptor.getDdlFile()))) {
-            return getOnlyElement(new HeaderFileParser().parseFile(inputStream)).getContentAsSingleLine();
+            return getOnlyElement(new AnnotatedFileParser().parseFile(inputStream)).getContentAsSingleLine();
         }
         catch (IOException e) {
             throw new IllegalStateException("Could not open ddl file: " + conventionTableDefinitionDescriptor.getDdlFile());

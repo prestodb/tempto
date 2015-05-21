@@ -50,7 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * --!
  * 42|24|
  */
-public class HeaderFileParser
+public class AnnotatedFileParser
 {
     private static final String PROPERTIES_PREFIX = "--";
     private static final String COMMENT_PREFIX = "---";
@@ -83,7 +83,7 @@ public class HeaderFileParser
         return sections.stream().map(this::parseSection).collect(toList());
     }
 
-    public SectionParsingResult parseSection(List<String> lines)
+    private SectionParsingResult parseSection(List<String> lines)
     {
         Map<String, String> properties = newHashMap();
         lines.stream().forEach((String line) -> {
@@ -100,7 +100,7 @@ public class HeaderFileParser
         return new SectionParsingResult(sectionName, lines, properties, contentFiltered);
     }
 
-    public List<List<String>> splitSections(List<String> lines)
+    private List<List<String>> splitSections(List<String> lines)
     {
         List<List<String>> sections = newArrayList();
         int nextSectionIndex;
@@ -108,11 +108,15 @@ public class HeaderFileParser
             sections.add(lines.subList(0, nextSectionIndex));
             lines = lines.subList(nextSectionIndex, lines.size());
         }
-        addIfNotEmpty(lines, sections);
+
+        if (!lines.isEmpty() || sections.isEmpty()) {
+            sections.add(lines);
+        }
+
         return sections;
     }
 
-    public int findNextSectionIndex(List<String> lines)
+    private int findNextSectionIndex(List<String> lines)
     {
         for (int i = 1; i < lines.size(); ++i) {
             if (isSectionLine(lines.get(i))) {
@@ -185,14 +189,14 @@ public class HeaderFileParser
     {
         private final Optional<String> sectionName;
         private final List<String> sectionLines;
-        private final Map<String, String> commentProperties;
+        private final Map<String, String> properties;
         private final List<String> contentLines;
 
-        private SectionParsingResult(Optional<String> sectionName, List<String> sectionLines, Map<String, String> commentProperties, List<String> contentLines)
+        private SectionParsingResult(Optional<String> sectionName, List<String> sectionLines, Map<String, String> properties, List<String> contentLines)
         {
             this.sectionName = sectionName;
             this.sectionLines = sectionLines;
-            this.commentProperties = commentProperties;
+            this.properties = properties;
             this.contentLines = contentLines;
         }
 
@@ -203,7 +207,12 @@ public class HeaderFileParser
 
         public Optional<String> getProperty(String key)
         {
-            return Optional.ofNullable(commentProperties.get(key));
+            return Optional.ofNullable(properties.get(key));
+        }
+
+        public Map<String, String> getProperties()
+        {
+            return properties;
         }
 
         public String getOriginalContent()
