@@ -28,7 +28,6 @@ import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -68,6 +67,8 @@ public class WebHDFSClient
     private final HostAndPort nameNode;
 
     private final CloseableHttpClient httpClient;
+
+    private static final boolean SUPPORT_OLDER_HADOOPS = true;
 
     @Inject
     public WebHDFSClient(
@@ -206,8 +207,13 @@ public class WebHDFSClient
             }
             logger.debug("Set xAttr {} = {} for {}, username: {}", key, value, path, username);
         }
-        catch (IOException e) {
-            throw new RuntimeException("Could not set xAttr for path: " + path + " in hdfs, user: " + username, e);
+        catch (Exception e) {
+            if (SUPPORT_OLDER_HADOOPS && isXAttrsWebCallRelated(e)) {
+                logger.debug("Could not set xAttr for path: " + path + " in hdfs, user: " + username + "; e=" + e.getMessage());
+            }
+            else {
+                throw new RuntimeException("Could not set xAttr for path: " + path + " in hdfs, user: " + username, e);
+            }
         }
     }
 
@@ -232,9 +238,20 @@ public class WebHDFSClient
             String xArgValue = StringUtils.strip(GET_XATTR_VALUE_JSON_PATH.read(responseContent).toString(), "\"");
             return Optional.of(xArgValue);
         }
-        catch (IOException e) {
-            throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
+        catch (Exception e) {
+            if (SUPPORT_OLDER_HADOOPS && isXAttrsWebCallRelated(e)) {
+                logger.debug("Could not get xAttr for path: " + path + " in hdfs, user: " + username + "; e=" + e.getMessage());
+                return Optional.empty();
+            }
+            else {
+                throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
+            }
         }
+    }
+
+    private boolean isXAttrsWebCallRelated(Exception e)
+    {
+        return e.getMessage().contains("XATTRS") && e.getMessage().contains("Operation");
     }
 
     private String executeAndGetRedirectUri(HttpUriRequest request)

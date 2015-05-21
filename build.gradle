@@ -84,7 +84,7 @@ ext.test_framework_examples = project(':test-framework-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
 
-ext.test_framework_version = '1.0.22-SNAPSHOT' // changed by losipiuk
+ext.test_framework_version = '1.0.23-SNAPSHOT' // changed by losipiuk
 ext.publish_maven_repository = {
   url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
   credentials {

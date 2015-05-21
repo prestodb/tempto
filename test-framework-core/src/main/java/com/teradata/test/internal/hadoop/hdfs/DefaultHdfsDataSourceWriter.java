@@ -40,22 +40,30 @@ public class DefaultHdfsDataSourceWriter
     @Override
     public void ensureDataOnHdfs(String dataSourcePath, DataSource dataSource)
     {
-        Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);
-        if (storedRevisionMarker.isPresent()) {
-            if (storedRevisionMarker.get().equals(dataSource.revisionMarker())) {
-                LOGGER.debug("Directory {} ({}) already exists, skipping generation of data", dataSourcePath, storedRevisionMarker.get());
-                return;
-            }
-            else {
-                LOGGER.info("Directory {} ({}) already exists, but has different revision marker than expected: {}, so data will be regenerated",
-                        dataSourcePath, storedRevisionMarker.get(), dataSource.revisionMarker());
-            }
+        if (isDataUpToDate(dataSourcePath, dataSource)) {
+            return;
         }
 
         hdfsClient.delete(dataSourcePath, hdfsUsername);
         hdfsClient.createDirectory(dataSourcePath, hdfsUsername);
         storeTableFiles(dataSourcePath, dataSource);
         hdfsClient.setXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME, dataSource.revisionMarker());
+    }
+
+    private boolean isDataUpToDate(String dataSourcePath, DataSource dataSource)
+    {
+        Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);
+        if (storedRevisionMarker.isPresent()) {
+            if (storedRevisionMarker.get().equals(dataSource.revisionMarker())) {
+                LOGGER.debug("Directory {} ({}) already exists, skipping generation of data", dataSourcePath, storedRevisionMarker.get());
+                return true;
+            }
+            else {
+                LOGGER.info("Directory {} ({}) already exists, but has different revision marker than expected: {}, so data will be regenerated",
+                        dataSourcePath, storedRevisionMarker.get(), dataSource.revisionMarker());
+            }
+        }
+        return false;
     }
 
     private void storeTableFiles(String dataSourcePath, DataSource dataSource)
