@@ -4,15 +4,21 @@
 
 package com.teradata.test.internal.query;
 
+import com.google.common.collect.Lists;
 import com.google.common.math.DoubleMath;
 import com.google.common.primitives.UnsignedBytes;
 
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.JDBCType;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 
@@ -80,8 +86,58 @@ public class QueryResultValueComparator
             case TIMESTAMP:
             case TIMESTAMP_WITH_TIMEZONE:
                 return timestampEqual(actual, expected);
+            case ARRAY:
+                return arrayEqual(actual, expected);
             default:
                 throw new RuntimeException("Unsupported sql type " + type);
+        }
+    }
+
+    private int arrayEqual(Object actual, Object expected)
+    {
+        if (actual instanceof Array && expected instanceof List) {
+            Array actualArray = (Array) actual;
+            QueryResultValueComparator elementComparator;
+            elementComparator = comparatorForArrayElements(actualArray);
+            List actualList = arrayAsList(actualArray);
+            List expectedList = (List) expected;
+
+            if (actualList.size() != expectedList.size()) {
+                return -1;
+            }
+
+            for (int i = 0; i < actualList.size(); ++i) {
+                Object actualValue = actualList.get(i);
+                Object expectedValue = expectedList.get(i);
+                int compareResult = elementComparator.compare(actualValue, expectedValue);
+                if (compareResult != 0) {
+                    return compareResult;
+                }
+            }
+            return 0;
+        }
+        return -1;
+    }
+
+    private QueryResultValueComparator comparatorForArrayElements(Array actualArray)
+    {
+        QueryResultValueComparator elementComparator;
+        try {
+            elementComparator = comparatorForType(JDBCType.valueOf(actualArray.getBaseType()));
+        }
+        catch (SQLException e) {
+            throw new RuntimeException();
+        }
+        return elementComparator;
+    }
+
+    private List arrayAsList(Array array)
+    {
+        try {
+            return Arrays.asList((Object[])array.getArray());
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
