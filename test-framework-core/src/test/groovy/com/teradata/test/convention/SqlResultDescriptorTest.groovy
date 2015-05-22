@@ -12,8 +12,8 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 
-import static com.google.common.collect.Iterables.getOnlyElement
 import static AnnotatedFileParser.SectionParsingResult
+import static com.google.common.collect.Iterables.getOnlyElement
 import static java.sql.JDBCType.*
 import static org.apache.commons.io.IOUtils.toInputStream
 
@@ -27,7 +27,7 @@ class SqlResultDescriptorTest
     String fileContent = '''-- delimiter: |; ignoreOrder: true; types: VARCHAR|BINARY|BIT|INTEGER|REAL|NUMERIC|DATE|TIME|TIMESTAMP
 A|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|
 B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
-    SectionParsingResult parsingResult = getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(fileContent)))
+    SectionParsingResult parsingResult = parseSection(fileContent)
     SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
 
     expect:
@@ -47,7 +47,7 @@ B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
     String fileContent = '''-- delimiter: |; ignoreOrder: false
 A|
 B|'''
-    SectionParsingResult parsingResult = getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(fileContent)))
+    SectionParsingResult parsingResult = parseSection(fileContent)
     SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
 
     expect:
@@ -66,7 +66,7 @@ B|'''
     String fileContent = '''-- delimiter: |; ignoreOrder: true; joinAllRowsToOne: true; types: VARCHAR
 A|
 B|'''
-    SectionParsingResult parsingResult = getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(fileContent)))
+    SectionParsingResult parsingResult = parseSection(fileContent)
     SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
 
     expect:
@@ -78,5 +78,10 @@ B|'''
     def rows = resultDescriptor.getRows(expectedTypes)
     rows.size() == 1
     rows.get(0).getValues() == ['A\nB']
+  }
+
+  def parseSection(String content)
+  {
+    getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(content)))
   }
 }

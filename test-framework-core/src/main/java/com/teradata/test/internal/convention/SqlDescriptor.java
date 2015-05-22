@@ -6,10 +6,12 @@ package com.teradata.test.internal.convention;
 import com.google.common.base.Splitter;
 import com.teradata.test.internal.convention.AnnotatedFileParser.SectionParsingResult;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -44,19 +46,24 @@ public class SqlDescriptor
         return sqlSectionParsingResult.getOriginalContent();
     }
 
-    protected Set<String> getPropertyValues(String property)
+    protected List<String> getPropertyValues(String property)
     {
-        Set<String> propertyValues = newHashSet();
+        List<String> propertyValues = newArrayList();
 
         if (sqlSectionParsingResult.getProperty(property).isPresent()) {
-            propertyValues.addAll(newHashSet(HEADER_PROPERTY_SPLITTER.split(sqlSectionParsingResult.getProperty(property).get())));
+            propertyValues.addAll(newArrayList(HEADER_PROPERTY_SPLITTER.split(sqlSectionParsingResult.getProperty(property).get())));
         }
 
         if (baseProperties.containsKey(property)) {
-            propertyValues.addAll(newHashSet(HEADER_PROPERTY_SPLITTER.split(baseProperties.get(property))));
+            propertyValues.addAll(newArrayList(HEADER_PROPERTY_SPLITTER.split(baseProperties.get(property))));
         }
 
         return propertyValues;
+    }
+
+    protected Set<String> getPropertyValuesSet(String property)
+    {
+        return newHashSet(getPropertyValues(property));
     }
 
     protected Optional<String> getPropertyValue(String property)

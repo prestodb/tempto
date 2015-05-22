@@ -34,7 +34,7 @@ public class SqlResultDescriptor
         extends SqlDescriptor
 {
 
-    private static final String DEFAULT_DELIMITER = "|";
+    private static final String DEFAULT_COLUMN_DELIMITER = "|";
 
     private static final String DEFAULT_IGNORE_ORDER = "false";
     private static final String DEFAULT_IGNORE_EXCESS = "false";
@@ -89,7 +89,7 @@ public class SqlResultDescriptor
     public List<Row> getRows(List<JDBCType> columnTypes)
     {
         List<Row> values = newArrayList();
-        String delimiter = getDelimiter();
+        String delimiter = getColumnDelimiter();
 
         QueryRowMapper rowMapper = new QueryRowMapper(columnTypes);
         Splitter valuesSplitter = Splitter.on(delimiter);
@@ -147,8 +147,8 @@ public class SqlResultDescriptor
         return Boolean.valueOf(getPropertyValue("joinAllRowsToOne").orElse(JOIN_ALL_VALUES_TO_ONE));
     }
 
-    private String getDelimiter()
+    private String getColumnDelimiter()
     {
-        return getPropertyValue("delimiter").orElse(DEFAULT_DELIMITER);
+        return getPropertyValue("delimiter").orElse(DEFAULT_COLUMN_DELIMITER);
     }
 }

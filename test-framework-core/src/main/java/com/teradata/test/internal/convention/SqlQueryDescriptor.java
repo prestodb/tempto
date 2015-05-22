@@ -4,14 +4,20 @@
 
 package com.teradata.test.internal.convention;
 
+import com.google.common.base.Splitter;
+import com.teradata.test.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.test.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.test.query.QueryType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.test.query.QueryExecutor.DEFAULT_DB_NAME;
 
 public class SqlQueryDescriptor
@@ -21,8 +27,15 @@ public class SqlQueryDescriptor
     private static final String GROUPS_HEADER_PROPERTY = "groups";
     private static final String DATABASE_HEADER_PROPERTY = "database";
     private static final String TABLES_HEADER_PROPERTY = "tables";
+    private static final String MUTABLE_TABLES_HEADER_PROPERTY = "mutable_tables";
     private static final String QUERY_TYPE_HEADER_PROPERTY = "queryType";
     private static final String REQUIRES_HEADER_PROPERTY = "requires";
+
+    // mutable table property format is: mutable_table_name|state|name
+    private static final Splitter MUTABLE_TABLE_PROPERTY_SPLITTER = Splitter.on('|');
+    private static final int MUTABLE_TABLE_DEFINITION_NAME_PROPERTY_INDEX = 0;
+    private static final int MUTABLE_TABLE_STATE_PROPERTY_INDEX = 1;
+    private static final int MUTABLE_TABLE_NAME_PROPERTY_INDEX = 2;
 
     public SqlQueryDescriptor(SectionParsingResult sqlSectionParsingResult)
     {
@@ -41,17 +54,43 @@ public class SqlQueryDescriptor
 
     public Set<String> getTableDefinitionNames()
     {
-        return getPropertyValues(TABLES_HEADER_PROPERTY);
+        return getPropertyValuesSet(TABLES_HEADER_PROPERTY);
+    }
+
+    public List<MutableTableDescriptor> getMutableTableDescriptors()
+    {
+        List<String> mutableTableValues = getPropertyValues(MUTABLE_TABLES_HEADER_PROPERTY);
+        List<MutableTableDescriptor> mutableTableDescriptors = newArrayList();
+        for (String mutableTableValue : mutableTableValues) {
+            List<String> properties = newArrayList(MUTABLE_TABLE_PROPERTY_SPLITTER.split(mutableTableValue));
+
+            checkState(properties.size() >= 1, "At least mutable table name must be specified, format is: mutable_table_name|state|name_in_database");
+            checkState(properties.size() <= 3, "Too many mutable table properties, format is: mutable_table_name|state|name_in_database");
+
+            String tableDefinitionName = properties.get(MUTABLE_TABLE_DEFINITION_NAME_PROPERTY_INDEX);
+            State state = properties.size() >= 2 ? State.valueOf(properties.get(MUTABLE_TABLE_STATE_PROPERTY_INDEX).toUpperCase()) : LOADED;
+            String name = properties.size() >= 3 ? properties.get(MUTABLE_TABLE_NAME_PROPERTY_INDEX) : tableDefinitionName;
+
+            checkState(!mutableTableDescriptors
+                            .stream()
+                            .filter((mutableTableDescriptor) -> mutableTableDescriptor.name.equals(name))
+                            .findAny().isPresent(),
+                    "Table with name %s is defined twice", name);
+
+            mutableTableDescriptors.add(new MutableTableDescriptor(tableDefinitionName, state, name));
+        }
+
+        return mutableTableDescriptors;
     }
 
     public Set<String> getTestGroups()
     {
-        return getPropertyValues(GROUPS_HEADER_PROPERTY);
+        return getPropertyValuesSet(GROUPS_HEADER_PROPERTY);
     }
 
     public Set<String> getRequirementClassNames()
     {
-        return getPropertyValues(REQUIRES_HEADER_PROPERTY);
+        return getPropertyValuesSet(REQUIRES_HEADER_PROPERTY);
     }
 
     public Optional<QueryType> getQueryType()
