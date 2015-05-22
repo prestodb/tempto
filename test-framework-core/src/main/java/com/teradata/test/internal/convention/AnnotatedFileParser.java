@@ -13,7 +13,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -220,6 +219,11 @@ public class AnnotatedFileParser
         public String getOriginalContent()
         {
             return Joiner.on('\n').join(sectionLines);
+        }
+
+        public String getContent()
+        {
+            return Joiner.on('\n').join(contentLines);
         }
 
         public List<String> getContentLines()

@@ -4,6 +4,8 @@
 
 package com.teradata.test.internal.convention.sql;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.teradata.test.Requirement;
 import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.internal.convention.ConventionBasedTest;
@@ -14,8 +16,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
@@ -26,6 +30,8 @@ public class SqlQueryConventionBasedTest
         extends ConventionBasedTest
 {
     private static final Logger LOGGER = getLogger(SqlQueryConventionBasedTest.class);
+
+    private static final Splitter QUERY_SPLITTER = Splitter.onPattern("[;][ ]*\r?\n");
 
     private final Optional<Path> beforeScriptPath;
     private final Optional<Path> afterScriptPath;
@@ -57,21 +63,36 @@ public class SqlQueryConventionBasedTest
             execute(beforeScriptPath.get().toString());
         }
 
-        QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
-
-        QueryResult queryResult;
-        if (queryDescriptor.getQueryType().isPresent()) {
-            queryResult = queryExecutor.executeQuery(queryDescriptor.getContent(), queryDescriptor.getQueryType().get());
-        }
-        else {
-            queryResult = queryExecutor.executeQuery(queryDescriptor.getContent());
-        }
-
+        QueryResult queryResult = runTestQuery();
         assertThat(queryResult).matches(resultDescriptor);
 
         if (afterScriptPath.isPresent()) {
             execute(afterScriptPath.get().toString());
         }
+    }
+
+    private QueryResult runTestQuery()
+    {
+        QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
+        if (queryDescriptor.getQueryType().isPresent()) {
+            return queryExecutor.executeQuery(queryDescriptor.getContent(), queryDescriptor.getQueryType().get());
+        }
+        else {
+            QueryResult queryResult = null;
+            List<String> queries = splitQueries(queryDescriptor.getContent());
+            checkState(!queries.isEmpty(), "At least one query must be present");
+
+            for (String query : splitQueries(queryDescriptor.getContent())) {
+                queryResult = queryExecutor.executeQuery(query);
+            }
+
+            return queryResult;
+        }
+    }
+
+    private List<String> splitQueries(String content)
+    {
+        return Lists.newArrayList(QUERY_SPLITTER.split(content));
     }
 
     @Override

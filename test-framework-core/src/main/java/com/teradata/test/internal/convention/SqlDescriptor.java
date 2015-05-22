@@ -36,7 +36,7 @@ public class SqlDescriptor
 
     public String getContent()
     {
-        return sqlSectionParsingResult.getContentAsSingleLine();
+        return sqlSectionParsingResult.getContent();
     }
 
     public String getOriginalContent()
