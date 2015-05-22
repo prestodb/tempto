@@ -13,8 +13,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class NamedObjectsState<T>
         implements State
 {
-    private final Map<String, T> objects;
-    private String objectDescription;
+    protected final Map<String, T> objects;
+    protected final String objectDescription;
 
     public NamedObjectsState(Map<String, T> objects, String objectDescription)
     {

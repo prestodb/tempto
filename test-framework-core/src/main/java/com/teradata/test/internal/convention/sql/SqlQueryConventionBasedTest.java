@@ -5,25 +5,36 @@
 package com.teradata.test.internal.convention.sql;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.teradata.test.Requirement;
 import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.SqlQueryDescriptor;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.teradata.test.assertions.QueryAssert.assertThat;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
+import static com.teradata.test.fulfillment.table.MutableTablesState.mutableTablesState;
 import static com.teradata.test.internal.convention.ProcessUtils.execute;
 import static java.lang.Character.isAlphabetic;
+import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -75,7 +86,7 @@ public class SqlQueryConventionBasedTest
     {
         QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
         if (queryDescriptor.getQueryType().isPresent()) {
-            return queryExecutor.executeQuery(queryDescriptor.getContent(), queryDescriptor.getQueryType().get());
+            return queryExecutor.executeQuery(resolveTemplates(queryDescriptor.getContent()), queryDescriptor.getQueryType().get());
         }
         else {
             QueryResult queryResult = null;
@@ -83,16 +94,37 @@ public class SqlQueryConventionBasedTest
             checkState(!queries.isEmpty(), "At least one query must be present");
 
             for (String query : splitQueries(queryDescriptor.getContent())) {
-                queryResult = queryExecutor.executeQuery(query);
+                queryResult = queryExecutor.executeQuery(resolveTemplates(query));
             }
 
             return queryResult;
         }
     }
 
+    private String resolveTemplates(String query)
+    {
+        try {
+            Template template = new Template("name", new StringReader(query), new Configuration());
+            Map<String, Object> data = newHashMap();
+            data.put("mutableTables", mutableTablesState().getNameInDatabaseMap());
+
+            Writer writer = new StringWriter();
+            template.process(data, writer);
+            writer.flush();
+
+            return writer.toString();
+        }
+        catch (TemplateException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<String> splitQueries(String content)
     {
-        return Lists.newArrayList(QUERY_SPLITTER.split(content));
+        return newArrayList(QUERY_SPLITTER.split(content))
+                .stream()
+                .filter(query -> !query.isEmpty())
+                .collect(toList());
     }
 
     @Override

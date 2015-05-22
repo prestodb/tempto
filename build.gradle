@@ -44,7 +44,8 @@ ext.versions = [
         reflections  : '0.9.9',
         bytebuddy    : '0.5.6',
         jsch         : '0.1.52',
-        mina_sshd    : '0.14.0'
+        mina_sshd    : '0.14.0',
+        freemarker   : '2.3.22'
 ]
 
 ext.libraries = [
@@ -75,7 +76,8 @@ ext.libraries = [
         jsch         : "com.jcraft:jsch:${versions.jsch}",
         mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}",
         postgresql_jdbc    : "org.postgresql:postgresql:9.3-1102-jdbc4",
-        commons_cli  : "commons-cli:commons-cli:1.2"
+        commons_cli  : "commons-cli:commons-cli:1.2",
+        freemarker   : "org.freemarker:freemarker:${versions.freemarker}"
 ]
 
 ext.test_framework_core = project(':test-framework-core')

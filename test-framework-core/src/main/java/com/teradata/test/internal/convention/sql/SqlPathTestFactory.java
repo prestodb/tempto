@@ -8,6 +8,7 @@ import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
+import com.teradata.test.fulfillment.table.MutableTableRequirement;
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.test.internal.ReflectionHelper;
 import com.teradata.test.internal.convention.AnnotatedFileParser;
@@ -135,6 +136,13 @@ public class SqlPathTestFactory
         requirements.addAll(queryDescriptor.getTableDefinitionNames()
                 .stream()
                 .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName)))
+                .collect(toList()));
+        requirements.addAll(queryDescriptor.getMutableTableDescriptors()
+                .stream()
+                .map(descriptor -> new MutableTableRequirement(
+                        tableDefinitionsRepository.getForName(descriptor.tableDefinitionName),
+                        descriptor.name,
+                        descriptor.state))
                 .collect(toList()));
         requirements.addAll(queryDescriptor.getRequirementClassNames()
                 .stream()
