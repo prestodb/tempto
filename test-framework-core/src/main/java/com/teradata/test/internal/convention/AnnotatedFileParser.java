@@ -13,6 +13,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +25,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.difference;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.newInputStream;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.IOUtils.readLines;
@@ -78,7 +80,7 @@ public class AnnotatedFileParser
             throws IOException
     {
         byte[] fileBytes = ByteStreams.toByteArray(fileInput);
-        List<String> lines = readLines(new ByteArrayInputStream(fileBytes));
+        List<String> lines = readLines(new ByteArrayInputStream(fileBytes), UTF_8);
         List<List<String>> sections = splitSections(lines);
         return sections.stream().map(this::parseSection).collect(toList());
     }
