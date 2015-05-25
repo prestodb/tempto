@@ -16,7 +16,20 @@ public class MutableTableRequirement
 {
     public enum State
     {
+        /**
+         * Table won't be created by test framework, but will be
+         * visible in {@link com.teradata.test.fulfillment.table.MutableTablesState}
+         * and will be dropped by test framework.
+         */
+        PREPARED,
+        /**
+         * Table will be created and dropped by test framework, but
+         * data won't be loaded.
+         */
         CREATED,
+        /**
+         * Table with data will be created and dropped by test framework.
+         */
         LOADED
     }
 

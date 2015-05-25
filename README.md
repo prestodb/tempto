@@ -360,6 +360,8 @@ like the following:
 │       ├── sample_table
 │       │   ├── allRows.result
 │       │   └── allRows.sql
+│       └── sample_table_insert
+│           └── insert.sql
 ├── suites.json
 └── test-configuration.yaml
 ```
@@ -390,8 +392,9 @@ query execution requirements:
 SELECT * FROM nation
 ```
 
-This test contains a single query that should be executed against the Hive database. In addition,
-the test is part of two separate TestNG groups: example_smoketest and group2.
+This test contains queries that should be executed against the Hive database. Only results
+of the last query will be checked agains result file. In addition, the test is part of two
+separate TestNG groups: example_smoketest and group2.
 
 * **TEST.result** - file with the expected result of the query. The first line can be a SQL comment
 with query assertion requirements:
@@ -407,6 +410,28 @@ that we expect the columns to be of the specified types. You always need to prov
 when checking the result, the framework will have to cast String to the given type. This is of
 course terrible for performance, but you're trading that for convenience (for example a test writer
 that cannot/does not want to write Java).
+
+Both SQL and result files honor comments which begin with _---_ prefix.
+
+It is possible to define both queries and results in single **TEST.sql** file.
+Such file is divided into sections. Each section is separated by _--!_ prefix.
+First section contains global properties. Next sections contain queries and
+results separately. Each section can override global properties.
+Additionally, each section can have a name. An example of such file would be:
+
+```
+-- database: hive; groups: example_smoketest,group2
+-- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR|INTEGER|VARCHAR
+--! name: query_1
+SELECT * FROM nation WHERE id=0
+--!
+0|ALGERIA|0| haggle. carefully final deposits detect slyly agai|
+--! name: query_2
+-- groups: additional_group
+SELECT * FROM nation WHERE id=1
+1|USA|1| foo bar|
+--!
+```
 
 You are also able to add custom _before_ and _after_ scripts for your test. Those are executed
 before and after each test case.

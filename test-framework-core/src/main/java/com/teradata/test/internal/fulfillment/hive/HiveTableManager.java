@@ -23,6 +23,7 @@ import javax.inject.Named;
 import java.util.Optional;
 
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
+import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -80,12 +81,13 @@ public class HiveTableManager
 
         String tableSuffix = uuidGenerator.randomUUID().replace("-", "");
         String tableNameInDatabase = tableDefinition.getName() + "_" + tableSuffix;
-        LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
-
         String tableDataPath = getMutableTableHdfsPath(tableNameInDatabase, Optional.empty());
-        if (state == LOADED && !hiveTableDefinition.isPartitioned()) {
-            uploadTableData(tableDataPath, hiveTableDefinition.getDataSource());
+        LOGGER.debug("creating mutable table {}, name in database: {}, data path: {}", tableDefinition.getName(), tableNameInDatabase, tableDataPath);
+
+        if (state == PREPARED) {
+            return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, hiveTableDefinition, Optional.of(tableDataPath));
         }
+
         queryExecutor.executeQuery(hiveTableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
 
         if (hiveTableDefinition.isPartitioned()) {
@@ -98,6 +100,9 @@ public class HiveTableManager
                 queryExecutor.executeQuery(partitionDefinition.getAddPartitionTableDDL(tableNameInDatabase, partitionDataPath));
                 partitionId++;
             }
+        }
+        else if (state == LOADED) {
+            uploadTableData(tableDataPath, hiveTableDefinition.getDataSource());
         }
 
         return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, hiveTableDefinition, Optional.of(tableDataPath));

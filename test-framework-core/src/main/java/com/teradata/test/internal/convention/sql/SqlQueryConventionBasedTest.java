@@ -93,7 +93,7 @@ public class SqlQueryConventionBasedTest
             List<String> queries = splitQueries(queryDescriptor.getContent());
             checkState(!queries.isEmpty(), "At least one query must be present");
 
-            for (String query : splitQueries(queryDescriptor.getContent())) {
+            for (String query : queries) {
                 queryResult = queryExecutor.executeQuery(resolveTemplates(query));
             }
 
