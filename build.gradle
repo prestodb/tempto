@@ -2,6 +2,10 @@
  * Copyright 2015, Teradata, Inc. All rights reserved.
  */
 
+plugins {
+  id "com.github.hierynomus.license" version "0.11.0"
+}
+
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
@@ -17,6 +21,10 @@ allprojects {
     maven {
       url 'http://phabricator.td.teradata.com:8081/nexus/content/groups/hadapt-deps'
     }
+  }
+  apply plugin: 'license'
+  license {
+    header rootProject.file('apache_license_header.txt')
   }
 }
 
