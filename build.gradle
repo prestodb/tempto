@@ -28,9 +28,7 @@ plugins.withType(JavaPlugin) {
 
 allprojects {
   repositories {
-    maven {
-      url 'http://phabricator.td.teradata.com:8081/nexus/content/groups/hadapt-deps'
-    }
+    mavenCentral()
   }
   apply plugin: 'license'
   license {
@@ -56,7 +54,7 @@ ext.versions = [
         jsonpath     : '2.0.0',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
-        hive         : '0.12.0-cdh5.1.2',
+        hive         : '0.12.0',
         hadoop       : '0.20.2',
         presto       : '0.97',
         reflections  : '0.9.9',
