@@ -60,8 +60,6 @@ class MutableTablesFulfillerTest
     fulfiller.cleanup()
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(mutableTableInstanceLoaded) >>> tableManager
-    1 * tableManager.drop(mutableTableInstanceLoaded)
     0 * _
   }
 
@@ -97,8 +95,6 @@ class MutableTablesFulfillerTest
     fulfiller.cleanup()
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(mutableTableInstanceNamedCreated) >>> tableManager
-    1 * tableManager.drop(mutableTableInstanceNamedCreated)
     0 * _
   }
 

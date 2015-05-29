@@ -19,7 +19,11 @@ import com.teradata.test.hadoop.hdfs.HdfsClient
 import com.teradata.test.internal.hadoop.hdfs.HdfsDataSourceWriter
 import com.teradata.test.internal.uuid.UUIDGenerator
 import com.teradata.test.query.QueryExecutor
+import com.teradata.test.query.QueryResult
+import com.teradata.test.query.QueryType
 import spock.lang.Specification
+
+import java.sql.JDBCType
 
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED
@@ -27,6 +31,9 @@ import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.
 class HiveTableManagerTest
         extends Specification
 {
+  String ROOT_PATH = "/tests-path"
+  String MUTABLE_TABLES_PATH = ROOT_PATH + HiveTableManager.MUTABLE_TABLES_DIR
+
   QueryExecutor queryExecutor = Mock()
   HdfsDataSourceWriter dataSourceWriter = Mock()
   HdfsClient hdfsClient = Mock()
@@ -35,8 +42,19 @@ class HiveTableManagerTest
 
   void setup()
   {
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, "/tests-path", hdfsClient, "password")
     uuidGenerator.randomUUID() >> "randomSuffix"
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, ROOT_PATH, hdfsClient, "password");
+  }
+
+  def 'should drop all tables'()
+  {
+    when:
+    tableManager.dropAllTables();
+
+    then:
+    1 * queryExecutor.executeQuery("SHOW TABLES", QueryType.SELECT) >> QueryResult.forSingleValue(JDBCType.VARCHAR, "some_table")
+    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS some_table")
+    1 * hdfsClient.delete(MUTABLE_TABLES_PATH, _)
   }
 
   def 'should create hive immutable table'()
@@ -55,16 +73,8 @@ class HiveTableManagerTest
     nationTableInstance.name == expectedTableName
     nationTableInstance.nameInDatabase == expectedTableNameInDatabase
 
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
     1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
-
-    when:
-    tableManager.drop(nationTableInstance)
-
-    then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
-    0 * _
   }
 
 
@@ -84,20 +94,12 @@ class HiveTableManagerTest
     tableInstance.name == expectedTableName
     1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
-
-    when:
-    tableManager.drop(tableInstance)
-
-    then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
-    1 * hdfsClient.delete(expectedTableLocation, _)
-    0 * _
   }
 
   def 'should create hive mutable table created not partitioned'()
   {
     setup:
-    def expectedTableLocation = "/tests-path/mutable_tables/nation_randomSuffix"
+    def expectedTableLocation = MUTABLE_TABLES_PATH + "nation_randomSuffix"
     def expectedTableName = "nation"
     def expectedTableNameInDatabase = "nation_randomSuffix"
 
@@ -109,14 +111,6 @@ class HiveTableManagerTest
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
-
-    when:
-    tableManager.drop(tableInstance)
-
-    then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
-    1 * hdfsClient.delete(expectedTableLocation, _)
-    0 * _
   }
 
   def 'should create hive mutable table loaded partitioned'()
@@ -124,7 +118,7 @@ class HiveTableManagerTest
     setup:
     def expectedTableName = "nation"
     def expectedTableNameInDatabase = "nation_randomSuffix"
-    def expectedTableLocation = "/tests-path/mutable_tables/${expectedTableNameInDatabase}"
+    def expectedTableLocation = MUTABLE_TABLES_PATH + expectedTableNameInDatabase
     def expectedPartition0Location = "${expectedTableLocation}/partition_0"
     def expectedPartition1Location = "${expectedTableLocation}/partition_1"
 
@@ -140,14 +134,6 @@ class HiveTableManagerTest
     1 * queryExecutor.executeQuery(expandDDLTemplate(PARTITIONED_NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=0) LOCATION '$expectedPartition0Location'")
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=1) LOCATION '$expectedPartition1Location'")
-
-    when:
-    tableManager.drop(tableInstance)
-
-    then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
-    1 * hdfsClient.delete(expectedTableLocation, _)
-    0 * _
   }
 
   def 'should create hive mutable table created partitioned'()
@@ -155,7 +141,7 @@ class HiveTableManagerTest
     setup:
     def expectedTableName = "nation"
     def expectedTableNameInDatabase = "nation_randomSuffix"
-    def expectedTableLocation = "/tests-path/mutable_tables/${expectedTableNameInDatabase}"
+    def expectedTableLocation = MUTABLE_TABLES_PATH + expectedTableNameInDatabase
     def expectedPartition0Location = "${expectedTableLocation}/partition_0"
     def expectedPartition1Location = "${expectedTableLocation}/partition_1"
 
@@ -169,14 +155,6 @@ class HiveTableManagerTest
     1 * queryExecutor.executeQuery(expandDDLTemplate(PARTITIONED_NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=0) LOCATION '$expectedPartition0Location'")
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=1) LOCATION '$expectedPartition1Location'")
-
-    when:
-    tableManager.drop(tableInstance)
-
-    then:
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS ${expectedTableNameInDatabase}")
-    1 * hdfsClient.delete(expectedTableLocation, _)
-    0 * _
   }
 
   private String expandDDLTemplate(String template, String tableName, String location = "n/a")

@@ -17,9 +17,10 @@ import javax.sql.DataSource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Map;
 
-import static com.beust.jcommander.internal.Maps.newHashMap;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.teradata.test.internal.query.JdbcUtils.dataSource;
 
 public class JdbcConnectionsPool
@@ -33,6 +34,14 @@ public class JdbcConnectionsPool
             dataSources.put(jdbcParamsState, dataSource(jdbcParamsState));
         }
 
-        return dataSources.get(jdbcParamsState).getConnection();
+        Connection connection = dataSources.get(jdbcParamsState).getConnection();
+        if (jdbcParamsState.prepareStatement.isPresent())
+        {
+            try (Statement statement = connection.createStatement())
+            {
+                statement.execute(jdbcParamsState.prepareStatement.get());
+            }
+        }
+        return connection;
     }
 }

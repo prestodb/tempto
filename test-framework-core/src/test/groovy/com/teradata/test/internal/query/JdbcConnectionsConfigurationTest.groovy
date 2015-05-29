@@ -39,6 +39,7 @@ databases:
     jdbc_password: bpassword
     jdbc_pooling: false
     jdbc_jar: /path/to/jar.jar
+    prepare_statement: USE schema
 
   b_alias:
     alias: b
@@ -46,15 +47,15 @@ databases:
 
   private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('a', 'com.acme.ADriver', 'jdbc:a://localhost:8080',
-                  'auser', 'apassword', true, empty())
+                  'auser', 'apassword', true, empty(), empty())
 
   private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('b', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'))
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'))
 
   private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('b_alias', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'))
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'))
 
   def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
 

@@ -37,6 +37,7 @@ import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
 import com.teradata.test.internal.fulfillment.table.ImmutableTablesFulfiller;
 import com.teradata.test.internal.fulfillment.table.MutableTablesFulfiller;
+import com.teradata.test.internal.fulfillment.table.TableManagerCleaner;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -72,6 +73,7 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
+            TableManagerCleaner.class,
             ImmutableTablesFulfiller.class
     );
 

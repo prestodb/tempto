@@ -56,8 +56,6 @@ class ImmutableTablesFulfillerTest
     fulfiller.cleanup()
 
     then:
-    1 * tableManagerDispatcher.getTableManagerFor(tableInstance) >>> tableManager
-    1 * tableManager.drop(tableInstance)
     0 * _
   }
 

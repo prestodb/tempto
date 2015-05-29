@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.fulfillment.table.TableDefinition;
 import com.teradata.test.fulfillment.table.TableManager;
@@ -26,7 +27,9 @@ import com.teradata.test.fulfillment.table.TableManagerDispatcher;
 import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
@@ -57,10 +60,20 @@ public class TableManagerDispatcherModuleProvider
             @Provides
             public TableManagerDispatcher defaultTableManagerDispatcher(Map<Class, TableManager> tableManagers)
             {
-                return tableDefinition -> {
-                    Class<? extends TableDefinition> clazz = tableDefinition.getClass();
-                    checkState(tableManagers.containsKey(clazz), "Table manager for %s is not registered", clazz);
-                    return tableManagers.get(clazz);
+                return new TableManagerDispatcher() {
+                    @Override
+                    public TableManager getTableManagerFor(TableDefinition tableDefinition)
+                    {
+                        Class<? extends TableDefinition> clazz = tableDefinition.getClass();
+                        checkState(tableManagers.containsKey(clazz), "Table manager for %s is not registered", clazz);
+                        return tableManagers.get(clazz);
+                    }
+
+                    @Override
+                    public Collection<TableManager> getAllTableManagers()
+                    {
+                        return tableManagers.values();
+                    }
                 };
             }
         };

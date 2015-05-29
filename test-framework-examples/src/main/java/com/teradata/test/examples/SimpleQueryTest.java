@@ -41,7 +41,6 @@ import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.NATIO
 import static com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions.REGION;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.test.fulfillment.table.MutableTableRequirement.State.LOADED;
-import static com.teradata.test.fulfillment.table.TableManager.dropTableOnTestContextClose;
 import static com.teradata.test.fulfillment.table.TableRequirements.mutableTable;
 import static com.teradata.test.query.QueryExecutor.query;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,9 +96,6 @@ public class SimpleQueryTest
 
         TableInstance instanceCreated = tableManager.createMutable(tableDefinition, CREATED);
         TableInstance instanceLoaded = tableManager.createMutable(tableDefinition);
-
-        dropTableOnTestContextClose(instanceCreated);
-        dropTableOnTestContextClose(instanceLoaded);
     }
 
     @Test(groups = "query")

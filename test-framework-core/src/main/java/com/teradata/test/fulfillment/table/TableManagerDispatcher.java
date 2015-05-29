@@ -16,6 +16,8 @@ package com.teradata.test.fulfillment.table;
 import com.google.inject.Binder;
 import com.google.inject.multibindings.MapBinder;
 
+import java.util.Collection;
+
 import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.teradata.test.context.ThreadLocalTestContextHolder.testContext;
 
@@ -30,6 +32,8 @@ public interface TableManagerDispatcher
     {
         return getTableManagerFor(tableInstance.tableDefinition());
     }
+
+    Collection<TableManager> getAllTableManagers();
 
     public static TableManagerDispatcher getTableManagerDispatcher()
     {

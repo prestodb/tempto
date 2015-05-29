@@ -69,8 +69,7 @@ public class MutableTablesFulfiller
     @Override
     public void cleanup()
     {
-        LOGGER.debug("cleaning up tables");
-        cleanup(tableInstances.values());
+        // TableManagers are responsible for cleanUp
     }
 
     private void createMutableTable(MutableTableRequirement mutableTableRequirement)
@@ -82,11 +81,6 @@ public class MutableTablesFulfiller
         TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
         TableInstance instance = tableManager.createMutable(tableDefinition, mutableTableRequirement.getState());
         tableInstances.put(name, instance);
-    }
-
-    private void cleanup(Collection<TableInstance> tableInstances)
-    {
-        tableInstances.forEach(tableInstance -> tableManagerDispatcher.getTableManagerFor(tableInstance).drop(tableInstance));
     }
 
     private <T> List<T> filter(Collection collection, Class<T> clazz)

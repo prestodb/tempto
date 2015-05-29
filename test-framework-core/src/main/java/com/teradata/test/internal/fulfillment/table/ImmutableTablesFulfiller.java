@@ -70,8 +70,7 @@ public class ImmutableTablesFulfiller
     @Override
     public void cleanup()
     {
-        LOGGER.debug("cleaning up tables");
-        tableInstances.values().forEach(tableInstance -> tableManagerDispatcher.getTableManagerFor(tableInstance).drop(tableInstance));
+        // TableManagers are responsible for cleanUp
     }
 
     private void createImmutableTable(TableDefinition tableDefinition)
