@@ -261,7 +261,7 @@ public class WebHDFSClient
 
     private boolean isXAttrsWebCallRelated(Exception e)
     {
-        return e.getMessage().contains("XATTRS") && e.getMessage().contains("Operation");
+        return e.getMessage().contains("XATTR") && e.getMessage().contains("Operation");
     }
 
     private String executeAndGetRedirectUri(HttpUriRequest request)
