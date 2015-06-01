@@ -77,7 +77,7 @@ public class ImmutableTablesFulfiller
     {
         TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
         TableInstance instance = tableManager.createImmutable(tableDefinition);
-        checkState(!tableInstances.containsKey(instance.getName()));
+        checkState(!tableInstances.containsKey(instance.getName()), "Table with name '%s' already exist.", instance.getName());
         tableInstances.put(instance.getName(), instance);
     }
 

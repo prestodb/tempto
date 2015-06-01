@@ -21,9 +21,11 @@ import com.teradata.test.Requirement
 import com.teradata.test.Requirements
 import com.teradata.test.RequirementsProvider
 import com.teradata.test.Requires
+import com.teradata.test.configuration.Configuration
 import spock.lang.Specification
 
 import static com.teradata.test.Requirements.compose
+import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration
 import static java.util.Arrays.asList
 
 public class RequirementsCollectorTest
@@ -34,7 +36,7 @@ public class RequirementsCollectorTest
   private static final def C = req('c')
   private static final def D = req('d')
 
-  def requirementsCollector = DefaultRequirementsCollector.getInstance()
+  def requirementsCollector = new DefaultRequirementsCollector(emptyConfiguration())
 
   def "should list method requirements"()
   {
@@ -113,7 +115,7 @@ public class RequirementsCollectorTest
   private static class ProviderA
           implements RequirementsProvider
   {
-    Requirement getRequirements()
+    Requirement getRequirements(Configuration configuration)
     {
       return A
     }
@@ -123,7 +125,7 @@ public class RequirementsCollectorTest
           implements RequirementsProvider
   {
     @Override
-    Requirement getRequirements()
+    Requirement getRequirements(Configuration configuration)
     {
       return B
     }

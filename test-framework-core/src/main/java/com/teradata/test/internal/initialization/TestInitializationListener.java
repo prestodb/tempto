@@ -33,6 +33,7 @@ import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
 import com.teradata.test.initialization.TestMethodModuleProvider;
 import com.teradata.test.internal.RequirementFulfillerByPriorityComparator;
+import com.teradata.test.internal.TestSpecificRequirementsResolver;
 import com.teradata.test.internal.context.GuiceTestContext;
 import com.teradata.test.internal.context.TestContextStack;
 import com.teradata.test.internal.fulfillment.table.ImmutableTablesFulfiller;
@@ -342,7 +343,7 @@ public class TestInitializationListener
         // as interceptor is for some reason called after onStart() which uses this method.
         Set<Requirement> allTestsRequirements = Sets.newHashSet();
         for (ITestNGMethod iTestNGMethod : context.getAllTestMethods()) {
-            Set<Set<Requirement>> requirementsSets = new RequirementsExpander().resolveTestSpecificRequirements(iTestNGMethod);
+            Set<Set<Requirement>> requirementsSets = new TestSpecificRequirementsResolver(configuration).resolve(iTestNGMethod);
             for (Set<Requirement> requirementsSet : requirementsSets) {
                 allTestsRequirements.addAll(requirementsSet);
             }

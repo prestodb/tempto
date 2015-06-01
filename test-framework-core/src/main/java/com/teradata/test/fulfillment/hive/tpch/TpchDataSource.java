@@ -22,6 +22,8 @@ import java.util.Collection;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class TpchDataSource
         implements DataSource
@@ -57,5 +59,17 @@ public class TpchDataSource
     public String revisionMarker()
     {
         return DATA_REVISION;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        return reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return reflectionHashCode(this);
     }
 }

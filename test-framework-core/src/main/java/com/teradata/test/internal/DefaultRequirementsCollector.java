@@ -20,6 +20,7 @@ import com.teradata.test.Requirement;
 import com.teradata.test.Requirements;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
+import com.teradata.test.configuration.Configuration;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -37,14 +38,11 @@ public class DefaultRequirementsCollector
         implements RequirementsCollector
 {
 
-    private static final RequirementsCollector INSTANCE = new DefaultRequirementsCollector();
+    private final Configuration configuration;
 
-    public static RequirementsCollector getInstance() {
-        return INSTANCE;
-    }
-
-    private DefaultRequirementsCollector()
+    public DefaultRequirementsCollector(Configuration configuration)
     {
+        this.configuration = configuration;
     }
 
     @Override
@@ -77,7 +75,7 @@ public class DefaultRequirementsCollector
                 Constructor<? extends RequirementsProvider> constructor = providerClass.getDeclaredConstructor();
                 constructor.setAccessible(true);
                 RequirementsProvider provider = constructor.newInstance();
-                return provider.getRequirements();
+                return provider.getRequirements(configuration);
             }
             catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
                 throw new IllegalArgumentException("Could not instantiate provider class", e);

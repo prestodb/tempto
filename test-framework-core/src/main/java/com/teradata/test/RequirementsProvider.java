@@ -14,8 +14,10 @@
 
 package com.teradata.test;
 
+import com.teradata.test.configuration.Configuration;
+
 @FunctionalInterface
 public interface RequirementsProvider
 {
-    Requirement getRequirements();
+    Requirement getRequirements(Configuration configuration);
 }

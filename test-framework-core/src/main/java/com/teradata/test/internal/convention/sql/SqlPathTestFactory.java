@@ -38,6 +38,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.test.Requirements.compose;
 import static com.teradata.test.convention.SqlResultDescriptor.sqlResultDescriptorFor;
+import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.test.internal.convention.SqlTestsFileUtils.getExtension;
 import static java.nio.file.Files.exists;
@@ -164,6 +165,7 @@ public class SqlPathTestFactory
     private Requirement getRequirementsFromClass(String requirementClassName)
     {
         RequirementsProvider requirementsProvider = ReflectionHelper.instantiate(requirementClassName);
-        return requirementsProvider.getRequirements();
+        // pass empty configuration here, because convention based requirements can't rely on any properties
+        return requirementsProvider.getRequirements(emptyConfiguration());
     }
 }

@@ -16,6 +16,7 @@ package com.teradata.test.internal.convention;
 
 import com.google.common.collect.ImmutableList;
 import com.teradata.test.Requirement;
+import com.teradata.test.configuration.Configuration;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.ClassLoadingStrategy;
 import net.bytebuddy.dynamic.DynamicType;
@@ -119,9 +120,9 @@ public class ConventionBasedTestProxyGenerator
         }
 
         @Override
-        public Requirement getRequirements()
+        public Requirement getRequirements(Configuration configuration)
         {
-            return delegate.getRequirements();
+            return delegate.getRequirements(configuration);
         }
     }
 

@@ -22,7 +22,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import static com.teradata.test.internal.initialization.RequirementsExpander.getMethodsCountFromContext;
+import static com.teradata.test.internal.initialization.RequirementsExpanderInterceptor.getMethodsCountFromContext;
 
 public class ProgressLoggingListener
         implements ITestListener

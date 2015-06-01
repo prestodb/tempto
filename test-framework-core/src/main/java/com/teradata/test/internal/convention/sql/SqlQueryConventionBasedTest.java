@@ -16,12 +16,12 @@ package com.teradata.test.internal.convention.sql;
 
 import com.google.common.base.Splitter;
 import com.teradata.test.Requirement;
+import com.teradata.test.configuration.Configuration;
 import com.teradata.test.convention.SqlResultDescriptor;
 import com.teradata.test.internal.convention.ConventionBasedTest;
 import com.teradata.test.internal.convention.SqlQueryDescriptor;
 import com.teradata.test.query.QueryExecutor;
 import com.teradata.test.query.QueryResult;
-import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.apache.commons.io.FilenameUtils;
@@ -114,7 +114,7 @@ public class SqlQueryConventionBasedTest
     private String resolveTemplates(String query)
     {
         try {
-            Template template = new Template("name", new StringReader(query), new Configuration());
+            Template template = new Template("name", new StringReader(query), new freemarker.template.Configuration());
             Map<String, Object> data = newHashMap();
             data.put("mutableTables", mutableTablesState().getNameInDatabaseMap());
 
@@ -166,7 +166,7 @@ public class SqlQueryConventionBasedTest
     }
 
     @Override
-    public Requirement getRequirements()
+    public Requirement getRequirements(Configuration configuration)
     {
         return requirement;
     }

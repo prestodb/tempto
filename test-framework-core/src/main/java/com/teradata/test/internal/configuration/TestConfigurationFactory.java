@@ -20,10 +20,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.List;
 import java.util.Optional;
 
-import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.teradata.test.internal.configuration.EmptyConfiguration.emptyConfiguration;
 
 public class TestConfigurationFactory

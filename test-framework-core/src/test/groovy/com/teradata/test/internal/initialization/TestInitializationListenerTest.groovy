@@ -15,11 +15,12 @@ package com.teradata.test.internal.initialization
 
 import com.google.inject.Inject
 import com.teradata.test.*
+import com.teradata.test.configuration.Configuration
 import com.teradata.test.context.State
 import com.teradata.test.context.TestContext
 import com.teradata.test.context.TestContextCloseCallback
 import com.teradata.test.fulfillment.RequirementFulfiller
-import com.teradata.test.internal.DefaultRequirementsCollector
+import com.teradata.test.internal.TestSpecificRequirementsResolver
 import org.testng.ITestClass
 import org.testng.ITestContext
 import org.testng.ITestNGMethod
@@ -65,7 +66,7 @@ class TestInitializationListenerTest
     EVENTS = []
   }
 
-  def requirementsExpander = new RequirementsExpander()
+  def testSpecificRequirementsResolver = new TestSpecificRequirementsResolver(emptyConfiguration())
 
   def 'positive flow'()
   {
@@ -158,7 +159,7 @@ class TestInitializationListenerTest
     testMethod.method >> method
     testMethod.instance >> testClass
     testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
-    def requirements = requirementsExpander.resolveTestSpecificRequirements(testMethod);
+    def requirements = testSpecificRequirementsResolver.resolve(testMethod);
     return new RequirementsAwareTestNGMethod(testMethod, getOnlyElement(requirements))
   }
 
@@ -212,7 +213,7 @@ class TestInitializationListenerTest
     }
 
     @Override
-    Requirement getRequirements()
+    Requirement getRequirements(Configuration configuration)
     {
       return B_REQUIREMENT
     }
@@ -222,7 +223,7 @@ class TestInitializationListenerTest
           implements RequirementsProvider
   {
     @Override
-    public Requirement getRequirements()
+    public Requirement getRequirements(Configuration configuration)
     {
       return A_REQUIREMENT
     }
@@ -254,7 +255,7 @@ class TestInitializationListenerTest
           implements RequirementsProvider
   {
     @Override
-    public Requirement getRequirements()
+    public Requirement getRequirements(Configuration configuration)
     {
       return C_REQUIREMENT
     }

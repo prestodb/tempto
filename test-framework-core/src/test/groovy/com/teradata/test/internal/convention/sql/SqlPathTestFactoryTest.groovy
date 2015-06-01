@@ -17,6 +17,7 @@ package com.teradata.test.internal.convention.sql
 import com.teradata.test.CompositeRequirement
 import com.teradata.test.Requirement
 import com.teradata.test.RequirementsProvider
+import com.teradata.test.configuration.Configuration
 import com.teradata.test.fulfillment.table.TableDefinitionsRepository
 import com.teradata.test.internal.convention.ConventionBasedTest
 import com.teradata.test.internal.convention.ConventionBasedTestProxyGenerator
@@ -193,7 +194,7 @@ query 2 result
           implements RequirementsProvider
   {
     @Override
-    Requirement getRequirements()
+    Requirement getRequirements(Configuration configuration)
     {
       return new DummyRequirement1()
     }
@@ -203,7 +204,7 @@ query 2 result
           implements RequirementsProvider
   {
     @Override
-    Requirement getRequirements()
+    Requirement getRequirements(Configuration configuration)
     {
       return new DummyRequirement2()
     }

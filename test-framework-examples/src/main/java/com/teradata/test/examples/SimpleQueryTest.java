@@ -22,6 +22,7 @@ import com.teradata.test.ProductTest;
 import com.teradata.test.Requirement;
 import com.teradata.test.RequirementsProvider;
 import com.teradata.test.Requires;
+import com.teradata.test.configuration.Configuration;
 import com.teradata.test.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.test.fulfillment.table.MutableTablesState;
 import com.teradata.test.fulfillment.table.TableDefinition;
@@ -54,7 +55,7 @@ public class SimpleQueryTest
     {
 
         @Override
-        public Requirement getRequirements()
+        public Requirement getRequirements(Configuration configuration)
         {
             return new ImmutableTableRequirement(NATION);
         }
@@ -119,7 +120,7 @@ public class SimpleQueryTest
     {
 
         @Override
-        public Requirement getRequirements()
+        public Requirement getRequirements(Configuration configuration)
         {
             return allOf(
                     mutableTable(NATION, "table", LOADED),
