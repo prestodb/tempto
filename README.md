@@ -28,8 +28,6 @@ and [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/h
 * _Test case_ - test of single functionality e.g. query.
 * _Test group_ - logical grouping of test cases. For example one could define a join group, a group by group, 
                  a window function group etc. in order to test different SQL functionality.
-* _Test suite_ - a set of different groups. For example you could have an administration suite, a concurrency suite etc.
-                 each of which would compose different groups that fit under that umbrella.
 * _Test context_ - object used to store context information specific to a test.
 * _Java test_ - test written in Java, annotated with @Test, following the TestNG convention.
 * _File based test_ - test written by specifying the query to run and the corresponding result using files.
@@ -65,8 +63,6 @@ With this appender for each test suite run new logs directory is created within 
 corresponds to time when test framework is run (e.g. /tmp/testlogs/2015-04-22_15-23-09).
 Log messages coming from different tests are logged to separate files.
 
-This appender also logs all INFO+ messages to console. (subject to change)
-
 Example contents of log directory:
 ```
 com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectAllDatatypesOrc_2015-04-22_15-23-09
@@ -101,15 +97,13 @@ smoketest to ensure that you've setup everything properly.
 
 * Build the framework:
 
+
 ```Shell
 $ cd test-framework
 $ ./gradlew clean build
-...
-...
-...
 BUILD SUCCESSFUL
-
-Total time: 2 mins 47.263 secs
+   
+$Total time: 2 mins 47.263 secs
 ```
 
 * Set configuration properties in the following configuration file: `test-framework/test-framework-examples/src/main/resources/test-configuration.yaml`.
@@ -123,16 +117,16 @@ refer to the **Configuration** section below.
 ```Shell
 $ cd test-framework
 $ bin/product-test \
-     --tests-classpath test-framework-core/build/libs/test-framework-core-all.jar:test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar \
+     --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
      --tests-package=com.teradata.test.examples \
      --exclude-groups quarantine \
-     --report-dir /tmp
+     --report-dir /tmp/test-reports
 Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
 ...
 [2015-04-02 15:21:48] Completed 18 tests
 [2015-04-02 15:21:48] 17 SUCCEEDED      /      1 FAILED      /      0 SKIPPED
 [2015-04-02 15:21:48] For tests logs see: testlogs/2015-04-02_15-15-16
-See /home/sogorkis/repos/test-framework/test-framework-core/build/reports/html/index.html for detailed results.
+See /tmp/test-reports/index.html for detailed results.
 ```
 
 * The framework will print on your console whether a test passed or failed. A more detailed report
@@ -143,7 +137,26 @@ one test (`com.teradata.test.examples.SimpleQueryTest.failingTest`) is made to f
 ## Configuration
 
 The test execution environment is configured via a hierarchical YAML file. The YAML file
-is loaded from the classpath and it must be called `test-configuration.yaml`. The file
+is loaded from the classpath and it must be named `test-configuration.yaml`. 
+If `test-configuration-local.yaml` file is present on classpath it will be also loaded and will
+overwrite settings defined in `test-configuration.yaml` file.
+
+Configuration files locations can be overidden by using following java system properties:
+ 
+ * `test.configuration` - for overriding global configuration file location
+ 
+ * `test.configuration.local` - for overriding local configuration file location  
+
+```
+ java ... -Dtest.configuration=classpath:my_configuration.yaml \
+          -Dtest.configuration.local=file:/tmp/my_local_configuration.yaml
+```
+
+If you start tests using helper `product-test` script you can use 
+`--test-configuration` and `--test-configuration-local` options to override
+configuration files. 
+
+The file
 contains the following configuration sections:
 
 * **hdfs**
@@ -182,9 +195,7 @@ databases:           # database connections
     jdbc_user: hdfs                                                                   # database user
     jdbc_password: na                                                                 # database password
     jdbc_pooling: false                                                               # (optional) should connection pooling be used (it does not work for Hive due to driver issues)
-    jdbc_jar: test-framework-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case
-                                                                                      # when we cannot have it in global classpath due to class conflicts 
-                                                                                      # (e.g. hive driver conflicts with presto driver)
+    jdbc_jar: test-framework-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts. (e.g. hive driver conflicts with presto driver)
  
   presto:           # connection named presto
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
@@ -207,11 +218,13 @@ tests:
 
 ### Example
 
-TODO
+See com.teradata.test.examples.SimpleQueryTest in test-framework-examples module.
 
 ### Requirements
 
 Tests may declare requirements that are fulfilled by the framework during suite/test initialization.
+
+#### Explicit RequirementsProvider
 
 You can specify Requirements for your test through the `@Requires` annotation. Test methods and whole classes
 can be annotated with `@Requires`. If a class is annotated with `@Requires`, that is the same having every
@@ -237,7 +250,7 @@ private final class SimpleTestRequirements
 }
 ```
 
-In this case, `SimpleTestRequirements` enapsulated the single requirement of an immutable Hive table called nation.
+In this case, `SimpleTestRequirements` encapsulated the single requirement of an immutable Hive table called nation.
 
 The implementation of `RequirementProvider` is then passed as an argument to the `@Requires` annotation:
 
@@ -253,26 +266,59 @@ The implementation of `RequirementProvider` is then passed as an argument to the
 If multiple `@Requires` annotations are stacked on top of one another on the same method or class, then
 the requirements they return are combined.
 
+#### Test class being RequirementsProvider
+
+Alternatively one can make Test class itself implement RequirementProvider. Then requirements
+returned by the implemeneted `getRequirements` method will be applied to all test methods in class.
+ 
+```Java
+private final class MyTestClass
+        implements RequirementsProvider
+{
+
+    @Override
+    public Requirement getRequirements()
+    {
+        // ensure TPCH nation table is available
+        return new ImmutableHiveTableRequirement(NATION);
+    }
+    
+    @Test
+    public void someTestMethod() {
+        assertThat(query("select * from nation")).hasRowsCount(25);
+    }
+}
+```
+
 ### Requirement Types
 
 This section lists the supported `Requirement` implementations that you can return
 from `RequirementProvider#getRequirement()`.
 
-* **ImmutableHiveTableRequirement**
+#### ImmutableTableRequirement
 
-When this requirement is fulfilled, it will create a table in Hive. It is called immutable because
-the contract with the test developer is that they will not, within the logic of their test, alter
-the state of the table (drop it, re-create it under a different name, delete data). This is done so
-that requirements can be recycled between tests. If 10 tests require an immutable table, that table
-will only be created once and the framework assumes it will be available for all tests.
+When this requirement is fulfilled, it will create a table in the underlying database. 
+It is called immutable because the contract with the test developer is that they will not, within 
+the logic of their test, alter the state of the table (drop it, re-create it under a different name, delete data). 
+This is done so that requirements can be recycled between tests. If 10 tests require an immutable table, 
+that table will only be created once and the framework assumes it will be available for all tests.
+
+##### Table Definitions
+
+ImmutableHiveTableRequirement is parametrized with `TableDefinition`.
+Target database in which table is created depends on `TableDefinition` instance passed as ImmutableTableRequirement
+parameter. Currently we have only one implementation: `HiveTableDefinition` allowing defining tables in Hive.
+Using `ImmutableTableRequirement` with `HiveTableDefinition` requires that a connection named `hive` is 
+defined in configuration Yaml.
+
+`HiveTableDefinition` include name, schema and dataSource. 
+`HiveTableDefinitionBuilder` can be use to create new definition. You need to provide table name,
+create table DDL template (_\{0\}_ is substituted with HDFS file location) and `DataSource`.
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
 be found in `com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions`.
 
 TODO: we need to clarify to the user how they create tables.
-ImmutableHiveTableRequirement is parametrized with _TableDefinition_
-which include name, schema and dataSource. _HiveTableDefinitionBuilder_ can be use to create new definition. You need to provide table name,
-create table DDL template (_\{0\}_ is substituted with HDFS file location) and _DataSource_.
 
 For example this is how the nation table is built:
 
@@ -292,21 +338,61 @@ For example this is how the nation table is built:
                 .build();
 ```
 
+Best way to crate `ImmutableTableRequirement` is to use `TableRequirements.immutableTable` factory
+method.
+
+#### MutableTableRequirement
+
+When this requirement is fulfilled it will crate a table in underlying database. 
+But unlike ImmutableTableRequirement framework does not assume table will not be modified. 
+Each test using  ImmutableTableRequirement will have a separate instance of table created in 
+database with unique name.
+
+To access name of table in database from test code `MutableTablesState` must be used.
+See following example.
+
+```Java
+    private static class MutableTableRequirements implements RequirementsProvider
+    {
+        @Override
+        public Requirement getRequirements()
+        {
+            mutableTable(NATION, "table", LOADED)
+        }
+    }
+
+    @Test(groups = "query")
+    @Requires(MutableTableRequirements.class)
+    public void testWithMutableTable()
+    {
+        MutableTablesState mutableTablesState = testContext().getDependency(MutableTablesState.class);
+        TableInstance tableInstance = mutableTablesState.get("table");
+        assertThat(query("select * from " + tableInstance.getNameInDatabase())).hasAnyRows();
+    }
+```
+
+One can request that mutable table is in one of three states:
+ * PREPARED - no table is crated actually - but MutableTableState entry is crated for table and unique name is generated
+ * CRATED - table is crated but is not populated with data 
+ * LOADED - table is crated and populated with data 
+
 ### Executing queries
 
-Queries are executed via implementations of the `QueryExecutor` interface. Currently the only implementaion
+Queries are executed via implementations of the `QueryExecutor` interface. Currently the only implementation
 is `JdbcQueryExecutor`. Each database configured in the YAML file will have its own query executor with the
 same name. To retrieve that executor and issue queries against that database you can use the
 `ThreadLocalTestContextHolder.testContext().getDependency(...)` as shown below.
 
 ```Java
-    // execute query agains the default database
+    // execute query against the default database
     QueryResult defaultQueryResult = QueryExecutor.query("SELECT * FROM nation");
     
     // Retrieve QueryExecutor for another, non-default, database
     QueryExecutor prestoQueryExecutor = ThreadLocalTestContextHolder.testContext().getDependency(QueryExecutor.class, "presto");
     QueryResult queryResultPresto = prestoQueryExecutor.query("SELECT * FROM nation");
 ```
+
+To use default QueryExecutor one can use helper static method `QueryExecutor.query` (see examples).
 
 ### Query assertions
 
@@ -439,7 +525,7 @@ TODO more info on scripts, what they should be named, what they can contain.
 
 ### Generated tests
 
-TODO
+TODO (not used right now)
 
 ## Tests running
 
@@ -472,7 +558,8 @@ tests found in class path will be executed.
 Example run command would look like this:
 
 ```Shell
-$ ./bin/product-test --tests-classpath test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar --tests-package=com.teradata.test.examples
+$ ./bin/product-test --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
+                     --tests-package=com.teradata.test.examples
 ```
 
 In above example we set classpath to contain two entries:
@@ -482,27 +569,11 @@ In above example we set classpath to contain two entries:
 
 And tests package is set to com.teradata.test.examples.
 
-**Tests configuration**
-
-By default we are searching for .yaml configuration file in classpath passed in --test-classpath parameter.
-If classpath contains test-configuration.yaml file then it will be used during tests execution. User can override
-tests configuration with _--test-configuration_ parameter.
-
-```Shell
-./bin/product-test ... --test-configuration my-test-configuration.yaml
-```
-
 **Tests selection**
 
 By default all tests found in classpath are executed but user may limit that.
 
 <table>
-    <tr>
-        <td style="width:120px">--suites</td>
-        <td>List of suites to be executed. Each suite is a list of groups suites.json.
-            TODO link to section with description of suites.json
-        </td>
-    </tr>
     <tr>
         <td>--groups</td>
         <td>List of groups to be executed.</td>
@@ -516,7 +587,7 @@ By default all tests found in classpath are executed but user may limit that.
         </td>
     </tr>
     <tr>
-        <td>--classess</td>
+        <td>--classes</td>
         <td>List of fully qualified java classess to be executed. Applies to java based tests only.</td>
     </tr>
     <tr>
@@ -532,7 +603,12 @@ If you want to run tests from product-test script under debuger use --debug para
 specified product tests framework will suspend execution at beginning and wait for debugger on TCP port _5005_.
 
 ```Shell
-./bin/product-test --tests-classpath test-framework-examples/src/main/resources/:test-framework-examples/build/libs/test-framework-examples.jar --debug
+$ bin/product-test \
+     --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
+     --tests-package=com.teradata.test.examples \
+     --exclude-groups quarantine \
+     --report-dir /tmp/test-reports
+     --debug
 Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
 Listening for transport dt_socket at address: 5005
 ```
