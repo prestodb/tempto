@@ -12,7 +12,7 @@ import subprocess
 import os
 
 CLASSPATH = ".:../build/libs/expected-result-generator-all.jar"
-JAVA_CLASS = "com.teradata.test.sql.SqlResultGenerator"
+JAVA_CLASS = "com.teradata.tempto.sql.SqlResultGenerator"
 
 def setup_argument_parser():
     parser = argparse.ArgumentParser(description="SQL Query Result generator.")

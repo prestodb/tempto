@@ -96,14 +96,14 @@ ext.libraries = [
         freemarker   : "org.freemarker:freemarker:${versions.freemarker}"
 ]
 
-ext.test_framework_core = project(':test-framework-core')
-ext.test_framework_logging_log4j = project(':test-framework-logging-log4j')
-ext.test_framework_examples = project(':test-framework-examples')
+ext.tempto_core = project(':tempto-core')
+ext.tempto_logging_log4j = project(':tempto-logging-log4j')
+ext.tempto_examples = project(':tempto-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
-ext.test_framework_version = '1.0.28-SNAPSHOT' // changed by arosa
+ext.tempto_version = '1.0.28-SNAPSHOT' // changed by arosa
 ext.publish_maven_repository = {
-  url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
+  url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/tempto'
   credentials {
     username 'automation'
     password 'hadoopdb'
@@ -116,7 +116,7 @@ task wrapper(type: Wrapper) {
 }
 
 task packageAndUploadLaunchScript(type: Exec) {
-  workingDir 'test-framework-launch-script/'
+  workingDir 'tempto-launch-script/'
   commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
 }
 

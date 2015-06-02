@@ -11,8 +11,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-include 'test-framework-core'
-include 'test-framework-logging-log4j'
-include 'test-framework-examples'
+include 'tempto-core'
+include 'tempto-logging-log4j'
+include 'tempto-examples'
 include 'expected-result-generator'
 include 'third-party-deps'

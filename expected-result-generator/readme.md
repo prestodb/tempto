@@ -9,7 +9,7 @@ This tool generates expected result files for use with the product-test framewor
 
 Building the tool
 -----------------
-cd ~/test-framework/expected-result-generator
+cd ~/tempto/expected-result-generator
 ../gradlew buildRunnableJar
 
 Writing tests

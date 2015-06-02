@@ -55,7 +55,7 @@ each test and suite fulfillment process to separate files. To use that configure
 ```
 log4j.rootLogger=INFO, TEST_FRAMEWORK_LOGGING_APPENDER
 log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.logging.TestFrameworkLoggingAppender
-log4j.category.com.teradata.test=DEBUG
+log4j.category.com.teradata.tempto=DEBUG
 log4j.category.org.reflections=WARN
 ```
 
@@ -74,9 +74,9 @@ com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectVarch
 SUITE_2015-04-22_15-23-09
 ```
 
-If you want to override root location of logs you can use com.teradata.test.root.logs.dir
+If you want to override root location of logs you can use com.teradata.tempto.root.logs.dir
 ```
-java -Dcom.teradata.test.root.logs.dir=/my/root/logs/dir ...
+java -Dcom.teradata.tempto.root.logs.dir=/my/root/logs/dir ...
 ```
 
 ### logging test id
@@ -99,14 +99,14 @@ smoketest to ensure that you've setup everything properly.
 
 
 ```Shell
-$ cd test-framework
+$ cd tempto
 $ ./gradlew clean build
 BUILD SUCCESSFUL
    
 $Total time: 2 mins 47.263 secs
 ```
 
-* Set configuration properties in the following configuration file: `test-framework/test-framework-examples/src/main/resources/test-configuration.yaml`.
+* Set configuration properties in the following configuration file: `tempto/tempto-examples/src/main/resources/tempto-configuration.yaml`.
 The most important settings you'll need to change are the WebHDFS host, the Hive and Presto JDBC URLs. For more details please
 refer to the **Configuration** section below.
 
@@ -115,10 +115,10 @@ refer to the **Configuration** section below.
 * Run tests using the provided test launcher:
 
 ```Shell
-$ cd test-framework
+$ cd tempto
 $ bin/product-test \
-     --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
-     --tests-package=com.teradata.test.examples \
+     --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
+     --tests-package=com.teradata.tempto.examples \
      --exclude-groups quarantine \
      --report-dir /tmp/test-reports
 Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
@@ -130,30 +130,30 @@ See /tmp/test-reports/index.html for detailed results.
 ```
 
 * The framework will print on your console whether a test passed or failed. A more detailed report
-is available at `test-framework/test-framework-core-build-reports/html/index.html`. Note that
-one test (`com.teradata.test.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
+is available at `tempto/tempto-core-build-reports/html/index.html`. Note that
+one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
 
 
 ## Configuration
 
 The test execution environment is configured via a hierarchical YAML file. The YAML file
-is loaded from the classpath and it must be named `test-configuration.yaml`. 
-If `test-configuration-local.yaml` file is present on classpath it will be also loaded and will
-overwrite settings defined in `test-configuration.yaml` file.
+is loaded from the classpath and it must be named `tempto-configuration.yaml`. 
+If `tempto-configuration-local.yaml` file is present on classpath it will be also loaded and will
+overwrite settings defined in `tempto-configuration.yaml` file.
 
 Configuration files locations can be overidden by using following java system properties:
  
- * `test.configuration` - for overriding global configuration file location
+ * `tempto.configuration` - for overriding global configuration file location
  
- * `test.configuration.local` - for overriding local configuration file location  
+ * `tempto.configuration.local` - for overriding local configuration file location  
 
 ```
- java ... -Dtest.configuration=classpath:my_configuration.yaml \
-          -Dtest.configuration.local=file:/tmp/my_local_configuration.yaml
+ java ... -Dtempto.configuration=classpath:my_configuration.yaml \
+          -Dtempto.configuration.local=file:/tmp/my_local_configuration.yaml
 ```
 
 If you start tests using helper `product-test` script you can use 
-`--test-configuration` and `--test-configuration-local` options to override
+`--tempto-configuration` and `--tempto-configuration-local` options to override
 configuration files. 
 
 The file
@@ -195,7 +195,7 @@ databases:           # database connections
     jdbc_user: hdfs                                                                   # database user
     jdbc_password: na                                                                 # database password
     jdbc_pooling: false                                                               # (optional) should connection pooling be used (it does not work for Hive due to driver issues)
-    jdbc_jar: test-framework-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts. (e.g. hive driver conflicts with presto driver)
+    jdbc_jar: tempto-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts. (e.g. hive driver conflicts with presto driver)
  
   presto:           # connection named presto
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
@@ -316,7 +316,7 @@ defined in configuration Yaml.
 create table DDL template (_\{0\}_ is substituted with HDFS file location) and `DataSource`.
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
-be found in `com.teradata.test.fulfillment.hive.tpch.TpchTableDefinitions`.
+be found in `com.teradata.tempto.fulfillment.hive.tpch.TpchTableDefinitions`.
 
 TODO: we need to clarify to the user how they create tables.
 
@@ -424,11 +424,11 @@ assumed by the framework, namely the directory convention.
 
 Moreover you can define datasets that can be queried in your tests. These dataset files contain
 the data along with the corresponding DDL. For examples take a look at files in the
-`test-framework-examples/src/main/resources/sql-tests` directory. The directory tree looks
+`tempto-examples/src/main/resources/sql-tests` directory. The directory tree looks
 like the following:
 
 ```Shell
-~/repos/test-framework/test-framework-examples/src/main/resources$ tree .
+~/repos/tempto/tempto-examples/src/main/resources$ tree .
 .
 ├── sql-tests
 │   ├── datasets
@@ -449,7 +449,7 @@ like the following:
 │       └── sample_table_insert
 │           └── insert.sql
 ├── suites.json
-└── test-configuration.yaml
+└── tempto-configuration.yaml
 ```
 
 ### Data sets
@@ -558,16 +558,16 @@ tests found in class path will be executed.
 Example run command would look like this:
 
 ```Shell
-$ ./bin/product-test --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
-                     --tests-package=com.teradata.test.examples
+$ ./bin/product-test --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
+                     --tests-package=com.teradata.tempto.examples
 ```
 
 In above example we set classpath to contain two entries:
 
-* test-framework-examples/src/main/resources - this is directory entry
-* test-framework-examples/build-libs/test-framework-examples.jar
+* tempto-examples/src/main/resources - this is directory entry
+* tempto-examples/build-libs/tempto-examples.jar
 
-And tests package is set to com.teradata.test.examples.
+And tests package is set to com.teradata.tempto.examples.
 
 **Tests selection**
 
@@ -581,7 +581,7 @@ By default all tests found in classpath are executed but user may limit that.
     <tr>
         <td>--tests</td>
         <td>List of tests to be executed. For java based tests test name is just fully qualified method name
-            e.g. com.teradata.test.examples.SimpleQueryTest.selectCountFromNation. For sql convention based tests name 
+            e.g. com.teradata.tempto.examples.SimpleQueryTest.selectCountFromNation. For sql convention based tests name
             looks like: sql_tests.testcases.sample_table.allRows. Tests which name ends with one of patterns specified
             in --tests parameter will be executed.
         </td>
@@ -604,8 +604,8 @@ specified product tests framework will suspend execution at beginning and wait f
 
 ```Shell
 $ bin/product-test \
-     --tests-classpath test-framework-examples/build/libs/test-framework-examples-all.jar \
-     --tests-package=com.teradata.test.examples \
+     --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
+     --tests-package=com.teradata.tempto.examples \
      --exclude-groups quarantine \
      --report-dir /tmp/test-reports
      --debug
@@ -613,10 +613,10 @@ Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°�
 Listening for transport dt_socket at address: 5005
 ```
 
-At this point you may use your IDE of choice to connect to test-framework VM.
+At this point you may use your IDE of choice to connect to tempto VM.
 
 ## Developers
 
 For every available `Requirement` there is one possible `Fulfiller`. Currently that mapping is hard coded.
-All requirements and their corresponding fulfillers are packed into `test-framework-core-all.jar`. In the
+All requirements and their corresponding fulfillers are packed into `tempto-core-all.jar`. In the
 future we envision separating requirements and their possible fulfillers into separate jars.
