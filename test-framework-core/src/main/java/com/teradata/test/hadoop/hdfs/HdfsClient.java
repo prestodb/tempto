@@ -16,6 +16,7 @@ package com.teradata.test.hadoop.hdfs;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,9 +50,16 @@ public interface HdfsClient
 
     void saveFile(String path, String username, RepeatableContentProducer repeatableContentProducer);
 
+    default void saveFile(String path, String username, String content)
+    {
+        saveFile(path, username, new ByteArrayInputStream(content.getBytes()));
+    }
+
     void loadFile(String path, String username, OutputStream outputStream);
 
     void setXAttr(String path, String username, String key, String value);
+
+    void removeXAttr(String path, String username, String key);
 
     Optional<String> getXAttr(String path, String username, String key);
 
@@ -66,4 +74,6 @@ public interface HdfsClient
      * @return length of a file stored in HDFS, -1 if file not exists
      */
     long getLength(String path, String username);
+
+    boolean exist(String path, String username);
 }

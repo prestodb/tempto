@@ -16,10 +16,13 @@ package com.teradata.test.internal.hadoop.hdfs;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
+import com.google.inject.Scopes;
 import com.teradata.test.configuration.Configuration;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.initialization.AutoModuleProvider;
 import com.teradata.test.initialization.SuiteModuleProvider;
+import com.teradata.test.internal.hadoop.hdfs.revisions.RevisionStorage;
+import com.teradata.test.internal.hadoop.hdfs.revisions.RevisionStorageProvider;
 
 @AutoModuleProvider
 public class HdfsModuleProvider
@@ -33,8 +36,9 @@ public class HdfsModuleProvider
             @Override
             protected void configure()
             {
-                bind(HdfsClient.class).to(WebHDFSClient.class);
-                bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class);
+                bind(HdfsClient.class).to(WebHDFSClient.class).in(Scopes.SINGLETON);
+                bind(RevisionStorage.class).toProvider(RevisionStorageProvider.class).in(Scopes.SINGLETON);
+                bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class).in(Scopes.SINGLETON);
             }
         };
     }

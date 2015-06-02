@@ -14,15 +14,18 @@
 
 package com.teradata.test.internal.hadoop.hdfs;
 
+import com.google.common.base.Stopwatch;
 import com.teradata.test.fulfillment.hive.DataSource;
 import com.teradata.test.hadoop.hdfs.HdfsClient;
 import com.teradata.test.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import com.teradata.test.internal.hadoop.hdfs.revisions.RevisionStorage;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -32,19 +35,18 @@ public class DefaultHdfsDataSourceWriter
 
     private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
 
-    /**
-     * XAttr name stored on HDFS for each data source file.
-     */
-    private static final String REVISON_XATTR_NAME = "user.test-data-revision";
-
     private final HdfsClient hdfsClient;
     private final String hdfsUsername;
+    private final RevisionStorage revisionStorage;
 
     @Inject
-    public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient, @Named("hdfs.username") String hdfsUsername)
+    public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient,
+            RevisionStorage revisionStorage,
+            @Named("hdfs.username") String hdfsUsername)
     {
         this.hdfsClient = hdfsClient;
         this.hdfsUsername = hdfsUsername;
+        this.revisionStorage = revisionStorage;
     }
 
     @Override
@@ -54,15 +56,18 @@ public class DefaultHdfsDataSourceWriter
             return;
         }
 
+        revisionStorage.remove(dataSourcePath);
         hdfsClient.delete(dataSourcePath, hdfsUsername);
         hdfsClient.createDirectory(dataSourcePath, hdfsUsername);
         storeTableFiles(dataSourcePath, dataSource);
-        hdfsClient.setXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME, dataSource.revisionMarker());
+        revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
     }
 
     private boolean isDataUpToDate(String dataSourcePath, DataSource dataSource)
     {
-        Optional<String> storedRevisionMarker = hdfsClient.getXAttr(dataSourcePath, hdfsUsername, REVISON_XATTR_NAME);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        Optional<String> storedRevisionMarker = revisionStorage.get(dataSourcePath);
+        LOGGER.debug("revisionMarker.get(\"{}\") took {}ms", dataSourcePath, stopwatch.elapsed(TimeUnit.MILLISECONDS));
         if (storedRevisionMarker.isPresent()) {
             if (storedRevisionMarker.get().equals(dataSource.revisionMarker())) {
                 LOGGER.debug("Directory {} ({}) already exists, skipping generation of data", dataSourcePath, storedRevisionMarker.get());

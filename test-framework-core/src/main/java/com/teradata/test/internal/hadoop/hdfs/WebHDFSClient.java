@@ -78,8 +78,6 @@ public class WebHDFSClient
 
     private final CloseableHttpClient httpClient;
 
-    private static final boolean SUPPORT_OLDER_HADOOPS = true;
-
     @Inject
     public WebHDFSClient(
             @Named("hdfs.webhdfs.host") String webHdfsNameNodeHost,
@@ -192,17 +190,25 @@ public class WebHDFSClient
         HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == SC_NOT_FOUND) {
-                return -1;
-            }
-            else if (statusCode != SC_OK) {
+            if (statusCode != SC_OK) {
                 throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
             }
-
             return ((Integer) GET_FILESTATUS_LENGTH_JSON_PATH.read(response.getEntity().getContent())).longValue();
         }
         catch (IOException e) {
-            throw new RuntimeException("Could not read file " + path + " in hdfs, user: " + username, e);
+            throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
+        }
+    }
+
+    @Override
+    public boolean exist(String path, String username)
+    {
+        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+            return response.getStatusLine().getStatusCode() == SC_OK;
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
         }
     }
 
@@ -217,13 +223,24 @@ public class WebHDFSClient
             }
             logger.debug("Set xAttr {} = {} for {}, username: {}", key, value, path, username);
         }
-        catch (Exception e) {
-            if (SUPPORT_OLDER_HADOOPS && isXAttrsWebCallRelated(e)) {
-                logger.debug("Could not set xAttr for path: " + path + " in hdfs, user: " + username + "; e=" + e.getMessage());
+        catch (IOException e) {
+            throw new RuntimeException("Could not set xAttr for path: " + path + " in hdfs, user: " + username, e);
+        }
+    }
+
+    @Override
+    public void removeXAttr(String path, String username, String key)
+    {
+        Pair[] params = {Pair.of("xattr.name", key)};
+        HttpPut setXAttrRequest = new HttpPut(buildUri(path, username, "REMOVEXATTR", params));
+        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+            if (response.getStatusLine().getStatusCode() != SC_OK) {
+                throw invalidStatusException("SETXATTR", path, username, setXAttrRequest, response);
             }
-            else {
-                throw new RuntimeException("Could not set xAttr for path: " + path + " in hdfs, user: " + username, e);
-            }
+            logger.debug("Remove xAttr {} for {}, username: {}", key, path, username);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Could not remove xAttr for path: " + path + " in hdfs, user: " + username, e);
         }
     }
 
@@ -248,20 +265,9 @@ public class WebHDFSClient
             String xArgValue = StringUtils.strip(GET_XATTR_VALUE_JSON_PATH.read(responseContent).toString(), "\"");
             return Optional.of(xArgValue);
         }
-        catch (Exception e) {
-            if (SUPPORT_OLDER_HADOOPS && isXAttrsWebCallRelated(e)) {
-                logger.debug("Could not get xAttr for path: " + path + " in hdfs, user: " + username + "; e=" + e.getMessage());
-                return Optional.empty();
-            }
-            else {
-                throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
-            }
+        catch (IOException e) {
+            throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
         }
-    }
-
-    private boolean isXAttrsWebCallRelated(Exception e)
-    {
-        return e.getMessage().contains("XATTR") && e.getMessage().contains("Operation");
     }
 
     private String executeAndGetRedirectUri(HttpUriRequest request)

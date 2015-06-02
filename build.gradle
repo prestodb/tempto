@@ -101,7 +101,7 @@ ext.test_framework_logging_log4j = project(':test-framework-logging-log4j')
 ext.test_framework_examples = project(':test-framework-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
-ext.test_framework_version = '1.0.27-SNAPSHOT' // changed by arosa
+ext.test_framework_version = '1.0.28-SNAPSHOT' // changed by arosa
 ext.publish_maven_repository = {
   url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
   credentials {
