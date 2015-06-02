@@ -193,7 +193,7 @@ public class WebHDFSClient
             if (statusCode != SC_OK) {
                 throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
             }
-            return ((Integer) GET_FILESTATUS_LENGTH_JSON_PATH.read(response.getEntity().getContent())).longValue();
+            return JsonPath.parse(response.getEntity().getContent()).read(GET_FILESTATUS_LENGTH_JSON_PATH, Long.class);
         }
         catch (IOException e) {
             throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
