@@ -21,8 +21,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import java.util.UUID;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class RevisionStorageProvider
@@ -61,23 +59,19 @@ public class RevisionStorageProvider
 
     private boolean xAttrsSupported()
     {
-        String tmpFilePath = "/tmp/" + UUID.randomUUID().toString();
         try {
-            hdfsClient.saveFile(tmpFilePath, hdfsUser, "RevisionMarkerFactory.xAttrsSupported()");
-            hdfsClient.setXAttr(tmpFilePath, hdfsUser, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
-            boolean supported = hdfsClient.getXAttr(tmpFilePath, hdfsUser, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
-            hdfsClient.removeXAttr(tmpFilePath, hdfsUser, TEST_X_ATTR_KEY);
+            hdfsClient.createDirectory(testDataBasePath, hdfsUser);
+            hdfsClient.setXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
+            boolean supported = hdfsClient.getXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
+            hdfsClient.removeXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY);
             return supported;
         }
         catch (RuntimeException e) {
             if (isXAttrsWebCallRelated(e)) {
-                LOGGER.debug("Could not get xAttr for path: " + tmpFilePath + " in hdfs, user: " + hdfsUser + "; e=" + e.getMessage());
+                LOGGER.debug("Could not get xAttr for path: " + testDataBasePath + " in hdfs, user: " + hdfsUser + "; e=" + e.getMessage());
                 return false;
             }
             throw e;
-        }
-        finally {
-            hdfsClient.delete(tmpFilePath, hdfsUser);
         }
     }
 
