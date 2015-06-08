@@ -26,7 +26,7 @@ import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import java.util.Set;
 
 /**
- * Calls dropAllTables on all table managers once per product-test execution, before other fulfillers
+ * Calls dropAllTables on all table managers once per Tempto execution, before other fulfillers
  */
 public class TableManagerCleaner
     implements RequirementFulfiller

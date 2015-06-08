@@ -1,4 +1,4 @@
-# Product test framework
+# Tempto - test framework
 
 This project allows developers to write and execute tests for SQL databases running
 on Hadoop. Individual test requirements such as data generation, HDFS file copy/storage
@@ -45,7 +45,7 @@ how to setup maven plugins...
 
 ## Logging
 
-Test framework uses SLF4J for logging.
+Tempto uses SLF4J for logging.
 
 ### Log file per test
 
@@ -59,8 +59,8 @@ log4j.category.com.teradata.tempto=DEBUG
 log4j.category.org.reflections=WARN
 ```
 
-With this appender for each test suite run new logs directory is created within /tmp/testlogs. Name of directory
-corresponds to time when test framework is run (e.g. /tmp/testlogs/2015-04-22_15-23-09).
+With this appender for each test suite run new logs directory is created within /tmp/tempto_logs. Name of directory
+corresponds to time when Tempto is run (e.g. /tmp/tempto_logs/2015-04-22_15-23-09).
 Log messages coming from different tests are logged to separate files.
 
 Example contents of log directory:
@@ -81,7 +81,7 @@ java -Dcom.teradata.tempto.root.logs.dir=/my/root/logs/dir ...
 
 ### logging test id
 
-Test framework sets up 'test_id' entry in SLF4J logs context (MDC). It corresponds to name of test currently being run.
+Tempto sets up 'test_id' entry in SLF4J logs context (MDC). It corresponds to name of test currently being run.
 It can be used in logging patterns. If you are using log4j as a backend you can use it as below:
 ```
 log4j.appender.CONSOLE=org.apache.log4j.ConsoleAppender
@@ -116,7 +116,7 @@ refer to the **Configuration** section below.
 
 ```Shell
 $ cd tempto
-$ bin/product-test \
+$ bin/tempto \
      --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
      --tests-package=com.teradata.tempto.examples \
      --exclude-groups quarantine \
@@ -125,7 +125,7 @@ Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°�
 ...
 [2015-04-02 15:21:48] Completed 18 tests
 [2015-04-02 15:21:48] 17 SUCCEEDED      /      1 FAILED      /      0 SKIPPED
-[2015-04-02 15:21:48] For tests logs see: testlogs/2015-04-02_15-15-16
+[2015-04-02 15:21:48] For tests logs see: tempto_logs/2015-04-02_15-15-16
 See /tmp/test-reports/index.html for detailed results.
 ```
 
@@ -152,7 +152,7 @@ Configuration files locations can be overidden by using following java system pr
           -Dtempto.configuration.local=file:/tmp/my_local_configuration.yaml
 ```
 
-If you start tests using helper `product-test` script you can use 
+If you start tests using helper `tempto` script you can use 
 `--tempto-configuration` and `--tempto-configuration-local` options to override
 configuration files. 
 
@@ -211,14 +211,14 @@ This section is used to configure various properties used during test execution.
 ```YAML
 tests:
   hdfs:
-    path: /product-test  # where to store test data on HDFS
+    path: /tempto  # where to store test data on HDFS
 ```
 
 ## Java based tests
 
 ### Example
 
-See com.teradata.test.examples.SimpleQueryTest in test-framework-examples module.
+See com.teradata.tempto.examples.SimpleQueryTest in tempto-examples module.
 
 ### Requirements
 
@@ -535,14 +535,14 @@ Java based tests can be simply run as TestNG tests.
 
 File convention based tests: TODO
 
-### Shell product-test launcher
+### Shell tempto launcher
 
-Tests can be run using the `bin/product-test` script. This is a wrapper around a command
+Tests can be run using the `bin/tempto` script. This is a wrapper around a command
 line invocation of the TestNG JVM. For a verbose description of all the execution options
-supported by the `bin/product-test` script run:
+supported by the `bin/tempto` script run:
 
 ```Shell
-$ ./bin/product-test --help
+$ ./bin/tempto --help
 ```
 
 **Basic parameters**
@@ -558,7 +558,7 @@ tests found in class path will be executed.
 Example run command would look like this:
 
 ```Shell
-$ ./bin/product-test --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
+$ ./bin/tempto --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
                      --tests-package=com.teradata.tempto.examples
 ```
 
@@ -599,11 +599,11 @@ By default all tests found in classpath are executed but user may limit that.
 
 **Debugging**
 
-If you want to run tests from product-test script under debuger use --debug parameter. When this parameter is
-specified product tests framework will suspend execution at beginning and wait for debugger on TCP port _5005_.
+If you want to run tests from tempto script under debuger use --debug parameter. When this parameter is
+specified Tempto will suspend execution at beginning and wait for debugger on TCP port _5005_.
 
 ```Shell
-$ bin/product-test \
+$ bin/tempto \
      --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
      --tests-package=com.teradata.tempto.examples \
      --exclude-groups quarantine \

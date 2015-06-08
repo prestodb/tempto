@@ -26,7 +26,7 @@ databases:
 
 tests:
   hdfs:
-    path: /product-test
+    path: /tempto
 
 ssh_roles:
   td_express:

@@ -40,9 +40,9 @@ PyPIRCCommand._get_rc_file = get_custom_rc_file
 # =====================================================
 
 setup(
-    name='product-test',
+    name='tempto',
     version='1.0',
-    description='product-test will run your product tests using a custom SQL on Hadoop test harness.',
+    description='tempto will run your product tests using a custom SQL on Hadoop test harness.',
     author='Teradata Corporation',
     author_email='anton.petrov@teradata.com',
     url='https://github.com/teradatalabs/tempto',
@@ -50,6 +50,6 @@ setup(
     include_package_data=True,
     package_data={'runner': ['*.xml']},
     keywords=['sql', 'hadoop', 'tempto'],
-    entry_points={'console_scripts': ['product-test = runner.test_runner:main']},
+    entry_points={'console_scripts': ['tempto = runner.test_runner:main']},
     install_requires=['argparse>=1.3.0']
 )

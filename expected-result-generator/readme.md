@@ -5,7 +5,7 @@
 SQL Result Generator
 ================
 
-This tool generates expected result files for use with the product-test framework's convention based tests.
+This tool generates expected result files for use with the Tempto's convention based tests.
 
 Building the tool
 -----------------

@@ -28,7 +28,7 @@ class TestRunnerParser(object):
     @staticmethod
     def __create_argparser():
         parser = argparse.ArgumentParser(
-            prog='product-test',
+            prog='tempto',
             description='Run a set of product tests',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter
         )

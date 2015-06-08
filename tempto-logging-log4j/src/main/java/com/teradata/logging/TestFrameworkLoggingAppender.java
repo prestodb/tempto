@@ -89,7 +89,7 @@ public class TestFrameworkLoggingAppender
             return userLogsDir;
         }
         else {
-            return getTempDirectoryPath() + "/testlogs";
+            return getTempDirectoryPath() + "/tempto_logs";
         }
     }
 
