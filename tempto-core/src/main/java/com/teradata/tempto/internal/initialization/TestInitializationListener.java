@@ -39,6 +39,7 @@ import com.teradata.tempto.internal.context.TestContextStack;
 import com.teradata.tempto.internal.fulfillment.table.ImmutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.MutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.TableManagerCleaner;
+import com.teradata.tempto.internal.logging.LoggingMdcHelper;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -64,6 +65,8 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testConte
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.tempto.internal.ReflectionHelper.instantiate;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.logging.LoggingMdcHelper.cleanLoggingMdc;
+import static com.teradata.tempto.internal.logging.LoggingMdcHelper.setupLoggingMdcForTest;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -182,6 +185,7 @@ public class TestInitializationListener
     @Override
     public void onTestStart(ITestResult testResult)
     {
+        setupLoggingMdcForTest(testResult);
         checkState(suiteTestContextStack.isPresent(), "test suite not initialized");
         GuiceTestContext initTestContext = suiteTestContextStack.get().peek().createChildContext(emptyList(), getTestModules(testResult));
         TestContextStack<GuiceTestContext> testContextStack = new TestContextStack<>();
@@ -234,6 +238,7 @@ public class TestInitializationListener
         finally {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
             doCleanup(testContextStack, testMethodLevelFulfillers);
+            cleanLoggingMdc();
         }
     }
 

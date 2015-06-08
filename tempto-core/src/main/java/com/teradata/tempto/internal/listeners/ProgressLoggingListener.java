@@ -28,7 +28,6 @@ public class ProgressLoggingListener
         implements ITestListener
 {
     private final static Logger LOGGER = LoggerFactory.getLogger(ProgressLoggingListener.class);
-    public static final String MDC_TEST_ID_KEY = "test_id";
 
     private int started;
     private int succeeded;
@@ -45,20 +44,14 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
-        String testId = getMdcTestId(testCase);
-        org.slf4j.MDC.put("test_id", testId);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");
         started++;
         LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, getMethodsCountFromContext(testCase.getTestContext()), testId, Joiner.on(", ").join(testCase.getMethod().getGroups()));
+                started, getMethodsCountFromContext(testCase.getTestContext()), new TestInfo(testCase).getShortTestId(), Joiner.on(", ").join(testCase.getMethod().getGroups()));
     }
 
-    private String getMdcTestId(ITestResult testCase)
-    {
-        return new TestInfo(testCase).getShortTestId();
-    }
 
     @Override
     public void onTestSuccess(ITestResult testCase)
@@ -98,7 +91,6 @@ public class ProgressLoggingListener
     @Override
     public void onFinish(ITestContext context)
     {
-        org.slf4j.MDC.remove(MDC_TEST_ID_KEY);
         LOGGER.info("");
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
