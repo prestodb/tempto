@@ -101,7 +101,7 @@ public class JdbcConnection {
   }
 
   /**
-   * @param jdbcUrl    jdbc:hadapt://[host]:[port]/[database]
+   * @param jdbcUrl    jdbc connection URL
    * @param user       Database user name
    * @param password   Database password
    */

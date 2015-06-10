@@ -92,7 +92,6 @@ public class ConventionBasedTestFactory
     {
         try {
             // TODO tree traversal for ZIP file system (when resources are inside jar) results with Exception
-            // TODO https://hadapt.jira.com/browse/SWARM-246
             return Files.list(path)
                     .flatMap(child -> createTestsForPath(child, testNamePrefix).stream())
                     .collect(toList());
