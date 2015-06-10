@@ -19,7 +19,7 @@ Currently we only support HDFS as a datastore. That means that on your Hadoop
 cluster you'll need the following:
 
 * Running Hadoop cluster with [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html)
-We suggest that cluster support [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtededAttributes.html). 
+* We suggest that cluster support [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtededAttributes.html). 
 Having that feature enabled improves test performance slightly.
 
 
