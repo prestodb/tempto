@@ -4,7 +4,7 @@ This project allows developers to write and execute tests for SQL databases runn
 on Hadoop. Individual test requirements such as data generation, HDFS file copy/storage
 of generated data and schema creation are expressed declaratively and are automatically
 fulfilled by the framework. Developers can write tests using Java (using a TestNG like
-paradigm and AssertJ style assertion) or by providing query files with expected resuls.
+paradigm and AssertJ style assertion) or by providing query files with expected results.
 
 
 ## Prerequisites
@@ -19,7 +19,8 @@ Currently we only support HDFS as a datastore. That means that on your Hadoop
 cluster you'll need the following:
 
 * Running Hadoop cluster with [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html)
-and [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtendedAttributes.html) enabled
+We suggest that cluster support [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtededAttributes.html). 
+Having that feature enabled improves test performance slightly.
 
 
 ## Basic concepts
