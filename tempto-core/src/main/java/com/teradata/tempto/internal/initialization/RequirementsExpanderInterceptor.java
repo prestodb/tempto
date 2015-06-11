@@ -20,14 +20,23 @@ import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
 import org.testng.ITestContext;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 import org.testng.internal.MethodInstance;
+import org.testng.internal.Parameters;
 import org.testng.internal.TestNGMethod;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static java.util.Arrays.asList;
 
 /**
  * Interceptor which for each TestNGMethod creates one or more RequirementAwareTestNGMethods.
@@ -63,7 +72,6 @@ public class RequirementsExpanderInterceptor
          * For some unknown reason TestNG calls method interceptors more than once for
          * same methods set. We determine if we already seen method by looking at type of internal TestNGMethod field.
          */
-
         List<IMethodInstance> allExpandedMethods = Lists.newArrayList();
         for (IMethodInstance method : methods) {
             if (isMethodAlreadyExpanded(method)) {
@@ -71,13 +79,56 @@ public class RequirementsExpanderInterceptor
             }
             else {
                 List<IMethodInstance> newExpandedMethods = expandMethod(method);
-                seenMethodsCount += newExpandedMethods.size();
+                incrementSeenMethodsCount(newExpandedMethods);
                 allExpandedMethods.addAll(newExpandedMethods);
             }
         }
 
         context.setAttribute(METHODS_COUNT_KEY, seenMethodsCount);
         return allExpandedMethods;
+    }
+
+    private void incrementSeenMethodsCount(List<IMethodInstance> newExpandedMethods)
+    {
+        for (IMethodInstance newExpandedMethod : newExpandedMethods) {
+            Optional<Object[][]> parametersForMethod = getParametersForMethod(newExpandedMethod);
+            if (parametersForMethod.isPresent()) {
+                seenMethodsCount += parametersForMethod.get().length;
+            } else {
+                seenMethodsCount++;
+            }
+        }
+    }
+
+    private Optional<Object[][]> getParametersForMethod(IMethodInstance method)
+    {
+        Test testAnnotation = method.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class);
+        Class dataProviderClass = testAnnotation.dataProviderClass();
+        if (dataProviderClass == null || dataProviderClass == Object.class) {
+            dataProviderClass = method.getMethod().getRealClass();
+        }
+        String dataProviderName = testAnnotation.dataProvider();
+        if (dataProviderName.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Optional<Method> dataProviderMethod = asList(dataProviderClass.getMethods()).stream().filter(
+                m -> {
+                    DataProvider annotation = m.getAnnotation(DataProvider.class);
+                    return annotation != null && annotation.name().equals(dataProviderName);
+                }
+        ).findFirst();
+        if (dataProviderMethod.isPresent()) {
+            try {
+                return Optional.of((Object[][]) dataProviderMethod.get().invoke(method.getInstance()));
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Exception while calling data provider for " + method, e);
+            }
+        }
+        else {
+            return Optional.empty();
+        }
     }
 
     private boolean isMethodAlreadyExpanded(IMethodInstance method) {return method.getMethod() instanceof RequirementsAwareTestNGMethod;}
