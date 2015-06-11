@@ -16,6 +16,7 @@ package com.teradata.tempto.internal.initialization;
 
 import com.google.common.collect.Lists;
 import com.teradata.tempto.Requirement;
+import com.teradata.tempto.internal.DataProviders;
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
@@ -24,6 +25,7 @@ import org.testng.internal.MethodInstance;
 import org.testng.internal.TestNGMethod;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -63,7 +65,6 @@ public class RequirementsExpanderInterceptor
          * For some unknown reason TestNG calls method interceptors more than once for
          * same methods set. We determine if we already seen method by looking at type of internal TestNGMethod field.
          */
-
         List<IMethodInstance> allExpandedMethods = Lists.newArrayList();
         for (IMethodInstance method : methods) {
             if (isMethodAlreadyExpanded(method)) {
@@ -71,13 +72,25 @@ public class RequirementsExpanderInterceptor
             }
             else {
                 List<IMethodInstance> newExpandedMethods = expandMethod(method);
-                seenMethodsCount += newExpandedMethods.size();
+                incrementSeenMethodsCount(newExpandedMethods);
                 allExpandedMethods.addAll(newExpandedMethods);
             }
         }
 
         context.setAttribute(METHODS_COUNT_KEY, seenMethodsCount);
         return allExpandedMethods;
+    }
+
+    private void incrementSeenMethodsCount(List<IMethodInstance> newExpandedMethods)
+    {
+        for (IMethodInstance newExpandedMethod : newExpandedMethods) {
+            Optional<Object[][]> parametersForMethod = DataProviders.getParametersForMethod(newExpandedMethod.getMethod());
+            if (parametersForMethod.isPresent()) {
+                seenMethodsCount += parametersForMethod.get().length;
+            } else {
+                seenMethodsCount++;
+            }
+        }
     }
 
     private boolean isMethodAlreadyExpanded(IMethodInstance method) {return method.getMethod() instanceof RequirementsAwareTestNGMethod;}
