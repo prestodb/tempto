@@ -15,16 +15,20 @@
 package com.teradata.tempto.internal.query;
 
 import com.teradata.tempto.assertions.QueryAssert.Row;
+import com.teradata.tempto.util.DateTimeUtils;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.JDBCType;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
+import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInUTC;
 
 /**
  * This class transforms string values to Java types based on column types.
@@ -94,7 +98,7 @@ public class QueryRowMapper
                 return Time.valueOf(value);
             case TIMESTAMP:
             case TIMESTAMP_WITH_TIMEZONE:
-                return Timestamp.valueOf(value);
+                return parseTimestampInUTC(value);
             default:
                 throw new IllegalArgumentException("Unsupported JDBC type conversion, type: " + expectedType + ", value: " + value);
         }

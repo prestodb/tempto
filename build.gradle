@@ -92,7 +92,8 @@ ext.libraries = [
         mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}",
         postgresql_jdbc    : "org.postgresql:postgresql:9.3-1102-jdbc4",
         commons_cli  : "commons-cli:commons-cli:1.2",
-        freemarker   : "org.freemarker:freemarker:${versions.freemarker}"
+        freemarker   : "org.freemarker:freemarker:${versions.freemarker}",
+        joda         : "joda-time:joda-time:2.4"
 ]
 
 ext.tempto_core = project(':tempto-core')
