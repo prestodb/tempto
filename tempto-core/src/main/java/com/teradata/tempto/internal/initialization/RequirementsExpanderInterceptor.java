@@ -16,27 +16,20 @@ package com.teradata.tempto.internal.initialization;
 
 import com.google.common.collect.Lists;
 import com.teradata.tempto.Requirement;
+import com.teradata.tempto.internal.DataProviders;
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import org.testng.IMethodInstance;
 import org.testng.IMethodInterceptor;
 import org.testng.ITestContext;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 import org.testng.internal.MethodInstance;
-import org.testng.internal.Parameters;
 import org.testng.internal.TestNGMethod;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
-import static java.util.Arrays.asList;
 
 /**
  * Interceptor which for each TestNGMethod creates one or more RequirementAwareTestNGMethods.
@@ -91,43 +84,12 @@ public class RequirementsExpanderInterceptor
     private void incrementSeenMethodsCount(List<IMethodInstance> newExpandedMethods)
     {
         for (IMethodInstance newExpandedMethod : newExpandedMethods) {
-            Optional<Object[][]> parametersForMethod = getParametersForMethod(newExpandedMethod);
+            Optional<Object[][]> parametersForMethod = DataProviders.getParametersForMethod(newExpandedMethod.getMethod());
             if (parametersForMethod.isPresent()) {
                 seenMethodsCount += parametersForMethod.get().length;
             } else {
                 seenMethodsCount++;
             }
-        }
-    }
-
-    private Optional<Object[][]> getParametersForMethod(IMethodInstance method)
-    {
-        Test testAnnotation = method.getMethod().getConstructorOrMethod().getMethod().getAnnotation(Test.class);
-        Class dataProviderClass = testAnnotation.dataProviderClass();
-        if (dataProviderClass == null || dataProviderClass == Object.class) {
-            dataProviderClass = method.getMethod().getRealClass();
-        }
-        String dataProviderName = testAnnotation.dataProvider();
-        if (dataProviderName.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Optional<Method> dataProviderMethod = asList(dataProviderClass.getMethods()).stream().filter(
-                m -> {
-                    DataProvider annotation = m.getAnnotation(DataProvider.class);
-                    return annotation != null && annotation.name().equals(dataProviderName);
-                }
-        ).findFirst();
-        if (dataProviderMethod.isPresent()) {
-            try {
-                return Optional.of((Object[][]) dataProviderMethod.get().invoke(method.getInstance()));
-            }
-            catch (Exception e) {
-                throw new RuntimeException("Exception while calling data provider for " + method, e);
-            }
-        }
-        else {
-            return Optional.empty();
         }
     }
 
