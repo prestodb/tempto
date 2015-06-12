@@ -12,9 +12,19 @@
  * limitations under the License.
  */
 
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.2"
+  }
+}
+
 apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'maven'
+apply plugin: 'io.codearte.nexus-staging'
 
 dependencies {
   compile libraries.assertj
@@ -40,23 +50,80 @@ dependencies {
   testCompile libraries.mina_sshd
 }
 
-task sourceJar(type: Jar) {
+// project information
+group 'com.teradata.tempto'
+archivesBaseName = 'teradata-tempto'
+version tempto_version
+
+nexusStaging {
+  packageGroup = group
+  stagingProfileId = '176117bc76f90b'
+}
+
+javadoc {
+  failOnError = false
+}
+
+// javadoc.jar generation
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+// sources.jar generation
+task sourcesJar (type : Jar) {
+  classifier = 'sources'
   from sourceSets.main.allJava
 }
 
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId 'com.teradata.tempto'
-      artifactId 'tempto-core'
-      version tempto_version
-      from components.java
-      artifact sourceJar {
-        classifier 'sources'
+artifacts {
+  archives javadocJar, sourcesJar
+}
+
+signing {
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: nexusUsername, password: nexusPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: nexusUsername, password: nexusPassword)
+      }
+
+      pom.project {
+        name 'tempto-core'
+        packaging 'jar'
+        artifactId 'tempto-core'
+        description 'Tempto - test framework'
+        url 'https://github.com/prestodb/tempto'
+        scm {
+          url 'git@github.com:prestodb/tempto.git'
+          connection 'scm:git:git@github.com:prestodb/tempto.git'
+          developerConnection 'scm:git:git@github.com:prestodb/tempto.git'
+        }
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/license/LICENSE-2.0.txt'
+          }
+        }
+        developers {
+          developer {
+            id 'bdch'
+            name 'Boston Development Center for Hadoop'
+            email 'EB230060 aat teradata doot com'
+          }
+        }
       }
     }
   }
-  repositories.maven publish_maven_repository
 }
 
 task buildFatJar(type: Jar, dependsOn: assemble) {

@@ -40,6 +40,6 @@ publishing {
       }
     }
   }
-  repositories.maven publish_maven_repository
+  repositories publish_repositories
 }
 

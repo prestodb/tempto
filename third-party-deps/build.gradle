@@ -62,5 +62,5 @@ publishing {
       artifacts = ["$libsDir/presto-jdbc-all.jar"]
     }
   }
-  repositories.maven publish_maven_repository
+  repositories publish_repositories
 }

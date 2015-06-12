@@ -101,12 +101,17 @@ ext.tempto_logging_log4j = project(':tempto-logging-log4j')
 ext.tempto_examples = project(':tempto-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
-ext.tempto_version = '1.0.28-SNAPSHOT' // changed by arosa
-ext.publish_maven_repository = {
-  url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
-  credentials {
-    username 'automation'
-    password 'hadoopdb'
+ext.tempto_version = '1.0.28' // changed by pnowojski
+
+
+ext.publish_repositories = {
+  maven {
+    name 'nexus'
+    url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
+    credentials {
+      username 'automation'
+      password 'hadoopdb'
+    }
   }
 }
 
