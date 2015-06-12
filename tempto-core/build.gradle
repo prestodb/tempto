@@ -25,6 +25,7 @@ apply plugin: 'java'
 apply plugin: 'signing'
 apply plugin: 'maven'
 apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'maven-publish'
 
 dependencies {
   compile libraries.assertj
@@ -55,11 +56,6 @@ group 'com.teradata.tempto'
 archivesBaseName = 'teradata-tempto'
 version tempto_version
 
-nexusStaging {
-  packageGroup = group
-  stagingProfileId = '176117bc76f90b'
-}
-
 javadoc {
   failOnError = false
 }
@@ -78,6 +74,46 @@ task sourcesJar (type : Jar) {
 
 artifacts {
   archives javadocJar, sourcesJar
+}
+
+// publishing to our nexus
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      groupId 'com.teradata.tempto'
+      artifactId 'framework-logging-log4j'
+      version tempto_version
+      from components.java
+      artifact sourcesJar {
+        classifier 'sources'
+      }
+    }
+  }
+  repositories publish_repositories
+}
+
+task buildFatJar(type: Jar, dependsOn: assemble) {
+  appendix = 'all'
+  from sourceSets.main.output
+  from {
+    configurations.runtime.collect {
+      it.isDirectory() ? it : zipTree(it)
+    }
+  }
+}
+
+license {
+  exclude "**/convention/sample-test/**/*.sql"
+}
+
+build.dependsOn.add(buildFatJar)
+
+// publishing to sonatype
+
+nexusStaging {
+  packageGroup = group
+  stagingProfileId = '176117bc76f90b'
 }
 
 signing {
@@ -125,19 +161,3 @@ uploadArchives {
     }
   }
 }
-
-task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = 'all'
-  from sourceSets.main.output
-  from {
-    configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
-}
-
-license {
-  exclude "**/convention/sample-test/**/*.sql"
-}
-
-build.dependsOn.add(buildFatJar)
