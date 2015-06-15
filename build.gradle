@@ -130,7 +130,7 @@ nexusStaging {
 }
 */
 
-configure(subprojects - project(':expected-result-generator') - project(':tempto-examples') - project(':third-party-deps')) {
+configure(subprojects - expected_result_generator - tempto_examples - third_party_deps) {
   apply plugin: 'signing'
   apply plugin: 'java'
   apply plugin: 'maven'
