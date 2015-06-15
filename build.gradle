@@ -12,15 +12,6 @@
  * limitations under the License.
  */
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.2"
-  }
-}
-
 plugins {
   id "com.github.hierynomus.license" version "0.11.0"
 }
@@ -28,8 +19,6 @@ plugins {
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
-//Not working for bundles...
-//apply plugin: 'io.codearte.nexus-staging'
 
 plugins.withType(JavaPlugin) {
   sourceCompatibility = 1.8
@@ -121,14 +110,6 @@ task packageAndUploadLaunchScript(type: Exec) {
   workingDir 'tempto-launch-script/'
   commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
 }
-
-/*
-Not working for bundles...
-nexusStaging {
-  packageGroup = 'com.teradata.tempto'
-  stagingProfileId = '7edbe315063867'
-}
-*/
 
 configure(subprojects - expected_result_generator - tempto_examples - third_party_deps) {
   apply plugin: 'signing'
