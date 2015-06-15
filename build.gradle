@@ -12,6 +12,15 @@
  * limitations under the License.
  */
 
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.2"
+  }
+}
+
 plugins {
   id "com.github.hierynomus.license" version "0.11.0"
 }
@@ -19,7 +28,8 @@ plugins {
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'maven-publish'
+//Not working for bundles...
+//apply plugin: 'io.codearte.nexus-staging'
 
 plugins.withType(JavaPlugin) {
   sourceCompatibility = 1.8
@@ -101,20 +111,7 @@ ext.tempto_logging_log4j = project(':tempto-logging-log4j')
 ext.tempto_examples = project(':tempto-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
-ext.tempto_version = '1.0.29-SNAPSHOT' // changed by pnowojski
-
-
-ext.publish_repositories = {
-  maven {
-    name 'nexus'
-    url 'http://phabricator.td.teradata.com:8081/nexus/content/repositories/test-framework'
-    credentials {
-      username 'automation'
-      password 'hadoopdb'
-    }
-  }
-}
-
+ext.tempto_version = '1.0.30-SNAPSHOT' // changed by pnowojski
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
@@ -123,5 +120,89 @@ task wrapper(type: Wrapper) {
 task packageAndUploadLaunchScript(type: Exec) {
   workingDir 'tempto-launch-script/'
   commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
+}
+
+/*
+Not working for bundles...
+nexusStaging {
+  packageGroup = 'com.teradata.tempto'
+  stagingProfileId = '7edbe315063867'
+}
+*/
+
+configure(subprojects - project(':expected-result-generator') - project(':tempto-examples') - project(':third-party-deps')) {
+  apply plugin: 'signing'
+  apply plugin: 'java'
+  apply plugin: 'maven'
+
+  // project information
+  version tempto_version
+
+  // plugins configuration
+  javadoc {
+    // TODO: SWARM-774
+    failOnError = false
+  }
+
+  // javadoc.jar generation
+  task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+  }
+
+  // sources.jar generation
+  task sourcesJar (type : Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+  }
+
+  signing {
+    sign configurations.archives
+  }
+
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
+
+  // publishing to sonatype
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+          authentication(userName: nexusUsername, password: nexusPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+          authentication(userName: nexusUsername, password: nexusPassword)
+        }
+
+        pom.project {
+          packaging 'jar'
+          description 'Tempto - test framework'
+          url 'https://github.com/prestodb/tempto'
+          scm {
+            url 'git@github.com:prestodb/tempto.git'
+            connection 'scm:git:git@github.com:prestodb/tempto.git'
+            developerConnection 'scm:git:git@github.com:prestodb/tempto.git'
+          }
+          licenses {
+            license {
+              name 'The Apache Software License, Version 2.0'
+              url 'http://www.apache.org/license/LICENSE-2.0.txt'
+            }
+          }
+          developers {
+            developer {
+              id 'thc'
+              name 'Teradata Hadoop Center'
+              email 'EB230060 aat teradata doot com'
+            }
+          }
+        }
+      }
+    }
+  }
 }
 

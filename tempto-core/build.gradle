@@ -12,20 +12,9 @@
  * limitations under the License.
  */
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.2"
-  }
-}
-
 apply plugin: 'java'
 apply plugin: 'signing'
 apply plugin: 'maven'
-apply plugin: 'io.codearte.nexus-staging'
-apply plugin: 'maven-publish'
 
 dependencies {
   compile libraries.assertj
@@ -52,46 +41,8 @@ dependencies {
 }
 
 // project information
-group 'com.teradata.tempto'
-archivesBaseName = 'teradata-tempto'
-version tempto_version
-
-javadoc {
-  failOnError = false
-}
-
-// javadoc.jar generation
-task javadocJar(type: Jar) {
-  classifier = 'javadoc'
-  from javadoc
-}
-
-// sources.jar generation
-task sourcesJar (type : Jar) {
-  classifier = 'sources'
-  from sourceSets.main.allJava
-}
-
-artifacts {
-  archives javadocJar, sourcesJar
-}
-
-// publishing to our nexus
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId 'com.teradata.tempto'
-      artifactId 'framework-logging-log4j'
-      version tempto_version
-      from components.java
-      artifact sourcesJar {
-        classifier 'sources'
-      }
-    }
-  }
-  repositories publish_repositories
-}
+ext.artifactId = 'tempto-core'
+archivesBaseName = artifactId
 
 task buildFatJar(type: Jar, dependsOn: assemble) {
   appendix = 'all'
@@ -110,53 +61,12 @@ license {
 build.dependsOn.add(buildFatJar)
 
 // publishing to sonatype
-
-nexusStaging {
-  packageGroup = group
-  stagingProfileId = '176117bc76f90b'
-}
-
-signing {
-  sign configurations.archives
-}
-
 uploadArchives {
   repositories {
     mavenDeployer {
-      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        authentication(userName: nexusUsername, password: nexusPassword)
-      }
-
-      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        authentication(userName: nexusUsername, password: nexusPassword)
-      }
-
       pom.project {
-        name 'tempto-core'
-        packaging 'jar'
-        artifactId 'tempto-core'
-        description 'Tempto - test framework'
-        url 'https://github.com/prestodb/tempto'
-        scm {
-          url 'git@github.com:prestodb/tempto.git'
-          connection 'scm:git:git@github.com:prestodb/tempto.git'
-          developerConnection 'scm:git:git@github.com:prestodb/tempto.git'
-        }
-        licenses {
-          license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/license/LICENSE-2.0.txt'
-          }
-        }
-        developers {
-          developer {
-            id 'bdch'
-            name 'Boston Development Center for Hadoop'
-            email 'EB230060 aat teradata doot com'
-          }
-        }
+        name artifactId
+        artifactId artifactId
       }
     }
   }

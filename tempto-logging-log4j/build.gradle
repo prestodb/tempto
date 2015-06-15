@@ -24,22 +24,18 @@ dependencies {
   compile libraries.reflections
 }
 
-task sourceJar(type: Jar) {
-  from sourceSets.main.allJava
-}
+// project information
+ext.artifactId = 'tempto-logging-log4j'
+archivesBaseName = artifactId
 
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId 'com.teradata.tempto'
-      artifactId 'framework-logging-log4j'
-      version tempto_version
-      from components.java
-      artifact sourceJar {
-        classifier 'sources'
+// publishing to sonatype
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name artifactId
+        artifactId artifactId
       }
     }
   }
-  repositories publish_repositories
 }
-
