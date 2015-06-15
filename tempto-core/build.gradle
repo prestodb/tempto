@@ -13,8 +13,8 @@
  */
 
 apply plugin: 'java'
-apply plugin: 'groovy'
-apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'maven'
 
 dependencies {
   compile libraries.assertj
@@ -40,24 +40,9 @@ dependencies {
   testCompile libraries.mina_sshd
 }
 
-task sourceJar(type: Jar) {
-  from sourceSets.main.allJava
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      groupId 'com.teradata.tempto'
-      artifactId 'tempto-core'
-      version tempto_version
-      from components.java
-      artifact sourceJar {
-        classifier 'sources'
-      }
-    }
-  }
-  repositories.maven publish_maven_repository
-}
+// project information
+ext.artifactId = 'tempto-core'
+archivesBaseName = artifactId
 
 task buildFatJar(type: Jar, dependsOn: assemble) {
   appendix = 'all'
@@ -74,3 +59,15 @@ license {
 }
 
 build.dependsOn.add(buildFatJar)
+
+// publishing to sonatype
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name artifactId
+        artifactId artifactId
+      }
+    }
+  }
+}

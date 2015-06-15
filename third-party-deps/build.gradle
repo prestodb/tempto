@@ -14,7 +14,6 @@
 
 apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'maven-publish'
 
 configurations {
   hiveJdbcFatJar
@@ -45,22 +44,22 @@ task copyProvidedDeps(type: Copy, dependsOn: hiveJdbcFatJar) {
 
 build.dependsOn.add([hiveJdbcFatJar, copyProvidedDeps])
 
-publishing {
-  publications {
-    hiveJdbcFatJar(MavenPublication) {
-      groupId 'org.apache.hive'
-      artifactId 'hive-jdbc-all'
-      version '1.0-SNAPSHOT'
+artifacts {
+  archives file: file("$buildDir/libs/hive-jdbc-all.jar"), name: 'hive-jdbc-all', type: 'jar'
+  archives file: file("$buildDir/libs/presto-jdbc-all.jar"), name: 'presto-jdbc-all', type: 'jar'
+}
 
-      artifacts = ["$libsDir/hive-jdbc-all.jar"]
-    }
-    prestoJdbcFatJar(MavenPublication) {
-      groupId 'com.facebook.presto'
-      artifactId 'presto-jdbc-all'
-      version versions['presto'] + '-SNAPSHOT'
-
-      artifacts = ["$libsDir/presto-jdbc-all.jar"]
+/*
+// publishing to sonatype
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      addFilter('hive-jdbc-all') {artifact, file ->
+        artifact.name == 'hive-jdbc-all'
+      }
+      addFilter('presto-jdbc-all') {artifact, file ->
+        artifact.name == 'presto-jdbc-all'
+      }
     }
   }
-  repositories.maven publish_maven_repository
-}
+}*/

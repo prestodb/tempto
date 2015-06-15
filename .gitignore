@@ -1,5 +1,6 @@
 # Build files
 .gradle/
+gradle.properties
 build/
 
 # Ignore IntelliJ files
