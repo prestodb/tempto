@@ -621,3 +621,7 @@ At this point you may use your IDE of choice to connect to tempto VM.
 For every available `Requirement` there is one possible `Fulfiller`. Currently that mapping is hard coded.
 All requirements and their corresponding fulfillers are packed into `tempto-core-all.jar`. In the
 future we envision separating requirements and their possible fulfillers into separate jars.
+
+## Acknowledgements
+
+A special thanks to the entire Hadapt team for inspiring the architecture of this framework.
