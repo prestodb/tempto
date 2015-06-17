@@ -102,6 +102,7 @@ ext.tempto_examples = project(':tempto-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
 ext.tempto_version = '1.0.30-SNAPSHOT' // changed by pnowojski
+ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
@@ -139,6 +140,7 @@ configure(subprojects - expected_result_generator - tempto_examples - third_part
   }
 
   signing {
+    required { isReleaseVersion }
     sign configurations.archives
   }
 
