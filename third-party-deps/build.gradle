@@ -49,17 +49,7 @@ artifacts {
   archives file: file("$buildDir/libs/presto-jdbc-all.jar"), name: 'presto-jdbc-all', type: 'jar'
 }
 
-/*
-// publishing to sonatype
-uploadArchives {
-  repositories {
-    mavenDeployer {
-      addFilter('hive-jdbc-all') {artifact, file ->
-        artifact.name == 'hive-jdbc-all'
-      }
-      addFilter('presto-jdbc-all') {artifact, file ->
-        artifact.name == 'presto-jdbc-all'
-      }
-    }
-  }
-}*/
+task uploadArchives {
+  // no op. for some reason gradle keeps calling this task for third-party-deps even though
+  // it is disabled in toplevel build.gradle.
+}

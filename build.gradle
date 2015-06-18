@@ -25,16 +25,6 @@ plugins.withType(JavaPlugin) {
   targetCompatibility = 1.8
 }
 
-allprojects {
-  repositories {
-    mavenCentral()
-  }
-  apply plugin: 'license'
-  license {
-    header rootProject.file('apache_license_header.txt')
-  }
-}
-
 ext.versions = [
         assertj      : '2.0.0',
         guava        : '18.0',
@@ -102,6 +92,7 @@ ext.tempto_examples = project(':tempto-examples')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.third_party_deps = project(':third-party-deps')
 ext.tempto_version = '1.0.30-SNAPSHOT' // changed by pnowojski
+ext.tempto_group = "com.teradata.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 task wrapper(type: Wrapper) {
@@ -113,13 +104,24 @@ task packageAndUploadLaunchScript(type: Exec) {
   commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
 }
 
+subprojects {
+  // project information
+  version = tempto_version
+  group = tempto_group
+
+  repositories {
+    mavenCentral()
+  }
+  apply plugin: 'license'
+  license {
+    header rootProject.file('apache_license_header.txt')
+  }
+}
+
 configure(subprojects - expected_result_generator - tempto_examples - third_party_deps) {
   apply plugin: 'signing'
   apply plugin: 'java'
   apply plugin: 'maven'
-
-  // project information
-  version tempto_version
 
   // plugins configuration
   javadoc {
