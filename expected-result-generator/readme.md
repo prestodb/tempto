@@ -25,7 +25,7 @@ may appear before the SQL statement.  Comments are identified by "--".
 Generating the result file
 --------------------------
 The actual execution of the SQL query is performed by a Java program using 
-JDBC, but the user interface is provided by a Python script (run_sql_test.py).
+JDBC, but the user interface is provided by a Python script (generate_results.py).
 
     cd bin
     # Generate results for one SQL file:
@@ -36,14 +36,15 @@ JDBC, but the user interface is provided by a Python script (run_sql_test.py).
 
 **NOTE:** Existing test.result files will not be overwritten.  If you want to update the result for a test, you will need to manually delete the existing .result file.
 
-The properties file is parsed by the java.util.Properties, and thus consists
+The properties file is parsed by java.util.Properties, and thus consists
 of key/value pairs, separated by equals or colon, one per line.  Comment
 lines start with '#' or '!'.  All of the acceptable keys are shown in the
 example below:
 
-    user=swarm
-    password=swarm
-    jdbc_url=jdbc:postgresql://cobbler.td.teradata.com:5432/swarm
+    user=db-name
+    password=db-password
+    jdbc_url=jdbc:postgresql://my-server.my-domain.com:5432/my-database
+    timeout=600
 
 You can use -s to specify a single SQL file or a directory containing one or more SQL files.
 If a directory is specified, only *.sql files in that directory will be executed.

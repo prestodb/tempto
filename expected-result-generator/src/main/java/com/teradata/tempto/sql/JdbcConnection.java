@@ -12,20 +12,6 @@
  * limitations under the License.
  */
 
-/*
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.teradata.tempto.sql;
 
 import java.io.BufferedReader;
@@ -34,6 +20,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Integer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -56,6 +43,7 @@ public class JdbcConnection {
   private String jdbcUrl;
   private String user;
   private String password;
+  private int timeout;
 
   private Connection conn = null;
   private Statement stmt = null;
@@ -64,6 +52,7 @@ public class JdbcConnection {
   protected static final String JDBC_URL = "jdbc_url";
   protected static final String JDBC_USER = "user";
   protected static final String JDBC_PASSWORD = "password";
+  protected static final String JDBC_TIMEOUT = "timeout";
 
   public JdbcConnection(String propertiesFileName) throws IOException {
     BufferedReader propertiesFileReader = new BufferedReader(new FileReader(new File(propertiesFileName)));
@@ -75,44 +64,22 @@ public class JdbcConnection {
       propertiesFileReader.close();
     }
 
-    String url = properties.getProperty(JDBC_URL);
-    String user = properties.getProperty(JDBC_USER);
-    String password = properties.getProperty(JDBC_PASSWORD);
+    jdbcUrl = properties.getProperty(JDBC_URL);
+    user = properties.getProperty(JDBC_USER);
+    password = properties.getProperty(JDBC_PASSWORD);
+    timeout = Integer.parseInt(properties.getProperty(JDBC_TIMEOUT, "600"));
 
-    initialize(url, user, password);
-  }
-
-  protected void initialize(String jdbcUrl, String user, String password) {
     LOGGER.info("url {}", jdbcUrl);
     LOGGER.info("user {}", user);
     LOGGER.info("password {}", password);
-
-    this.jdbcUrl = jdbcUrl;
-    this.user = user;
-    this.password = password;
+    LOGGER.info("timeout {}", timeout);
   }
 
-  public JdbcConnection(Properties properties) {
-    String url = properties.getProperty(JDBC_URL);
-    String user = properties.getProperty(JDBC_USER);
-    String password = properties.getProperty(JDBC_PASSWORD);
-
-    initialize(url, user, password);
-  }
-
-  /**
-   * @param jdbcUrl    jdbc connection URL
-   * @param user       Database user name
-   * @param password   Database password
-   */
-  public JdbcConnection(String jdbcUrl, String user, String password) {
-    initialize(jdbcUrl, user, password);
-  }
-
-  public void connect() throws SQLException {
-    LOGGER.info("Connecting to database...");
-    conn = DriverManager.getConnection(jdbcUrl, user, password);
-    stmt = conn.createStatement();
+   public void connect() throws SQLException {
+     LOGGER.info("Connecting to database...");
+     conn = DriverManager.getConnection(jdbcUrl, user, password);
+     stmt = conn.createStatement();
+     stmt.setQueryTimeout(timeout);
   }
 
   public void close() {

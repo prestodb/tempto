@@ -10,8 +10,11 @@
 import argparse
 import subprocess
 import os
+import glob
 
-CLASSPATH = ".:../build/libs/expected-result-generator-all.jar"
+jar_file_list = glob.glob("../build/libs/expected-result-generator-all*.jar")
+jar_file = jar_file_list.pop()
+CLASSPATH = ".:" + jar_file
 JAVA_CLASS = "com.teradata.tempto.sql.SqlResultGenerator"
 
 def setup_argument_parser():

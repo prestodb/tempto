@@ -1,6 +1,15 @@
 #
 # This file provides the information that is needed to connect to the database.
 #
-user=swarm
-password=swarm
-jdbc_url=jdbc:postgresql://cobbler.td.teradata.com:5432/swarm
+
+# Database user name
+user=my_name
+
+#Database password
+password=my_pass
+
+# JDBC connection string
+jdbc_url=jdbc:postgresql://my-server.my-domain.com:5432/my-database
+
+# Max time allowed for executing one query, in seconds
+timeout=600
