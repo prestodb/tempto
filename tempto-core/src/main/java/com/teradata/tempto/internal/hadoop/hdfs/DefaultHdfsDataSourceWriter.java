@@ -15,7 +15,7 @@
 package com.teradata.tempto.internal.hadoop.hdfs;
 
 import com.google.common.base.Stopwatch;
-import com.teradata.tempto.fulfillment.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;

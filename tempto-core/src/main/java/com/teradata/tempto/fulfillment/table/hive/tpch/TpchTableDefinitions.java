@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.hive.tpch;
+package com.teradata.tempto.fulfillment.table.hive.tpch;
 
-import com.teradata.tempto.fulfillment.hive.HiveTableDefinition;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
 public class TpchTableDefinitions

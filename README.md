@@ -317,7 +317,7 @@ defined in configuration Yaml.
 create table DDL template (_\{0\}_ is substituted with HDFS file location) and `DataSource`.
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
-be found in `com.teradata.tempto.fulfillment.hive.tpch.TpchTableDefinitions`.
+be found in `com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions`.
 
 TODO: we need to clarify to the user how they create tables.
 

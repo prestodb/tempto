@@ -12,11 +12,11 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.hive.tpch;
+package com.teradata.tempto.fulfillment.table.hive.tpch;
 
-import com.teradata.tempto.fulfillment.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
-import com.teradata.tempto.internal.fulfillment.hive.tpch.TpchEntityByteSource;
+import com.teradata.tempto.internal.fulfillment.table.hive.tpch.TpchEntityByteSource;
 
 import java.util.Collection;
 

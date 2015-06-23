@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.hive;
+package com.teradata.tempto.fulfillment.table.hive;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 
@@ -22,8 +22,8 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.teradata.tempto.fulfillment.hive.InlineDataSource.createSameRowDataSource;
-import static com.teradata.tempto.fulfillment.hive.InlineDataSource.createStringDataSource;
+import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createSameRowDataSource;
+import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createStringDataSource;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 

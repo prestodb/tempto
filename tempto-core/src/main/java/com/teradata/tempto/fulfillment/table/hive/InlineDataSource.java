@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.hive;
+package com.teradata.tempto.fulfillment.table.hive;
 
 import com.google.common.io.ByteSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;

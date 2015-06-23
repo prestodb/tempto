@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.fulfillment.hive.tpch;
+package com.teradata.tempto.internal.fulfillment.table.hive.tpch;
 
 import com.google.common.io.ByteSource;
 import io.airlift.tpch.TpchEntity;
