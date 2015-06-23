@@ -14,8 +14,8 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
-import com.teradata.tempto.fulfillment.hive.DataSource;
-import com.teradata.tempto.fulfillment.hive.HiveTableDefinition;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static com.teradata.tempto.fulfillment.hive.HiveTableDefinition.hiveTableDefinition;
+import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.hiveTableDefinition;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.exists;

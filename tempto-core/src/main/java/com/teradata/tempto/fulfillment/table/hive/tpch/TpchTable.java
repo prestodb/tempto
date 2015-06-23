@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.hive.tpch;
+package com.teradata.tempto.fulfillment.table.hive.tpch;
 
 /**
  * Enum containing names of all TPCH tables. Moreover it holds reference to
