@@ -16,13 +16,13 @@ package com.teradata.tempto.fulfillment.table;
 /**
  * Describes a table that is instantiated during a test run.
  */
-public class TableInstance
+public class TableInstance<T extends TableDefinition>
 {
     private final String name;
     private final String nameInDatabase;
-    private final TableDefinition tableDefinition;
+    private final T tableDefinition;
 
-    public TableInstance(String name, String nameInDatabase, TableDefinition tableDefinition)
+    protected TableInstance(String name, String nameInDatabase, T tableDefinition)
     {
         this.name = name;
         this.nameInDatabase = nameInDatabase;
@@ -39,7 +39,7 @@ public class TableInstance
         return nameInDatabase;
     }
 
-    public TableDefinition tableDefinition()
+    public T tableDefinition()
     {
         return tableDefinition;
     }

@@ -11,26 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.tempto.internal.fulfillment.table.hive;
+package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
-import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
+import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
 
 import java.util.Optional;
 
-public class HiveTableInstance
-        extends TableInstance<HiveTableDefinition>
+public class JdbcTableInstance
+        extends TableInstance<JdbcTableDefinition>
 {
-    private final Optional<String> mutableDataHdfsDataPath;
 
-    public HiveTableInstance(String name, String nameInDatabase, HiveTableDefinition tableDefinition, Optional<String> mutableDataHdfsDataPath)
+    public JdbcTableInstance(String name, String nameInDatabase, JdbcTableDefinition tableDefinition)
     {
         super(name, nameInDatabase, tableDefinition);
-        this.mutableDataHdfsDataPath = mutableDataHdfsDataPath;
-    }
-
-    public Optional<String> getMutableDataHdfsDataPath()
-    {
-        return mutableDataHdfsDataPath;
     }
 }

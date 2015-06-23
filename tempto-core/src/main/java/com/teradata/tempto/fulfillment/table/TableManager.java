@@ -14,6 +14,7 @@
 package com.teradata.tempto.fulfillment.table;
 
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
+import javafx.scene.control.Tab;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,7 +27,7 @@ import static com.teradata.tempto.fulfillment.table.TableManagerDispatcher.getTa
 /**
  * Provides functionality of creating/dropping tables based on {@link TableDefinition}.
  */
-public interface TableManager
+public interface TableManager<T extends TableDefinition>
 {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
@@ -36,28 +37,28 @@ public interface TableManager
         String type();
     }
 
-    TableInstance createImmutable(TableDefinition tableDefinition);
+    TableInstance<T> createImmutable(T tableDefinition);
 
-    TableInstance createMutable(TableDefinition tableDefinition, State state);
+    TableInstance<T> createMutable(T tableDefinition, State state);
 
-    default TableInstance createMutable(TableDefinition tableDefinition)
+    default TableInstance<T> createMutable(T tableDefinition)
     {
         return createMutable(tableDefinition, LOADED);
     }
 
     void dropAllTables();
 
-    public static TableInstance createImmutableTable(TableDefinition tableDefinition)
+    public static <T extends TableDefinition> TableInstance<T> createImmutableTable(T tableDefinition)
     {
-        return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createImmutable(tableDefinition);
+        return  getTableManagerDispatcher().getTableManagerFor(tableDefinition).createImmutable(tableDefinition);
     }
 
-    public static TableInstance createMutableTable(TableDefinition tableDefinition, State state)
+    public static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition, State state)
     {
         return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createMutable(tableDefinition, state);
     }
 
-    public static TableInstance createMutableTable(TableDefinition tableDefinition)
+    public static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition)
     {
         return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createMutable(tableDefinition);
     }

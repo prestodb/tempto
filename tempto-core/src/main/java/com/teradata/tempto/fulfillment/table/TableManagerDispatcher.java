@@ -26,9 +26,9 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testConte
  */
 public interface TableManagerDispatcher
 {
-    TableManager getTableManagerFor(TableDefinition tableDefinition);
+    <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition);
 
-    default TableManager getTableManagerFor(TableInstance tableInstance)
+    default <T extends TableDefinition> TableManager<T> getTableManagerFor(TableInstance<T> tableInstance)
     {
         return getTableManagerFor(tableInstance.tableDefinition());
     }

@@ -21,6 +21,7 @@ import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.hive.DataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import com.teradata.tempto.internal.uuid.UUIDGenerator;
 import com.teradata.tempto.query.QueryExecutor;
@@ -33,6 +34,7 @@ import javax.inject.Singleton;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static java.text.MessageFormat.format;
@@ -41,7 +43,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @TableManager.Descriptor(tableDefinitionClass = HiveTableDefinition.class, type = "HIVE")
 @Singleton
 public class HiveTableManager
-        implements TableManager
+        implements TableManager<HiveTableDefinition>
 {
     public static final String MUTABLE_TABLES_DIR = "/mutable_tables/";
 
@@ -49,7 +51,7 @@ public class HiveTableManager
 
     private final QueryExecutor queryExecutor;
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
-    private final UUIDGenerator uuidGenerator;
+    private final TableNameGenerator tableNameGenerator;
     private final String testDataBasePath;
     private final HdfsClient hdfsClient;
     private final String hdfsUsername;
@@ -57,54 +59,50 @@ public class HiveTableManager
     @Inject
     public HiveTableManager(QueryExecutor queryExecutor,
             HdfsDataSourceWriter hdfsDataSourceWriter,
-            UUIDGenerator uuidGenerator,
+            TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             HdfsClient hdfsClient,
             @Named("hdfs.username") String hdfsUsername)
     {
-        this.queryExecutor = queryExecutor;
-        this.hdfsDataSourceWriter = hdfsDataSourceWriter;
-        this.uuidGenerator = uuidGenerator;
-        this.testDataBasePath = testDataBasePath;
-        this.hdfsClient = hdfsClient;
-        this.hdfsUsername = hdfsUsername;
+        this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
+        this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
+        this.tableNameGenerator = checkNotNull(tableNameGenerator, "tableNameGenerator is null");
+        this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
+        this.hdfsClient = checkNotNull(hdfsClient, "hdfsClientd is null");
+        this.hdfsUsername = checkNotNull(hdfsUsername, "hdfsUsername is null");
     }
 
     @Override
-    public HiveTableInstance createImmutable(TableDefinition tableDefinition)
+    public HiveTableInstance createImmutable(HiveTableDefinition tableDefinition)
     {
-        HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
-        Preconditions.checkState(!hiveTableDefinition.isPartitioned(), "Partitioning not supported for immutable tables");
+        Preconditions.checkState(!tableDefinition.isPartitioned(), "Partitioning not supported for immutable tables");
         String tableNameInDatabase = tableDefinition.getName();
         LOGGER.debug("creating immutable table {}", tableNameInDatabase);
 
-        String tableDataPath = getImmutableTableHdfsPath(hiveTableDefinition.getDataSource());
-        uploadTableData(tableDataPath, hiveTableDefinition.getDataSource());
+        String tableDataPath = getImmutableTableHdfsPath(tableDefinition.getDataSource());
+        uploadTableData(tableDataPath, tableDefinition.getDataSource());
 
-        queryExecutor.executeQuery(hiveTableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
+        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
 
-        return new HiveTableInstance(tableNameInDatabase, tableNameInDatabase, hiveTableDefinition, Optional.<String>empty());
+        return new HiveTableInstance(tableNameInDatabase, tableNameInDatabase, tableDefinition, Optional.<String>empty());
     }
 
     @Override
-    public HiveTableInstance createMutable(TableDefinition tableDefinition, State state)
+    public HiveTableInstance createMutable(HiveTableDefinition tableDefinition, State state)
     {
-        HiveTableDefinition hiveTableDefinition = (HiveTableDefinition) tableDefinition;
-
-        String tableSuffix = uuidGenerator.randomUUID().replace("-", "");
-        String tableNameInDatabase = tableDefinition.getName() + "_" + tableSuffix;
+        String tableNameInDatabase = tableNameGenerator.generateUniqueTableNameInDatabase(tableDefinition);
         String tableDataPath = getMutableTableHdfsPath(tableNameInDatabase, Optional.empty());
         LOGGER.debug("creating mutable table {}, name in database: {}, data path: {}", tableDefinition.getName(), tableNameInDatabase, tableDataPath);
 
         if (state == PREPARED) {
-            return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, hiveTableDefinition, Optional.of(tableDataPath));
+            return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, tableDefinition, Optional.of(tableDataPath));
         }
 
-        queryExecutor.executeQuery(hiveTableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
+        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
 
-        if (hiveTableDefinition.isPartitioned()) {
+        if (tableDefinition.isPartitioned()) {
             int partitionId = 0;
-            for (HiveTableDefinition.PartitionDefinition partitionDefinition : hiveTableDefinition.getPartitionDefinitons()) {
+            for (HiveTableDefinition.PartitionDefinition partitionDefinition : tableDefinition.getPartitionDefinitons()) {
                 String partitionDataPath = getMutableTableHdfsPath(tableNameInDatabase, Optional.of(partitionId));
                 if (state == LOADED) {
                     uploadTableData(partitionDataPath, partitionDefinition.getDataSource());
@@ -114,10 +112,10 @@ public class HiveTableManager
             }
         }
         else if (state == LOADED) {
-            uploadTableData(tableDataPath, hiveTableDefinition.getDataSource());
+            uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, hiveTableDefinition, Optional.of(tableDataPath));
+        return new HiveTableInstance(tableDefinition.getName(), tableNameInDatabase, tableDefinition, Optional.of(tableDataPath));
     }
 
     @Override

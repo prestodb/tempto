@@ -43,7 +43,7 @@ class HiveTableManagerTest
   void setup()
   {
     uuidGenerator.randomUUID() >> "randomSuffix"
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, ROOT_PATH, hdfsClient, "password");
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, uuidGenerator, tableNameGenerator, ROOT_PATH, hdfsClient, "password");
   }
 
   def 'should drop all tables'()

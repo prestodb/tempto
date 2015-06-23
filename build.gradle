@@ -80,10 +80,11 @@ ext.libraries = [
         bytebuddy    : "net.bytebuddy:byte-buddy:${versions.bytebuddy}",
         jsch         : "com.jcraft:jsch:${versions.jsch}",
         mina_sshd    : "org.apache.sshd:apache-sshd:${versions.mina_sshd}",
-        postgresql_jdbc    : "org.postgresql:postgresql:9.3-1102-jdbc4",
+        postgresql_jdbc : "org.postgresql:postgresql:9.4-1201-jdbc41",
         commons_cli  : "commons-cli:commons-cli:1.2",
         freemarker   : "org.freemarker:freemarker:${versions.freemarker}",
-        joda         : "joda-time:joda-time:2.4"
+        joda         : "joda-time:joda-time:2.4",
+        psql_jdbc    : 'org.postgresql:postgresql:9.4-1201-jdbc41'
 ]
 
 ext.tempto_core = project(':tempto-core')

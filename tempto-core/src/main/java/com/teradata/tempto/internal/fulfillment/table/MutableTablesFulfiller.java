@@ -26,6 +26,7 @@ import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
+import javafx.scene.control.Tab;
 import org.slf4j.Logger;
 
 import java.util.Collection;

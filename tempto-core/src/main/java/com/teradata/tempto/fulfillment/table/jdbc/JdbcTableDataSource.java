@@ -12,29 +12,18 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
+package com.teradata.tempto.fulfillment.table.jdbc;
 
-dependencies {
-  compile tempto_core
-  compile tempto_logging_log4j
-  compile libraries.testng
-  compile libraries.slf4j_api
-  compile libraries.slf4j_log4j
-  runtime libraries.postgresql_jdbc
-}
+import java.sql.PreparedStatement;
+import java.util.Iterator;
+import java.util.List;
 
-task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = 'all'
-  from sourceSets.main.output
-  from {
-    configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
-}
-
-build.dependsOn.add(buildFatJar)
-
-license {
-  exclude "sql-tests/**/*.sql"
+public interface JdbcTableDataSource
+{
+    /**
+     * Returns iterator over rows to be inserted to table.
+     * Object types must match column types in table.
+     * Object will be inserted using {@link PreparedStatement#setObject(int, Object)} method.
+     */
+    Iterator<List<Object>> getDataRows();
 }
