@@ -14,7 +14,8 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-    jdbc_jar: third-party-deps/build/libs/hive-jdbc-all.jar
+    jdbc_jar: third-party-deps/build/libs/hive-jdbc-all-1.0.31-SNAPSHOT.jar
+    table_manager_type: hive
 
   presto:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver

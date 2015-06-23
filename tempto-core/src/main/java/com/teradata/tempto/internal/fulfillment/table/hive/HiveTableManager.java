@@ -20,7 +20,6 @@ import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import com.teradata.tempto.internal.uuid.UUIDGenerator;
@@ -38,7 +37,7 @@ import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.Stat
 import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@AutoTableManager(tableDefinitionClass = HiveTableDefinition.class, name = "hive")
+@TableManager.Descriptor(tableDefinitionClass = HiveTableDefinition.class, type = "HIVE")
 public class HiveTableManager
         implements TableManager
 {

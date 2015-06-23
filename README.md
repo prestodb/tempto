@@ -197,6 +197,7 @@ databases:           # database connections
     jdbc_password: na                                                                 # database password
     jdbc_pooling: false                                                               # (optional) should connection pooling be used (it does not work for Hive due to driver issues)
     jdbc_jar: tempto-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts. (e.g. hive driver conflicts with presto driver)
+    table_manager_type: hive
  
   presto:           # connection named presto
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
@@ -204,6 +205,9 @@ databases:           # database connections
     jdbc_user: hdfs
     jdbc_password: na
 ```
+
+If we want framework to provision tables we need to specify table_manager_type for database connection.
+Currently only supported table_manager_type is HIVE and is applicable to HDFS backed hive database connection.
 
 * **tests**
 

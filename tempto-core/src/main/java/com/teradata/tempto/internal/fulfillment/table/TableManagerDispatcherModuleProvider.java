@@ -21,18 +21,21 @@ import com.google.inject.Provides;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
 import static com.teradata.tempto.fulfillment.table.TableManagerDispatcher.tableManagerMapBinderFor;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
+import static java.util.stream.Collectors.toMap;
 
 @AutoModuleProvider
 public class TableManagerDispatcherModuleProvider
@@ -45,20 +48,45 @@ public class TableManagerDispatcherModuleProvider
             @Override
             protected void configure()
             {
-                getAnnotatedSubTypesOf(TableManager.class, AutoTableManager.class).stream().forEach(
-                        tableManagerClass -> {
-                            AutoTableManager annotation = tableManagerClass.getAnnotation(AutoTableManager.class);
-                            tableManagerMapBinderFor(binder()).addBinding(annotation.tableDefinitionClass()).to(tableManagerClass);
-                            bind(Key.get(TableManager.class, named(annotation.name()))).to(tableManagerClass);
-                        }
-                );
+                Configuration databasesSectionConfiguration = configuration.getSubconfiguration("databases");
+                Set<String> databaseNames = databasesSectionConfiguration.listKeyPrefixes(1);
+
+                Map<String, ? extends Class<? extends TableManager>> tableManagerClasses = getTableManagerClassesByType();
+
+                for (String database : databaseNames) {
+                    Configuration databaseConfiguration = databasesSectionConfiguration.getSubconfiguration(database);
+                    Optional<String> tableMangerTypeOptional = databaseConfiguration.getString("table_manager_type");
+                    if (!tableMangerTypeOptional.isPresent()) {
+                        continue;
+                    }
+                    String tableManagerType = tableMangerTypeOptional.get();
+                    checkArgument(tableManagerClasses.containsKey(tableManagerType),
+                            "unknown table manager type %s for database %s; expecting one of %s",
+                            tableManagerType, database, tableManagerClasses.keySet());
+
+                    Class<? extends TableManager> tableManagerClass = tableManagerClasses.get(tableManagerType.toLowerCase());
+                    Class<? extends TableDefinition> tableDefinitionClass = tableManagerClass
+                            .getAnnotation(TableManager.Descriptor.class).tableDefinitionClass();
+
+                    tableManagerMapBinderFor(binder()).addBinding(tableDefinitionClass).to(tableManagerClass);
+                    bind(Key.get(TableManager.class, named(database))).to(tableManagerClass);
+                }
+            }
+
+            private Map<String, ? extends Class<? extends TableManager>> getTableManagerClassesByType()
+            {
+                return getAnnotatedSubTypesOf(TableManager.class, TableManager.Descriptor.class).stream()
+                        .collect(toMap(
+                                tableManagerClass -> tableManagerClass.getAnnotation(TableManager.Descriptor.class).type().toLowerCase(),
+                                tableManagerClass -> tableManagerClass));
             }
 
             @Inject
             @Provides
             public TableManagerDispatcher defaultTableManagerDispatcher(Map<Class, TableManager> tableManagers)
             {
-                return new TableManagerDispatcher() {
+                return new TableManagerDispatcher()
+                {
                     @Override
                     public TableManager getTableManagerFor(TableDefinition tableDefinition)
                     {
