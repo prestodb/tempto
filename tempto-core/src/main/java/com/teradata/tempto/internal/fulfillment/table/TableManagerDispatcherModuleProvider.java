@@ -21,18 +21,20 @@ import com.google.inject.Provides;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.TableManager.AutoTableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
+import com.teradata.tempto.internal.fulfillment.table.hive.HiveTableManager;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.inject.name.Names.named;
 import static com.teradata.tempto.fulfillment.table.TableManagerDispatcher.tableManagerMapBinderFor;
-import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 
 @AutoModuleProvider
 public class TableManagerDispatcherModuleProvider
@@ -45,20 +47,61 @@ public class TableManagerDispatcherModuleProvider
             @Override
             protected void configure()
             {
-                getAnnotatedSubTypesOf(TableManager.class, AutoTableManager.class).stream().forEach(
-                        tableManagerClass -> {
-                            AutoTableManager annotation = tableManagerClass.getAnnotation(AutoTableManager.class);
-                            tableManagerMapBinderFor(binder()).addBinding(annotation.tableDefinitionClass()).to(tableManagerClass);
-                            bind(Key.get(TableManager.class, named(annotation.name()))).to(tableManagerClass);
-                        }
-                );
+                Set<String> databaseNames = configuration.getSubconfiguration("databases").listKeyPrefixes(1);
+                Configuration managersSectionConfiguration = configuration.getSubconfiguration("table_managers");
+
+                for (String tableManagerName : managersSectionConfiguration.listKeyPrefixes(1)) {
+                    Configuration managerConfiguration = configuration.getSubconfiguration(tableManagerName);
+                    String tableDefinitionClassName = managerConfiguration.getStringMandatory("table_definition_class");
+                    String tableManagerClassName = getTableManagerClassName(
+                            managerConfiguration.getString("manager_class"),
+                            managerConfiguration.getString("manager_type"),
+                            tableManagerName);
+                    String databaseName = configuration.getString("database").orElse(tableManagerName);
+                    checkArgument(databaseNames.contains(databaseName), "unknown database %s defined for table manager %s", databaseName, tableManagerName);
+
+                    Class<? extends TableDefinition> tableDefinitionClass = getClassForName(tableDefinitionClassName, TableDefinition.class);
+                    Class<? extends TableManager> tableManagerClass = getClassForName(tableManagerClassName, TableManager.class);
+
+                    tableManagerMapBinderFor(binder()).addBinding(tableDefinitionClass).to(tableManagerClass);
+                    bind(Key.get(TableManager.class, named(tableManagerName))).to(tableManagerClass);
+                }
+            }
+
+            private <T> Class<? extends T> getClassForName(String className, Class<T> expectedParentClass)
+            {
+                Class<?> clazz;
+                try {
+                    clazz = Class.forName(className);
+                    checkArgument(expectedParentClass.isAssignableFrom(clazz),
+                            "%s does not inherit from %s", clazz, expectedParentClass);
+                }
+                catch (ClassNotFoundException e) {
+                    throw new IllegalArgumentException("could not instantiate class " + className, e);
+                }
+                return (Class<? extends T>) clazz;
+            }
+
+            private String getTableManagerClassName(Optional<String> tableManagerClassOptional, Optional<String> tableManagerTypeOptional, String tableManagerName)
+            {
+                checkArgument(tableManagerClassOptional.isPresent() ^ tableManagerTypeOptional.isPresent(),
+                        "exactly one of manager_class/manager_type must be defined for table manager %s", tableManagerName);
+                return tableManagerClassOptional.orElse(tableManagerTypeOptional.map(type -> {
+                    switch (type) {
+                        case "HIVE":
+                            return HiveTableManager.class.getCanonicalName();
+                        default:
+                            throw new IllegalArgumentException("unknown table manager type " + type + " for table manager " + tableManagerName);
+                    }
+                }).get());
             }
 
             @Inject
             @Provides
             public TableManagerDispatcher defaultTableManagerDispatcher(Map<Class, TableManager> tableManagers)
             {
-                return new TableManagerDispatcher() {
+                return new TableManagerDispatcher()
+                {
                     @Override
                     public TableManager getTableManagerFor(TableDefinition tableDefinition)
                     {

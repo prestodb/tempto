@@ -28,19 +28,6 @@ import static com.teradata.tempto.fulfillment.table.TableManagerDispatcher.getTa
  */
 public interface TableManager
 {
-    /**
-     * {@link TableManager} classes annotated with this annotation
-     * will be automatically scanned for.
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE})
-    public @interface AutoTableManager
-    {
-        Class<? extends TableDefinition> tableDefinitionClass();
-
-        String name();
-    }
-
     TableInstance createImmutable(TableDefinition tableDefinition);
 
     TableInstance createMutable(TableDefinition tableDefinition, State state);

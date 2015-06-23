@@ -24,6 +24,14 @@ databases:
     jdbc_pooling: false
     jdbc_jar: third-party-deps/build/libs/presto-jdbc-all.jar
 
+table_managers:
+  hive:
+    table_definition_class: com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition     # table definition class
+    manager_class: com.teradata.tempto.internal.fulfillment.table.hive.HiveTableManager        # table manager class
+    # manager_type: HIVE                              # (optional) can be used instead of manager_class for builtin table managers
+    # database: hive                                  # (optional) (defaults to name of table manager)
+
+
 tests:
   hdfs:
     path: /tempto
