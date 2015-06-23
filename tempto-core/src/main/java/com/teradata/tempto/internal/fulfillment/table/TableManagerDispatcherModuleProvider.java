@@ -17,6 +17,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
@@ -24,6 +25,7 @@ import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
+import com.teradata.tempto.query.QueryExecutor;
 
 import java.util.Collection;
 import java.util.Map;
@@ -68,8 +70,21 @@ public class TableManagerDispatcherModuleProvider
                     Class<? extends TableDefinition> tableDefinitionClass = tableManagerClass
                             .getAnnotation(TableManager.Descriptor.class).tableDefinitionClass();
 
-                    tableManagerMapBinderFor(binder()).addBinding(tableDefinitionClass).to(tableManagerClass);
-                    bind(Key.get(TableManager.class, named(database))).to(tableManagerClass);
+                    Key<TableManager> tableManagerKey = Key.get(TableManager.class, named(database));
+                    PrivateModule tableManagerPrivateModule = new PrivateModule()
+                    {
+                        @Override
+                        protected void configure()
+                        {
+                            // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
+                            Key<QueryExecutor> queryExecutorKey = Key.get(QueryExecutor.class, named(database));
+                            bind(QueryExecutor.class).to(queryExecutorKey);
+                            bind(tableManagerKey).to(tableManagerClass);
+                            expose(tableManagerKey);
+                        }
+                    };
+                    install(tableManagerPrivateModule);
+                    tableManagerMapBinderFor(binder()).addBinding(tableDefinitionClass).to(tableManagerKey);
                 }
             }
 

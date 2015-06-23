@@ -15,11 +15,11 @@ package com.teradata.tempto.internal.fulfillment.table.hive;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
-import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import com.teradata.tempto.internal.uuid.UUIDGenerator;
@@ -29,6 +29,7 @@ import com.teradata.tempto.query.QueryType;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ import static java.text.MessageFormat.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TableManager.Descriptor(tableDefinitionClass = HiveTableDefinition.class, type = "HIVE")
+@Singleton
 public class HiveTableManager
         implements TableManager
 {
@@ -53,7 +55,7 @@ public class HiveTableManager
     private final String hdfsUsername;
 
     @Inject
-    public HiveTableManager(@Named("hive") QueryExecutor queryExecutor,
+    public HiveTableManager(QueryExecutor queryExecutor,
             HdfsDataSourceWriter hdfsDataSourceWriter,
             UUIDGenerator uuidGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
