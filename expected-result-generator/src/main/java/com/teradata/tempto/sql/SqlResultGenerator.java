@@ -67,12 +67,9 @@ public class SqlResultGenerator {
       resultGenerator.generateExpectedResults();
     } catch (ParseException e) {
       usage(options);
-      System.exit(99);
     } catch (Exception e) {
       LOGGER.error("Caught exception in main", e);
-      System.exit(99);
     }
-    System.exit(0);
   }
 
   /**

@@ -46,6 +46,8 @@ example below:
     jdbc_url=jdbc:postgresql://my-server.my-domain.com:5432/my-database
     timeout=600
 
+If timeout is not specified in the configuration file, it will default to 600 seconds (10 minutes).
+
 You can use -s to specify a single SQL file or a directory containing one or more SQL files.
 If a directory is specified, only *.sql files in that directory will be executed.
 

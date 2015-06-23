@@ -69,10 +69,7 @@ public class JdbcConnection {
     password = properties.getProperty(JDBC_PASSWORD);
     timeout = Integer.parseInt(properties.getProperty(JDBC_TIMEOUT, "600"));
 
-    LOGGER.info("url {}", jdbcUrl);
-    LOGGER.info("user {}", user);
-    LOGGER.info("password {}", password);
-    LOGGER.info("timeout {}", timeout);
+    LOGGER.info("url {}, user {}, password {}, timeout {}", jdbcUrl, user, password, timeout);
   }
 
    public void connect() throws SQLException {
