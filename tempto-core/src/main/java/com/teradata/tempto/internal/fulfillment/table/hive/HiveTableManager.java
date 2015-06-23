@@ -11,12 +11,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.tempto.internal.fulfillment.hive;
+package com.teradata.tempto.internal.fulfillment.table.hive;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.teradata.tempto.fulfillment.hive.DataSource;
-import com.teradata.tempto.fulfillment.hive.HiveTableDefinition;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;

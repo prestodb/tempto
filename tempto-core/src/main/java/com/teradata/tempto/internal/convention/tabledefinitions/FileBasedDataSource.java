@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
-import com.teradata.tempto.fulfillment.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.DataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
 import java.io.IOException;

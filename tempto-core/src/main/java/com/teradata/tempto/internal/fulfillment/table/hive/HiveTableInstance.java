@@ -11,9 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.tempto.internal.fulfillment.hive;
+package com.teradata.tempto.internal.fulfillment.table.hive;
 
-import com.teradata.tempto.fulfillment.hive.HiveTableDefinition;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 
 import java.util.Optional;

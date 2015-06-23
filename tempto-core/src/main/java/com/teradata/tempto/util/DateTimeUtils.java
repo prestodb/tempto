@@ -21,13 +21,9 @@ import org.joda.time.format.DateTimeParser;
 import org.joda.time.format.DateTimePrinter;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 public class DateTimeUtils
 {
-
     private static DateTimeParser[] timestampWithoutTimeZoneParser = {
             DateTimeFormat.forPattern("yyyy-M-d").getParser(),
             DateTimeFormat.forPattern("yyyy-M-d H:m").getParser(),

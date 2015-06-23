@@ -15,9 +15,9 @@
 package com.teradata.tempto.examples;
 
 import com.teradata.tempto.ProductTest;
-import com.teradata.tempto.fulfillment.hive.tpch.TpchDataSource;
+import com.teradata.tempto.fulfillment.table.hive.tpch.TpchDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
-import com.teradata.tempto.internal.fulfillment.hive.tpch.TpchEntityByteSource;
+import com.teradata.tempto.internal.fulfillment.table.hive.tpch.TpchEntityByteSource;
 import io.airlift.tpch.TpchEntity;
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
-import static com.teradata.tempto.fulfillment.hive.tpch.TpchTable.REGION;
+import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTable.REGION;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TpchDataSourceTest
