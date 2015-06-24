@@ -16,6 +16,7 @@ package com.teradata.tempto.convention
 
 import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.internal.convention.AnnotatedFileParser
+import com.teradata.tempto.util.DateTimeUtils
 import spock.lang.Specification
 
 import java.sql.Date
@@ -24,6 +25,7 @@ import java.sql.Timestamp
 
 import static AnnotatedFileParser.SectionParsingResult
 import static com.google.common.collect.Iterables.getOnlyElement
+import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInUTC
 import static java.sql.JDBCType.*
 import static org.apache.commons.io.IOUtils.toInputStream
 
@@ -48,7 +50,7 @@ B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
     List<QueryAssert.Row> rows = resultDescriptor.getRows(expectedTypes)
     rows.size() == 2
     rows.get(0).getValues() == ['A', true, true, 10, Double.valueOf(20.0), new BigDecimal("30.0"), Date.valueOf('2015-11-01'),
-                                Time.valueOf('10:55:25'), Timestamp.valueOf('2016-11-01 10:55:25')]
+                                Time.valueOf('10:55:25'), parseTimestampInUTC('2016-11-01 10:55:25')]
   }
 
   def 'sampleResultFileWithoutExplicitExpectedTypes'()
