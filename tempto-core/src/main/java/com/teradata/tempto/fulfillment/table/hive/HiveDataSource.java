@@ -21,7 +21,7 @@ import java.util.Collection;
 /**
  * Responsible for providing data.
  */
-public interface DataSource
+public interface HiveDataSource
 {
     /**
      * @return path suffix where data source data should be stored

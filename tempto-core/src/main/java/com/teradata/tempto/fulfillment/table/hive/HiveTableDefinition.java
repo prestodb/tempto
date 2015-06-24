@@ -35,11 +35,11 @@ public class HiveTableDefinition
     private static final String PARTITION_SPEC_MARKER = "%PARTITION_SPEC%";
     private static final String NO_DATA_REVISION = "NO_DATA_REVISION";
 
-    private final Optional<DataSource> dataSource;
+    private final Optional<HiveDataSource> dataSource;
     private final Optional<List<PartitionDefinition>> partitionDefinitions;
     private final String createTableDDLTemplate;
 
-    private HiveTableDefinition(String name, String createTableDDLTemplate, Optional<DataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
+    private HiveTableDefinition(String name, String createTableDDLTemplate, Optional<HiveDataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
     {
         super(name);
         checkArgument(dataSource.isPresent() ^ partitionDefinitions.isPresent(), "either dataSource or partitionDefinitions must be set");
@@ -56,7 +56,7 @@ public class HiveTableDefinition
         }
     }
 
-    public DataSource getDataSource()
+    public HiveDataSource getDataSource()
     {
         checkState(!isPartitioned(), "not supported for partitioned table");
         return dataSource.get();
@@ -78,7 +78,7 @@ public class HiveTableDefinition
         return createTableDDLTemplate.replace(NAME_MARKER, name).replace(LOCATION_MARKER, location);
     }
 
-    public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, DataSource dataSource)
+    public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, HiveDataSource dataSource)
     {
         return new HiveTableDefinition(name, createTableDDLTemplate, Optional.of(dataSource), Optional.empty());
     }
@@ -102,7 +102,7 @@ public class HiveTableDefinition
 
         private String name;
         private String createTableDDLTemplate;
-        private Optional<DataSource> dataSource = Optional.empty();
+        private Optional<HiveDataSource> dataSource = Optional.empty();
         private Optional<List<PartitionDefinition>> partitionDefinitions = Optional.empty();
 
         private HiveTableDefinitionBuilder()
@@ -121,7 +121,7 @@ public class HiveTableDefinition
             return this;
         }
 
-        public HiveTableDefinitionBuilder setDataSource(DataSource dataSource)
+        public HiveTableDefinitionBuilder setDataSource(HiveDataSource dataSource)
         {
             this.dataSource = Optional.of(dataSource);
             return this;
@@ -147,7 +147,7 @@ public class HiveTableDefinition
             return setDataSource(createSameRowDataSource(name, revision, splitCount, rowsInEachSplit, rowData));
         }
 
-        public HiveTableDefinitionBuilder addPartition(String partitionSpec, DataSource dataSource) {
+        public HiveTableDefinitionBuilder addPartition(String partitionSpec, HiveDataSource dataSource) {
             if (!partitionDefinitions.isPresent()) {
                 partitionDefinitions = Optional.of(newArrayList());
             }
@@ -167,14 +167,14 @@ public class HiveTableDefinition
          * Partition spec inserted into {link #ADD_PARTION_DDL_TEMPLATE}.
          */
         private final String partitionSpec;
-        private final DataSource dataSource;
+        private final HiveDataSource dataSource;
 
         private static final String ADD_PARTION_DDL_TEMPLATE =
                 "ALTER TABLE " + NAME_MARKER +
                         " ADD PARTITION (" + PARTITION_SPEC_MARKER + ")" +
                         " LOCATION '" + LOCATION_MARKER + "'";
 
-        public PartitionDefinition(String partitionSpec, DataSource dataSource)
+        public PartitionDefinition(String partitionSpec, HiveDataSource dataSource)
         {
             this.partitionSpec = partitionSpec;
             this.dataSource = dataSource;
@@ -185,7 +185,7 @@ public class HiveTableDefinition
             return partitionSpec;
         }
 
-        public DataSource getDataSource()
+        public HiveDataSource getDataSource()
         {
             return dataSource;
         }

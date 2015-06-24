@@ -30,7 +30,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singleton;
 
 public abstract class InlineDataSource
-        implements DataSource
+        implements HiveDataSource
 {
 
     private final String tableName;
@@ -42,7 +42,7 @@ public abstract class InlineDataSource
         this.revisionMarker = revisionMarker;
     }
 
-    public static DataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource)
+    public static HiveDataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource)
     {
         return new InlineDataSource(tableName, revisionMarker)
         {
@@ -54,7 +54,7 @@ public abstract class InlineDataSource
         };
     }
 
-    public static DataSource createStringDataSource(String tableName, String revisionMarker, String data)
+    public static HiveDataSource createStringDataSource(String tableName, String revisionMarker, String data)
     {
         return new InlineDataSource(tableName, revisionMarker)
         {
@@ -66,7 +66,7 @@ public abstract class InlineDataSource
         };
     }
 
-    public static DataSource createSameRowDataSource(String tableName, String revisionMarker, int splitCount, int rowsInEachSplit, String rowData)
+    public static HiveDataSource createSameRowDataSource(String tableName, String revisionMarker, int splitCount, int rowsInEachSplit, String rowData)
     {
         return new InlineDataSource(tableName, revisionMarker)
         {

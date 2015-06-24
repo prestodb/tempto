@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
@@ -130,12 +130,12 @@ public class HiveTableManager
         hdfsClient.delete(getMutableTablesDir(), hdfsUsername);
     }
 
-    private void uploadTableData(String tableDataPath, DataSource dataSource)
+    private void uploadTableData(String tableDataPath, HiveDataSource dataSource)
     {
         hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
     }
 
-    private String getImmutableTableHdfsPath(DataSource dataSource)
+    private String getImmutableTableHdfsPath(HiveDataSource dataSource)
     {
         return testDataBasePath + "/" + dataSource.getPathSuffix();
     }

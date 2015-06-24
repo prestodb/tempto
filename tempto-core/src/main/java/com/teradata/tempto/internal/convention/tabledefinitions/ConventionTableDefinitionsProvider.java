@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
@@ -86,7 +86,7 @@ public class ConventionTableDefinitionsProvider
 
     private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinition)
     {
-        DataSource dataSource = new FileBasedDataSource(tableDefinition);
+        HiveDataSource dataSource = new FileBasedDataSource(tableDefinition);
         return hiveTableDefinition(tableDefinition.getName(), createTableDDLTemplate(tableDefinition), dataSource);
     }
 

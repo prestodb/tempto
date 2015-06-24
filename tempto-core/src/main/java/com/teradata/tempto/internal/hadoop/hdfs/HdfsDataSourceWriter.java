@@ -14,9 +14,9 @@
 
 package com.teradata.tempto.internal.hadoop.hdfs;
 
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 
 public interface HdfsDataSourceWriter
 {
-    void ensureDataOnHdfs(String dataPath, DataSource dataSource);
+    void ensureDataOnHdfs(String dataPath, HiveDataSource dataSource);
 }

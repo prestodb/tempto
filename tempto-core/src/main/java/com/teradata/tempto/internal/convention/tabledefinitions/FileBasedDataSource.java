@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ import static java.nio.file.Files.readAllBytes;
 import static java.util.Collections.singleton;
 
 public class FileBasedDataSource
-        implements DataSource
+        implements HiveDataSource
 {
 
     private final ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor;

@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.fulfillment.table.hive.tpch;
 
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.fulfillment.table.hive.tpch.TpchEntityByteSource;
 
@@ -26,7 +26,7 @@ import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class TpchDataSource
-        implements DataSource
+        implements HiveDataSource
 {
 
     private static final String DATA_REVISION = "v.1.0";

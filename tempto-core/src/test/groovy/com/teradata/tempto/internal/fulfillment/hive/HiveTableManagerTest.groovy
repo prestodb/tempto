@@ -13,7 +13,7 @@
  */
 package com.teradata.tempto.internal.fulfillment.table.hive
 
-import com.teradata.tempto.fulfillment.table.hive.DataSource
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
@@ -172,7 +172,7 @@ class HiveTableManagerTest
 
   def getNationHiveTableDefinition()
   {
-    DataSource nationDataSource = mockDataSource('some/table/in/hdfs')
+    HiveDataSource nationDataSource = mockDataSource('some/table/in/hdfs')
     return HiveTableDefinition.builder()
             .setName('nation')
             .setDataSource(nationDataSource)
@@ -197,9 +197,9 @@ class HiveTableManagerTest
             .build()
   }
 
-  private DataSource mockDataSource(String pathSuffix)
+  private HiveDataSource mockDataSource(String pathSuffix)
   {
-    def dataSource = Mock(DataSource)
+    def dataSource = Mock(HiveDataSource)
     dataSource.getPathSuffix() >> pathSuffix
     return dataSource
   }

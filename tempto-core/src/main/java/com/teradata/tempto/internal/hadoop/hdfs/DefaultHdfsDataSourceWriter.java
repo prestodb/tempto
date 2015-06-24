@@ -15,7 +15,7 @@
 package com.teradata.tempto.internal.hadoop.hdfs;
 
 import com.google.common.base.Stopwatch;
-import com.teradata.tempto.fulfillment.table.hive.DataSource;
+import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
@@ -50,7 +50,7 @@ public class DefaultHdfsDataSourceWriter
     }
 
     @Override
-    public void ensureDataOnHdfs(String dataSourcePath, DataSource dataSource)
+    public void ensureDataOnHdfs(String dataSourcePath, HiveDataSource dataSource)
     {
         if (isDataUpToDate(dataSourcePath, dataSource)) {
             return;
@@ -63,7 +63,7 @@ public class DefaultHdfsDataSourceWriter
         revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
     }
 
-    private boolean isDataUpToDate(String dataSourcePath, DataSource dataSource)
+    private boolean isDataUpToDate(String dataSourcePath, HiveDataSource dataSource)
     {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Optional<String> storedRevisionMarker = revisionStorage.get(dataSourcePath);
@@ -81,7 +81,7 @@ public class DefaultHdfsDataSourceWriter
         return false;
     }
 
-    private void storeTableFiles(String dataSourcePath, DataSource dataSource)
+    private void storeTableFiles(String dataSourcePath, HiveDataSource dataSource)
     {
         int fileIndex = 0;
         for (RepeatableContentProducer fileContent : dataSource.data()) {
