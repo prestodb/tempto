@@ -154,6 +154,9 @@ public class QueryAssert
 
     /**
      * Verifies that the actual result set contains all the given {@code rows}
+     *
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert contains(List<Row> rows)
     {
@@ -175,6 +178,8 @@ public class QueryAssert
 
     /**
      * @see #contains(java.util.List)
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert contains(Row... rows)
     {
@@ -183,6 +188,8 @@ public class QueryAssert
 
     /**
      * Verifies that the actual result set consist of only {@code rows} in any order
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert containsOnly(List<Row> rows)
     {
@@ -194,6 +201,8 @@ public class QueryAssert
 
     /**
      * @see #containsOnly(java.util.List)
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert containsOnly(Row... rows)
     {
@@ -203,6 +212,9 @@ public class QueryAssert
     /**
      * Verifies that the actual result set equals to {@code rows}.
      * ResultSet in different order or with any extra rows perceived as not same
+     *
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert containsExactly(List<Row> rows)
     {
@@ -226,6 +238,9 @@ public class QueryAssert
 
     /**
      * @see #containsExactly(java.util.List)
+     *
+     * @param rows Rows to be matched
+     * @return this
      */
     public QueryAssert containsExactly(Row... rows)
     {
@@ -234,6 +249,9 @@ public class QueryAssert
 
     /**
      * Verifies number of rows updated/inserted by last update query
+     *
+     * @param count Number of rows expected
+     * @return this
      */
     public QueryAssert updatedRowsCountIsEqualTo(int count)
     {

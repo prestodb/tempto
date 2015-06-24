@@ -26,7 +26,7 @@ public final class SqlContexts
      * Helper method designed to be used with lambda expressions containing assertions used
      * on newly created view:
      * <pre>
-     *  executeWith(createViewAs("SELECT * FROM nation", view -> {
+     *  executeWith(createViewAs("SELECT * FROM nation", view -&gt; {
      *        assertThat(query(format("SELECT * FROM %s", view.getName())))
      *            .hasRowsCount(25);
      *  }));

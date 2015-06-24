@@ -44,6 +44,8 @@ public class ParallelExecution
     /**
      * Joins all child threads and throws {@link ParallelExecutionException} if some
      * child throws a {@link Throwable}.
+     *
+     * @throws InterruptedException if the thread is interrupted
      */
     public void joinAndRethrow()
             throws InterruptedException
@@ -52,6 +54,8 @@ public class ParallelExecution
     }
 
     /**
+     * @param timeout Milliseconds
+     * @throws InterruptedException if the thread is interrupted
      * @return true if child threads were successfully joined within given timeout.
      */
     public boolean joinAndRethrow(long timeout)

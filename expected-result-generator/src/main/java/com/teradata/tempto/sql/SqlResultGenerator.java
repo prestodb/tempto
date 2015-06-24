@@ -50,7 +50,7 @@ public class SqlResultGenerator {
    * The easiest way to generate expected results is to use
    * the python front-end (generate_results.py).
    *
-   * @param args
+   * @param args Command line arguments
    */
   public static void main(String[] args) {
     Options options = configureCommandLineParser();

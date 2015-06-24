@@ -20,6 +20,9 @@ public class TableRequirements
     /**
      * Requirement for mutable table.
      * Test code is allowed to mutate (insert/delete rows) for mutable table
+     *
+     * @param tableDefinition Encapsulated DDL for table
+     * @return Requirement for mutable table
      */
     public static MutableTableRequirement mutableTable(TableDefinition tableDefinition)
     {
@@ -29,6 +32,11 @@ public class TableRequirements
     /**
      * Requirement for mutable table.
      * Test code is allowed to mutate (insert/delete rows) for mutable table
+     *
+     * @param tableDefinition Encapsulated DDL for table
+     * @param name Name for table
+     * @param state PREPARED, CREATED, or LOADED
+     * @return Requirement for mutable table
      */
     public static MutableTableRequirement mutableTable(TableDefinition tableDefinition, String name, MutableTableRequirement.State state)
     {
@@ -37,6 +45,9 @@ public class TableRequirements
 
     /**
      * Requirement for immutable table.
+     *
+     * @param tableDefinition Encapsulated DDL for table
+     * @return ImmutableTableRequirement
      */
     public static ImmutableTableRequirement immutableTable(TableDefinition tableDefinition)
     {

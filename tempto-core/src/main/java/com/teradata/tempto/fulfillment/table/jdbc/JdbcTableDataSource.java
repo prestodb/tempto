@@ -24,6 +24,8 @@ public interface JdbcTableDataSource
      * Returns iterator over rows to be inserted to table.
      * Object types must match column types in table.
      * Object will be inserted using {@link PreparedStatement#setObject(int, Object)} method.
+     *
+     * @return iterator over rows to be inserted to table
      */
     Iterator<List<Object>> getDataRows();
 }

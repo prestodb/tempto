@@ -129,6 +129,7 @@ public class QueryResult
     /**
      * In SQL/JDBC column indexing starts form 1. This method returns SQL index for given Java index.
      *
+     * @param index 0 based column index
      * @return index + 1
      */
     public static int toSqlIndex(int index)
@@ -139,6 +140,7 @@ public class QueryResult
     /**
      * In SQL/JDBC column indexing starts form 1. This method returns Java index for given SQL index.
      *
+     * @param index 1 based column index
      * @return index - 1;
      */
     public static int fromSqlIndex(int index)

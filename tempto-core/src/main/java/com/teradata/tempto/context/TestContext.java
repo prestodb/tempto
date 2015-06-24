@@ -25,7 +25,9 @@ public interface TestContext
      * Common types of dependencies would be State instance coming out of RequirementFulfillers
      * and services for performing work on cluster (like QueryExecutor, HdfsClient, RemoteExecutor)
      *
+     * @param <T> template
      * @param dependencyClass Class of dependency to be obtained
+     * @return Dependency
      */
     <T> T getDependency(Class<T> dependencyClass);
 
@@ -34,18 +36,30 @@ public interface TestContext
     /**
      * Same as {@link #getDependency(Class)} but will return Optional.empty() if no binding is present for
      * given class.
+     *
+     * @param <T> template
+     * @param dependencyClass Class of dependency to be obtained
+     * @return Dependency
      */
     <T> Optional<T> getOptionalDependency(Class<T> dependencyClass);
 
     /**
      * Same as {@link #getDependency(Class, String)} but will return Optional.empty() if no binding is present for
      * given class.
+     *
+     * @param <T> template
+     * @param dependencyClass Class of dependency to be obtained
+     * @param dependencyName Name of dependency
+     * @return Dependency
      */
     <T> Optional<T> getOptionalDependency(Class<T> dependencyClass, String dependencyName);
 
     /**
      * Creates a new child {@link TestContext} with new {@link com.google.inject.Injector}
      * that contains new states.
+     *
+     * @param states requested states
+     * @return TestContext
      */
     TestContext createChildContext(Iterable<State> states);
 
@@ -56,6 +70,8 @@ public interface TestContext
 
     /**
      * Registers a callback that will be executed on {@link TestContext} close.
+     *
+     * @param callback callback that will be executed on {@link TestContext} close.
      */
     void registerCloseCallback(TestContextCloseCallback callback);
 

@@ -29,21 +29,26 @@ import static com.teradata.tempto.configuration.KeyUtils.joinKey;
 import static java.util.Optional.empty;
 
 /**
+ * <p>
  * This class constructs and stores a map based configuration using nested maps.
- * <p/>
+ * </p>
+ * <p>
  * For leafs - value is stored in map.
  * For non-leaf - nested map is stored.
- * <p/>
+ * </p>
+ * <p>
  * Outer map is responsible for first part in all keys stored in configuration.
  * Maps stored at first internal level are responsible for second part in stored keys and so on.
- * <p/>
+ * </p>
+ * <p>
  * For example, for a configuration storing these hierarchical entries:
  * a.b.c = 3
  * a.x = 10
  * b.c = 15
- * <p/>
+ * </p>
+ * <p>
  * the following map structure would be created
- * <p/>
+ * </p>
  * {
  * a : {
  *  b : {

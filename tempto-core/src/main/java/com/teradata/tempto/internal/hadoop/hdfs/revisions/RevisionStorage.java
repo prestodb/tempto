@@ -24,17 +24,24 @@ public interface RevisionStorage
 
     /**
      * Get current data revision for given {@code hdfsPath}
+     * @param hdfsPath Path to be examined
+     * @return data revision
      */
     Optional<String> get(String hdfsPath);
 
     /**
      * Store data revision for {@code hdfsPath}
+     *
+     * @param hdfsPath Path to be affected
+     * @param revision Revision string to be associated with hdfsPath
      */
     void put(String hdfsPath, String revision);
 
     /**
      * Remove information about {@code hdfsPath} data revision
      * If data revision hasn't been set or hdfsPath does not exist method will just return as regular
+     *
+     * @param hdfsPath Path to be affected
      */
     void remove(String hdfsPath);
 }

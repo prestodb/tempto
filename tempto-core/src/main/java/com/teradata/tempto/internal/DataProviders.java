@@ -33,6 +33,9 @@ public class DataProviders
      * Obtains list of parameter sets for test method based on defined data provider.
      * If no data provider is defined then {@link Optional#empty()} is returned.
      * This method takes into consideration only data providers defined through annotation.
+     *
+     * @param method to be examined
+     * @return list of parameter sets
      */
     public static Optional<Object[][]> getParametersForMethod(ITestNGMethod method)
     {

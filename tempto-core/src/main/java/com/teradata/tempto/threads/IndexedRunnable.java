@@ -21,6 +21,7 @@ public interface IndexedRunnable
 {
     /**
      * @param threadIndex an index of thread that executes this {@link IndexedRunnable}.
+     * @throws Exception if something goes wrong
      */
     void run(int threadIndex)
             throws Exception;

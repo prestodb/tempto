@@ -36,6 +36,7 @@ public interface HdfsClient
     interface RepeatableContentProducer
     {
         /**
+         * @throws IOException If the stream cannot be opened
          * @return a content {@link InputStream}. It will be automatically closed after use.
          */
         InputStream getInputStream()
@@ -71,6 +72,8 @@ public interface HdfsClient
     }
 
     /**
+     * @param path File to be examined
+     * @param username HDFS user name
      * @return length of a file stored in HDFS, -1 if file not exists
      */
     long getLength(String path, String username);

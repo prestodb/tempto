@@ -34,6 +34,8 @@ public interface QueryExecutor
      * Executes statement. Can be either SELECT or DDL/DML.
      * DDL/DML integer result is wrapped into QueryResult
      *
+     * @param sql SQL query to be executed
+     * @param params Parameters to be used while executing query
      * @return Result of executed statement.
      */
     QueryResult executeQuery(String sql, QueryParam... params)
@@ -41,6 +43,11 @@ public interface QueryExecutor
 
     /**
      * Force given query to be executed as update
+     *
+     * @param queryType SELECT or UPDATE
+     * @param sql SQL query to be executed
+     * @param params Parameters to be used while executing query
+     * @return QueryResult
      */
     QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException;
@@ -49,6 +56,10 @@ public interface QueryExecutor
 
     /**
      * Executes given query on DB setup in test context.
+     *
+     * @param sql SQL query to be executed
+     * @param params Parameters to be used while executing query
+     * @return QueryResult
      */
     public static QueryResult query(String sql, QueryParam... params)
             throws QueryExecutionException

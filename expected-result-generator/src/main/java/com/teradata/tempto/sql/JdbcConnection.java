@@ -120,7 +120,8 @@ public class JdbcConnection {
    * @param sql  Query to be executed.
    * @param resultFile  If this file exists, it will be overwritten.
    *
-   * @throws SQLException
+   * @throws SQLException if anything goes wrong while executing the query
+   * @throws IOException if the file cannot be written
    */
   public void executeQueryToFile(String sql, File resultFile) throws SQLException, IOException {
     if (!stmt.execute(sql)) {

@@ -25,6 +25,9 @@ public interface SshClient
 {
     /**
      * Executes command on a remote machine.
+     *
+     * @param command Command to be executed on remote machine.
+     * @return CLIProcess
      */
     CliProcess execute(String command);
 
@@ -33,6 +36,9 @@ public interface SshClient
 
     /**
      * Uploads file to a remote machine. It works like SCP.
+     *
+     * @param file Local path to file which is to be uploaded
+     * @param remotePath Destination path for file on remote machine.
      */
     void upload(Path file, String remotePath);
 }

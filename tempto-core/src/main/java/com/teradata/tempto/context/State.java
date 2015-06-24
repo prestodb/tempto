@@ -25,6 +25,8 @@ public interface State
     /**
      * Return name for state. If non-empty optional is
      * returned State will be bound in TestContext with name annotation.
+     *
+     * @return Name
      */
     default Optional<String> getName() {
         return Optional.empty();

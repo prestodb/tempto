@@ -41,6 +41,8 @@ public interface Configuration
 
     /**
      * Lists all keys in configuration
+     *
+     * @return List of keys
      */
     Set<String> listKeys();
 
@@ -57,12 +59,18 @@ public interface Configuration
      * and
      *
      * listKeyPrefixes(2) would return ["a.b", "a.d", "b"]
+     *
+     * @param prefixesLength Max size of prefix to list
+     * @return List of prefixes
      */
     Set<String> listKeyPrefixes(int prefixesLength);
 
     /**
      * Returns configuration containing all keys starting with given prefix.
      * Keys for returned configuration are stripped of this prefix.
+     *
+     * @param keyPrefix Prefix to search for
+     * @return Configuration containing all keys starting with given prefix.
      */
     Configuration getSubconfiguration(String keyPrefix);
 

@@ -42,12 +42,10 @@ import static org.apache.commons.io.FileUtils.getTempDirectoryPath;
 
 /**
  * This class is a custom log appender that is responsible for two things:
- * <p>
  * <ol>
  * <li>Writing out messages to the console when they meet the minimum level</li>
  * <li>Writing out messages to a per-test file when they meet the minimum level</li>
  * </ol>
- * <p>
  * For now, the console and file levels are defined statically, as well as the output patterns.
  */
 public class TestFrameworkLoggingAppender
@@ -175,7 +173,7 @@ public class TestFrameworkLoggingAppender
     }
 
     /**
-     * Returns logs directory for configured TestFrameworkLoggingAppender.
+     * @return logs directory for configured TestFrameworkLoggingAppender
      */
     public static Optional<String> getSelectedLogsDirectory()
     {

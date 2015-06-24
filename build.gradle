@@ -127,8 +127,7 @@ configure(subprojects - expected_result_generator - tempto_examples - third_part
 
   // plugins configuration
   javadoc {
-    // TODO: SWARM-774
-    failOnError = false
+    failOnError = true
   }
 
   // javadoc.jar generation
