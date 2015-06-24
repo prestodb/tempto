@@ -40,6 +40,8 @@ dependencies {
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
   testCompile libraries.mina_sshd
+  testRuntime libraries.objenesis
+
 }
 
 // project information
