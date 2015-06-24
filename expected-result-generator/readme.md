@@ -10,7 +10,7 @@ This tool generates expected result files for use with the Tempto's convention b
 Building the tool
 -----------------
 cd ~/tempto/expected-result-generator
-../gradlew buildRunnableJar
+../gradlew clean buildRunnableJar
 
 Writing tests
 -------------
@@ -27,7 +27,7 @@ Generating the result file
 The actual execution of the SQL query is performed by a Java program using 
 JDBC, but the user interface is provided by a Python script (generate_results.py).
 
-    cd bin
+    cd build
     # Generate results for one SQL file:
     ./generate_results.py --properties ../config/db.properties -s ~/presto-tdc/presto-product-tests/src/test/resources/sql-tests/testcases/my_test/test1.sql
     
@@ -60,6 +60,6 @@ This file must be formatted as follows:
     test_directory
 
 You can configure the Java application's logging behavior by editing 
-**bin/log4j.properties**.
+**log4j.properties**.
 
 
