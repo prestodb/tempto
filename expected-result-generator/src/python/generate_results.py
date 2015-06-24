@@ -2,7 +2,17 @@
 
 
 """
- Copyright 2015, Teradata Corp. All rights reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
 
  This script simplifies the task of executing the Java SqlResultGenerator program.
 """
@@ -10,8 +20,9 @@
 import argparse
 import subprocess
 import os
+import glob
 
-CLASSPATH = ".:../build/libs/expected-result-generator-all.jar"
+CLASSPATH = "..:./libs/expected-result-generator-all-@version@.jar"
 JAVA_CLASS = "com.teradata.tempto.sql.SqlResultGenerator"
 
 def setup_argument_parser():
@@ -81,19 +92,9 @@ def get_db_properties_file(parser, args):
     return properties_file
 
 
-def verify_java_class_exists():
-    java_command = ('java -cp {0} {1}').format(CLASSPATH, JAVA_CLASS)
-    if 1 == subprocess.call(java_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
-        print("Can't load Java class SqlResultGenerator.  This usually means you need to" +
-              " build it using the following commands:\n" +
-              "pushd ..;../gradlew buildRunnableJar;popd\n")
-        exit(1)
-
 def main():
     parser = setup_argument_parser()
     args = parser.parse_args()
-
-    verify_java_class_exists()
 
     test_list = get_test_list(parser, args)
     properties_file = get_db_properties_file(parser, args)

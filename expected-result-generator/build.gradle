@@ -13,6 +13,7 @@
  */
 
 apply plugin: "java"
+import org.apache.tools.ant.filters.ReplaceTokens
 
 dependencies {
   compile libraries.commons_cli
@@ -21,7 +22,13 @@ dependencies {
   compile libraries.postgresql_jdbc
 }
 
-task buildRunnableJar(type: Jar, dependsOn: build) {
+task wrapperScript(type: Copy, dependsOn: build) {
+  from 'src/python/generate_results.py'
+  into 'build'
+  filter(ReplaceTokens, tokens: [version: tempto_version])
+}
+
+task buildRunnableJar(type: Jar, dependsOn: wrapperScript) {
   appendix = "all"
   from sourceSets.main.output
   from { configurations.testRuntime.collect { it.isDirectory() ? it : zipTree(it) } }
