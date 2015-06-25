@@ -204,10 +204,23 @@ databases:           # database connections
     jdbc_url: jdbc:presto://localhost:8080/hive/default
     jdbc_user: hdfs
     jdbc_password: na
+
+  psql:           # posgresql
+    jdbc_driver_class: org.postgresql.Driver
+    jdbc_url: jdbc:postgresql://localhost:5432/postgres
+    jdbc_user: blah
+    jdbc_password: blah
+    jdbc_pooling: true
+    table_manager_type: jdbc
+
 ```
 
 If we want framework to provision tables we need to specify table_manager_type for database connection.
-Currently only supported table_manager_type is HIVE and is applicable to HDFS backed hive database connection.
+Currently we support two table manager types:
+ * hive: manages tables in HIVE. Is applicable to HDFS backed hive database connection.
+ * jdbc: manages tables in standard SQL JDBC based database. Tables are populated using "INSERT INTO " statements.
+
+Current limitation is that only one table manager for each type can be defined.
 
 * **tests**
 
@@ -459,14 +472,82 @@ like the following:
 
 ### Data sets
 
-Data sets are stored in `sql-tests/datasets_ directory`. To create an example table, you will need to create three files:
+Data sets are stored in `sql-tests/datasets directory`. To create an example table, you will need to create three files:
 
+* TABLE_NAME.ddl - DDL for data.
 * TABLE_NAME.data - file containing raw data.
 * TABLE_NAME.data-revision - file with data marker. If you change your data, you should also increase this
 revision marker, so the new table data is automatically reloaded.
-* TABLE_NAME.ddl - DDL for data.
 
-TODO: provide examples.
+#### TABLE_NAME.ddl
+Contains template for SQL for creating table. 
+Header specifies type of table manager which should be used for this table definition. Can be `jdbc` or `hive`.
+
+##### HIVE tables
+
+Example:
+```
+-- type: hive
+CREATE TABLE %NAME% (
+  id INT,
+  name STRING
+)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+LOCATION '%LOCATION%'
+```
+
+Template must contain:
+ * %NAME% pattern which will be replaced with table name.
+ * %LOCATION% pattern which will replaced with HDFS path where data will be uploaded.
+
+##### JDBC tables
+
+Example:
+```
+-- type: jdbc
+CREATE TABLE %NAME% (
+  id INT,
+  name VARCHAR(100)
+)
+```
+
+Template must contain %NAME% pattern which will be replaced with table name.
+
+#### TABLE_NAME.data
+
+Contains table data.
+
+##### HIVE tables
+
+For HIVE table manager content is not analyzed. Data file is just uploaded to HDFS.
+ 
+##### JDBC tables
+
+Example:
+```
+-- delimiter: |; trimValues: false; types: INTEGER|VARCHAR
+3|A|
+2|B|
+1|C|
+```
+Header parameters are:
+ * delimiter - data columns delimiter (default: |)
+ * trimValues - remove leading and trailing whitespace from data values (default: false)
+ * types - column types (required). Supported column types are:
+   - CHAR, VARCHAR, LONGVARCHAR, LONGNVARCHAR - character string
+   - BOOLEAN - true/false
+   - BIT - 0/1
+   - TINYINT, SMALLINT, INTEGER, BIGINT - integer value
+   - REAL, FLOAT, DOUBLE - floating point value
+   - DECIMAL, NUMERIC - decimal point value
+   - DATE - date; format: `yyyy-[m]m-[d]d`
+   - TIME, TIME_WITH_TIMEZONE - time; format: `hh:mm:ss`
+   - TIMESTAMP, TIMESTAMP_WITH_TIMEZONE - timestamp; format: `yyyy-M-d H:m:s.SSS`
+
+#### TABLE_NAME.data-revision
+
+Currently only HIVE table manager makes use of that. It should contain any string, which must be updated when table contents is changed.
+
 TODO: where should be user create the sql-tests directory? Right now it's resources under the examples dir, where should they put it?
 
 ### Tests
