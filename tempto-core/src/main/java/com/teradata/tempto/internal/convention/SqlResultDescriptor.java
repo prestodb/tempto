@@ -12,14 +12,12 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.convention;
+package com.teradata.tempto.internal.convention;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.assertions.QueryAssert.Row;
-import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
-import com.teradata.tempto.internal.convention.SqlDescriptor;
 import com.teradata.tempto.internal.query.QueryRowMapper;
 
 import java.io.IOException;

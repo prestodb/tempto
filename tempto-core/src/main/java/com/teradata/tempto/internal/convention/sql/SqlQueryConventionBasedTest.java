@@ -17,7 +17,7 @@ package com.teradata.tempto.internal.convention.sql;
 import com.google.common.base.Splitter;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.convention.SqlResultDescriptor;
+import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
 import com.teradata.tempto.query.QueryExecutor;

@@ -1,4 +1,5 @@
-CREATE TABLE %NAME%(
+-- type: hive
+CREATE TABLE %NAME% (
   id INT,
   name STRING
 )

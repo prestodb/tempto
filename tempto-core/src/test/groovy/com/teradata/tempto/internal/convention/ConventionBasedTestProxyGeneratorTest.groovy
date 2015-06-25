@@ -15,7 +15,6 @@
 package com.teradata.tempto.internal.convention
 
 import com.teradata.tempto.Requirement
-import com.teradata.tempto.convention.SqlResultDescriptor
 import com.teradata.tempto.internal.convention.sql.SqlQueryConventionBasedTest
 import org.testng.annotations.Test
 import spock.lang.Specification

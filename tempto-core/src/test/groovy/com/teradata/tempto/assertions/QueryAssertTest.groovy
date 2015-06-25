@@ -15,7 +15,7 @@
 package com.teradata.tempto.assertions
 
 import com.google.common.collect.HashBiMap
-import com.teradata.tempto.convention.SqlResultDescriptor
+import com.teradata.tempto.internal.convention.SqlResultDescriptor
 import com.teradata.tempto.internal.convention.AnnotatedFileParser
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryResult
