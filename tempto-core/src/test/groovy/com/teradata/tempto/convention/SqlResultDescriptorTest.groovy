@@ -16,12 +16,11 @@ package com.teradata.tempto.convention
 
 import com.teradata.tempto.assertions.QueryAssert
 import com.teradata.tempto.internal.convention.AnnotatedFileParser
-import com.teradata.tempto.util.DateTimeUtils
+import com.teradata.tempto.internal.convention.SqlResultDescriptor
 import spock.lang.Specification
 
 import java.sql.Date
 import java.sql.Time
-import java.sql.Timestamp
 
 import static AnnotatedFileParser.SectionParsingResult
 import static com.google.common.collect.Iterables.getOnlyElement

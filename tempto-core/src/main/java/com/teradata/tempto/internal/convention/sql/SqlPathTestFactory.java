@@ -16,7 +16,7 @@ package com.teradata.tempto.internal.convention.sql;
 
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.convention.SqlResultDescriptor;
+import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.Requirements.compose;
-import static com.teradata.tempto.convention.SqlResultDescriptor.sqlResultDescriptorFor;
+import static com.teradata.tempto.internal.convention.SqlResultDescriptor.sqlResultDescriptorFor;
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getExtension;

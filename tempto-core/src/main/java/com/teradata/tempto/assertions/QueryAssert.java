@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.assertions;
 
-import com.teradata.tempto.convention.SqlResultDescriptor;
+import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;

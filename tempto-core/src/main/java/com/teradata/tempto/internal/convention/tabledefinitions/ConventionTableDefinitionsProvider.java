@@ -14,14 +14,18 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
+import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
-import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
+import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
+import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
+import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import org.slf4j.Logger;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -50,7 +54,7 @@ public class ConventionTableDefinitionsProvider
         getAllConventionBasedTableDefinitions().stream().forEach(tableDefinitionsRepository::register);
     }
 
-    private List<HiveTableDefinition> getAllConventionBasedTableDefinitions()
+    private List<TableDefinition> getAllConventionBasedTableDefinitions()
     {
         Optional<Path> dataSetsPath = getConventionsTestsPath(DATASETS_PATH_PART);
         if (!dataSetsPath.isPresent()) {
@@ -60,10 +64,11 @@ public class ConventionTableDefinitionsProvider
         else {
             return getAllConventionTableDefinitionDescriptors(dataSetsPath.get())
                     .stream()
-                    .map(this::hiveTableDefinitionFor)
+                    .map(this::tableDefinitionFor)
                     .collect(toList());
         }
     }
+
 
     private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors(Path dataSetsPath)
     {
@@ -84,19 +89,28 @@ public class ConventionTableDefinitionsProvider
         }
     }
 
-    private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinition)
+    private TableDefinition tableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
-        HiveDataSource dataSource = new FileBasedDataSource(tableDefinition);
-        return hiveTableDefinition(tableDefinition.getName(), createTableDDLTemplate(tableDefinition), dataSource);
+        ConventionTableDefinitionDescriptor.ParsedDDLFile parsedDDLFile = tableDefinitionDescriptor.getParsedDDLFile();
+        switch (parsedDDLFile.getTableType()) {
+            case HIVE:
+                return hiveTableDefinitionFor(tableDefinitionDescriptor);
+            case JDBC:
+                return jdbcTableDefinitionFor(tableDefinitionDescriptor);
+            default:
+                throw new IllegalArgumentException("unknown table type: " + parsedDDLFile.getTableType());
+        }
     }
 
-    private String createTableDDLTemplate(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
+    private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
-        try (InputStream inputStream = new BufferedInputStream(newInputStream(conventionTableDefinitionDescriptor.getDdlFile()))) {
-            return getOnlyElement(new AnnotatedFileParser().parseFile(inputStream)).getContentAsSingleLine();
-        }
-        catch (IOException e) {
-            throw new IllegalStateException("Could not open ddl file: " + conventionTableDefinitionDescriptor.getDdlFile());
-        }
+        HiveDataSource dataSource = new FileBasedHiveDataSource(tableDefinitionDescriptor);
+        return hiveTableDefinition(tableDefinitionDescriptor.getName(), tableDefinitionDescriptor.getParsedDDLFile().getContent(), dataSource);
+    }
+
+    private TableDefinition jdbcTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
+    {
+        JdbcTableDataSource dataSource= new FileBasedJdbcDataSource(tableDefinitionDescriptor);
+        return JdbcTableDefinition.jdbcTableDefinition(tableDefinitionDescriptor.getName(), tableDefinitionDescriptor.getParsedDDLFile().getContent(), dataSource);
     }
 }

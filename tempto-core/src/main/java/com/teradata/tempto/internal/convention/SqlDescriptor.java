@@ -16,6 +16,7 @@ package com.teradata.tempto.internal.convention;
 import com.google.common.base.Splitter;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +27,7 @@ import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * Base class for {@link com.teradata.tempto.internal.convention.SqlQueryDescriptor}
- * and {@link com.teradata.tempto.convention.SqlResultDescriptor}.
+ * and {@link SqlResultDescriptor}.
  */
 public class SqlDescriptor
 {
@@ -34,6 +35,11 @@ public class SqlDescriptor
 
     protected final SectionParsingResult sqlSectionParsingResult;
     private final Map<String, String> baseProperties;
+
+    protected SqlDescriptor(SectionParsingResult sqlSectionParsingResult)
+    {
+        this(sqlSectionParsingResult, Collections.emptyMap());
+    }
 
     protected SqlDescriptor(SectionParsingResult sqlSectionParsingResult, Map<String, String> baseProperties)
     {

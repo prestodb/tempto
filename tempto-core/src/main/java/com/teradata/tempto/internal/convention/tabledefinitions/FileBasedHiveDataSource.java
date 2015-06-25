@@ -27,32 +27,32 @@ import static java.nio.file.Files.newInputStream;
 import static java.nio.file.Files.readAllBytes;
 import static java.util.Collections.singleton;
 
-public class FileBasedDataSource
+public class FileBasedHiveDataSource
         implements HiveDataSource
 {
 
-    private final ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor;
+    private final ConventionTableDefinitionDescriptor tableDefinitionDescriptor;
     private String revisionMarker;
 
-    public FileBasedDataSource(ConventionTableDefinitionDescriptor conventionTableDefinitionDescriptor)
+    public FileBasedHiveDataSource(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
-        this.conventionTableDefinitionDescriptor = conventionTableDefinitionDescriptor;
+        this.tableDefinitionDescriptor = tableDefinitionDescriptor;
     }
 
     @Override
     public String getPathSuffix()
     {
         // {TESTS_PATH}/datasets/{dataSetName}
-        return format("datasets/%s", conventionTableDefinitionDescriptor.getName());
+        return format("datasets/%s", tableDefinitionDescriptor.getName());
     }
 
     @Override
     public Collection<RepeatableContentProducer> data()
     {
-        Path dataFile = conventionTableDefinitionDescriptor.getDataFile();
+        Path dataFile = tableDefinitionDescriptor.getDataFile();
 
         if (!exists(dataFile)) {
-            throw new IllegalStateException("Data file " + conventionTableDefinitionDescriptor.getDataFile() + " should exist");
+            throw new IllegalStateException("Data file " + tableDefinitionDescriptor.getDataFile() + " should exist");
         }
 
         return singleton(() -> newInputStream(dataFile));
@@ -63,12 +63,12 @@ public class FileBasedDataSource
     {
         try {
             if (revisionMarker == null) {
-                revisionMarker = new String(readAllBytes(conventionTableDefinitionDescriptor.getRevisionFile()));
+                revisionMarker = new String(readAllBytes(tableDefinitionDescriptor.getRevisionFile()));
             }
             return revisionMarker;
         }
         catch (IOException e) {
-            throw new IllegalStateException("Could not read revision file: " + conventionTableDefinitionDescriptor.getRevisionFile());
+            throw new IllegalStateException("Could not read revision file: " + tableDefinitionDescriptor.getRevisionFile());
         }
     }
 }
