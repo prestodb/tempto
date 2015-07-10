@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.TableInstance;
@@ -29,15 +30,18 @@ import org.slf4j.Logger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.copyOf;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static java.lang.String.format;
+import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -139,7 +143,7 @@ public class JdbcTableManager
                     preparedStatement.setObject(pos, value);
                     ++pos;
                 }
-                batchRows.add(copyOf(values));
+                batchRows.add(unmodifiableList(newArrayList(values)));
                 preparedStatement.addBatch();
                 if (++rowsInserted % BATCH_SIZE == 0) {
                     executeBatchWithVerification(preparedStatement, rowsInserted - batchRows.size(), batchRows);

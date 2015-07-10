@@ -1,4 +1,4 @@
 -- delimiter: |; types: INTEGER|VARCHAR
 3|A|
-2|B|
+2|null|
 1|C|
