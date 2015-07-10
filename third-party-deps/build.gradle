@@ -29,6 +29,7 @@ dependencies {
 task hiveJdbcFatJar(type: Jar, dependsOn: clean) {
   baseName = 'hive-jdbc'
   appendix = 'all'
+  version = ''
   from {
     configurations.hiveJdbcFatJar.collect {
       it.isDirectory() ? it : zipTree(it)
@@ -36,10 +37,11 @@ task hiveJdbcFatJar(type: Jar, dependsOn: clean) {
   }
 }
 
-task copyProvidedDeps(type: Copy, dependsOn: hiveJdbcFatJar) {
+task copyProvidedDeps(type: Copy, dependsOn: clean) {
   from configurations.provided
   into ("$buildDir/libs")
-  rename ('presto-jdbc-(.*).jar', 'presto-jdbc-all.jar')
+  rename ("presto-jdbc-${versions.presto}.jar", 'presto-jdbc-all.jar')
+
 }
 
 build.dependsOn.add([hiveJdbcFatJar, copyProvidedDeps])
