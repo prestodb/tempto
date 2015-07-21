@@ -17,6 +17,7 @@ package com.teradata.tempto.internal.fulfillment.table.jdbc;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
+import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
@@ -26,6 +27,8 @@ import com.teradata.tempto.internal.uuid.UUIDGenerator;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
+
+import javax.inject.Named;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -55,11 +58,15 @@ public class JdbcTableManager
 
     private final QueryExecutor queryExecutor;
     private final TableNameGenerator tableNameGenerator;
+    private final String databaseName;
+
     @Inject
     public JdbcTableManager(
             QueryExecutor queryExecutor,
-            TableNameGenerator tableNameGenerator)
+            TableNameGenerator tableNameGenerator,
+            @Named("databaseName") String databaseName)
     {
+        this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.tableNameGenerator = checkNotNull(tableNameGenerator, "tableNameGenerator is null");
     }
@@ -97,11 +104,11 @@ public class JdbcTableManager
     }
 
     @Override
-    public TableInstance createMutable(JdbcTableDefinition tableDefinition, MutableTableRequirement.State state)
+    public TableInstance createMutable(JdbcTableDefinition tableDefinition, MutableTableRequirement.State state, String name)
     {
-        String tableNameInDatabase = tableNameGenerator.generateUniqueTableNameInDatabase(tableDefinition);
+        String tableNameInDatabase = tableNameGenerator.generateUniqueTableNameInDatabase(name);
         LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
-        JdbcTableInstance tableInstance = new JdbcTableInstance(tableDefinition.getName(), tableNameInDatabase, tableDefinition);
+        JdbcTableInstance tableInstance = new JdbcTableInstance(name, tableNameInDatabase, tableDefinition);
         if (state == PREPARED) {
             return tableInstance;
         }
@@ -124,6 +131,18 @@ public class JdbcTableManager
     public void dropAllTables()
     {
         // not implementing since we are thinking of changing the flow here
+    }
+
+    @Override
+    public String getDatabaseName()
+    {
+        return databaseName;
+    }
+
+    @Override
+    public Class<? extends TableDefinition> getTableDefinitionClass()
+    {
+        return JdbcTableDefinition.class;
     }
 
     private void insertData(String tableNameInDatabase, JdbcTableDataSource dataSource)

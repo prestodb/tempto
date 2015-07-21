@@ -40,7 +40,7 @@ public class TpchDataSourceTest
 
         String path = "/tempto/" + dataSource.getPathSuffix();
 
-        assertThat(path).isEqualTo("/tempto/tpch/sf-1_00/REGION");
+        assertThat(path).isEqualTo("/tempto/tpch/sf-1,00/REGION");
 
         HdfsClient hdfsClient = testContext().getDependency(HdfsClient.class);
         String hdfsUsername = testContext().getDependency(String.class, "hdfs.username");

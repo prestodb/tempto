@@ -14,78 +14,35 @@
 
 package com.teradata.tempto.internal.fulfillment.table;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
-import com.teradata.tempto.Requirement;
-import com.teradata.tempto.context.State;
-import com.teradata.tempto.fulfillment.RequirementFulfiller;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTablesState;
-import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
-import javafx.scene.control.Tab;
-import org.slf4j.Logger;
+import com.teradata.tempto.fulfillment.table.TablesState;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import static com.beust.jcommander.internal.Maps.newHashMap;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newArrayList;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class MutableTablesFulfiller
-        implements RequirementFulfiller
+        extends TableRequirementFulfiller<MutableTableRequirement>
 {
-
-    private static final Logger LOGGER = getLogger(MutableTablesFulfiller.class);
-
-    private TableManagerDispatcher tableManagerDispatcher;
-
-    private final Map<String, TableInstance> tableInstances = newHashMap();
 
     @Inject
     public MutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher)
     {
-        this.tableManagerDispatcher = tableManagerDispatcher;
+        super(tableManagerDispatcher, MutableTableRequirement.class);
     }
 
     @Override
-    public Set<State> fulfill(Set<Requirement> requirements)
+    protected TablesState createState(Map<String, DatabaseTableInstanceMap> databaseTableInstances)
     {
-        LOGGER.debug("fulfilling tables");
-
-        filter(requirements, MutableTableRequirement.class)
-                .stream()
-                .forEach(this::createMutableTable);
-
-        return ImmutableSet.of(new MutableTablesState(tableInstances));
+        return new MutableTablesState(databaseTableInstances);
     }
 
     @Override
-    public void cleanup()
+    protected TableInstance createTable(TableManager tableManager, MutableTableRequirement tableRequirement)
     {
-        // TableManagers are responsible for cleanUp
-    }
-
-    private void createMutableTable(MutableTableRequirement mutableTableRequirement)
-    {
-        TableDefinition tableDefinition = mutableTableRequirement.getTableDefinition();
-        String name = mutableTableRequirement.getName();
-        checkState(!tableInstances.containsKey(name));
-
-        TableManager tableManager = tableManagerDispatcher.getTableManagerFor(tableDefinition);
-        TableInstance instance = tableManager.createMutable(tableDefinition, mutableTableRequirement.getState());
-        tableInstances.put(name, instance);
-    }
-
-    private <T> List<T> filter(Collection collection, Class<T> clazz)
-    {
-        return newArrayList(Iterables.filter(collection, clazz));
+        return tableManager.createMutable(tableRequirement.getTableDefinition(), tableRequirement.getState(), tableRequirement.getName());
     }
 }
