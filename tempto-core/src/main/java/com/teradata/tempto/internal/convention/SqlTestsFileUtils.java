@@ -71,7 +71,11 @@ public final class SqlTestsFileUtils
     {
         return (Path file) -> {
             try {
-                Files.copy(file, target.resolve(source.relativize(file).toString()), COPY_ATTRIBUTES);
+                Path targetPath = target.resolve(source.relativize(file).toString());
+                if (Files.exists(targetPath) && Files.isDirectory(targetPath)) {
+                    return;
+                }
+                Files.copy(file, targetPath, COPY_ATTRIBUTES);
             }
             catch (IOException exception) {
                 throw new RuntimeException(exception);

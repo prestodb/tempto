@@ -23,11 +23,14 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.copyRecursive;
-import static java.lang.ClassLoader.getSystemResource;
+import static java.lang.ClassLoader.getSystemResources;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
 import static java.nio.file.Files.exists;
@@ -44,9 +47,15 @@ public final class ConventionTestsUtils
     public static Optional<Path> getConventionsTestsPath(String child)
     {
         try {
-            URL productTestUrl = getSystemResource(CONVENTION_TESTS_ROOT_DIR + "/" + child);
-            if (productTestUrl != null) {
-                return Optional.of(copyTestsToTemporaryDirectory(productTestUrl.toURI(), child));
+            Enumeration<URL> productTestUrls = getSystemResources(CONVENTION_TESTS_ROOT_DIR + "/" + child);
+            List<URI> productTestUris = new ArrayList<>();
+            while (productTestUrls.hasMoreElements()) {
+                URL url = productTestUrls.nextElement();
+                productTestUris.add(url.toURI());
+            }
+
+            if (!productTestUris.isEmpty()) {
+                return Optional.of(copyTestsToTemporaryDirectory(productTestUris, child));
             }
             else {
                 return Optional.empty();
@@ -60,14 +69,16 @@ public final class ConventionTestsUtils
         }
     }
 
-    private static Path copyTestsToTemporaryDirectory(URI productTestsUri, String child)
+    private static Path copyTestsToTemporaryDirectory(List<URI> productTestsUris, String child)
             throws IOException
     {
         ensureTemporaryTestsRootPathExists();
 
         Path temporaryTestsPath = temporaryTestsRootPath.get().resolve(child);
         if (!exists(temporaryTestsPath)) {
-            processPathFromUri(productTestsUri, (Path path) -> copyRecursive(path, temporaryTestsPath));
+            for (URI uri : productTestsUris) {
+                processPathFromUri(uri, (Path path) -> copyRecursive(path, temporaryTestsPath));
+            }
         }
 
         return temporaryTestsPath;
@@ -83,7 +94,7 @@ public final class ConventionTestsUtils
     }
 
     /**
-     * Converts given {@link URI} to {@link Path} and process it using
+     * lConverts given {@link URI} to {@link Path} and process it using
      * given {@link Consumer}. If the URI points to a JAR file it opens
      * a new {@link FileSystem} for the duration of processing.
      * <p>
