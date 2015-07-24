@@ -15,6 +15,8 @@
 package com.teradata.tempto.internal.convention;
 
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,8 +27,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.copyRecursive;
@@ -44,15 +48,19 @@ public final class ConventionTestsUtils
 
     private static Optional<Path> temporaryTestsRootPath = Optional.empty();
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConventionTestsUtils.class);
+
     public static Optional<Path> getConventionsTestsPath(String child)
     {
         try {
             Enumeration<URL> productTestUrls = getSystemResources(CONVENTION_TESTS_ROOT_DIR + "/" + child);
-            List<URI> productTestUris = new ArrayList<>();
+            Set<URI> productTestUris = new HashSet<>();
             while (productTestUrls.hasMoreElements()) {
                 URL url = productTestUrls.nextElement();
                 productTestUris.add(url.toURI());
             }
+
+            LOGGER.debug("discovered following convention tests uris: %s", productTestUris);
 
             if (!productTestUris.isEmpty()) {
                 return Optional.of(copyTestsToTemporaryDirectory(productTestUris, child));
@@ -69,7 +77,7 @@ public final class ConventionTestsUtils
         }
     }
 
-    private static Path copyTestsToTemporaryDirectory(List<URI> productTestsUris, String child)
+    private static Path copyTestsToTemporaryDirectory(Set<URI> productTestsUris, String child)
             throws IOException
     {
         ensureTemporaryTestsRootPathExists();
@@ -77,6 +85,7 @@ public final class ConventionTestsUtils
         Path temporaryTestsPath = temporaryTestsRootPath.get().resolve(child);
         if (!exists(temporaryTestsPath)) {
             for (URI uri : productTestsUris) {
+                LOGGER.debug("copying convention tests from %s to %s", uri, temporaryTestsPath);
                 processPathFromUri(uri, (Path path) -> copyRecursive(path, temporaryTestsPath));
             }
         }
