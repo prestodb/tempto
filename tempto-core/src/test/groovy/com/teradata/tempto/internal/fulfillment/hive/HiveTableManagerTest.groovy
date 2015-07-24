@@ -18,6 +18,7 @@ import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
 import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
+import com.teradata.tempto.internal.uuid.UUIDGenerator
 import com.teradata.tempto.query.QueryExecutor
 import com.teradata.tempto.query.QueryResult
 import com.teradata.tempto.query.QueryType
@@ -43,7 +44,7 @@ class HiveTableManagerTest
   void setup()
   {
     tableNameGenerator.generateUniqueTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, hdfsClient, "password", "database");
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, hdfsClient, "password");
   }
 
   def 'should drop all tables'()

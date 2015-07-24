@@ -146,15 +146,14 @@ public class SqlPathTestFactory
         List<Requirement> requirements = newArrayList();
         requirements.addAll(queryDescriptor.getTableDefinitionNames()
                 .stream()
-                .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName), Optional.of(queryDescriptor.getDatabaseName())))
+                .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName)))
                 .collect(toList()));
         requirements.addAll(queryDescriptor.getMutableTableDescriptors()
                 .stream()
-                .map(descriptor -> MutableTableRequirement.builder(tableDefinitionsRepository.getForName(descriptor.tableDefinitionName))
-                        .withName(descriptor.name)
-                        .withState(descriptor.state)
-                        .withDatabase(queryDescriptor.getDatabaseName())
-                        .build())
+                .map(descriptor -> new MutableTableRequirement(
+                        tableDefinitionsRepository.getForName(descriptor.tableDefinitionName),
+                        descriptor.name,
+                        descriptor.state))
                 .collect(toList()));
         requirements.addAll(queryDescriptor.getRequirementClassNames()
                 .stream()

@@ -14,6 +14,7 @@
 package com.teradata.tempto.fulfillment.table;
 
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
+import javafx.scene.control.Tab;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -38,35 +39,27 @@ public interface TableManager<T extends TableDefinition>
 
     TableInstance<T> createImmutable(T tableDefinition);
 
+    TableInstance<T> createMutable(T tableDefinition, State state);
+
     default TableInstance<T> createMutable(T tableDefinition)
     {
         return createMutable(tableDefinition, LOADED);
     }
 
-    default TableInstance<T> createMutable(T tableDefinition, State state) {
-        return createMutable(tableDefinition, state, tableDefinition.getName());
-    }
-
-    TableInstance<T> createMutable(T tableDefinition, State state, String name);
-
     void dropAllTables();
 
-    static <T extends TableDefinition> TableInstance<T> createImmutableTable(T tableDefinition)
+    public static <T extends TableDefinition> TableInstance<T> createImmutableTable(T tableDefinition)
     {
-        return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createImmutable(tableDefinition);
+        return  getTableManagerDispatcher().getTableManagerFor(tableDefinition).createImmutable(tableDefinition);
     }
 
-    static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition, State state)
+    public static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition, State state)
     {
         return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createMutable(tableDefinition, state);
     }
 
-    static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition)
+    public static <T extends TableDefinition> TableInstance<T> createMutableTable(T tableDefinition)
     {
         return getTableManagerDispatcher().getTableManagerFor(tableDefinition).createMutable(tableDefinition);
     }
-
-    String getDatabaseName();
-
-    Class<? extends TableDefinition> getTableDefinitionClass();
 }

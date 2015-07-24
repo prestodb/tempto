@@ -1,12 +1,12 @@
 #!/bin/bash
 
 cat >$1/generated_nation.sql << EOF
--- database: hive; tables: sample_hive_table; groups: generated
-SELECT * FROM sample_hive_table
+-- database: hive; tables: sample_hive_table
+SELECT * FROM sample_table
 EOF
 
 cat >$1/generated_nation.result << EOF
--- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR; groups: generated
+-- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR
 1|A|
 2|B|
 3|C|

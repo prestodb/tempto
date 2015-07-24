@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.fulfillment.table;
 
+import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.internal.uuid.UUIDGenerator;
 
 import javax.inject.Inject;
@@ -28,6 +29,11 @@ public class TableNameGenerator
     public TableNameGenerator(UUIDGenerator uuidGenerator)
     {
         this.uuidGenerator = checkNotNull(uuidGenerator, "uuidGenerator is null");
+    }
+
+    public String generateUniqueTableNameInDatabase(TableDefinition tableDefinition)
+    {
+        return generateUniqueTableNameInDatabase(tableDefinition.getName());
     }
 
     public String generateUniqueTableNameInDatabase(String baseTableName)

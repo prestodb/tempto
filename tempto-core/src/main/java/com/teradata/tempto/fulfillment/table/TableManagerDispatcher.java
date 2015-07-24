@@ -13,9 +13,12 @@
  */
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Collection;
-import java.util.Optional;
+import com.google.inject.Binder;
+import com.google.inject.multibindings.MapBinder;
 
+import java.util.Collection;
+
+import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 
 /**
@@ -23,23 +26,22 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testConte
  */
 public interface TableManagerDispatcher
 {
+    <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition);
 
     default <T extends TableDefinition> TableManager<T> getTableManagerFor(TableInstance<T> tableInstance)
     {
         return getTableManagerFor(tableInstance.tableDefinition());
     }
 
-    default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition)
-    {
-        return getTableManagerFor(tableDefinition, Optional.<String>empty());
-    }
-
-    <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition, Optional<String> databaseName);
-
     Collection<TableManager> getAllTableManagers();
 
-    static TableManagerDispatcher getTableManagerDispatcher()
+    public static TableManagerDispatcher getTableManagerDispatcher()
     {
         return testContext().getDependency(TableManagerDispatcher.class);
+    }
+
+    public static MapBinder<Class<? extends TableDefinition>, TableManager> tableManagerMapBinderFor(Binder binder)
+    {
+        return (MapBinder<Class<? extends TableDefinition>, TableManager>) newMapBinder(binder, TableDefinition.class.getClass(), TableManager.class);
     }
 }

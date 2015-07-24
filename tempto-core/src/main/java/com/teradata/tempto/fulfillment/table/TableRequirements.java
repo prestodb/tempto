@@ -14,8 +14,6 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
-
 public class TableRequirements
 {
 
@@ -28,7 +26,7 @@ public class TableRequirements
      */
     public static MutableTableRequirement mutableTable(TableDefinition tableDefinition)
     {
-        return MutableTableRequirement.builder(tableDefinition).build();
+        return new MutableTableRequirement(tableDefinition);
     }
 
     /**
@@ -42,7 +40,7 @@ public class TableRequirements
      */
     public static MutableTableRequirement mutableTable(TableDefinition tableDefinition, String name, MutableTableRequirement.State state)
     {
-        return MutableTableRequirement.builder(tableDefinition).withName(name).withState(state).build();
+        return new MutableTableRequirement(tableDefinition, name, state);
     }
 
     /**

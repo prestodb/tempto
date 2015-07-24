@@ -14,14 +14,16 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import com.teradata.tempto.internal.fulfillment.table.DatabaseTableInstanceMap;
+import com.teradata.tempto.fulfillment.NamedObjectsState;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
+import static java.util.stream.Collectors.toMap;
 
 public class MutableTablesState
-        extends TablesState
+        extends NamedObjectsState<TableInstance>
 {
 
     public static MutableTablesState mutableTablesState()
@@ -29,8 +31,15 @@ public class MutableTablesState
         return testContext().getDependency(MutableTablesState.class);
     }
 
-    public MutableTablesState(Map<String, DatabaseTableInstanceMap> databaseTableInstanceMap)
+    public MutableTablesState(Map<String, TableInstance> mutableTableInstances)
     {
-        super(databaseTableInstanceMap, "mutable table");
+        super(mutableTableInstances, "mutable table");
+    }
+
+    public Map<String, String> getNameInDatabaseMap()
+    {
+        return objects.entrySet()
+                .stream()
+                .collect(toMap(Entry::getKey, e -> e.getValue().getNameInDatabase()));
     }
 }

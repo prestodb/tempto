@@ -14,14 +14,14 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import com.teradata.tempto.internal.fulfillment.table.DatabaseTableInstanceMap;
+import com.teradata.tempto.fulfillment.NamedObjectsState;
 
 import java.util.Map;
 
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 
 public class ImmutableTablesState
-        extends TablesState
+        extends NamedObjectsState<TableInstance>
 {
 
     public static ImmutableTablesState immutableTablesState()
@@ -29,8 +29,8 @@ public class ImmutableTablesState
         return testContext().getDependency(ImmutableTablesState.class);
     }
 
-    public ImmutableTablesState(Map<String, DatabaseTableInstanceMap> databaseTableInstanceMap)
+    public ImmutableTablesState(Map<String, TableInstance> immutableTableInstances)
     {
-        super(databaseTableInstanceMap, "immutable table");
+        super(immutableTableInstances, "immutable table");
     }
 }

@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
+import com.teradata.tempto.Requirement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
@@ -22,9 +22,8 @@ import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class MutableTableRequirement
-        extends TableRequirement
+        implements Requirement
 {
-
     public enum State
     {
         /**
@@ -44,14 +43,25 @@ public class MutableTableRequirement
         LOADED
     }
 
+    private final TableDefinition tableDefinition;
     private final String name;
     private final State state;
 
-    private MutableTableRequirement(String name, State state, TableDefinition tableDefinition, Optional<String> databaseName)
+    public MutableTableRequirement(TableDefinition tableDefinition)
     {
-        super(tableDefinition, databaseName);
+        this(tableDefinition, tableDefinition.getName(), LOADED);
+    }
+
+    public MutableTableRequirement(TableDefinition tableDefinition, String name, State state)
+    {
+        this.tableDefinition = checkNotNull(tableDefinition);
         this.name = checkNotNull(name);
         this.state = checkNotNull(state);
+    }
+
+    public TableDefinition getTableDefinition()
+    {
+        return tableDefinition;
     }
 
     public String getName()
@@ -62,16 +72,6 @@ public class MutableTableRequirement
     public State getState()
     {
         return state;
-    }
-
-    @Override
-    public TableRequirement copyWithDatabase(String databaseName)
-    {
-        return builder(getTableDefinition())
-                .withState(getState())
-                .withName(getName())
-                .withDatabase(databaseName)
-                .build();
     }
 
     @Override
@@ -95,8 +95,7 @@ public class MutableTableRequirement
     {
         private final TableDefinition tableDefinition;
         private String name;
-        private State state = LOADED;
-        private Optional<String> databaseName = Optional.empty();
+        private State state;
 
         public MutableTableRequirementBuilder(TableDefinition tableDefinition)
         {
@@ -116,15 +115,9 @@ public class MutableTableRequirement
             return this;
         }
 
-        public MutableTableRequirementBuilder withDatabase(String databaseName)
-        {
-            this.databaseName = Optional.of(databaseName);
-            return this;
-        }
-
         public MutableTableRequirement build()
         {
-            return new MutableTableRequirement(name, state, tableDefinition, databaseName);
+            return new MutableTableRequirement(tableDefinition, name, state);
         }
     }
 }

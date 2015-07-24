@@ -14,25 +14,36 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
+import com.teradata.tempto.Requirement;
+
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class ImmutableTableRequirement
-        extends TableRequirement
+        implements Requirement
 {
+
+    private final TableDefinition tableDefinition;
 
     public ImmutableTableRequirement(TableDefinition tableDefinition)
     {
-        this(tableDefinition, Optional.empty());
+        this.tableDefinition = tableDefinition;
     }
 
-    public ImmutableTableRequirement(TableDefinition tableDefinition, Optional<String> databaseName)
+    public TableDefinition getTableDefinition()
     {
-        super(tableDefinition, databaseName);
+        return tableDefinition;
     }
 
     @Override
-    public ImmutableTableRequirement copyWithDatabase(String databaseName)
+    public boolean equals(Object o)
     {
-        return new ImmutableTableRequirement(getTableDefinition(), Optional.of(databaseName));
+        return reflectionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return reflectionHashCode(this);
     }
 }

@@ -96,7 +96,7 @@ public class SqlQueryConventionBasedTest
     {
         QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
         if (queryDescriptor.getQueryType().isPresent()) {
-            return queryExecutor.executeQuery(resolveTemplates(queryDescriptor.getContent(), queryDescriptor.getDatabaseName()), queryDescriptor.getQueryType().get());
+            return queryExecutor.executeQuery(resolveTemplates(queryDescriptor.getContent()), queryDescriptor.getQueryType().get());
         }
         else {
             QueryResult queryResult = null;
@@ -104,19 +104,19 @@ public class SqlQueryConventionBasedTest
             checkState(!queries.isEmpty(), "At least one query must be present");
 
             for (String query : queries) {
-                queryResult = queryExecutor.executeQuery(resolveTemplates(query, queryDescriptor.getDatabaseName()));
+                queryResult = queryExecutor.executeQuery(resolveTemplates(query));
             }
 
             return queryResult;
         }
     }
 
-    private String resolveTemplates(String query, String databaseName)
+    private String resolveTemplates(String query)
     {
         try {
             Template template = new Template("name", new StringReader(query), new freemarker.template.Configuration());
             Map<String, Object> data = newHashMap();
-            data.put("mutableTables", mutableTablesState().getNameInDatabaseMap(databaseName));
+            data.put("mutableTables", mutableTablesState().getNameInDatabaseMap());
 
             Writer writer = new StringWriter();
             template.process(data, writer);
