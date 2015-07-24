@@ -60,7 +60,7 @@ public final class ConventionTestsUtils
                 productTestUris.add(url.toURI());
             }
 
-            LOGGER.debug("discovered following convention tests uris: %s", productTestUris);
+            LOGGER.debug("discovered following convention tests uris: {}", productTestUris);
 
             if (!productTestUris.isEmpty()) {
                 return Optional.of(copyTestsToTemporaryDirectory(productTestUris, child));
@@ -85,7 +85,7 @@ public final class ConventionTestsUtils
         Path temporaryTestsPath = temporaryTestsRootPath.get().resolve(child);
         if (!exists(temporaryTestsPath)) {
             for (URI uri : productTestsUris) {
-                LOGGER.debug("copying convention tests from %s to %s", uri, temporaryTestsPath);
+                LOGGER.debug("copying convention tests from {} to {}", uri, temporaryTestsPath);
                 processPathFromUri(uri, (Path path) -> copyRecursive(path, temporaryTestsPath));
             }
         }
