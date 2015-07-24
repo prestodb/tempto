@@ -49,6 +49,12 @@ public class JdbcQueryExecutor
         this.jdbcUrl = jdbcParamsState.url;
     }
 
+    public JdbcQueryExecutor(Connection connection, String jdbcUrl, TestContext testContext)
+    {
+        this.connection = connection;
+        this.jdbcUrl = jdbcUrl;
+    }
+
     @Override
     public QueryResult executeQuery(String sql, QueryParam... params)
             throws QueryExecutionException
