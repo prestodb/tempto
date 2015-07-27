@@ -35,6 +35,16 @@ databases:
     jdbc_pooling: true
     table_manager_type: jdbc
 
+  # run psql2 instance with
+  # docker run --name tempto-examples-psql2 -p 15433:5432 -e POSTGRES_USER=blah -e POSTGRES_PASSWORD=blah  -d postgres
+  psql2:
+    jdbc_driver_class: org.postgresql.Driver
+    jdbc_url: jdbc:postgresql://localhost:15433/postgres
+    jdbc_user: blah
+    jdbc_password: blah
+    jdbc_pooling: true
+    table_manager_type: jdbc
+
 tests:
   hdfs:
     path: /tempto

@@ -31,9 +31,11 @@ import org.testng.annotations.Test;
 import javax.inject.Named;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
+import static com.teradata.tempto.fulfillment.table.ImmutableTablesState.immutableTablesState;
 import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
 
 public class PostgresqlQueryTest
@@ -63,7 +65,7 @@ public class PostgresqlQueryTest
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return new ImmutableTableRequirement(TEST_TABLE_DEFINITION);
+            return new ImmutableTableRequirement(TEST_TABLE_DEFINITION, Optional.of("psql"));
         }
     }
 
@@ -74,15 +76,17 @@ public class PostgresqlQueryTest
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return new MutableTableRequirement(TEST_TABLE_DEFINITION);
+            return MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase("psql").build();
         }
     }
+
 
     @Test(groups = "psql_query")
     @Requires(ImmutableTestJdbcTable.class)
     public void selectFromImmutableTable()
     {
-        assertThat(queryExecutor.executeQuery("select * from test_table")).containsOnly(row(1, "x"), row(2, "y"));
+        String nameInDatabase = immutableTablesState().get("test_table", Optional.of("psql")).getNameInDatabase();
+        assertThat(queryExecutor.executeQuery("select * from " + nameInDatabase)).containsOnly(row(1, "x"), row(2, "y"));
     }
 
     @Test(groups = "psql_query")

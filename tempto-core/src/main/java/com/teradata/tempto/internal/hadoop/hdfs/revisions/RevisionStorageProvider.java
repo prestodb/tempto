@@ -83,7 +83,7 @@ public class RevisionStorageProvider
                 return true;
             }
         }
-        while ((cause = e.getCause()) != null);
+        while ((cause = cause.getCause()) != null);
 
         return false;
     }

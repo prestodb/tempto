@@ -36,6 +36,7 @@ public class JdbcQueryExecutor
     private static final Logger LOGGER = getLogger(JdbcQueryExecutor.class);
 
     private final Connection connection;
+    private final String jdbcUrl;
 
     @Inject
     public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState,
@@ -43,13 +44,9 @@ public class JdbcQueryExecutor
             TestContext testContext)
             throws SQLException
     {
-        this(jdbcConnectionsPool.connectionFor(jdbcParamsState), testContext);
-    }
-
-    public JdbcQueryExecutor(Connection connection, TestContext testContext)
-    {
-        this.connection = connection;
+        this.connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
         testContext.registerCloseCallback(context -> this.close());
+        this.jdbcUrl = jdbcParamsState.url;
     }
 
     @Override
@@ -75,7 +72,7 @@ public class JdbcQueryExecutor
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
             throws QueryExecutionException
     {
-        LOGGER.debug("executing query {} with params {}", sql, params);
+        LOGGER.debug("executing on {} query {} with params {}", jdbcUrl, sql, params);
 
         try {
             if (params.length == 0) {
