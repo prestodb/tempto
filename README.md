@@ -560,13 +560,17 @@ of files:
 query execution requirements:
 
 ```
--- database: hive; groups: example_smoketest,group2
+-- database: hive; groups: example_smoketest,group2; tables: nation;
 SELECT * FROM nation
 ```
 
 This test contains queries that should be executed against the Hive database. Only results
 of the last query will be checked agains result file. In addition, the test is part of two
 separate TestNG groups: example_smoketest and group2.
+
+In above example queries will be run against database hive (see database key in a first row).
+Test require immutable table nation to be created and loaded before query execution (see tables key). 
+
 
 * **TEST.result** - file with the expected result of the query. The first line can be a SQL comment
 with query assertion requirements:
@@ -608,6 +612,27 @@ SELECT * FROM nation WHERE id=1
 You are also able to add custom _before_ and _after_ scripts for your test. Those are executed
 before and after each test case.
 TODO more info on scripts, what they should be named, what they can contain.
+
+#### Using tables across databases.
+
+It is possible (which is useful for testing presto for example), to use a table which is created in one database (e.g. hive, psql) while sending test query to other database (e.g. presto).
+Take a look at the example below. Here query is issued via presto JDBC, while nation table could be created somewhere else. In order to determine 
+where nation should be created (find appropriate requirements) below matching flow is used:
+ - If database is specified explicitly as prefix for table name (e.g psql.nation) then requirement for table in that database will be generated. Note that database must have a table_manager with type matching table manager of a table or error will be thrown.
+ - If no database is specified explicitly then if there is only one database with table manager of type equal to table type then this database will be picked up.
+ - As fallback database to which test query would be send is used. Database type manager type vs table type checking is done.
+
+```
+-- database: presto; tables: nation;
+SELECT * FROM nation
+```
+
+Here you have an example with an immutable table requirement from database psql.
+
+```
+-- database: presto; tables: psql.nation;
+SELECT * FROM nation
+```
 
 ### Generated tests
 

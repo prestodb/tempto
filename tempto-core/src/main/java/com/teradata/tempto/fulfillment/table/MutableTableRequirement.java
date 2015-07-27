@@ -14,8 +14,6 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
@@ -47,7 +45,7 @@ public class MutableTableRequirement
     private final String name;
     private final State state;
 
-    private MutableTableRequirement(String name, State state, TableDefinition tableDefinition, Optional<String> databaseName)
+    private MutableTableRequirement(String name, State state, TableDefinition tableDefinition, DatabaseSelectionContext databaseName)
     {
         super(tableDefinition, databaseName);
         this.name = checkNotNull(name);
@@ -70,7 +68,7 @@ public class MutableTableRequirement
         return builder(getTableDefinition())
                 .withState(getState())
                 .withName(getName())
-                .withDatabase(databaseName)
+                .withDatabase(DatabaseSelectionContext.forDatabaseName(databaseName))
                 .build();
     }
 
@@ -96,7 +94,7 @@ public class MutableTableRequirement
         private final TableDefinition tableDefinition;
         private String name;
         private State state = LOADED;
-        private Optional<String> databaseName = Optional.empty();
+        private DatabaseSelectionContext databaseSelectionContext = DatabaseSelectionContext.none();
 
         public MutableTableRequirementBuilder(TableDefinition tableDefinition)
         {
@@ -116,15 +114,15 @@ public class MutableTableRequirement
             return this;
         }
 
-        public MutableTableRequirementBuilder withDatabase(String databaseName)
+        public MutableTableRequirementBuilder withDatabase(DatabaseSelectionContext databaseSelectionContext)
         {
-            this.databaseName = Optional.of(databaseName);
+            this.databaseSelectionContext = databaseSelectionContext;
             return this;
         }
 
         public MutableTableRequirement build()
         {
-            return new MutableTableRequirement(name, state, tableDefinition, databaseName);
+            return new MutableTableRequirement(name, state, tableDefinition, databaseSelectionContext);
         }
     }
 }

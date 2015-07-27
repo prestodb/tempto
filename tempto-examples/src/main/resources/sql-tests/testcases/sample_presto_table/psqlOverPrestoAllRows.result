@@ -1,0 +1,4 @@
+-- delimiter: |; ignoreOrder: false; types: BIGINT|LONGNVARCHAR
+3|A|
+2|null|
+1|C|

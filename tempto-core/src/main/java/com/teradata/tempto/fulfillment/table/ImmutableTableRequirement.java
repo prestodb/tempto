@@ -14,25 +14,23 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
-
 public class ImmutableTableRequirement
         extends TableRequirement
 {
 
     public ImmutableTableRequirement(TableDefinition tableDefinition)
     {
-        this(tableDefinition, Optional.empty());
+        this(tableDefinition, DatabaseSelectionContext.none());
     }
 
-    public ImmutableTableRequirement(TableDefinition tableDefinition, Optional<String> databaseName)
+    public ImmutableTableRequirement(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext)
     {
-        super(tableDefinition, databaseName);
+        super(tableDefinition, databaseSelectionContext);
     }
 
     @Override
     public ImmutableTableRequirement copyWithDatabase(String databaseName)
     {
-        return new ImmutableTableRequirement(getTableDefinition(), Optional.of(databaseName));
+        return new ImmutableTableRequirement(getTableDefinition(), DatabaseSelectionContext.forDatabaseName(databaseName));
     }
 }

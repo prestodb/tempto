@@ -1,0 +1,3 @@
+databases:
+  presto:
+    jdbc_url: jdbc:presto://localhost:8080/hive/default

@@ -19,32 +19,51 @@ import spock.lang.Specification
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED
+import static java.util.Optional.empty
 import static org.apache.commons.io.IOUtils.toInputStream
 
 class SqlQueryDescriptorTest
         extends Specification
 {
-  def 'parses mutable table properties'()
+  def 'parses immutable table properties'()
   {
     setup:
-    String fileContent = '-- mutable_tables: table1|loaded|table1_name, table2|created, table3'
+    String fileContent = '-- tables: table1, prefix.table2'
     SectionParsingResult parsingResult = parseSection(fileContent)
     SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(parsingResult)
 
     expect:
-    queryDescriptor.mutableTableDescriptors.size() == 3
+    queryDescriptor.tableDefinitionNames == [
+            new TableName('table1', empty()),
+            new TableName('table2', Optional.of('prefix'))
+    ] as Set
+  }
+
+  def 'parses mutable table properties'()
+  {
+    setup:
+    String fileContent = '-- mutable_tables: table1|loaded|table1_name, table2|created, table3, table4|created|prefix.table4_1'
+    SectionParsingResult parsingResult = parseSection(fileContent)
+    SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(parsingResult)
+
+    expect:
+    queryDescriptor.mutableTableDescriptors.size() == 4
 
     queryDescriptor.mutableTableDescriptors[0].tableDefinitionName == 'table1'
     queryDescriptor.mutableTableDescriptors[0].state == LOADED;
-    queryDescriptor.mutableTableDescriptors[0].name == 'table1_name'
+    queryDescriptor.mutableTableDescriptors[0].name == new TableName('table1_name', empty())
 
     queryDescriptor.mutableTableDescriptors[1].tableDefinitionName == 'table2'
     queryDescriptor.mutableTableDescriptors[1].state == CREATED;
-    queryDescriptor.mutableTableDescriptors[1].name == 'table2'
+    queryDescriptor.mutableTableDescriptors[1].name == new TableName('table2', empty())
 
     queryDescriptor.mutableTableDescriptors[2].tableDefinitionName == 'table3'
     queryDescriptor.mutableTableDescriptors[2].state == LOADED;
-    queryDescriptor.mutableTableDescriptors[2].name == 'table3'
+    queryDescriptor.mutableTableDescriptors[2].name == new TableName('table3', empty())
+
+    queryDescriptor.mutableTableDescriptors[3].tableDefinitionName == 'table4'
+    queryDescriptor.mutableTableDescriptors[3].state == CREATED;
+    queryDescriptor.mutableTableDescriptors[3].name == new TableName('table4_1', Optional.of('prefix'))
   }
 
   def 'should fail duplicate mutable table name'()

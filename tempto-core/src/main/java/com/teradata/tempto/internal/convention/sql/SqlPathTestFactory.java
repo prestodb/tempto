@@ -16,7 +16,7 @@ package com.teradata.tempto.internal.convention.sql;
 
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.internal.convention.SqlResultDescriptor;
+import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
@@ -27,6 +27,7 @@ import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import com.teradata.tempto.internal.convention.ConventionBasedTestProxyGenerator;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
+import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.convention.SqlTestsFileUtils;
 
 import java.nio.file.Path;
@@ -37,8 +38,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.Requirements.compose;
-import static com.teradata.tempto.internal.convention.SqlResultDescriptor.sqlResultDescriptorFor;
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
+import static com.teradata.tempto.internal.convention.SqlResultDescriptor.sqlResultDescriptorFor;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getExtension;
 import static java.nio.file.Files.exists;
@@ -146,16 +147,20 @@ public class SqlPathTestFactory
         List<Requirement> requirements = newArrayList();
         requirements.addAll(queryDescriptor.getTableDefinitionNames()
                 .stream()
-                .map(requiredTableName -> new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName), Optional.of(queryDescriptor.getDatabaseName())))
-                .collect(toList()));
+                .map(requiredTableName -> {
+                    DatabaseSelectionContext databaseSelectionContext = new DatabaseSelectionContext(requiredTableName.getPrefix(), Optional.of(queryDescriptor.getDatabaseName()));
+                    return new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName.getName()), databaseSelectionContext);
+                }).collect(toList()));
         requirements.addAll(queryDescriptor.getMutableTableDescriptors()
                 .stream()
-                .map(descriptor -> MutableTableRequirement.builder(tableDefinitionsRepository.getForName(descriptor.tableDefinitionName))
-                        .withName(descriptor.name)
-                        .withState(descriptor.state)
-                        .withDatabase(queryDescriptor.getDatabaseName())
-                        .build())
-                .collect(toList()));
+                .map(descriptor -> {
+                    DatabaseSelectionContext databaseSelectionContext = new DatabaseSelectionContext(descriptor.name.getPrefix(), Optional.of(queryDescriptor.getDatabaseName()));
+                    return MutableTableRequirement.builder(tableDefinitionsRepository.getForName(descriptor.tableDefinitionName))
+                            .withName(descriptor.name.getName())
+                            .withState(descriptor.state)
+                            .withDatabase(databaseSelectionContext)
+                            .build();
+                }).collect(toList()));
         requirements.addAll(queryDescriptor.getRequirementClassNames()
                 .stream()
                 .map(this::getRequirementsFromClass)

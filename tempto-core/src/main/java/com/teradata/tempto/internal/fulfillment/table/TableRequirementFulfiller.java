@@ -82,8 +82,7 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
 
     private TableManager getTableManager(T tableRequirement)
     {
-        Optional<String> databaseName = tableRequirement.getDatabaseName();
-        return tableManagerDispatcher.getTableManagerFor(tableRequirement.getTableDefinition(), databaseName);
+        return tableManagerDispatcher.getTableManagerFor(tableRequirement.getTableDefinition(), tableRequirement.getDatabaseSelectionContext());
     }
 
     private void addDatabaseTable(TableInstance instance, String databaseName)

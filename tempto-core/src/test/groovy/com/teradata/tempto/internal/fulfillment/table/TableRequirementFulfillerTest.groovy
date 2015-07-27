@@ -36,9 +36,9 @@ class TableRequirementFulfillerTest
   {
     tableManager.databaseName >> DATABASE_NAME
     otherTableManager.databaseName >> OTHER_DATABASE_NAME
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, Optional.empty()) >> tableManager
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, Optional.of(DATABASE_NAME)) >> tableManager
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, Optional.of(OTHER_DATABASE_NAME)) >> otherTableManager
+    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.none()) >> tableManager
+    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME)) >> tableManager
+    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(OTHER_DATABASE_NAME)) >> otherTableManager
   }
 
   def "test mutable table fulfill/cleanup"()
@@ -141,8 +141,8 @@ class TableRequirementFulfillerTest
     setup:
     def tableDefinition = getTableDefinition("nation")
     def tableInstance = new TableInstance("nation", "nation", tableDefinition)
-    def requirement = new ImmutableTableRequirement(tableDefinition, Optional.of(DATABASE_NAME))
-    def requirementOnOtherDatabase = new ImmutableTableRequirement(tableDefinition, Optional.of(OTHER_DATABASE_NAME))
+    def requirement = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME))
+    def requirementOnOtherDatabase = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(OTHER_DATABASE_NAME))
 
     tableManager.createImmutable(tableDefinition) >> tableInstance
     otherTableManager.createImmutable(tableDefinition) >> tableInstance
@@ -180,7 +180,7 @@ class TableRequirementFulfillerTest
     setup:
     def tableDefinition = getTableDefinition("nation")
     def tableInstance = new TableInstance("nation", "nation", tableDefinition)
-    def requirement = new ImmutableTableRequirement(tableDefinition, Optional.of(DATABASE_NAME))
+    def requirement = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME))
     def requirementOnDefault = new ImmutableTableRequirement(tableDefinition)
 
     tableManager.createImmutable(tableDefinition) >> tableInstance

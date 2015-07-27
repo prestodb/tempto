@@ -20,6 +20,7 @@ import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
 import com.teradata.tempto.Requires;
 import com.teradata.tempto.configuration.Configuration;
+import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTablesState;
@@ -65,7 +66,7 @@ public class PostgresqlQueryTest
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return new ImmutableTableRequirement(TEST_TABLE_DEFINITION, Optional.of("psql"));
+            return new ImmutableTableRequirement(TEST_TABLE_DEFINITION, DatabaseSelectionContext.forDatabaseName("psql"));
         }
     }
 
@@ -76,7 +77,7 @@ public class PostgresqlQueryTest
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase("psql").build();
+            return MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase(DatabaseSelectionContext.forDatabaseName("psql")).build();
         }
     }
 

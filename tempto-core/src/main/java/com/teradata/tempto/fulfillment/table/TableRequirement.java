@@ -16,9 +16,7 @@ package com.teradata.tempto.fulfillment.table;
 
 import com.teradata.tempto.Requirement;
 
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
@@ -27,12 +25,12 @@ public abstract class TableRequirement<T extends TableRequirement>
 {
 
     private final TableDefinition tableDefinition;
-    private final Optional<String> databaseName;
+    private final DatabaseSelectionContext databaseSelectionContext;
 
-    protected TableRequirement(TableDefinition tableDefinition, Optional<String> databaseName)
+    protected TableRequirement(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext)
     {
-        this.tableDefinition = checkNotNull(tableDefinition);
-        this.databaseName = checkNotNull(databaseName);
+        this.tableDefinition = requireNonNull(tableDefinition, "tableDefinition is null");
+        this.databaseSelectionContext = requireNonNull(databaseSelectionContext, "databaseSelectionContext is null");
     }
 
     public TableDefinition getTableDefinition()
@@ -40,9 +38,9 @@ public abstract class TableRequirement<T extends TableRequirement>
         return tableDefinition;
     }
 
-    public Optional<String> getDatabaseName()
+    public DatabaseSelectionContext getDatabaseSelectionContext()
     {
-        return databaseName;
+        return databaseSelectionContext;
     }
 
     public abstract T copyWithDatabase(String databaseName);

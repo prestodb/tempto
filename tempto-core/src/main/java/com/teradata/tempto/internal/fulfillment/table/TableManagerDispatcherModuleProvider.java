@@ -13,9 +13,6 @@
  */
 package com.teradata.tempto.internal.fulfillment.table;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.ListMultimap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -23,15 +20,12 @@ import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.query.QueryExecutor;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -42,7 +36,6 @@ import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.name.Names.named;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 @AutoModuleProvider
@@ -104,46 +97,7 @@ public class TableManagerDispatcherModuleProvider
             @Provides
             public TableManagerDispatcher defaultTableManagerDispatcher(Map<String, TableManager> tableManagers)
             {
-                final ListMultimap<Class<? extends TableDefinition>, TableManager> classToTableManagers = ArrayListMultimap.create();
-                tableManagers.values().stream().forEach(
-                        manager -> classToTableManagers.put(manager.getTableDefinitionClass(), manager)
-                );
-
-                return new TableManagerDispatcher()
-                {
-
-                    @Override
-                    public <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition, Optional<String> databaseName)
-                    {
-                        if (databaseName.isPresent()) {
-                            if (tableManagers.containsKey(databaseName.get())) {
-                                return tableManagers.get(databaseName.get());
-                            }
-                            throw new IllegalStateException(format("No table manager found for database name '%s'.", databaseName.get()));
-                        }
-                        Class<? extends TableDefinition> tableDefinitionClass = tableDefinition.getClass();
-                        if (classToTableManagers.containsKey(tableDefinitionClass)) {
-                            List<TableManager> classTableManagers = classToTableManagers.get(tableDefinitionClass);
-                            switch(classTableManagers.size()) {
-                                case 0:
-                                    throw new IllegalStateException(format("No table manager found for table definition class '%s'.", tableDefinitionClass));
-                                case 1:
-                                    return getOnlyElement(classTableManagers);
-                                default:
-                                    List<String> databaseNames = classTableManagers.stream().map(TableManager::getDatabaseName).collect(toList());
-                                    throw new IllegalStateException(format("Multiple table manager found for table definition class '%s'. Pick name to determine table manager from %s",
-                                            tableDefinitionClass, databaseNames));
-                            }
-                        }
-                        throw new IllegalStateException(format("Table manager for table definition class: %s, name: %s is not registered", tableDefinitionClass, databaseName));
-                    }
-
-                    @Override
-                    public Collection<TableManager> getAllTableManagers()
-                    {
-                        return tableManagers.values();
-                    }
-                };
+                return new DefaultTableManagerDispatcher(tableManagers);
             }
         };
     }

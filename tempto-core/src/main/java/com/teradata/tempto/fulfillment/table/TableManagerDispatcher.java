@@ -14,7 +14,6 @@
 package com.teradata.tempto.fulfillment.table;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 
@@ -31,10 +30,10 @@ public interface TableManagerDispatcher
 
     default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition)
     {
-        return getTableManagerFor(tableDefinition, Optional.<String>empty());
+        return getTableManagerFor(tableDefinition, DatabaseSelectionContext.none());
     }
 
-    <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition, Optional<String> databaseName);
+    <T extends TableDefinition> TableManager<T> getTableManagerFor(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext);
 
     Collection<TableManager> getAllTableManagers();
 

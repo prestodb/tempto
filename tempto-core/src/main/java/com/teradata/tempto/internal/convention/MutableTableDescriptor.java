@@ -21,9 +21,9 @@ public final class MutableTableDescriptor
 {
     public final String tableDefinitionName;
     public final State state;
-    public final String name;
+    public final TableName name;
 
-    MutableTableDescriptor(String tableDefinitionName, State state, String name)
+    MutableTableDescriptor(String tableDefinitionName, State state, TableName name)
     {
         this.tableDefinitionName = checkNotNull(tableDefinitionName);
         this.state = checkNotNull(state);
