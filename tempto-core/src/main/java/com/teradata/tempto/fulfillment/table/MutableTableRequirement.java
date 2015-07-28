@@ -95,7 +95,7 @@ public class MutableTableRequirement
     {
         private final TableDefinition tableDefinition;
         private String name;
-        private State state;
+        private State state = LOADED;
 
         public MutableTableRequirementBuilder(TableDefinition tableDefinition)
         {
