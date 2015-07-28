@@ -18,6 +18,7 @@ import com.teradata.tempto.fulfillment.table.TableInstance;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
 import static com.google.common.base.Preconditions.checkState;
@@ -57,5 +58,10 @@ public class DatabaseTableInstanceMap
     public Optional<TableInstance> get(String name)
     {
         return Optional.ofNullable(tableInstances.get(name));
+    }
+
+    public Set<String> getTableNames()
+    {
+        return tableInstances.keySet();
     }
 }

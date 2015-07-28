@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -83,6 +84,11 @@ public abstract class TablesState
     {
         checkState(databaseTableInstances.containsKey(database), "There is no tables for database '%s'.", database);
         return databaseTableInstances.get(database);
+    }
+
+    public Set<String> getDatabaseNames()
+    {
+        return databaseTableInstances.keySet();
     }
 }
 

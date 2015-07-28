@@ -17,9 +17,10 @@ package com.teradata.tempto.internal.convention.sql;
 import com.google.common.base.Splitter;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.internal.convention.SqlResultDescriptor;
+import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
+import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.query.QueryExecutor;
 import com.teradata.tempto.query.QueryResult;
 import freemarker.template.Template;
@@ -35,6 +36,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
@@ -45,6 +47,7 @@ import static com.teradata.tempto.fulfillment.table.MutableTablesState.mutableTa
 import static com.teradata.tempto.internal.convention.ProcessUtils.execute;
 import static java.lang.Character.isAlphabetic;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SqlQueryConventionBasedTest
@@ -96,7 +99,8 @@ public class SqlQueryConventionBasedTest
     {
         QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
         if (queryDescriptor.getQueryType().isPresent()) {
-            return queryExecutor.executeQuery(resolveTemplates(queryDescriptor.getContent(), queryDescriptor.getDatabaseName()), queryDescriptor.getQueryType().get());
+            String sql = resolveTemplates(queryDescriptor.getContent());
+            return queryExecutor.executeQuery(sql, queryDescriptor.getQueryType().get());
         }
         else {
             QueryResult queryResult = null;
@@ -104,19 +108,22 @@ public class SqlQueryConventionBasedTest
             checkState(!queries.isEmpty(), "At least one query must be present");
 
             for (String query : queries) {
-                queryResult = queryExecutor.executeQuery(resolveTemplates(query, queryDescriptor.getDatabaseName()));
+                String sql = resolveTemplates(query);
+                queryResult = queryExecutor.executeQuery(sql);
             }
 
             return queryResult;
         }
     }
 
-    private String resolveTemplates(String query, String databaseName)
+    private String resolveTemplates(String query)
     {
         try {
             Template template = new Template("name", new StringReader(query), new freemarker.template.Configuration());
             Map<String, Object> data = newHashMap();
-            data.put("mutableTables", mutableTablesState().getNameInDatabaseMap(databaseName));
+            Map<String, Map<String, String>> tableNamesPerDatabase = mutableTablesState().getDatabaseNames().stream()
+                    .collect(toMap(databaseName -> databaseName, databaseName -> mutableTablesState().getNameInDatabaseMap(databaseName)));
+            data.put("mutableTables", tableNamesPerDatabase);
 
             Writer writer = new StringWriter();
             template.process(data, writer);
