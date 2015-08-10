@@ -16,6 +16,8 @@ package com.teradata.tempto.fulfillment.table;
 import com.google.common.collect.MapMaker;
 import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import com.teradata.tempto.internal.ReflectionHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,6 +36,9 @@ import static java.util.stream.Collectors.toList;
  */
 public class TableDefinitionsRepository
 {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TableDefinitionsRepository.class);
+
     /**
      * An annotation for {@link TableDefinition} static fields
      * that should be registered in {@link TableDefinitionsRepository}.
@@ -44,17 +49,26 @@ public class TableDefinitionsRepository
     {
     }
 
-    private static List<TableDefinition> SCANNED_TABLE_DEFINITIONS =
-            getFieldsAnnotatedWith(RepositoryTableDefinition.class)
-                    .stream()
-                    .map(ReflectionHelper::<TableDefinition>getStaticFieldValue)
-                    .collect(toList());
+    private static final List<TableDefinition> SCANNED_TABLE_DEFINITIONS;
 
-    private static TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(SCANNED_TABLE_DEFINITIONS);
+    private static final TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY;
 
     static {
-        // TODO: since TestNG has no listener that can be run before tests factory, this has to be initialized here
-        new ConventionTableDefinitionsProvider().registerConventionTableDefinitions(TABLE_DEFINITIONS_REPOSITORY);
+        // ExceptionInInitializerError is not always appropriately logged, lets log exceptions explicitly here
+        try {
+            SCANNED_TABLE_DEFINITIONS =
+                    getFieldsAnnotatedWith(RepositoryTableDefinition.class)
+                            .stream()
+                            .map(ReflectionHelper::<TableDefinition>getStaticFieldValue)
+                            .collect(toList());
+
+            TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(SCANNED_TABLE_DEFINITIONS);
+            // TODO: since TestNG has no listener that can be run before tests factory, this has to be initialized here
+            new ConventionTableDefinitionsProvider().registerConventionTableDefinitions(TABLE_DEFINITIONS_REPOSITORY);
+        } catch (RuntimeException e){
+            LOGGER.error("Error during TableDefinitionsRepository initialization", e);
+            throw e;
+        }
     }
 
     public static <T extends TableDefinition> T registerTableDefinition(T tableDefinition)

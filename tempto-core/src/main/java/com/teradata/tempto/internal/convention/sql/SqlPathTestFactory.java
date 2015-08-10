@@ -16,6 +16,7 @@ package com.teradata.tempto.internal.convention.sql;
 
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
+import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
@@ -38,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.Requirements.compose;
-import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
 import static com.teradata.tempto.internal.convention.SqlResultDescriptor.sqlResultDescriptorFor;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getExtension;
@@ -56,12 +56,15 @@ public class SqlPathTestFactory
 
     private final TableDefinitionsRepository tableDefinitionsRepository;
     private final ConventionBasedTestProxyGenerator proxyGenerator;
+    private final Configuration configuration;
 
     public SqlPathTestFactory(TableDefinitionsRepository tableDefinitionsRepository,
-            ConventionBasedTestProxyGenerator proxyGenerator)
+                              ConventionBasedTestProxyGenerator proxyGenerator,
+                              Configuration configuration)
     {
         this.tableDefinitionsRepository = tableDefinitionsRepository;
         this.proxyGenerator = proxyGenerator;
+        this.configuration = configuration;
     }
 
     @Override
@@ -171,7 +174,6 @@ public class SqlPathTestFactory
     private Requirement getRequirementsFromClass(String requirementClassName)
     {
         RequirementsProvider requirementsProvider = ReflectionHelper.instantiate(requirementClassName);
-        // pass empty configuration here, because convention based requirements can't rely on any properties
-        return requirementsProvider.getRequirements(emptyConfiguration());
+        return requirementsProvider.getRequirements(configuration);
     }
 }

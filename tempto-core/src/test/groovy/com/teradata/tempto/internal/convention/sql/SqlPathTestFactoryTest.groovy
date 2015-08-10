@@ -30,6 +30,8 @@ import spock.lang.Specification
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration
+
 class SqlPathTestFactoryTest
         extends Specification
 {
@@ -43,7 +45,7 @@ class SqlPathTestFactoryTest
   {
     TableDefinitionsRepository tableDefinitionsRepositoryMock = Mock()
     ConventionBasedTestProxyGenerator conventionBasedTestProxyGeneratorMock = new ConventionBasedTestProxyGenerator('test')
-    sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock)
+    sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock, emptyConfiguration())
   }
 
   def shouldCreateConventionTestWithRequires()
