@@ -25,14 +25,17 @@ class AnnotatedFileParserTest
 {
   private AnnotatedFileParser fileParser = new AnnotatedFileParser()
 
-  def 'parse file with comments and properties'()
+  def 'parse file with comments, properties and whitespace lines'()
   {
     String fileContent = '-- property1: value1;\n' +
             '-- property2: value2\n' +
             'content line 1\n' +
             '--- comment line\n' +
+            '  \n' +  // whitespace line
             '--- property3: value3\n' +
-            'content line 2'
+            'content line 2\n' +
+            '\\--- contentproperty: x\n' +
+            '\\# content comment'
     SectionParsingResult parsingResult = parseOnlySection(fileContent)
 
     expect:
@@ -40,10 +43,12 @@ class AnnotatedFileParserTest
     parsingResult.getProperty("property2").get() == "value2"
     !parsingResult.getProperty("property3").isPresent()
     !parsingResult.getProperty("unknownProperty").isPresent()
-    parsingResult.getContentLines().size() == 2
+    parsingResult.getContentLines().size() == 4
     parsingResult.getContentLines().get(0) == "content line 1"
     parsingResult.getContentLines().get(1) == "content line 2"
-    parsingResult.getContentAsSingleLine() == "content line 1 content line 2"
+    parsingResult.getContentLines().get(2) == "--- contentproperty: x"
+    parsingResult.getContentLines().get(3) == "# content comment"
+    parsingResult.getContentAsSingleLine() == "content line 1 content line 2 --- contentproperty: x # content comment"
   }
 
   def 'parse file no comment properties'()

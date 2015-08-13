@@ -72,6 +72,7 @@ public class AnnotatedFileParser
             .omitEmptyStrings()
             .trimResults()
             .withKeyValueSeparator(Splitter.on(":").trimResults());
+    public static final String LINE_ESCAPE = "\\";
 
     public List<SectionParsingResult> parseFile(Path path)
     {
@@ -144,8 +145,14 @@ public class AnnotatedFileParser
     {
         contentLines = contentLines.stream()
                 .filter(s -> !(isSpecialLine(s) || isBlank(s)))
+                .map(AnnotatedFileParser::unescapeLine)
                 .collect(toList());
         return contentLines;
+    }
+
+    private static String unescapeLine(String s)
+    {
+        return s.startsWith(LINE_ESCAPE) ? s.substring(1) : s;
     }
 
     private Map<String, String> parseLineProperties(String line)
