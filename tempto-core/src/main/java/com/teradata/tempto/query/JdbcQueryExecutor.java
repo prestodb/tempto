@@ -49,7 +49,7 @@ public class JdbcQueryExecutor
         this.jdbcUrl = jdbcParamsState.url;
     }
 
-    public JdbcQueryExecutor(Connection connection, String jdbcUrl, TestContext testContext)
+    public JdbcQueryExecutor(Connection connection, String jdbcUrl)
     {
         this.connection = connection;
         this.jdbcUrl = jdbcUrl;
