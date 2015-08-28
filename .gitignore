@@ -20,3 +20,7 @@ tempto_logs
 
 # python packaging artifacts
 dist/
+
+# etc
+*.log
+*.orig
