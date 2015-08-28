@@ -16,24 +16,24 @@ package com.teradata.tempto.internal.ssh;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.PrivateModule;
-import com.google.inject.Singleton;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.ssh.SshClient;
+import com.teradata.tempto.ssh.SshClientFactory;
+
+import java.util.Optional;
 
 import static com.google.inject.name.Names.named;
-import static com.teradata.tempto.internal.ssh.JSchSshClient.SSH_HOST_BINDING_NAME;
-import static com.teradata.tempto.internal.ssh.JSchSshClient.SSH_PASSWORD_BINDING_NAME;
-import static com.teradata.tempto.internal.ssh.JSchSshClient.SSH_PORT_BINDING_NAME;
-import static com.teradata.tempto.internal.ssh.JSchSshClient.SSH_USER_BINDING_NAME;
 
 @AutoModuleProvider
 public class SshClientModuleProvider
         implements SuiteModuleProvider
 {
-    private static final String SSH_ROLES_CONFIGURATION_SECTION = "ssh_roles";
+    private static final String SSH_KEY = "ssh";
+    private static final String ROLES_KEY = "roles";
+    private static final String IDENTITY_KEY = "identity";
+
     private static final String HOST_KEY = "host";
     private static final String PORT_KEY = "port";
     private static final String USER_KEY = "user";
@@ -41,39 +41,29 @@ public class SshClientModuleProvider
 
     public Module getModule(Configuration configuration)
     {
-        Configuration rolesConfiguration = configuration.getSubconfiguration(SSH_ROLES_CONFIGURATION_SECTION);
+        Configuration sshConfiguration = configuration.getSubconfiguration(SSH_KEY);
+        Optional<String> identity = sshConfiguration.getString(IDENTITY_KEY);
+
+        Configuration rolesConfiguration = sshConfiguration.getSubconfiguration(ROLES_KEY);
         return new AbstractModule()
         {
             @Override
             protected void configure()
             {
+                JschSshClientFactory sshClientFactory = new JschSshClientFactory();
+                identity.ifPresent(identityValue -> sshClientFactory.addIdentity(identityValue));
+                bind(SshClientFactory.class).toInstance(sshClientFactory);
+
                 for (String role : rolesConfiguration.listKeyPrefixes(1)) {
                     Configuration roleConfiguration = rolesConfiguration.getSubconfiguration(role);
                     String host = roleConfiguration.getStringMandatory(HOST_KEY);
                     int port = roleConfiguration.getIntMandatory(PORT_KEY);
                     String user = roleConfiguration.getStringMandatory(USER_KEY);
-                    String password = roleConfiguration.getStringMandatory(PASSWORD_KEY);
-                    bindSshClient(role, host, port, user, password);
-                }
-            }
+                    Optional<String> password = roleConfiguration.getString(PASSWORD_KEY);
 
-            private void bindSshClient(String role, String host, int port, String user, String password)
-            {
-                PrivateModule privateModule = new PrivateModule()
-                {
-                    @Override
-                    protected void configure()
-                    {
-                        Key<SshClient> sshClientKey = Key.get(SshClient.class, named(role));
-                        bind(String.class).annotatedWith(named(SSH_HOST_BINDING_NAME)).toInstance(host);
-                        bind(Integer.class).annotatedWith(named(SSH_PORT_BINDING_NAME)).toInstance(port);
-                        bind(String.class).annotatedWith(named(SSH_USER_BINDING_NAME)).toInstance(user);
-                        bind(String.class).annotatedWith(named(SSH_PASSWORD_BINDING_NAME)).toInstance(password);
-                        bind(sshClientKey).to(JSchSshClient.class).in(Singleton.class);
-                        expose(sshClientKey);
-                    }
-                };
-                install(privateModule);
+                    Key<SshClient> sshClientKey = Key.get(SshClient.class, named(role));
+                    bind(sshClientKey).toInstance(sshClientFactory.create(host, port, user, password));
+                }
             }
         };
     }

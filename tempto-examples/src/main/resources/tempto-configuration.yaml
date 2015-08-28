@@ -25,8 +25,6 @@ databases:
     jdbc_pooling: false
     jdbc_jar: third-party-deps/build/libs/presto-jdbc-all.jar
 
-  # run psql instance with
-  # docker run --name tempto-examples-psql -p 15432:5432 -e POSTGRES_USER=blah -e POSTGRES_PASSWORD=blah  -d postgres
   psql:
     jdbc_driver_class: org.postgresql.Driver
     jdbc_url: jdbc:postgresql://localhost:15432/postgres
@@ -35,8 +33,6 @@ databases:
     jdbc_pooling: true
     table_manager_type: jdbc
 
-  # run psql2 instance with
-  # docker run --name tempto-examples-psql2 -p 15433:5432 -e POSTGRES_USER=blah -e POSTGRES_PASSWORD=blah  -d postgres
   psql2:
     jdbc_driver_class: org.postgresql.Driver
     jdbc_url: jdbc:postgresql://localhost:15433/postgres
@@ -49,9 +45,16 @@ tests:
   hdfs:
     path: /tempto
 
-ssh_roles:
-  td_express:
-    host: ${TD_EXPRESS_HOST}
-    port: 22
-    user: root
-    password: root
+ssh:
+  identity: ${IDENTITY}
+  roles:
+    host_by_password:
+      host: ${HOST}
+      port: 22
+      user: ${USER_A}
+      password: ${USER_A_PASSWORD}
+
+    host_by_identity:
+      host: ${HOST}
+      port: 22
+      user: ${USER_B}

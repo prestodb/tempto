@@ -48,11 +48,11 @@ public class RevisionStorageProvider
     public RevisionStorage get()
     {
         if (xAttrsSupported()) {
-            LOGGER.info("HDFS xAttrs supported. Lets use RevisionMarkerXAttr.");
+            LOGGER.debug("HDFS xAttrs supported. Lets use RevisionMarkerXAttr.");
             return new RevisionStorageXAttr(hdfsClient, hdfsUser);
         }
         else {
-            LOGGER.info("HDFS xAttrs are not supported. Lets use RevisionMarkerFile.");
+            LOGGER.debug("HDFS xAttrs are not supported. Lets use RevisionMarkerFile.");
             return new RevisionStorageFile(hdfsClient, hdfsUser, testDataBasePath);
         }
     }

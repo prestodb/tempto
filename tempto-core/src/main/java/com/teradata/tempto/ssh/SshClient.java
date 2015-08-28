@@ -15,13 +15,14 @@ package com.teradata.tempto.ssh;
 
 import com.teradata.tempto.process.CliProcess;
 
+import java.io.Closeable;
 import java.nio.file.Path;
 import java.util.List;
 
 /**
  * Simple SSH client.
  */
-public interface SshClient
+public interface SshClient extends Closeable
 {
     /**
      * Executes command on a remote machine.
@@ -41,4 +42,10 @@ public interface SshClient
      * @param remotePath Destination path for file on remote machine.
      */
     void upload(Path file, String remotePath);
+
+    String getHost();
+
+    String getUser();
+
+    int getPort();
 }
