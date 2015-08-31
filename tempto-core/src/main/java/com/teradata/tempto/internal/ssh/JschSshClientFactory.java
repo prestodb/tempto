@@ -21,7 +21,6 @@ import com.teradata.tempto.ssh.SshClient;
 import com.teradata.tempto.ssh.SshClientFactory;
 import org.slf4j.Logger;
 
-import java.io.Serializable;
 import java.util.Optional;
 import java.util.Properties;
 

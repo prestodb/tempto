@@ -16,18 +16,19 @@ package com.teradata.tempto.internal.ssh
 import com.google.common.io.Files
 import com.teradata.tempto.process.CliProcess
 import org.apache.sshd.SshServer
-import org.apache.sshd.common.NamedFactory
 import org.apache.sshd.server.Command
 import org.apache.sshd.server.CommandFactory
 import org.apache.sshd.server.PasswordAuthenticator
-import org.apache.sshd.server.UserAuth
+import org.apache.sshd.server.PublickeyAuthenticator
 import org.apache.sshd.server.auth.UserAuthPassword
+import org.apache.sshd.server.auth.UserAuthPublicKey
 import org.apache.sshd.server.command.ScpCommandFactory
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import spock.lang.Shared
 import spock.lang.Specification
 
+import java.security.PublicKey
 import java.time.Duration
 
 import static Thread.sleep
@@ -44,10 +45,13 @@ public class JSchSshClientTest
   @Shared
   private SshServer sshd
 
+  @Shared
+  private JschSshClientFactory factory = new JschSshClientFactory()
+
   def 'should connect end execute command on master'()
   {
     setup:
-    JSchSshClient client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
+    JSchSshClient client = factory.create(HOST, PORT, USER, Optional.of(PASSWORD))
 
     when:
     CliProcess process = client.execute(['echo', 'hello world'])
@@ -61,7 +65,7 @@ public class JSchSshClientTest
   def 'should fail when invalid ssh command'()
   {
     setup:
-    JSchSshClient client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
+    JSchSshClient client = factory.create(HOST, PORT, USER, Optional.of(PASSWORD))
 
     when:
     CliProcess process = client.execute(['foo'])
@@ -74,7 +78,7 @@ public class JSchSshClientTest
   def 'should fail when timeouted'()
   {
     setup:
-    JSchSshClient client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
+    JSchSshClient client = factory.create(HOST, PORT, USER, Optional.of(PASSWORD))
     CliProcess process = client.execute(['sleep', '5'])
 
     when:
@@ -87,7 +91,7 @@ public class JSchSshClientTest
   def 'should upload file'()
   {
     setup:
-    def client = new JSchSshClient(HOST, PORT, USER, PASSWORD)
+    JSchSshClient client = factory.create(HOST, PORT, USER, Optional.of(PASSWORD))
     def file = fileWithContent('hello world')
     def suffix = UUID.randomUUID()
     def fileName = "/tmp/test_file.txt_${suffix}"
@@ -98,6 +102,21 @@ public class JSchSshClientTest
 
     then:
     content == 'hello world'
+  }
+
+  def 'should connect with just a private key'()
+  {
+    setup:
+    factory.addIdentity('src/test/resources/ssh/ssh.pem')
+    JSchSshClient client = factory.create(HOST, PORT, USER)
+
+    when:
+    CliProcess process = client.execute(['echo', 'hello world'])
+    String line = process.nextOutputLine()
+    process.waitForWithTimeoutAndKill()
+
+    then:
+    line == 'hello world'
   }
 
   def fileWithContent(String content)
@@ -122,9 +141,7 @@ public class JSchSshClientTest
 
   private void setupAuthentication()
   {
-    List<NamedFactory<UserAuth>> userAuthFactories = new ArrayList<NamedFactory<UserAuth>>()
-    userAuthFactories.add(new UserAuthPassword.Factory())
-    sshd.setUserAuthFactories(userAuthFactories)
+    sshd.setUserAuthFactories([new UserAuthPassword.Factory(), new UserAuthPublicKey.Factory()])
 
     sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
       public boolean authenticate(String username, String password, ServerSession session)
@@ -132,6 +149,14 @@ public class JSchSshClientTest
         return USER.equals(username) && PASSWORD.equals(password);
       }
     });
+
+    sshd.setPublickeyAuthenticator(new PublickeyAuthenticator() {
+      @Override
+      boolean authenticate(String username, PublicKey key, ServerSession session)
+      {
+        return true
+      }
+    })
   }
 
   private void setupCommandFactories()
