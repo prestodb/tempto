@@ -13,9 +13,11 @@
  */
 package com.teradata.tempto.ssh;
 
+import com.google.common.base.Joiner;
 import com.teradata.tempto.process.CliProcess;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -24,6 +26,18 @@ import java.util.List;
  */
 public interface SshClient extends Closeable
 {
+
+    default String command(String command) {
+        try (CliProcess cliProcess = execute(command)) {
+            String output = Joiner.on("\n").join(cliProcess.readRemainingOutputLines());
+            cliProcess.waitForWithTimeoutAndKill();
+            return output;
+        }
+        catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Executes command on a remote machine.
      *
