@@ -36,12 +36,17 @@ dependencies {
   compile libraries.freemarker
   compile libraries.joda
 
+  runtime libraries.jcl_over_slf4j
+
   testCompile libraries.spock
   testCompile libraries.hsqldb
   testCompile libraries.dbutils
   testCompile libraries.mina_sshd
   testRuntime libraries.objenesis
+}
 
+configurations {
+  all*.exclude group: 'commons-logging', module: 'commons-logging'
 }
 
 // project information
