@@ -1,5 +1,10 @@
 #!/bin/sh
 
-SCRIPT_ROOT=$(readlink -f $(dirname $(readlink -f "$0"))/..)
+READLINK=readlink
+if [[ `uname` == "Darwin" ]]; then
+  READLINK=greadlink
+fi
+
+SCRIPT_ROOT=$($READLINK -f $(dirname $($READLINK -f "$0"))/..)
 
 exec python $SCRIPT_ROOT/runner/test_runner.py "$@"
