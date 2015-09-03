@@ -29,12 +29,12 @@ dependencies {
   compile libraries.httpclient
   compile libraries.ioutils
   compile libraries.tpchgen
-  compile libraries.jsonpath
   compile libraries.bytebuddy
   compile libraries.reflections
   compile libraries.jsch
   compile libraries.freemarker
   compile libraries.joda
+  compile libraries.jackson_databind
 
   runtime libraries.jcl_over_slf4j
 

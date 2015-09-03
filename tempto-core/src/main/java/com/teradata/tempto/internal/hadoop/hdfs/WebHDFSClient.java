@@ -14,8 +14,9 @@
 
 package com.teradata.tempto.internal.hadoop.hdfs;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HostAndPort;
-import com.jayway.jsonpath.JsonPath;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -68,9 +71,8 @@ public class WebHDFSClient
 
     private static final Logger logger = getLogger(WebHDFSClient.class);
 
-    private static final JsonPath GET_FILESTATUS_LENGTH_JSON_PATH = JsonPath.compile("$.FileStatus.length");
-    private static final JsonPath GET_XATTR_JSON_PATH = JsonPath.compile("$.XAttrs");
-    private static final JsonPath GET_XATTR_VALUE_JSON_PATH = JsonPath.compile("$.XAttrs.[0].value");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
     private static final int NUMBER_OF_RETRIES = 3;
 
@@ -185,6 +187,7 @@ public class WebHDFSClient
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public long getLength(String path, String username)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
@@ -193,7 +196,8 @@ public class WebHDFSClient
             if (statusCode != SC_OK) {
                 throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
             }
-            return JsonPath.parse(response.getEntity().getContent()).read(GET_FILESTATUS_LENGTH_JSON_PATH, Long.class);
+            Map<String, Object> responseObject = deserializeJsonResponse(response);
+            return ((Number) ((Map<String, Object>) responseObject.get("FileStatus")).get("length")).longValue();
         }
         catch (IOException e) {
             throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
@@ -257,12 +261,12 @@ public class WebHDFSClient
                 throw invalidStatusException("GETXATTRS", path, username, setXAttrRequest, response);
             }
 
-            String responseContent = IOUtils.toString(response.getEntity().getContent());
-            if (GET_XATTR_JSON_PATH.read(responseContent) == null) {
+            Map<String, Object> responseObject = deserializeJsonResponse(response);
+            if (responseObject.get("XAttrs") == null) {
                 return Optional.empty();
             }
 
-            String xArgValue = StringUtils.strip(GET_XATTR_VALUE_JSON_PATH.read(responseContent).toString(), "\"");
+            String xArgValue = StringUtils.strip(((Map<String, Object>) ((List<Object>) responseObject.get("XAttrs")).get(0)).get("value").toString(), "\"");
             return Optional.of(xArgValue);
         }
         catch (IOException e) {
@@ -329,5 +333,11 @@ public class WebHDFSClient
                 ", status: " + response.getStatusLine().getStatusCode() + " " + response.getStatusLine().getReasonPhrase() +
                 ", content: " + IOUtils.toString(response.getEntity().getContent()) +
                 ", request: " + request.getRequestLine().getMethod() + " " + request.getRequestLine().getUri());
+    }
+
+    private Map<String, Object> deserializeJsonResponse(HttpResponse response)
+            throws IOException
+    {
+        return MAPPER.readValue(IOUtils.toString(response.getEntity().getContent()), MAP_TYPE_REFERENCE);
     }
 }

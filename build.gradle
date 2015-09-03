@@ -40,7 +40,6 @@ ext.versions = [
         httpclient   : '4.4',
         ioutils      : '2.4',
         tpchgen      : '0.4',
-        jsonpath     : '2.0.0',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
         hive         : '0.12.0',
@@ -51,7 +50,8 @@ ext.versions = [
         jsch         : '0.1.52',
         mina_sshd    : '0.14.0',
         freemarker   : '2.3.22',
-        objenesis    : '1.4'
+        objenesis    : '1.4',
+        jackson      : '2.4.4',
 ]
 
 ext.libraries = [
@@ -74,7 +74,6 @@ ext.libraries = [
         jcl_over_slf4j : "org.slf4j:jcl-over-slf4j:${versions.slf4j}",
         snakeyaml    : "org.yaml:snakeyaml:${versions.snakeyaml}",
         tpchgen      : "io.airlift.tpch:tpch:${versions.tpchgen}",
-        jsonpath     : "com.jayway.jsonpath:json-path:${versions.jsonpath}",
         hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
         hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}",
         presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}",
@@ -86,7 +85,8 @@ ext.libraries = [
         commons_cli  : "commons-cli:commons-cli:1.2",
         freemarker   : "org.freemarker:freemarker:${versions.freemarker}",
         joda         : "joda-time:joda-time:2.4",
-        objenesis    : "org.objenesis:objenesis:${versions.objenesis}"
+        objenesis    : "org.objenesis:objenesis:${versions.objenesis}",
+        jackson_databind : "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}",
 ]
 
 ext.tempto_core = project(':tempto-core')
