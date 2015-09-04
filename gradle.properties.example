@@ -1,6 +1,7 @@
-signing.keyId=KEYID
-signing.password=KEY_PASSWORD
-signing.secretKeyRingFile=KEY_PATH
+#skipSigning=false
+#signing.keyId=KEYID
+#signing.password=KEY_PASSWORD
+#signing.secretKeyRingFile=KEY_PATH
 
-nexusUsername=SONATYPE_LOGIN
-nexusPassword=SONATYPE_PASSWORD
+#nexusUsername=SONATYPE_LOGIN
+#nexusPassword=SONATYPE_PASSWORD

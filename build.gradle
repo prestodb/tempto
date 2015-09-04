@@ -98,6 +98,10 @@ ext.tempto_version = '1.0.36-SNAPSHOT' // changed by losipiuk
 ext.tempto_group = "com.teradata.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
+ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
+ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
+ext.skipSigning = false
+
 task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
 }
@@ -144,7 +148,7 @@ configure(subprojects - expected_result_generator - tempto_examples - third_part
   }
 
   signing {
-    required { isReleaseVersion }
+    required { isReleaseVersion && !skipSigning}
     sign configurations.archives
   }
 
