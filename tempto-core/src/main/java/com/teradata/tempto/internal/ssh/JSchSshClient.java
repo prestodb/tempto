@@ -20,6 +20,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.teradata.tempto.process.CliProcess;
 import com.teradata.tempto.ssh.SshClient;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,6 +32,7 @@ import java.util.List;
 import static com.google.common.collect.Iterables.transform;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Objects.requireNonNull;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * An {@link SshClient} based on JSch library.
@@ -38,6 +40,8 @@ import static java.util.Objects.requireNonNull;
 public class JSchSshClient
         implements SshClient
 {
+    private static final Logger LOGGER = getLogger(JSchSshClient.class);
+
     private final Session session;
 
     public JSchSshClient(Session session)
@@ -55,6 +59,7 @@ public class JSchSshClient
     public CliProcess execute(String command)
     {
         try {
+            LOGGER.info("Executing on {}@{}: {}", getUser(), getHost(), command);
             ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
             channel.setCommand(command);
             JSchCliProcess process = new JSchCliProcess(channel);
@@ -78,6 +83,7 @@ public class JSchSshClient
     @Override
     public void upload(Path file, String remotePath)
     {
+        LOGGER.info("Uploading {} onto {}@{}:{}", file, getUser(), getHost(), remotePath);
         try {
             ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
             String command = "scp -t " + remotePath;

@@ -16,6 +16,8 @@ package com.teradata.tempto.internal.ssh;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.teradata.tempto.internal.process.CliProcessBase;
+import com.teradata.tempto.process.CommandExecutionException;
+import com.teradata.tempto.process.TimeoutRuntimeException;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -67,13 +69,13 @@ class JSchCliProcess
         if (!channel.isClosed()) {
             close();
             thread.join();
-            throw new RuntimeException("SSH channel did not finish within given timeout");
+            throw new TimeoutRuntimeException("SSH channel did not finish within given timeout");
         }
 
         close();
         int exitStatus = channel.getExitStatus();
         if (channel.getExitStatus() != 0) {
-            throw new RuntimeException("SSH command exited with status: " + exitStatus);
+            throw new CommandExecutionException("SSH command exited with status: " + exitStatus, exitStatus);
         }
     }
 

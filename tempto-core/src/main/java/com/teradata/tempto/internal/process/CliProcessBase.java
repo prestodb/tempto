@@ -61,7 +61,7 @@ public abstract class CliProcessBase
     public String nextOutputLine()
     {
         String nextLine = processOutput.nextLine();
-        LOGGER.info("processOutput: {}", nextLine);
+        LOGGER.debug("processOutput: {}", nextLine);
         return nextLine;
     }
 
@@ -69,7 +69,7 @@ public abstract class CliProcessBase
     public String nextOutputToken()
     {
         String next = processOutput.next();
-        LOGGER.info("processOutput: {}", next);
+        LOGGER.debug("processOutput: {}", next);
         return next;
     }
 

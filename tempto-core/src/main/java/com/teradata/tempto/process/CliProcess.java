@@ -59,13 +59,15 @@ public interface CliProcess extends Closeable
 
     /**
      * Waits for a process to finish and ensures it returns with 0 status. If the process
-     * fails to finish within given timeout it is killed and {@link RuntimeException} is thrown.
+     * fails to finish within given timeout it is killed and {@link TimeoutRuntimeException} is thrown.
      *
      * @throws InterruptedException if the thread is interrupted
+     * @throws CommandExecutionException if command finishes with non zero status
+     * @throws TimeoutRuntimeException
      */
     void waitForWithTimeoutAndKill()
-            throws InterruptedException;
+            throws InterruptedException, TimeoutRuntimeException, CommandExecutionException;
 
     void waitForWithTimeoutAndKill(Duration timeout)
-            throws InterruptedException;
+            throws InterruptedException, TimeoutRuntimeException, CommandExecutionException;
 }
