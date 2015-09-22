@@ -18,6 +18,8 @@ import com.google.common.collect.ImmutableMap;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.configuration.KeyUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -92,6 +94,30 @@ public abstract class AbstractConfiguration
         return value.get();
     }
 
+    @Override
+    public List<String> getStringList(String key) {
+        Optional<Object> object = get(key);
+        if (object.isPresent() && object.get() instanceof List) {
+            return (List<String>) object.get();
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<String> getStringListMandatory(String key, String errorMessage) {
+        List<String> stringList = getStringList(key);
+        if (stringList.isEmpty()) {
+            throw new IllegalStateException(errorMessage);
+        }
+        return stringList;
+    }
+
+    @Override
+    public List<String> getStringListMandatory(String key)
+    {
+        return getStringListMandatory(key, standardValueNotFoundMessage(key));
+    }
+    
     @Override
     public Set<String> listKeyPrefixes(int prefixesLength)
     {

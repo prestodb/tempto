@@ -76,6 +76,26 @@ class ConfigurationVariableResolverTest
     configuration.getStringMandatory('story_with_alias') == "ala ma kota"
   }
 
+
+  def resolveConfigurationListVariables() {
+    setup:
+    def configuration = new MapConfiguration([
+                items     : [
+                    who       : 'ala',
+                    verb      : 'ma',
+                    what      : 'kota',
+                    int       : 1
+                ],
+                list_alias: ['${items.who}', '${items.what}', '${items.int}']
+        ])
+
+        when:
+        configuration = resolver.resolve(configuration)
+
+        then:
+        configuration.getStringList('list_alias') == ['ala', 'kota', '1']
+    }
+    
   def unableToResolveWhenCyclicReferences()
   {
     setup:
