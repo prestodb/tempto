@@ -29,11 +29,15 @@ a:
       d: ela\${foo}
 x:
    y: 10
+list:
+    - element1
+    - element2   
 """)
     expect:
-    configuration.listKeys() == ['a.b.d', 'x.y'] as Set
+    configuration.listKeys() == ['a.b.d', 'x.y', 'list'] as Set
     configuration.getInt('x.y') == Optional.of(10)
     configuration.getString('a.b.d') == Optional.of('ela${foo}')
     configuration.getString('x.y') == Optional.of('10')
+    configuration.getStringList('list') == ['element1', 'element2']
   }
 }

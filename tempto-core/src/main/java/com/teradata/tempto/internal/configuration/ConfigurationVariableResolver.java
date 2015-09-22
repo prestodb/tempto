@@ -18,6 +18,8 @@ import com.teradata.tempto.configuration.Configuration;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,6 +67,13 @@ public class ConfigurationVariableResolver
             Object value = optionalValue.get();
             if (value instanceof String) {
                 return Pair.of(prefix, strSubstitutor.replace(value));
+            }
+            else if (value instanceof List) {
+                List<String> resolvedList = new ArrayList<String>();
+                for (String entry: (List<String>)value) {
+                    resolvedList.add(strSubstitutor.replace(entry));
+                }
+                return Pair.of(prefix, resolvedList);
             }
             else {
                 return Pair.of(prefix, value);

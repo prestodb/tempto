@@ -16,6 +16,7 @@ package com.teradata.tempto.internal.configuration;
 
 import com.teradata.tempto.configuration.Configuration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -84,6 +85,24 @@ public abstract class DelegateConfiguration
     public boolean getBooleanMandatory(String key, String errorMessage)
     {
         return getDelegate().getBooleanMandatory(key, errorMessage);
+    }
+
+    @Override
+    public List<String> getStringList(String key)
+    {
+        return getDelegate().getStringList(key);
+    }
+
+    @Override
+    public List<String> getStringListMandatory(String key, String errorMessage)
+    {
+        return getDelegate().getStringListMandatory(key, errorMessage);
+    }
+
+    @Override
+    public List<String> getStringListMandatory(String key)
+    {
+        return getDelegate().getStringListMandatory(key);
     }
     
     @Override

@@ -136,6 +136,37 @@ class AbstractConfigurationTest
     e.message == 'damn, no key'
   }
 
+  def 'get string list'()
+  {
+    when:
+    setupGetObject(KEY, ['a', 'b'])
+
+    then:
+    configuration.getStringList(KEY) == ['a', 'b']
+  }
+
+  def 'mandatory get string list with no value with message'()
+  {
+    when:
+    setupGetObject(KEY, null)
+    configuration.getStringListMandatory(KEY, 'damn, no key')
+
+    then:
+    def e = thrown(IllegalStateException)
+    e.message == 'damn, no key'
+  }
+
+  def 'mandatory get string list with no value'()
+  {
+    when:
+    setupGetObject(KEY, null)
+    configuration.getStringListMandatory(KEY)
+
+    then:
+    def e = thrown(IllegalStateException)
+    e.message == 'could not find value for key a.b.c'
+  }
+  
   def 'test list key prefixes'()
   {
     when:

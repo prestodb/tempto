@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.configuration;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +39,12 @@ public interface Configuration
     boolean getBooleanMandatory(String key);
 
     boolean getBooleanMandatory(String key, String errorMessage);
+
+    List<String> getStringList(String key);
+
+    List<String> getStringListMandatory(String key, String errorMessage);
+
+    List<String> getStringListMandatory(String key);
 
     /**
      * Lists all keys in configuration
