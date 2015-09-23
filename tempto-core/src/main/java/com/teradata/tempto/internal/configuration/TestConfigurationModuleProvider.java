@@ -15,13 +15,16 @@
 package com.teradata.tempto.internal.configuration;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.inject.name.Names.named;
@@ -50,16 +53,26 @@ public class TestConfigurationModuleProvider
                 for (String key : configuration.listKeys()) {
                     Optional<Object> value = configuration.get(key);
                     if (value.isPresent()) {
-                        @SuppressWarnings("unchecked") Class<Object> valueClass = (Class<Object>) value.get().getClass();
+                        @SuppressWarnings("unchecked") Key bindingKey = getBindingKey(value.get(), key);
 
-                        LOGGER.debug("Binding {} key: {} -> {}", valueClass.getName(), key, value.get());
+                        LOGGER.debug("Binding {} key: {} -> {}", bindingKey, key, value.get());
 
-                        bind(valueClass)
-                                .annotatedWith(named(key))
+                        bind(bindingKey)
                                 .toInstance(value.get());
                     }
                 }
             }
+
+            private  Key getBindingKey(Object configValue, String configKey)
+            {
+                if (configValue instanceof List) {
+                    // currently only list of strings is supported
+                    return Key.get(new TypeLiteral<List<String>>() {}, named(configKey));
+                }
+                return Key.get(configValue.getClass(), named(configKey));
+            }
+
         };
     }
+
 }
