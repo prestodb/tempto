@@ -225,6 +225,12 @@ public abstract class DelegateTestNGMethod
     }
 
     @Override
+    public int getTotalInvocationCount()
+    {
+        return delegate.getTotalInvocationCount();
+    }
+
+    @Override
     public int getSuccessPercentage()
     {
         return delegate.getSuccessPercentage();
@@ -288,6 +294,12 @@ public abstract class DelegateTestNGMethod
     public String getDescription()
     {
         return delegate.getDescription();
+    }
+
+    @Override
+    public void setDescription(String description)
+    {
+        delegate.setDescription(description);
     }
 
     @Override
