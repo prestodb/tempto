@@ -11,34 +11,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-plugins {
-  id 'java' // or 'groovy' Must be explicitly applied
-  id 'com.github.johnrengelman.shadow' version '1.2.2'
-}
-
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'maven'
+apply plugin: 'groovy'
 
 dependencies {
-  compile tempto_runner
-  compile tempto_logging_log4j
-  compile libraries.testng
-  compile libraries.slf4j_api
-  compile libraries.slf4j_log4j
-  compile project(':third-party-deps')
-  compile libraries.postgresql_jdbc
-  runtime libraries.slf4j_jdk14
+  compile tempto_core
+  compile libraries.commons_cli
 }
 
-jar {
-  manifest {
-    attributes 'Main-Class': 'com.teradata.tempto.examples.TemptoExamples'
+configurations {
+  all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+// project information
+ext.artifactId = 'tempto-runner'
+archivesBaseName = artifactId
+
+// publishing to sonatype
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name artifactId
+        artifactId artifactId
+      }
+    }
   }
-}
-
-build.dependsOn.add([shadowJar])
-
-license {
-  exclude "sql-tests/**/*.sql"
 }
