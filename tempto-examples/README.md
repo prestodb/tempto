@@ -40,6 +40,7 @@ ssh:
 
 ```
 cd tempto-examples
-gradle clean buildFatJar :third-party-deps:build
-VERSION=1.0.35-SNAPSHOT; ../bin/tempto --tests-classpath  build/libs/tempto-examples-all-$VERSION.jar:../third-party-deps/build/libs/hive-jdbc-all.jar:../third-party-deps/build/libs/presto-jdbc-all.jar --report-dir /tmp/report --tests-package com.teradata.tempto.example.*
+gradle build
+VERSION=1.0.37-SNAPSHOT
+../bin/tempto --tests-classpath build/libs/tempto-examples-all-$VERSION.jar --report-dir /tmp/report --tests-package com.teradata.tempto.examples.*
 ```

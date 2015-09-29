@@ -20,7 +20,8 @@ dependencies {
   compile libraries.testng
   compile libraries.slf4j_api
   compile libraries.slf4j_log4j
-  runtime libraries.postgresql_jdbc
+  compile project(':third-party-deps')
+  compile libraries.postgresql_jdbc
 }
 
 task buildFatJar(type: Jar, dependsOn: assemble) {
