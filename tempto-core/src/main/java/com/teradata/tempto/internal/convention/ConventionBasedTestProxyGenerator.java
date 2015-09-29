@@ -20,10 +20,10 @@ import com.google.common.collect.Iterables;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.configuration.Configuration;
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.ClassLoadingStrategy;
+import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.instrumentation.MethodCall;
-import net.bytebuddy.modifier.Visibility;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+import net.bytebuddy.implementation.MethodCall;
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 

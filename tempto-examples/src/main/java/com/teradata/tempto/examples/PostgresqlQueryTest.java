@@ -51,6 +51,7 @@ public class PostgresqlQueryTest
     private MutableTablesState mutableTablesState;
 
     private static final JdbcTableDefinition TEST_TABLE_DEFINITION;
+
     static {
         JdbcTableDataSource dataSource = () -> ImmutableList.<List<Object>>of(
                 ImmutableList.of(1, "x"),
@@ -81,7 +82,6 @@ public class PostgresqlQueryTest
         }
     }
 
-
     @Test(groups = "psql_query")
     @Requires(ImmutableTestJdbcTable.class)
     public void selectFromImmutableTable()
@@ -97,5 +97,4 @@ public class PostgresqlQueryTest
         String tableName = mutableTablesState.get("test_table").getNameInDatabase();
         assertThat(queryExecutor.executeQuery("select * from " + tableName)).containsOnly(row(1, "x"), row(2, "y"));
     }
-
 }

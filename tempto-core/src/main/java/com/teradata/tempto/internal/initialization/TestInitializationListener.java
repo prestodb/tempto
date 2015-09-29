@@ -19,8 +19,11 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.teradata.tempto.AfterTestWithContext;
 import com.teradata.tempto.BeforeTestWithContext;
 import com.teradata.tempto.Requirement;
@@ -32,6 +35,7 @@ import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoTestLevelFulfill
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.initialization.TestMethodModuleProvider;
+import com.teradata.tempto.internal.ReflectionInjectorHelper;
 import com.teradata.tempto.internal.RequirementFulfillerByPriorityComparator;
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import com.teradata.tempto.internal.context.GuiceTestContext;
@@ -39,7 +43,6 @@ import com.teradata.tempto.internal.context.TestContextStack;
 import com.teradata.tempto.internal.fulfillment.table.ImmutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.MutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.TableManagerCleaner;
-import com.teradata.tempto.internal.logging.LoggingMdcHelper;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -49,6 +52,7 @@ import org.testng.ITestResult;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -89,8 +93,9 @@ public class TestInitializationListener
     private final List<? extends TestMethodModuleProvider> testMethodModuleProviders;
     private final List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers;
     private final List<Class<? extends RequirementFulfiller>> testMethodLevelFulfillers;
-    private final Configuration configuration;
+    private final ReflectionInjectorHelper reflectionInjectorHelper = new ReflectionInjectorHelper();
 
+    private final Configuration configuration;
     private Optional<TestContextStack<GuiceTestContext>> suiteTestContextStack = Optional.empty();
 
     public TestInitializationListener()
@@ -202,9 +207,10 @@ public class TestInitializationListener
 
         assertTestContextNotSet();
         pushAllTestContexts(testContextStack);
-        testContextStack.peek().injectMembers(testResult.getInstance());
+        GuiceTestContext topTestContext = testContextStack.peek();
+        topTestContext.injectMembers(testResult.getInstance());
 
-        runBeforeWithContextMethods(testResult);
+        runBeforeWithContextMethods(testResult, topTestContext);
     }
 
     @Override
@@ -232,20 +238,21 @@ public class TestInitializationListener
             return;
         }
 
+        TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
+
         try {
-            runAfterWithContextMethods(testResult);
+            runAfterWithContextMethods(testResult, testContextStack.peek());
         }
         finally {
-            TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
             doCleanup(testContextStack, testMethodLevelFulfillers);
             cleanLoggingMdc();
         }
     }
 
-    private void runBeforeWithContextMethods(ITestResult testResult)
+    private void runBeforeWithContextMethods(ITestResult testResult, GuiceTestContext testContext)
     {
         try {
-            invokeMethodsAnnotatedWith(BeforeTestWithContext.class, testResult);
+            invokeMethodsAnnotatedWith(BeforeTestWithContext.class, testResult, testContext);
         }
         catch (RuntimeException e) {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
@@ -254,17 +261,17 @@ public class TestInitializationListener
         }
     }
 
-    private void runAfterWithContextMethods(ITestResult testResult)
+    private void runAfterWithContextMethods(ITestResult testResult, GuiceTestContext testContext)
     {
-        invokeMethodsAnnotatedWith(AfterTestWithContext.class, testResult);
+        invokeMethodsAnnotatedWith(AfterTestWithContext.class, testResult, testContext);
     }
 
-    private static void invokeMethodsAnnotatedWith(Class<? extends Annotation> annotationClass, ITestResult testCase)
+    private void invokeMethodsAnnotatedWith(Class<? extends Annotation> annotationClass, ITestResult testCase, GuiceTestContext testContext)
     {
         for (Method declaredMethod : testCase.getTestClass().getRealClass().getDeclaredMethods()) {
             if (declaredMethod.getAnnotation(annotationClass) != null) {
                 try {
-                    declaredMethod.invoke(testCase.getInstance());
+                    declaredMethod.invoke(testCase.getInstance(), reflectionInjectorHelper.getMethodArguments(testContext.getInjector(), declaredMethod));
                 }
                 catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException("error invoking methods annotated with " + annotationClass.getName(), e);

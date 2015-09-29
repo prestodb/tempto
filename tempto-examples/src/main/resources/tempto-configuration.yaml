@@ -56,3 +56,9 @@ ssh:
       host: ${HOST}
       port: 22
       user: ${USER_B}
+
+list:
+  string:
+    - ala
+    - ma
+    - kota

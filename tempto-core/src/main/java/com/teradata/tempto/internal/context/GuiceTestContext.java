@@ -175,4 +175,9 @@ public class GuiceTestContext
             binder.bind(TestContext.class).toInstance(this);
         };
     }
+
+    public Injector getInjector()
+    {
+        return injector;
+    }
 }
