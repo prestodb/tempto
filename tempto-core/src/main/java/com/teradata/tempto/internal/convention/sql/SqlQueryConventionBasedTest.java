@@ -60,19 +60,23 @@ public class SqlQueryConventionBasedTest
     private final Optional<Path> beforeScriptPath;
     private final Optional<Path> afterScriptPath;
     private final Path queryFile;
+    private final String testNamePrefix;
     private final int testNumber;
+    private final int queriesCount;
     private final SqlQueryDescriptor queryDescriptor;
     private final SqlResultDescriptor resultDescriptor;
     private final Requirement requirement;
 
     public SqlQueryConventionBasedTest(Optional<Path> beforeScriptFile, Optional<Path> afterScriptFile,
-            Path queryFile, int testNumber, SqlQueryDescriptor queryDescriptor, SqlResultDescriptor resultDescriptor,
+            Path queryFile, String testNamePrefix, int queryNumber, int queriesCount, SqlQueryDescriptor queryDescriptor, SqlResultDescriptor resultDescriptor,
             Requirement requirement)
     {
         this.beforeScriptPath = beforeScriptFile;
         this.afterScriptPath = afterScriptFile;
         this.queryFile = queryFile;
-        this.testNumber = testNumber;
+        this.testNamePrefix = testNamePrefix;
+        this.testNumber = queryNumber;
+        this.queriesCount = queriesCount;
         this.queryDescriptor = queryDescriptor;
         this.resultDescriptor = resultDescriptor;
         this.requirement = requirement;
@@ -145,31 +149,23 @@ public class SqlQueryConventionBasedTest
     }
 
     @Override
-    public String testName()
+    public String getTestName()
     {
-        String testName = FilenameUtils.getBaseName(queryFile.getParent().toString());
-        if (!isAlphabetic(testName.charAt(0))) {
-            return "Test" + testName;
-        }
-        return testName;
-    }
-
-    @Override
-    public String testCaseName()
-    {
-        String testCaseName;
+        StringBuilder fullNameBuilder = new StringBuilder();
+        fullNameBuilder.append(testNamePrefix);
+        fullNameBuilder.append(".");
+        String testFileNamePart = FilenameUtils.getBaseName(queryFile.getFileName().toString());
+        fullNameBuilder.append(testFileNamePart);
         if (queryDescriptor.getName().isPresent()) {
-            testCaseName = queryDescriptor.getName().get().replaceAll("\\s", "");
+            fullNameBuilder.append(".");
+            fullNameBuilder.append(queryDescriptor.getName().get().replaceAll("\\s", ""));
+        } else {
+            if (queriesCount > 1) {
+                fullNameBuilder.append("_");
+                fullNameBuilder.append(testNumber);
+            }
         }
-        else {
-            testCaseName = FilenameUtils.getBaseName(queryFile.getFileName().toString()) + "_" + testNumber;
-        }
-
-        if (!isAlphabetic(testCaseName.charAt(0))) {
-            return "test_" + testCaseName;
-        }
-
-        return testCaseName;
+        return fullNameBuilder.toString();
     }
 
     @Override
@@ -179,9 +175,9 @@ public class SqlQueryConventionBasedTest
     }
 
     @Override
-    public String[] testGroups()
+    public Set<String> getTestGroups()
     {
-        return queryDescriptor.getTestGroups().toArray(new String[0]);
+        return queryDescriptor.getTestGroups();
     }
 
     private QueryExecutor getQueryExecutor(SqlQueryDescriptor sqlQueryDescriptor)

@@ -11,20 +11,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+apply plugin: 'java'
+apply plugin: 'signing'
+apply plugin: 'maven'
+apply plugin: 'groovy'
 
-package com.teradata.tempto.internal.convention;
-
-import com.teradata.tempto.ProductTest;
-import com.teradata.tempto.RequirementsProvider;
-import com.teradata.tempto.testmarkers.WithName;
-import com.teradata.tempto.testmarkers.WithTestGroups;
-
-public abstract class ConventionBasedTest
-        extends ProductTest
-        implements RequirementsProvider, WithName, WithTestGroups
-{
-    public abstract void test();
-
-
-
+dependencies {
+  compile tempto_core
+  compile libraries.commons_cli
+  runtime libraries.slf4j_jdk14
 }
+
+configurations {
+  all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+// project information
+ext.artifactId = 'tempto-runner'
+archivesBaseName = artifactId
+
+// publishing to sonatype
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      pom.project {
+        name artifactId
+        artifactId artifactId
+      }
+    }
+  }
+}
+
+
+
+
+
+
+

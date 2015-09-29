@@ -137,7 +137,7 @@ class TestInitializationListenerTest
   {
     ITestContext suiteContext = Mock(ITestContext)
 
-    suiteContext.allTestMethods >> [getITestNGMethod(method, testClass)]
+    suiteContext.allTestMethods >> [getITestNGMethod(method, testClass, getITestClass())]
 
     return suiteContext
   }
@@ -145,19 +145,29 @@ class TestInitializationListenerTest
   def getITestResult(Method method, TestClass testClass)
   {
     ITestResult testResult = Mock(ITestResult)
-    testResult.method >> getITestNGMethod(method, testClass)
-    ITestClass iTestClass = Mock()
+    ITestClass iTestClass = getITestClass()
+    testResult.method >> getITestNGMethod(method, testClass, iTestClass)
     testResult.testClass >> iTestClass
     testResult.instance >> testResult.method.instance
     iTestClass.realClass >> TestClass
     return testResult
   }
 
-  def getITestNGMethod(Method method, TestClass testClass)
+  private ITestClass getITestClass()
+  {
+    ITestClass iTestClass = Mock()
+    iTestClass.name >> "MockTestClass"
+    return iTestClass
+  }
+
+  def getITestNGMethod(Method method, TestClass testClass, ITestClass iTestClass)
   {
     ITestNGMethod testMethod = Mock(ITestNGMethod)
+    testMethod.testClass >> iTestClass
     testMethod.method >> method
     testMethod.instance >> testClass
+    testMethod.groups >> []
+    testMethod.methodName >> "mockTestMethod"
     testMethod.getConstructorOrMethod() >> new ConstructorOrMethod(method)
     def requirements = testSpecificRequirementsResolver.resolve(testMethod);
     return new RequirementsAwareTestNGMethod(testMethod, getOnlyElement(requirements))

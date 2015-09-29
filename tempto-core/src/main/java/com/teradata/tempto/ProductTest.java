@@ -17,6 +17,7 @@ package com.teradata.tempto;
 import com.teradata.tempto.internal.initialization.RequirementsExpanderInterceptor;
 import com.teradata.tempto.internal.initialization.TestInitializationListener;
 import com.teradata.tempto.internal.listeners.ProgressLoggingListener;
+import com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Listeners;
