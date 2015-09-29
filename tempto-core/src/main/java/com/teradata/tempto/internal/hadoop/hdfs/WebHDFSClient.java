@@ -24,6 +24,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -89,6 +90,20 @@ public class WebHDFSClient
         checkArgument(webHdfsNameNodePort > 0, "Invalid name node WebHDFS port number: %s", webHdfsNameNodePort);
 
         this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
+
+        checkNameNodeAccessibility();
+    }
+
+    private void checkNameNodeAccessibility()
+    {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            HttpGet httpGet = httpGetFileStatus("/", "root");
+            httpGet.setConfig(RequestConfig.custom().setConnectTimeout(1).build());
+            client.execute(httpGet);
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Namenode is not accessible", e);
+        }
     }
 
     @Override
@@ -190,7 +205,7 @@ public class WebHDFSClient
     @SuppressWarnings("unchecked")
     public long getLength(String path, String username)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        HttpGet readRequest = httpGetFileStatus(path, username);
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != SC_OK) {
@@ -207,7 +222,7 @@ public class WebHDFSClient
     @Override
     public boolean exist(String path, String username)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        HttpGet readRequest = httpGetFileStatus(path, username);
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             return response.getStatusLine().getStatusCode() == SC_OK;
         }
@@ -215,6 +230,8 @@ public class WebHDFSClient
             throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
         }
     }
+
+    private HttpGet httpGetFileStatus(String path, String username) {return new HttpGet(buildUri(path, username, "GETFILESTATUS"));}
 
     @Override
     public void setXAttr(String path, String username, String key, String value)
