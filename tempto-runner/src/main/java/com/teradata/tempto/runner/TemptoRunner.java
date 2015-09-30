@@ -16,9 +16,7 @@ package com.teradata.tempto.runner;
 
 import com.google.common.base.Joiner;
 import com.teradata.tempto.internal.configuration.TestConfigurationFactory;
-import com.teradata.tempto.internal.listeners.TestMetadataReader;
 import com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector;
-import jdk.nashorn.internal.runtime.options.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.TestNG;
@@ -27,11 +25,9 @@ import org.testng.xml.XmlPackage;
 import org.testng.xml.XmlSuite;
 import org.testng.xml.XmlTest;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 
 public class TemptoRunner
@@ -97,12 +93,10 @@ public class TemptoRunner
         XmlTest test = new XmlTest(testSuite);
         test.setName("all");
         XmlPackage testPackage = new XmlPackage(options.getTestsPackage());
-        List<XmlPackage> testPackages = new ArrayList<>();
-        testPackages.add(testPackage);
+        List<XmlPackage> testPackages = newArrayList(testPackage);
         test.setPackages(testPackages);
         XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.internal.convention.ConventionBasedTestFactory");
-        List<XmlClass> classes = new ArrayList<>();
-        classes.add(conventionBasedTestsClass);
+        List<XmlClass> classes = newArrayList(conventionBasedTestsClass);
         test.setClasses(classes);
         return testSuite;
     }
