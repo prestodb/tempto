@@ -99,7 +99,7 @@ public class ConventionBasedTestProxyGenerator
 
     private String toJavaSymbol(String s)
     {
-        String javaSymbol = s.replaceAll("[^A-Z-a-z0-9_]", "");
+        String javaSymbol = s.replaceAll("[^A-Za-z0-9_]", "");
         if (!isAlphabetic(javaSymbol.charAt(0))) {
             javaSymbol = "_" + javaSymbol;
         }
