@@ -15,6 +15,7 @@
 package com.teradata.tempto.runner;
 
 import com.google.common.base.Joiner;
+import com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.TestNG;
@@ -36,6 +37,8 @@ import static java.util.Collections.singletonList;
 public class TemptoRunner
 {
     private static final Logger LOG = LoggerFactory.getLogger(TemptoRunner.class);
+    private static final int METHOD_SELECTOR_PRIORITY = 20;
+    private static final String METHOD_SELECTOR_CLASS_NAME = TestNameGroupNameMethodSelector.class.getName();
     private final TemptoRunnerCommandLineParser parser;
     private final TemptoRunnerOptions options;
 
@@ -83,7 +86,7 @@ public class TemptoRunner
         if (!options.getTests().isEmpty()) {
             System.setProperty(TEST_NAMES_TO_RUN_PROPERTY, Joiner.on(',').join(options.getTests()));
         }
-        testNG.addMethodSelector("com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector", 20);
+        testNG.addMethodSelector(METHOD_SELECTOR_CLASS_NAME, METHOD_SELECTOR_PRIORITY);
     }
 
     private XmlSuite getXmlSuite()
