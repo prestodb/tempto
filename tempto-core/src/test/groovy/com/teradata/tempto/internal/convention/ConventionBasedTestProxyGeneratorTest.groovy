@@ -14,8 +14,12 @@
 
 package com.teradata.tempto.internal.convention
 
+import com.google.common.collect.Iterables
 import com.teradata.tempto.Requirement
+import com.teradata.tempto.configuration.Configuration
+import com.teradata.tempto.internal.DummyTestRequirement
 import com.teradata.tempto.internal.convention.sql.SqlQueryConventionBasedTest
+import com.teradata.tempto.internal.initialization.TestInitializationListenerTest
 import org.testng.annotations.Test
 import spock.lang.Specification
 
@@ -24,12 +28,13 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import static com.google.common.collect.Iterables.getOnlyElement
+import static java.util.Arrays.asList
+import static java.util.Collections.emptySet
 import static org.assertj.core.api.Assertions.assertThat
 
 class ConventionBasedTestProxyGeneratorTest
         extends Specification
 {
-
   private ConventionBasedTestProxyGenerator proxyGenerator = new ConventionBasedTestProxyGenerator("com.teradata.tempto");
 
   def 'testGenerateProxy'()
@@ -70,5 +75,66 @@ class ConventionBasedTestProxyGeneratorTest
   private section(Path file)
   {
     getOnlyElement(new AnnotatedFileParser().parseFile(file))
+  }
+
+  def 'test class name and method names properly generated'()
+  {
+    setup:
+    def test = DummyConventionBasedTest.emptyTest(testName);
+    def proxy = proxyGenerator.generateProxy(test);
+    def proxyMethodNames = proxy.getClass().getMethods().collect { it.name }
+
+    expect:
+    proxy.getClass().getName() == expectedClassName;
+    proxyMethodNames.contains(expectedMethodName);
+
+    where:
+    testName                       | expectedClassName                 | expectedMethodName
+    'a.b.c.d'                      | 'com.teradata.tempto.c'           | 'd'
+    'a.b.9c.1d'                    | 'com.teradata.tempto._9c'         | '_1d'
+    'a.b.ala ma kota.a-kot-ma ale' | 'com.teradata.tempto.ala_ma_kota' | 'a_kot_ma_ale'
+  }
+
+  private static class DummyConventionBasedTest
+          extends ConventionBasedTest
+  {
+
+    private final Requirement requirement
+    private final String testName;
+    private final Set<String> testGroups;
+
+    public DummyConventionBasedTest(Requirement requirement, String testName, Set<String> testGroups)
+    {
+      this.requirement = requirement
+      this.testName = testName
+      this.testGroups = testGroups
+    }
+
+    @Override
+    void test()
+    {}
+
+    @Override
+    Requirement getRequirements(Configuration configuration)
+    {
+      return requirement;
+    }
+
+    @Override
+    String getTestName()
+    {
+      return testName;
+    }
+
+    @Override
+    Set<String> getTestGroups()
+    {
+      return testGroups;
+    }
+
+    public static DummyConventionBasedTest emptyTest(String testName)
+    {
+      return new DummyConventionBasedTest(new DummyTestRequirement(), testName, emptySet());
+    }
   }
 }

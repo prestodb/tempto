@@ -12,7 +12,6 @@
  * limitations under the License.
  */
 
-
 package com.teradata.tempto.internal
 
 import com.google.common.collect.ImmutableSet
@@ -128,22 +127,6 @@ public class RequirementsCollectorTest
     Requirement getRequirements(Configuration configuration)
     {
       return B
-    }
-  }
-
-  private static final class DummyTestRequirement
-          implements Requirement
-  {
-    private final String name;
-
-    DummyTestRequirement(String name)
-    {
-      this.name = name;
-    }
-
-    public String toString()
-    {
-      return name;
     }
   }
 }

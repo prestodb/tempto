@@ -14,7 +14,6 @@
 
 package com.teradata.tempto.internal.convention;
 
-import com.google.common.base.Converter;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -34,8 +33,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.CaseFormat.LOWER_UNDERSCORE;
-import static com.google.common.base.CaseFormat.UPPER_CAMEL;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static java.lang.Character.isAlphabetic;
 import static java.lang.ClassLoader.getSystemClassLoader;
@@ -99,7 +96,7 @@ public class ConventionBasedTestProxyGenerator
 
     private String toJavaSymbol(String s)
     {
-        String javaSymbol = s.replaceAll("[^A-Za-z0-9_]", "");
+        String javaSymbol = s.replaceAll("[^A-Za-z0-9_]", "_");
         if (!isAlphabetic(javaSymbol.charAt(0))) {
             javaSymbol = "_" + javaSymbol;
         }
