@@ -16,13 +16,16 @@ package com.teradata.tempto.internal.listeners;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.copyOf;
+
 public class TestMetadata
 {
     public final Set<String> testGroups;
     public final String testName;
 
     public TestMetadata(Set<String> testGroups, String testName) {
-        this.testGroups = testGroups;
-        this.testName = testName;
+        this.testGroups = copyOf(checkNotNull(testGroups, "testGroups can not be null"));
+        this.testName = checkNotNull(testName, "testName can not be null");
     }
 }
