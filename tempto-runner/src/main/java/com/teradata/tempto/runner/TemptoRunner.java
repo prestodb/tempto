@@ -40,15 +40,15 @@ public class TemptoRunner
     private final TemptoRunnerCommandLineParser parser;
     private final TemptoRunnerOptions options;
 
+    public static void runTempto(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options)
+    {
+        new TemptoRunner(parser, options).run();
+    }
+
     private TemptoRunner(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options) {
 
         this.parser = parser;
         this.options = options;
-    }
-
-    public static void runTempto(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options)
-    {
-        new TemptoRunner(parser, options).run();
     }
 
     private void run()
