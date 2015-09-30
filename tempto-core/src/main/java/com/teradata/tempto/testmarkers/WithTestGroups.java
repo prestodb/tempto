@@ -18,7 +18,7 @@ import org.testng.ITest;
 
 import java.util.Set;
 
-public interface       WithTestGroups
+public interface WithTestGroups
         extends ITest
 {
     Set<String> getTestGroups();
