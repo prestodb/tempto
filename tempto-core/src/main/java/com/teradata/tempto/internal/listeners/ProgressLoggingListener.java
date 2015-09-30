@@ -50,7 +50,7 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
-        TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         testStartTime = System.currentTimeMillis();
 
         LOGGER.info("");

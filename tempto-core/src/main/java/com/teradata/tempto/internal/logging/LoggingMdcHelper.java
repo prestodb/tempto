@@ -24,7 +24,7 @@ public class LoggingMdcHelper
     private static final TestMetadataReader testMetadataReader = new TestMetadataReader();
 
     public static void setupLoggingMdcForTest(ITestResult testCase) {
-        TestMetadata testMetadata = testMetadataReader.getTestMetadata(testCase);
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         String testId = testMetadata.testName;
         org.slf4j.MDC.put("test_id", testId);
     }

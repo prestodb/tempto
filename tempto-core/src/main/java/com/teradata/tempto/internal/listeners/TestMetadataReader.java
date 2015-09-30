@@ -27,17 +27,17 @@ import static java.util.Arrays.asList;
 public class TestMetadataReader
 {
 
-    public TestMetadata getTestMetadata(ITestResult testResult) {
-        return getTestMetadata(testResult.getMethod());
+    public TestMetadata readTestMetadata(ITestResult testResult) {
+        return readTestMetadata(testResult.getMethod());
     }
 
-    public TestMetadata getTestMetadata(ITestNGMethod testMethod) {
+    public TestMetadata readTestMetadata(ITestNGMethod testMethod) {
         return new TestMetadata(
-                getTestGroups(testMethod),
-                getTestName(testMethod));
+                readTestGroups(testMethod),
+                readTestName(testMethod));
     }
 
-    private Set<String> getTestGroups(ITestNGMethod method)
+    private Set<String> readTestGroups(ITestNGMethod method)
     {
         if (method.isTest() && method.getInstance() instanceof WithTestGroups) {
             return (((WithTestGroups) method.getInstance()).getTestGroups());
@@ -45,7 +45,7 @@ public class TestMetadataReader
         return newHashSet(asList(method.getGroups()));
     }
 
-    private String getTestName(ITestNGMethod method)
+    private String readTestName(ITestNGMethod method)
     {
         if (method.isTest() && method.getInstance() instanceof WithName) {
             return ((WithName) method.getInstance()).getTestName();

@@ -32,7 +32,7 @@ class TestNameGroupNameMethodSelectorTest
   def 'test selector match #testName/#testGroups for #allowedTestNames/#allowedTestGroups/#excludedTestGroups'()
   {
     setup:
-    metadataReader.getTestMetadata(_) >> new TestMetadata(testGroups as Set, testName)
+    metadataReader.readTestMetadata(_) >> new TestMetadata(testGroups as Set, testName)
     def testSelector = new TestNameGroupNameMethodSelector(asSetOptional(allowedTestNames),
             asSetOptional(allowedTestGroups),
             asSetOptional(excludedTestGroups),

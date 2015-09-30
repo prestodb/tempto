@@ -29,7 +29,7 @@ public class TestMethodInfoModuleProvider
     private final TestMetadataReader testMetadataReader = new TestMetadataReader();
     public Module getModule(Configuration configuration, ITestResult testResult)
     {
-        TestMetadata testMetadata = testMetadataReader.getTestMetadata(testResult);
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testResult);
         return new AbstractModule()
         {
             @Override

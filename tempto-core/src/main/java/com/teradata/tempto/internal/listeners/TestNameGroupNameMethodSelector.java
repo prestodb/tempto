@@ -15,7 +15,6 @@
 package com.teradata.tempto.internal.listeners;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.testng.IMethodSelector;
 import org.testng.IMethodSelectorContext;
@@ -83,7 +82,7 @@ public class TestNameGroupNameMethodSelector
     @Override
     public boolean includeMethod(IMethodSelectorContext context, ITestNGMethod method, boolean isTestMethod)
     {
-        TestMetadata testMetadata = testMetadataReader.getTestMetadata(method);
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(method);
         return includeBasedOnTestName(testMetadata) &&
                 includeBasedOnGroups(testMetadata) &&
                 !excludeBasedOnGroups(testMetadata);
