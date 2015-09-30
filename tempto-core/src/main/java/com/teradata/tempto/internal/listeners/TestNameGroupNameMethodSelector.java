@@ -38,21 +38,23 @@ import static java.util.Optional.ofNullable;
  * in static way through annotations.
  * <p>
  * So we introduce our own mechanism of tests selection.
- * This is governed by two java system properties
- * com.teradata.test.groups and com.teradata.test.names.
+ * This is governed by following java system properties:
+ * <ul>
+ *   <li>com.teradata.tempto.groups - should contain comma separated list of groups from which tests should be run
+ *   <li>com.teradata.tempto.exclude_groups - should contain comma separated list of groups from which tests should be excluded
+ *   <li>com.teradata.tempto.tests - should contain comma separated list of test names to be run
+ * </ul>
  * <p>
- * com.teradata.test.groups should contain comma separated list of groups from which tests should be executed
- * <p>
- * com.teradata.test.names should contain comma separated list of testNames.
+ *
  * TestName matching is done by verifying if value from system property is suffix of actual test name in question
  */
 public class TestNameGroupNameMethodSelector
         implements IMethodSelector
 {
 
-    public static final String TEST_NAMES_TO_RUN_PROPERTY = "com.teradata.test.names";
-    public static final String TEST_GROUPS_TO_RUN_PROPERTY = "com.teradata.test.groups";
-    public static final String TEST_GROUPS_TO_EXCLUDE_PROPERTY = "com.teradata.test.exclude_groups";
+    public static final String TEST_NAMES_TO_RUN_PROPERTY = "com.teradata.tempto.tests";
+    public static final String TEST_GROUPS_TO_RUN_PROPERTY = "com.teradata.tempto.groups";
+    public static final String TEST_GROUPS_TO_EXCLUDE_PROPERTY = "com.teradata.tempto.exclude_groups";
 
     private final Optional<Set<String>> testNamesToRun;
     private final Optional<Set<String>> testGroupsToRun;
