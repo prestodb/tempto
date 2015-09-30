@@ -27,18 +27,18 @@ import org.apache.commons.cli.ParseException;
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
 public class TemptoRunnerCommandLineParser
 {
-    public static class ParsingException extends RuntimeException {
+    public static class ParsingException
+            extends RuntimeException
+    {
         public ParsingException(String message)
         {
             super(message);
@@ -63,9 +63,8 @@ public class TemptoRunnerCommandLineParser
     private static final String REPORT_DIR_DEFAULT = "./test-reports";
 
     private static final String GROUPS_OPTION = "groups";
-    private static final String EXCLUDED_GROUPS_OPTION ="excluded-groups";
+    private static final String EXCLUDED_GROUPS_OPTION = "excluded-groups";
     private static final String TESTS_OPTION = "tests";
-
 
     private static final String HELP_OPTION = "help";
     public static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
