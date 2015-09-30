@@ -19,7 +19,6 @@ apply plugin: 'groovy'
 dependencies {
   compile tempto_core
   compile libraries.commons_cli
-  runtime libraries.slf4j_jdk14
 }
 
 configurations {

@@ -27,6 +27,7 @@ dependencies {
   compile libraries.slf4j_api
   compile libraries.slf4j_log4j
   runtime libraries.postgresql_jdbc
+  runtime libraries.slf4j_jdk14
 }
 
 jar {
