@@ -24,10 +24,6 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 
-/**
- * Helper class for obtaining test method metadata (name, groups etc) which
- * is usable in multiple places in test framework.
- */
 public class TestMetadataReader
 {
 
