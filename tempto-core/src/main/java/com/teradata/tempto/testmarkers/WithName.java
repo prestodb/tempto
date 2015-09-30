@@ -16,6 +16,9 @@ package com.teradata.tempto.testmarkers;
 
 import org.testng.ITest;
 
+/**
+ * Marker interface for test classes which explicitly define dest name.
+ */
 public interface WithName
         extends ITest
 {
