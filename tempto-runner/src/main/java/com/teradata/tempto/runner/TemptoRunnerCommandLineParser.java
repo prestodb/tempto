@@ -68,11 +68,11 @@ public class TemptoRunnerCommandLineParser
 
     private static final String HELP_OPTION = "help";
     private static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
+    private static final Function<String, Set<String>> SPLIT_ON_COMMA = s -> ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(s));
 
     private final String appName;
     private final Map<String, DefaultValue> defaultsMap;
 
-    private static final Function<String, Set<String>> SPLIT_ON_COMMA = s -> ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(s));
 
     private TemptoRunnerCommandLineParser(String appName, Map<String, DefaultValue> defaultsMap)
     {
