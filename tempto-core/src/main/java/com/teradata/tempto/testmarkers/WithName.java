@@ -19,4 +19,6 @@ import org.testng.ITest;
 public interface WithName
         extends ITest
 {
+    @Override
+    String getTestName();
 }
