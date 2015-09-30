@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static java.util.Collections.emptySet;
+import static java.util.Optional.empty;
 
 public class TemptoRunnerCommandLineParser
 {
@@ -117,57 +118,26 @@ public class TemptoRunnerCommandLineParser
     private Options buildOptions()
     {
         Options options = new Options();
-        if (isChangable(PACKAGE_OPTION)) {
-            options.addOption(Option.builder("p")
-                    .longOpt(PACKAGE_OPTION)
-                    .hasArg()
-                    .required()
-                    .desc("Java package to be scanned for tests").build());
-        }
-        if (isChangable(CONFIG_FILE_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(CONFIG_FILE_OPTION)
-                    .hasArg()
-                    .desc("URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
-                    .build());
-        }
-        if (isChangable(CONFIG_FILE_LOCAL_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(CONFIG_FILE_LOCAL_OPTION)
-                    .hasArg()
-                    .desc("URI to Test local configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
-                    .build());
-        }
-        if (isChangable(REPORT_DIR_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(REPORT_DIR_OPTION)
-                    .hasArg()
-                    .desc("Test reports directory")
-                    .build());
-        }
-        if (isChangable(GROUPS_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(GROUPS_OPTION)
-                    .hasArg()
-                    .desc("Test groups to be run")
-                    .build());
-        }
-        if (isChangable(EXCLUDED_GROUPS_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(EXCLUDED_GROUPS_OPTION)
-                    .hasArg()
-                    .desc("Test groups to be excluded")
-                    .build());
-        }
-        if (isChangable(TESTS_OPTION)) {
-            options.addOption(Option.builder()
-                    .longOpt(TESTS_OPTION)
-                    .hasArg()
-                    .desc("Test patterns to be included (not yet supported)")
-                    .build());
-        }
+        addOptionWithArg(options, PACKAGE_OPTION, Optional.of("p"), true, "Java package to be scanned for tests");
+        addOptionWithArg(options, CONFIG_FILE_OPTION, empty(), false, "URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
+        addOptionWithArg(options, CONFIG_FILE_LOCAL_OPTION, empty(), false, "URI to Test local configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
+        addOptionWithArg(options, REPORT_DIR_OPTION, empty(), false, "Test reports directory");
+        addOptionWithArg(options, GROUPS_OPTION, empty(), false, "Test groups to be run");
+        addOptionWithArg(options, EXCLUDED_GROUPS_OPTION, empty(), false, "Test groups to be excluded");
+        addOptionWithArg(options, TESTS_OPTION, empty(), false, "Test patterns to be included (not yet supported)");
         options.addOption("h", HELP_OPTION, false, "Shows help message");
         return options;
+    }
+
+    private void addOptionWithArg(Options options, String longOptionName, Optional<String> shortOptionName, boolean required, String description)
+    {
+        if (isChangable(longOptionName)) {
+            options.addOption(Option.builder(shortOptionName.orElse(null))
+                    .longOpt(PACKAGE_OPTION)
+                    .hasArg()
+                    .required(required)
+                    .desc(description).build());
+        }
     }
 
     private boolean isChangable(String option)
