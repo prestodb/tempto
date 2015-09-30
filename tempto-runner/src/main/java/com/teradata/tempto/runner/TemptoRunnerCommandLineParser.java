@@ -38,6 +38,18 @@ import static java.util.Collections.emptySet;
 
 public class TemptoRunnerCommandLineParser
 {
+    public static class ParsingException extends RuntimeException {
+        public ParsingException(String message)
+        {
+            super(message);
+        }
+
+        public ParsingException(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
     private static final String CLASS_PATH_OPTION = "classpath";
     private static final String PACKAGE_OPTION = "package";
 
@@ -100,7 +112,7 @@ public class TemptoRunnerCommandLineParser
             return commandLineToOptions(commandLine);
         }
         catch (ParseException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new ParsingException(e.getMessage(), e);
         }
     }
 

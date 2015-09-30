@@ -17,6 +17,7 @@ package com.teradata.tempto.examples;
 import com.teradata.tempto.runner.TemptoRunner;
 import com.teradata.tempto.runner.TemptoRunnerCommandLineParser;
 import com.teradata.tempto.runner.TemptoRunnerOptions;
+import sun.security.pkcs.ParsingException;
 
 public class TemptoExamples
 {
@@ -31,14 +32,13 @@ public class TemptoExamples
         TemptoRunnerOptions temptoRunnerOptions;
         try {
             temptoRunnerOptions = parser.parseCommandLine(args);
+            TemptoRunner.runTempto(parser, temptoRunnerOptions);
         }
-        catch (Exception e) {
+        catch (TemptoRunnerCommandLineParser.ParsingException e) {
             System.err.println("Could not parse command line. " + e.getMessage());
             System.err.println();
-
             parser.printHelpMessage();
-            throw e;
+            System.exit(1);
         }
-        TemptoRunner.runTempto(parser, temptoRunnerOptions);
     }
 }
