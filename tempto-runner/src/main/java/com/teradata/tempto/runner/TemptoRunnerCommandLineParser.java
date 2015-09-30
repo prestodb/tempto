@@ -69,28 +69,6 @@ public class TemptoRunnerCommandLineParser
     private static final String HELP_OPTION = "help";
     private static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
 
-    private static class DefaultValue
-    {
-        private final String value;
-        private final boolean changeable;
-
-        private DefaultValue(String value, boolean changeable)
-        {
-            this.value = value;
-            this.changeable = changeable;
-        }
-
-        public String getValue()
-        {
-            return value;
-        }
-
-        public boolean isChangeable()
-        {
-            return changeable;
-        }
-    }
-
     private final String appName;
     private final Map<String, DefaultValue> defaultsMap;
 
@@ -289,6 +267,28 @@ public class TemptoRunnerCommandLineParser
         public TemptoRunnerCommandLineParser build()
         {
             return new TemptoRunnerCommandLineParser(appName, defaultsMap);
+        }
+    }
+
+    private static class DefaultValue
+    {
+        private final String value;
+        private final boolean changeable;
+
+        private DefaultValue(String value, boolean changeable)
+        {
+            this.value = value;
+            this.changeable = changeable;
+        }
+
+        public String getValue()
+        {
+            return value;
+        }
+
+        public boolean isChangeable()
+        {
+            return changeable;
         }
     }
 }
