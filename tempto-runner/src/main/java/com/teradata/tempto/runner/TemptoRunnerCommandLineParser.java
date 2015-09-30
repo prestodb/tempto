@@ -67,7 +67,7 @@ public class TemptoRunnerCommandLineParser
     private static final String TESTS_OPTION = "tests";
 
     private static final String HELP_OPTION = "help";
-    public static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
+    private static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
 
     private static class DefaultValue
     {
