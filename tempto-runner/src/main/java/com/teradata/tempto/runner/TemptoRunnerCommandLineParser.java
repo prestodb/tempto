@@ -133,7 +133,7 @@ public class TemptoRunnerCommandLineParser
     {
         if (isChangable(longOptionName)) {
             options.addOption(Option.builder(shortOptionName.orElse(null))
-                    .longOpt(PACKAGE_OPTION)
+                    .longOpt(longOptionName)
                     .hasArg()
                     .required(required)
                     .desc(description).build());
@@ -228,9 +228,19 @@ public class TemptoRunnerCommandLineParser
             return setDefaultValue(REPORT_DIR_OPTION, reportDir, changeable);
         }
 
-        private Builder setDefaultValue(String option, String value, boolean changable)
+        public Builder setExcludedGroups(String excludedGroups, boolean changeable)
         {
-            defaultsMap.put(option, new DefaultValue(value, changable));
+            return setDefaultValue(EXCLUDED_GROUPS_OPTION, excludedGroups, changeable);
+        }
+
+        public Builder setGroups(String groups, boolean changeable)
+        {
+            return setDefaultValue(GROUPS_OPTION, groups, changeable);
+        }
+
+        private Builder setDefaultValue(String option, String value, boolean changeable)
+        {
+            defaultsMap.put(option, new DefaultValue(value, changeable));
             return this;
         }
 
