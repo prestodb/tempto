@@ -42,6 +42,18 @@ public class TemptoRunner
     private final TemptoRunnerCommandLineParser parser;
     private final TemptoRunnerOptions options;
 
+    public static void runTempto(TemptoRunnerCommandLineParser parser, String[] args) {
+        try {
+            TemptoRunner.runTempto(parser, parser.parseCommandLine(args));
+        }
+        catch (TemptoRunnerCommandLineParser.ParsingException e) {
+            System.err.println("Could not parse command line. " + e.getMessage());
+            System.err.println();
+            parser.printHelpMessage();
+            System.exit(1);
+        }
+    }
+
     public static void runTempto(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options)
     {
         new TemptoRunner(parser, options).run();
