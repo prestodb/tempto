@@ -9,15 +9,13 @@ paradigm and AssertJ style assertion) or by providing query files with expected 
 
 ## Prerequisites
 
-You will need the following software to be installed on the machine running the
-framework:
+To use Tempto you need a Java 1.8 runtime.
 
-* Java >= 1.8
-* Python >= 2.6 (if you use the custom launcher that comes with the framework)
+Other dependencies depend on set of features you are using.
 
-Currently we only support HDFS as a datastore. That means that on your Hadoop
-cluster you'll need the following:
+### HDFS
 
+For automatic provisioning HDFS based tables you need:
 * Running Hadoop cluster with [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html)
 * We suggest that cluster support [XAttr metadata](https://hadoop.apache.org/docs/r2.6.0/hadoop-project-dist/hadoop-hdfs/ExtededAttributes.html). 
 Having that feature enabled improves test performance slightly.
@@ -36,13 +34,13 @@ Having that feature enabled improves test performance slightly.
 
 ## Setup
 
-Note: the machine running the framework and tests does not have to
-be the same as the machine or set of machines running your SQL on Hadoop database.
-For example, the framework and tests can be running on a Jenkins slave and the
-framework will remotely interact with your cluster.
+To use Tempto you need machine to execute test code and machine or machines to run tested application.
 
-**TODO:** we should include here information which jar to use as dependency, and where to put file with properties,
-how to setup maven plugins...
+Note that the machine running the framework and tests does not have to
+be the same as the machine or set of machines running your SQL on Hadoop database.
+For example, typical configuration is
+* the framework and tests running on a Jenkins slave
+* tested application cluster is running on separate machines and is accessed over network
 
 ## Logging
 
@@ -94,7 +92,7 @@ log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{
 ## Configuration
 
 The test execution environment is configured via a hierarchical YAML file. The YAML file
-is loaded from the classpath and it must be named `tempto-configuration.yaml`. 
+is by default loaded from the classpath and must be named `tempto-configuration.yaml`.
 If `tempto-configuration-local.yaml` file is present on classpath it will be also loaded and will
 overwrite settings defined in `tempto-configuration.yaml` file.
 
@@ -109,14 +107,29 @@ Configuration files locations can be overidden by using following java system pr
           -Dtempto.configuration.local=file:/tmp/my_local_configuration.yaml
 ```
 
-If you start tests using helper `tempto` script you can use 
-`--tempto-configuration` and `--tempto-configuration-local` options to override
-configuration files. 
+Configuration files can also be overriden through by passing command line arguments to
+tests runner based on `TemptoRunner`. See below for details.
 
-The file
-contains the following configuration sections:
+### Variable expansion
 
-* **hdfs**
+The configuration file can contain variable placeholders in form of `${variable_name}`.
+
+Variables placeholders in templates are expanded during tests execution based on:
+* System environment variables
+* Other configuration keys in the file
+
+Example configuration file with variables:
+```YAML
+common:
+  master_host: localhost
+
+hdfs:
+  host: ${common.master_host}
+```
+
+### Configuration sections
+
+#### **hdfs**
 
 This section is used to configure how the framework accesses HDFS. During the fulfillment process,
 the framework accesses HDFS through the WebHDFS REST API. In your Java tests you may also
@@ -138,8 +151,10 @@ You can change "default" to point to whichever JDBC connection you want to query
 You will need to define a connection for every database that will need to be access during the test run.
 For example, if you'd like the framework to create tables for you in Hive, you'll have to specify connection
 parameters for Hive.
-TODO: what if you've already created all your tables in hive, do you still need
-to provide connection parameters?
+
+Remark: Currently all database connections defined in the configuration are initialized eagerly even
+        if due to test filtering no tests requiring particular connection is being run. This is place for
+        improvement in the future.
 
 ```YAML
 databases:           # database connections
@@ -152,7 +167,7 @@ databases:           # database connections
     jdbc_user: hdfs                                                                   # database user
     jdbc_password: na                                                                 # database password
     jdbc_pooling: false                                                               # (optional) should connection pooling be used (it does not work for Hive due to driver issues)
-    jdbc_jar: tempto-hive-jdbc/build/libs/hive-jdbc-fat.jar                   # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts. (e.g. hive driver conflicts with presto driver)
+    jdbc_jar: tempto-hive-jdbc/build/libs/hive-jdbc-fat.jar                           # (optional) jar to be used for obtaining database driver. Should be used in case when we cannot have it in global classpath due to class conflicts.
     table_manager_type: hive
  
   presto:           # connection named presto
@@ -175,8 +190,6 @@ If we want framework to provision tables we need to specify table_manager_type f
 Currently we support two table manager types:
  * hive: manages tables in HIVE. Is applicable to HDFS backed hive database connection.
  * jdbc: manages tables in standard SQL JDBC based database. Tables are populated using "INSERT INTO " statements.
-
-Current limitation is that only one table manager for each type can be defined.
 
 * **tests**
 
@@ -201,12 +214,13 @@ Tests may declare requirements that are fulfilled by the framework during suite/
 #### Explicit RequirementsProvider
 
 You can specify Requirements for your test through the `@Requires` annotation. Test methods and whole classes
-can be annotated with `@Requires`. If a class is annotated with `@Requires`, that is the same having every
-test method in that class be annoted with `@Requires`. The parameter passed to `@Requires` must be a class
-that extends the `RequirementsProvider` interface. This
-interface has a single method, `getRequirements()` that returns an instance of a `Requirement` object. You may notice
-that a better way of passing in requirements would be to supply `@Requires` with an instance but Java only allows
-constant argument annotations.
+can be annotated with `@Requires`. If a class is annotated with `@Requires`, behavior is the same as when
+each test method in that class be annotated with `@Requires`. The parameter passed to `@Requires` must be a class
+that extends the `RequirementsProvider` interface.
+This interface has a single method, `getRequirements()` that returns an instance of a `Requirement` object.
+
+Remark: *It seems that a better way of passing in requirements would be to supply
+         `@Requires` with an instance but Java only allows constant argument annotations.*
 
 Here's an example implementation of the `RequirementProvider` interface:
 
@@ -242,8 +256,8 @@ the requirements they return are combined.
 
 #### Test class being RequirementsProvider
 
-Alternatively one can make Test class itself implement RequirementProvider. Then requirements
-returned by the implemeneted `getRequirements` method will be applied to all test methods in class.
+Alternatively one can make Test class itself implement `RequirementProvider`. Then requirements
+returned by the implemented `getRequirements` method will be applied to all test methods in class.
  
 ```Java
 private final class MyTestClass
@@ -272,54 +286,85 @@ from `RequirementProvider#getRequirement()`.
 #### ImmutableTableRequirement
 
 When this requirement is fulfilled, it will create a table in the underlying database. 
-It is called immutable because the contract with the test developer is that they will not, within 
-the logic of their test, alter the state of the table (drop it, re-create it under a different name, delete data). 
-This is done so that requirements can be recycled between tests. If 10 tests require an immutable table, 
+It is called immutable because the contract with the test developer is that they will not be altered by the test code.
+For immutable tables test code is not allowed to
+ * drop it
+ * re-create it under a different name
+ * delete/insert data.
+
+The immutable tables can be recycled between tests. If 10 tests require an immutable table,
 that table will only be created once and the framework assumes it will be available for all tests.
+
+Best way to create `ImmutableTableRequirement` is to use `TableRequirements.immutableTable` factory
+method.
 
 ##### Table Definitions
 
-ImmutableHiveTableRequirement is parametrized with `TableDefinition`.
-Target database in which table is created depends on `TableDefinition` instance passed as ImmutableTableRequirement
-parameter. Currently we have only one implementation: `HiveTableDefinition` allowing defining tables in Hive.
-Using `ImmutableTableRequirement` with `HiveTableDefinition` requires that a connection named `hive` is 
-defined in configuration Yaml.
+`ImmutableHiveTableRequirement` is parametrized with `TableDefinition`.
+Target database in which table is created depends on `TableDefinition` instance passed as `ImmutableTableRequirement`
+parameter.
 
-`HiveTableDefinition` include name, schema and dataSource. 
-`HiveTableDefinitionBuilder` can be use to create new definition. You need to provide table name,
-create table DDL template (_\{0\}_ is substituted with HDFS file location) and `DataSource`.
+Currently we support:
+ * `HiveTableDefinition` - allowing defining tables in Hive. Requires database with `hive` table manager defined.
+ * `JDBCTableDefinition` - allowing defining table in JDBC databases. Requires database with `jdbc` table manager defined.
+
+Remark: If multiple table managers for the same type are defined in the configuration, you have to provide
+        database name explicitly in `ImmutableHiveTableRequirement`.
+
+###### HiveTableDefinition
+
+`HiveTableDefinition` include name, schema and dataSource.
+`HiveTableDefinitionBuilder` can be use to create new definition. You need to provide:
+ * DDL template containing following template placeholders:
+   * `%NAME%` - table name in hive
+   * `%LOCATION%` - data location on HDFS
+ * Optional specification of table partitions.
+ * `HiveDataSource` responsible for providing table data which is saved to HDFS
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
 be found in `com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions`.
-
-TODO: we need to clarify to the user how they create tables.
 
 For example this is how the nation table is built:
 
 ```Java
     public static final HiveTableDefinition NATION =
-        HiveTableDefinition.builder()
-                .setName("nation")
-                .setCreateTableDDLTemplate("" +
-                        "CREATE TABLE nation(" +
-                        "   n_nationkey     INT," +
-                        "   n_name          STRING," +
-                        "   n_regionkey     INT," +
-                        "   n_comment       STRING) " +
-                        "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
-                        "LOCATION '{0}'")
-                .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
-                .build();
+            HiveTableDefinition.builder()
+                    .setName("nation")
+                    .setCreateTableDDLTemplate("" +
+                            "CREATE EXTERNAL TABLE %NAME%(" +
+                            "   n_nationkey     INT," +
+                            "   n_name          STRING," +
+                            "   n_regionkey     INT," +
+                            "   n_comment       STRING) " +
+                            "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
+                            "LOCATION '%LOCATION%'")
+                    .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
+                    .build();
 ```
 
-Best way to crate `ImmutableTableRequirement` is to use `TableRequirements.immutableTable` factory
-method.
+###### JdbcTableDefinition
+
+`JdbcTableDefinition` include name, schema and dataSource. You need to provide:
+ * DDL template containing following template placeholders:
+   * `%NAME%` - actual table name in database
+ * `JdbcTableDataSource` responsible for providing list of rows which are inserted into created table.
+
+Example:
+```Java
+    static {
+        JdbcTableDataSource dataSource = () -> ImmutableList.<List<Object>>of(
+                ImmutableList.of(1, "x"),
+                ImmutableList.of(2, "y")
+        ).iterator();
+        TEST_TABLE_DEFINITION = jdbcTableDefinition("test_table", "CREATE TABLE %NAME% (a int, b varchar(100))", dataSource);
+    }
+```
 
 #### MutableTableRequirement
 
-When this requirement is fulfilled it will crate a table in underlying database. 
+When this requirement is fulfilled it will create a table in underlying database.
 But unlike ImmutableTableRequirement framework does not assume table will not be modified. 
-Each test using  ImmutableTableRequirement will have a separate instance of table created in 
+Each test using ImmutableTableRequirement will have a separate instance of table created in
 database with unique name.
 
 To access name of table in database from test code `MutableTablesState` must be used.
@@ -346,15 +391,16 @@ See following example.
 ```
 
 One can request that mutable table is in one of three states:
- * PREPARED - no table is crated actually - but MutableTableState entry is crated for table and unique name is generated
- * CRATED - table is crated but is not populated with data 
- * LOADED - table is crated and populated with data 
+ * `PREPARED` - no table is created actually - but `MutableTableState` entry is created for table and unique name is generated
+ * `CREATED` - table is created but is not populated with data
+ * `LOADED` - table is created and populated with data
 
 ### Executing queries
 
 Queries are executed via implementations of the `QueryExecutor` interface. Currently the only implementation
-is `JdbcQueryExecutor`. Each database configured in the YAML file will have its own query executor with the
-same name. To retrieve that executor and issue queries against that database you can use the
+is `JdbcQueryExecutor`. Each database configured in the YAML file will have
+its own query executor with name matching name of the database.
+To retrieve that executor and issue queries against that database you can use the
 `ThreadLocalTestContextHolder.testContext().getDependency(...)` as shown below.
 
 ```Java
@@ -365,6 +411,8 @@ same name. To retrieve that executor and issue queries against that database you
     QueryExecutor prestoQueryExecutor = ThreadLocalTestContextHolder.testContext().getDependency(QueryExecutor.class, "presto");
     QueryResult queryResultPresto = prestoQueryExecutor.query("SELECT * FROM nation");
 ```
+
+Alternatively test writer can inject named QueryExecutor to the test. See below.
 
 To use default QueryExecutor one can use helper static method `QueryExecutor.query` (see examples).
 
@@ -390,16 +438,44 @@ Example assertions:
       }
 ```
 
-## Convention based file tests
+### Injecting dependencies into tests
 
-Query tests can be written by providing the framework with a sql query file and a file with
+As an alternative to using `ThreadLocalTestContextHolder.testContext()` explicitly
+dependencies can be injected to test by framework. Field injection and argument injection
+through `setup()` method is supported.
+
+See example:
+```
+public class InjectionTest
+        extends ProductTest
+{
+    @Inject
+    MutableTablesState mutableTablesState;
+
+    @BeforeTestWithContext
+    @Inject
+    public void setUp(
+            ImmutableTablesState immutableTablesState,
+            @Named("hdfs.username") String hdfsUsername
+    )
+    {
+        immutableTablesState.get(...)
+    }
+...
+```
+
+## Convention based SQL query tests
+
+SQL query tests can be written in simpler form without using Java code.
+
+It is done by providing the framework with a sql query file and a file with
 the expected result. These tests are called convention based because of the directory structure
 assumed by the framework, namely the directory convention.
 
-Moreover you can define datasets that can be queried in your tests. These dataset files contain
-the data along with the corresponding DDL. For examples take a look at files in the
-`tempto-examples/src/main/resources/sql-tests` directory. The directory tree looks
-like the following:
+Moreover you can define Hive and JDBC datasets that can be queried in your tests.
+These datasets files contain the data along with the corresponding DDL.
+For examples take a look at files in the `tempto-examples/src/main/resources/sql-tests`
+directory. The directory tree looks like the following:
 
 ```Shell
 ~/repos/tempto/tempto-examples/src/main/resources$ tree .
@@ -430,9 +506,9 @@ like the following:
 
 Data sets are stored in `sql-tests/datasets directory`. To create an example table, you will need to create three files:
 
-* TABLE_NAME.ddl - DDL for data.
-* TABLE_NAME.data - file containing raw data.
-* TABLE_NAME.data-revision - file with data marker. If you change your data, you should also increase this
+* `TABLE_NAME.ddl` - DDL for data.
+* `TABLE_NAME.data` - file containing raw data.
+* `TABLE_NAME.data-revision` - file with data marker. If you change your data, you should also increase this
 revision marker, so the new table data is automatically reloaded.
 
 #### TABLE_NAME.ddl
@@ -453,8 +529,8 @@ LOCATION '%LOCATION%'
 ```
 
 Template must contain:
- * %NAME% pattern which will be replaced with table name.
- * %LOCATION% pattern which will replaced with HDFS path where data will be uploaded.
+ * `%NAME%` pattern which will be replaced with table name.
+ * `%LOCATION%` pattern which will replaced with HDFS path where data will be uploaded.
 
 ##### JDBC tables
 
@@ -467,7 +543,7 @@ CREATE TABLE %NAME% (
 )
 ```
 
-Template must contain %NAME% pattern which will be replaced with table name.
+Template must contain `%NAME%` pattern which will be replaced with table name.
 
 #### TABLE_NAME.data
 
@@ -502,9 +578,8 @@ Header parameters are:
 
 #### TABLE_NAME.data-revision
 
-Currently only HIVE table manager makes use of that. It should contain any string, which must be updated when table contents is changed.
-
-TODO: where should be user create the sql-tests directory? Right now it's resources under the examples dir, where should they put it?
+Currently only HIVE table manager makes use of that. It should contain any string, which must be updated when
+table contents is changed.
 
 ### Tests
 
@@ -520,13 +595,24 @@ query execution requirements:
 SELECT * FROM nation
 ```
 
-This test contains queries that should be executed against the Hive database. Only results
-of the last query will be checked agains result file. In addition, the test is part of two
-separate TestNG groups: example_smoketest and group2.
+This test contains queries that should be executed against the Hive database.
+The test is part of two separate TestNG groups: example_smoketest and group2.
 
 In above example queries will be run against database hive (see database key in a first row).
 Test require immutable table nation to be created and loaded before query execution (see tables key). 
 
+It is possible to have more than one query in `*.sql` file.
+To do that separate queries using semicolon.
+
+E.g
+```
+-- database: hive; tables: sample_hive_table; mutable_tables: sample_hive_table|created|sample_table_created, sample_hive_table|prepared|sample_table_prepared; groups: insert
+INSERT INTO TABLE ${mutableTables.hive.sample_table_created} SELECT * from sample_hive_table;
+SELECT * from ${mutableTables.hive.sample_table_created}
+```
+
+If multiple queries are defined in the `*.sql` file results
+of the last query will be checked against result file.
 
 * **TEST.result** - file with the expected result of the query. The first line can be a SQL comment
 with query assertion requirements:
@@ -537,13 +623,13 @@ with query assertion requirements:
 ...
 ```
 
-Above we set the _|_ character as the delimiter, we ignore the order of rows during comparison and
+Above we set the `|` character as the delimiter, we ignore the order of rows during comparison and
 that we expect the columns to be of the specified types. You always need to provide types because
 when checking the result, the framework will have to cast String to the given type. This is of
 course terrible for performance, but you're trading that for convenience (for example a test writer
 that cannot/does not want to write Java).
 
-Both SQL and result files honor comments which begin with _---_ prefix.
+Both SQL and result files honor comments which begin with `---` prefix.
 
 It is possible to define both queries and results in single **TEST.sql** file.
 Such file is divided into sections. Each section is separated by _--!_ prefix.
@@ -571,11 +657,15 @@ TODO more info on scripts, what they should be named, what they can contain.
 
 #### Using tables across databases.
 
-It is possible (which is useful for testing presto for example), to use a table which is created in one database (e.g. hive, psql) while sending test query to other database (e.g. presto).
+It is possible (which is useful for testing presto for example), to use a table which is created in one database (e.g. hive, psql)
+while sending test query to other database (e.g. presto).
 Take a look at the example below. Here query is issued via presto JDBC, while nation table could be created somewhere else. In order to determine 
 where nation should be created (find appropriate requirements) below matching flow is used:
- - If database is specified explicitly as prefix for table name (e.g psql.nation) then requirement for table in that database will be generated. Note that database must have a table_manager with type matching table manager of a table or error will be thrown.
- - If no database is specified explicitly then if there is only one database with table manager of type equal to table type then this database will be picked up.
+ - If database is specified explicitly as prefix for table name (e.g psql.nation) then requirement for
+   table in that database will be generated. Note that database must have a table_manager with type
+   matching table manager of a table or error will be thrown.
+ - If no database is specified explicitly then if there is only one database with table manager
+   of type equal to table type then this database will be picked up.
  - As fallback database to which test query would be send is used. Database type manager type vs table type checking is done.
 
 ```
@@ -600,7 +690,7 @@ TODO (not used right now)
 
 Java based tests can be simply run as TestNG tests.
 
-File convention based tests: TODO
+There is no such possibility for convention based tests right now.
 
 ### Using tempto runner
 
@@ -642,12 +732,8 @@ By default all tests found in classpath are executed but user may limit that.
 </table>
 
 
-## Developers
-
-For every available `Requirement` there is one possible `Fulfiller`. Currently that mapping is hard coded.
-All requirements and their corresponding fulfillers are packed into `tempto-core-all.jar`. In the
-future we envision separating requirements and their possible fulfillers into separate jars.
-
 ## Acknowledgements
 
 A special thanks to the entire Hadapt team for inspiring the architecture of this framework.
+
+

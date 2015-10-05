@@ -5,10 +5,13 @@ smoketest to ensure that you've setup everything properly.
 
 ##Setup 
 
- * You need a cluster with hadoop accessible by name hadoop-master and a presto cluster accessible by name presto-master. In case you want to use different host names (or service ports) you need to change ```src/main/resources/tempto-configuration.yaml``` accordingly.For more details please refer to the [Configuration section](../README.md).
- * Ensure that WebHDFS, Hive and Presto are running.
+### Hadoop cluster
 
-Also you need PSQL instances.
+ You need a cluster with hadoop accessible by name hadoop-master and a presto cluster accessible by name presto-master. In case you want to use different host names (or service ports) you need to change ```src/main/resources/tempto-configuration.yaml``` accordingly.For more details please refer to the [Configuration section](../README.md).
+
+ Ensure that WebHDFS, Hive and Presto are running.
+
+### Also you need PSQL instances.
 ```
 docker run --name tempto-examples-psql -p 15432:5432 -e POSTGRES_USER=blah -e POSTGRES_PASSWORD=blah  -d postgres
 docker run --name tempto-examples-psql2 -p 15433:5432 -e POSTGRES_USER=blah -e POSTGRES_PASSWORD=blah  -d postgres
@@ -19,30 +22,47 @@ docker start tempto-examples-psql
 docker start tempto-examples-psql2
 ```
 
- * configure ssh in ```src/main/resources/tempto-configuration-local.yaml```
+If your docker server is not `localhost` you have to specify it in your
+`src/main/resources/tempto-configuration-local.yaml`
+```
+DOCKER_MACHINE: host_of_my_docker_server
+```
 
-You need a pem (private key) file to login to the cluster and some user with a password set (yarn/yarn by default).
-Example content for this file is:
+### Ssh-able host
+
+You need some host accessible over ssh.
+ * using private key
+ * using password
+
+Configure ssh in ```src/main/resources/tempto-configuration-local.yaml```
 ```
 ssh:
-  identity: ~/hfab/hfab/util/pkg_data/insecure_key.pem
+  identity: ~/my_key.pem
   roles:
     host_by_password:
-      user: test
-      password: testtest
-      host: master
+      user: username
+      password: userpassword
+      host: ssh_test_host
 
     host_by_identity:
-      host: master
+      host: ssh_test_host
 ```
 
 ## build and run
 
+Being in root `tempto` project directory run:
 ```
-cd tempto-examples
 gradle clean build
-../bin/tempto --tests-classpath build/libs/tempto-examples-all.jar --report-dir /tmp/report --tests-package com.teradata.tempto.examples.*
+java -jar tempto-examples/build/libs/tempto-examples-all.jar --report-dir /tmp/report
+```
+
+Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
+
+To get help on more running option use:
+```
+java -jar tempto-examples/build/libs/tempto-examples-all.jar --help
 ```
 
 The framework will print on your console whether a test passed or failed. A more detailed report
 is available at `/tmp/report/index.html`. 
+

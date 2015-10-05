@@ -164,12 +164,12 @@ public class HiveTableDefinition
     public static class PartitionDefinition
     {
         /**
-         * Partition spec inserted into {link #ADD_PARTION_DDL_TEMPLATE}.
+         * Partition spec inserted into {@link #ADD_PARTITION_DDL_TEMPLATE}.
          */
         private final String partitionSpec;
         private final HiveDataSource dataSource;
 
-        private static final String ADD_PARTION_DDL_TEMPLATE =
+        private static final String ADD_PARTITION_DDL_TEMPLATE =
                 "ALTER TABLE " + NAME_MARKER +
                         " ADD PARTITION (" + PARTITION_SPEC_MARKER + ")" +
                         " LOCATION '" + LOCATION_MARKER + "'";
@@ -192,7 +192,7 @@ public class HiveTableDefinition
 
         public String getAddPartitionTableDDL(String tableName, String location)
         {
-            return ADD_PARTION_DDL_TEMPLATE.replace(NAME_MARKER, tableName).replace(PARTITION_SPEC_MARKER, partitionSpec).replace(LOCATION_MARKER, location);
+            return ADD_PARTITION_DDL_TEMPLATE.replace(NAME_MARKER, tableName).replace(PARTITION_SPEC_MARKER, partitionSpec).replace(LOCATION_MARKER, location);
         }
     }
 
