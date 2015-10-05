@@ -22,19 +22,23 @@ apply plugin: 'java'
 
 dependencies {
   compile tempto_runner
-  compile tempto_logging_log4j
-  compile libraries.testng
   compile libraries.slf4j_api
-  compile libraries.slf4j_log4j
-  compile project(':third-party-deps')
-  compile libraries.postgresql_jdbc
-  runtime libraries.slf4j_jdk14
+
+  runtime tempto_logging_log4j
+  runtime libraries.slf4j_log4j
+  runtime libraries.postgresql_jdbc
+  runtime libraries.presto_jdbc
+  runtime libraries.hive_jdbc
 }
 
 jar {
   manifest {
     attributes 'Main-Class': 'com.teradata.tempto.examples.TemptoExamples'
   }
+}
+
+shadow {
+  version = ''
 }
 
 build.dependsOn.add([shadowJar])

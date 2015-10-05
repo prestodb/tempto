@@ -42,8 +42,7 @@ ext.versions = [
         tpchgen      : '0.4',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
-        hive         : '0.12.0',
-        hadoop       : '0.20.2',
+        hive         : '0.13.1-1',
         presto       : '0.97',
         reflections  : '0.9.9',
         bytebuddy    : '0.5.6',
@@ -76,8 +75,7 @@ ext.libraries = [
         jcl_over_slf4j : "org.slf4j:jcl-over-slf4j:${versions.slf4j}",
         snakeyaml    : "org.yaml:snakeyaml:${versions.snakeyaml}",
         tpchgen      : "io.airlift.tpch:tpch:${versions.tpchgen}",
-        hive_jdbc    : "org.apache.hive:hive-jdbc:${versions.hive}",
-        hadoop_core  : "org.apache.hadoop:hadoop-core:${versions.hadoop}",
+        hive_jdbc    : "com.facebook.presto.hive:hive-apache-jdbc:${versions.hive}",
         presto_jdbc  : "com.facebook.presto:presto-jdbc:${versions.presto}",
         reflections  : "org.reflections:reflections:${versions.reflections}",
         bytebuddy    : "net.bytebuddy:byte-buddy:${versions.bytebuddy}",
@@ -97,7 +95,6 @@ ext.tempto_logging_log4j = project(':tempto-logging-log4j')
 ext.tempto_examples = project(':tempto-examples')
 ext.tempto_runner = project(':tempto-runner')
 ext.expected_result_generator = project(':expected-result-generator')
-ext.third_party_deps = project(':third-party-deps')
 ext.tempto_version = '1.0.37-SNAPSHOT' // changed by losipiuk
 ext.tempto_group = "com.teradata.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
@@ -129,7 +126,7 @@ subprojects {
   }
 }
 
-configure(subprojects - expected_result_generator - tempto_examples - third_party_deps) {
+configure(subprojects - expected_result_generator - tempto_examples) {
   apply plugin: 'signing'
   apply plugin: 'java'
   apply plugin: 'maven'

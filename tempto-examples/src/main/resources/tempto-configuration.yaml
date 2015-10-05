@@ -14,7 +14,6 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-    jdbc_jar: third-party-deps/build/libs/hive-jdbc-all.jar
     table_manager_type: hive
 
   presto:
@@ -23,7 +22,6 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-    jdbc_jar: third-party-deps/build/libs/presto-jdbc-all.jar
 
   psql:
     jdbc_driver_class: org.postgresql.Driver

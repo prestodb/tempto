@@ -41,6 +41,5 @@ ssh:
 ```
 cd tempto-examples
 gradle build
-VERSION=1.0.37-SNAPSHOT
-../bin/tempto --tests-classpath build/libs/tempto-examples-all-$VERSION.jar --report-dir /tmp/report --tests-package com.teradata.tempto.examples.*
+../bin/tempto --tests-classpath build/libs/tempto-examples-all.jar --report-dir /tmp/report --tests-package com.teradata.tempto.examples.*
 ```
