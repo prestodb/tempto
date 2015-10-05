@@ -25,7 +25,7 @@ databases:
 
   psql:
     jdbc_driver_class: org.postgresql.Driver
-    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE:-localhost}:15432/postgres
+    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE}:15432/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
@@ -33,7 +33,7 @@ databases:
 
   psql2:
     jdbc_driver_class: org.postgresql.Driver
-    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE:-localhost}:15433/postgres
+    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE}:15433/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
@@ -62,3 +62,5 @@ list:
     - ala
     - ma
     - kota
+
+DOCKER_MACHINE: localhost
