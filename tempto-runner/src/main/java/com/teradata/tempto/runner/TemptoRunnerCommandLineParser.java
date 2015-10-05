@@ -120,11 +120,11 @@ public class TemptoRunnerCommandLineParser
         Options options = new Options();
         addOptionWithArg(options, PACKAGE_OPTION, Optional.of("p"), true, "Java package to be scanned for tests");
         addOptionWithArg(options, CONFIG_FILE_OPTION, empty(), false, "URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
-        addOptionWithArg(options, CONFIG_FILE_LOCAL_OPTION, empty(), false, "URI to Test local configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
-        addOptionWithArg(options, REPORT_DIR_OPTION, empty(), false, "Test reports directory");
-        addOptionWithArg(options, GROUPS_OPTION, empty(), false, "Test groups to be run");
-        addOptionWithArg(options, EXCLUDED_GROUPS_OPTION, empty(), false, "Test groups to be excluded");
-        addOptionWithArg(options, TESTS_OPTION, empty(), false, "Test patterns to be included (not yet supported)");
+        addOptionWithArg(options, CONFIG_FILE_LOCAL_OPTION, Optional.of("c"), false, "URI to Test local configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
+        addOptionWithArg(options, REPORT_DIR_OPTION, Optional.of("r"), false, "Test reports directory");
+        addOptionWithArg(options, GROUPS_OPTION, Optional.of("g"), false, "Test groups to be run");
+        addOptionWithArg(options, EXCLUDED_GROUPS_OPTION, Optional.of("x"), false, "Test groups to be excluded");
+        addOptionWithArg(options, TESTS_OPTION, Optional.of("t"), false, "Test patterns to be included (not yet supported)");
         options.addOption("h", HELP_OPTION, false, "Shows help message");
         return options;
     }
