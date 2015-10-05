@@ -53,21 +53,9 @@ configurations {
 ext.artifactId = 'tempto-core'
 archivesBaseName = artifactId
 
-task buildFatJar(type: Jar, dependsOn: assemble) {
-  appendix = 'all'
-  from sourceSets.main.output
-  from {
-    configurations.runtime.collect {
-      it.isDirectory() ? it : zipTree(it)
-    }
-  }
-}
-
 license {
   exclude "**/convention/sample-test/**/*.sql"
 }
-
-build.dependsOn.add(buildFatJar)
 
 // publishing to sonatype
 uploadArchives {

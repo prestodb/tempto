@@ -91,50 +91,6 @@ log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
 log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L [%X{test_id}] - %m%n
 ```
 
-## Example test run
-
-The steps below will run the example tests that come with the framework. They act as a basic
-smoketest to ensure that you've setup everything properly.
-
-* Build the framework:
-
-
-```Shell
-$ cd tempto
-$ ./gradlew clean build
-BUILD SUCCESSFUL
-   
-$Total time: 2 mins 47.263 secs
-```
-
-* Set configuration properties in the following configuration file: `tempto/tempto-examples/src/main/resources/tempto-configuration.yaml`.
-The most important settings you'll need to change are the WebHDFS host, the Hive and Presto JDBC URLs. For more details please
-refer to the **Configuration** section below.
-
-* Ensure that WebHDFS, Hive and Presto are running.
-
-* Run tests using the provided test launcher:
-
-```Shell
-$ cd tempto
-$ bin/tempto \
-     --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
-     --tests-package=com.teradata.tempto.examples \
-     --exclude-groups quarantine \
-     --report-dir /tmp/test-reports
-Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
-...
-[2015-04-02 15:21:48] Completed 18 tests
-[2015-04-02 15:21:48] 17 SUCCEEDED      /      1 FAILED      /      0 SKIPPED
-[2015-04-02 15:21:48] For tests logs see: tempto_logs/2015-04-02_15-15-16
-See /tmp/test-reports/index.html for detailed results.
-```
-
-* The framework will print on your console whether a test passed or failed. A more detailed report
-is available at `tempto/tempto-core-build-reports/html/index.html`. Note that
-one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
-
-
 ## Configuration
 
 The test execution environment is configured via a hierarchical YAML file. The YAML file
@@ -646,39 +602,21 @@ Java based tests can be simply run as TestNG tests.
 
 File convention based tests: TODO
 
-### Shell tempto launcher
+### Using tempto runner
 
-Tests can be run using the `bin/tempto` script. This is a wrapper around a command
-line invocation of the TestNG JVM. For a verbose description of all the execution options
-supported by the `bin/tempto` script run:
-
-```Shell
-$ ./bin/tempto --help
-```
-
-**Basic parameters**
-
-For running tests you have to specify at the least the following arguments:
-
-* **classpath** - classpath will be scanned to find tests to be run and it may be either
-a set of jars or directories or a mix of both.
-* **tests-package** - defines java package containing tests. For Java based tests only tests residing in
-this package (or some child package of this) will be executed. Additionally all convention based
-tests found in class path will be executed.
-
-Example run command would look like this:
+Tests can be run using the tempto runner. This is a java library which enables user to create an
+executable jar which make it easy for the user to run the tests.
+To see a verbose description of all the execution options run:
 
 ```Shell
-$ ./bin/tempto --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
-                     --tests-package=com.teradata.tempto.examples
+$ java -jar tempto-examples/build/libs/tempto-examples-all.jar --help
 ```
 
-In above example we set classpath to contain two entries:
+To run example tests command would look like this:
 
-* tempto-examples/src/main/resources - this is directory entry
-* tempto-examples/build-libs/tempto-examples.jar
-
-And tests package is set to com.teradata.tempto.examples.
+```Shell
+$ java -jar tempto-examples/build/libs/tempto-examples-all.jar
+```
 
 **Tests selection**
 
@@ -698,33 +636,11 @@ By default all tests found in classpath are executed but user may limit that.
         </td>
     </tr>
     <tr>
-        <td>--classes</td>
-        <td>List of fully qualified java classess to be executed. Applies to java based tests only.</td>
-    </tr>
-    <tr>
         <td>--exclude-groups</td>
         <td>List of test groups which should be excluded from execution.</td>
     </tr>
 </table>
 
-
-**Debugging**
-
-If you want to run tests from tempto script under debuger use --debug parameter. When this parameter is
-specified Tempto will suspend execution at beginning and wait for debugger on TCP port _5005_.
-
-```Shell
-$ bin/tempto \
-     --tests-classpath tempto-examples/build/libs/tempto-examples-all.jar \
-     --tests-package=com.teradata.tempto.examples \
-     --exclude-groups quarantine \
-     --report-dir /tmp/test-reports
-     --debug
-Loading TestNG run, this may take a sec.  Please don't flip tables (╯°□°）╯︵ ┻━┻
-Listening for transport dt_socket at address: 5005
-```
-
-At this point you may use your IDE of choice to connect to tempto VM.
 
 ## Developers
 

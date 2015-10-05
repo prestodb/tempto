@@ -1,12 +1,12 @@
 # Tempto example tests
 
-## Running
+The steps below will run the example tests that come with the framework. They act as a basic
+smoketest to ensure that you've setup everything properly.
 
-### Setup 
+##Setup 
 
- * setup clusters
-
-You need a cluster with hadoop accessible by name hadoop-master and a presto cluster accessible by name presto-master.
+ * You need a cluster with hadoop accessible by name hadoop-master and a presto cluster accessible by name presto-master. In case you want to use different host names (or service ports) you need to change ```src/main/resources/tempto-configuration.yaml``` accordingly.For more details please refer to the [Configuration section](../README.md).
+ * Ensure that WebHDFS, Hive and Presto are running.
 
 Also you need PSQL instances.
 ```
@@ -36,10 +36,14 @@ ssh:
       host: master
 ```
 
-### build and run
+## build and run
 
 ```
 cd tempto-examples
-gradle build
+gradle clean build
 ../bin/tempto --tests-classpath build/libs/tempto-examples-all.jar --report-dir /tmp/report --tests-package com.teradata.tempto.examples.*
 ```
+
+The framework will print on your console whether a test passed or failed. A more detailed report
+is available at `/tmp/report/index.html`. 
+Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.

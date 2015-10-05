@@ -107,11 +107,6 @@ task wrapper(type: Wrapper) {
   gradleVersion = '2.3'
 }
 
-task packageAndUploadLaunchScript(type: Exec) {
-  workingDir 'tempto-launch-script/'
-  commandLine 'python', 'setup.py', 'bdist_wheel', 'upload', '-r', 'pypi_internal'
-}
-
 subprojects {
   // project information
   version = tempto_version
