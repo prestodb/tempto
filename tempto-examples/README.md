@@ -46,4 +46,3 @@ gradle clean build
 
 The framework will print on your console whether a test passed or failed. A more detailed report
 is available at `/tmp/report/index.html`. 
-Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
