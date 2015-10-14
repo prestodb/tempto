@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.query;
 
+import com.google.common.base.Throwables;
 import com.teradata.tempto.context.TestContext;
 import org.slf4j.Logger;
 
@@ -28,6 +29,7 @@ import java.sql.Statement;
 import static com.teradata.tempto.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
 import static com.teradata.tempto.query.QueryType.SELECT;
+import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class JdbcQueryExecutor
@@ -35,8 +37,11 @@ public class JdbcQueryExecutor
 {
     private static final Logger LOGGER = getLogger(JdbcQueryExecutor.class);
 
-    private final Connection connection;
     private final String jdbcUrl;
+    private final JdbcConnectivityParamsState jdbcParamsState;
+    private final JdbcConnectionsPool jdbcConnectionsPool;
+
+    private Connection connection = null;
 
     @Inject
     public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState,
@@ -44,15 +49,35 @@ public class JdbcQueryExecutor
             TestContext testContext)
             throws SQLException
     {
-        this.connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
-        testContext.registerCloseCallback(context -> this.close());
+        this.jdbcParamsState = requireNonNull(jdbcParamsState, "jdbcParamsState is null");
+        this.jdbcConnectionsPool = requireNonNull(jdbcConnectionsPool, "jdbcConnectionsPool is null");
         this.jdbcUrl = jdbcParamsState.url;
+        testContext.registerCloseCallback(context -> this.close());
+        openConnection();
     }
 
-    public JdbcQueryExecutor(Connection connection, String jdbcUrl)
+    public void openConnection()
     {
-        this.connection = connection;
-        this.jdbcUrl = jdbcUrl;
+        closeConnection();
+        try {
+            connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
+        }
+        catch (SQLException e){
+            throw Throwables.propagate(e);
+        }
+    }
+
+    public void closeConnection()
+    {
+        if (connection != null) {
+            try {
+                connection.close();
+            }
+            catch (SQLException e) {
+                LOGGER.debug("Exception happened during closing connection.", e);
+            }
+            connection = null;
+        }
     }
 
     @Override
@@ -72,7 +97,7 @@ public class JdbcQueryExecutor
     @Override
     public Connection getConnection()
     {
-        return connection;
+        return requireNonNull(connection, "connection is null");
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
@@ -96,7 +121,7 @@ public class JdbcQueryExecutor
     private QueryResult executeQueryNoParams(String sql, boolean isSelect)
             throws SQLException
     {
-        try (Statement statement = connection.createStatement()) {
+        try (Statement statement = getConnection().createStatement()) {
             if (isSelect) {
                 ResultSet rs = statement.executeQuery(sql);
                 return QueryResult.forResultSet(rs);
@@ -111,7 +136,7 @@ public class JdbcQueryExecutor
     private QueryResult executeQueryWithParams(String sql, boolean isSelect, QueryParam[] params)
             throws SQLException
     {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             setQueryParams(statement, params);
 
             if (isSelect) {
@@ -141,11 +166,6 @@ public class JdbcQueryExecutor
     @Override
     public void close()
     {
-        try {
-            connection.close();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        closeConnection();
     }
 }
