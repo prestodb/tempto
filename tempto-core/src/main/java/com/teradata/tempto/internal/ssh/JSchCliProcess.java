@@ -15,6 +15,7 @@ package com.teradata.tempto.internal.ssh;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.teradata.tempto.internal.process.CliProcessBase;
 import com.teradata.tempto.process.CommandExecutionException;
 import com.teradata.tempto.process.TimeoutRuntimeException;
@@ -31,12 +32,14 @@ class JSchCliProcess
 {
     private static final Logger LOGGER = getLogger(JSchCliProcess.class);
 
+    private final Session session;
     private final ChannelExec channel;
 
-    JSchCliProcess(ChannelExec channel)
+    JSchCliProcess(Session session, ChannelExec channel)
             throws IOException
     {
         super(channel.getInputStream(), channel.getErrStream() , channel.getOutputStream());
+        this.session = session;
         this.channel = channel;
     }
 
@@ -85,10 +88,14 @@ class JSchCliProcess
     @Override
     public void close()
     {
-        // close channel first
-        channel.disconnect();
-
-        // close all related streams than
-        super.close();
+        try {
+            channel.disconnect();
+        } finally {
+            try {
+                session.disconnect();
+            } finally {
+                super.close();
+            }
+        }
     }
 }

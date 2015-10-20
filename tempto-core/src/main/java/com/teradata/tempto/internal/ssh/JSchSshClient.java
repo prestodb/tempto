@@ -14,6 +14,7 @@
 package com.teradata.tempto.internal.ssh;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.io.ByteStreams;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
@@ -28,6 +29,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.nio.file.Files.newInputStream;
@@ -42,11 +44,11 @@ public class JSchSshClient
 {
     private static final Logger LOGGER = getLogger(JSchSshClient.class);
 
-    private final Session session;
+    private final Supplier<Session> sessionSupplier;
 
-    public JSchSshClient(Session session)
+    public JSchSshClient(Supplier<Session> sessionSupplier)
     {
-        this.session = requireNonNull(session, "session is null");
+        this.sessionSupplier = requireNonNull(sessionSupplier, "sessionSupplier is null");
     }
 
     @Override
@@ -59,10 +61,11 @@ public class JSchSshClient
     public CliProcess execute(String command)
     {
         try {
-            LOGGER.info("Executing on {}@{}: {}", getUser(), getHost(), command);
-            ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
+            Session session = createSession();
+            LOGGER.info("Executing on {}@{}: {}", session.getUserName(), session.getHost(), command);
+            ChannelExec channel = (ChannelExec) session.openChannel("exec");
             channel.setCommand(command);
-            JSchCliProcess process = new JSchCliProcess(channel);
+            JSchCliProcess process = new JSchCliProcess(session, channel);
             process.connect();
             return process;
         }
@@ -71,21 +74,23 @@ public class JSchSshClient
         }
     }
 
-    private Session getActiveSession()
+    private Session createSession()
             throws JSchException
     {
-        if (!session.isConnected()) {
-            session.connect();
-        }
+        Session session = sessionSupplier.get();
+        session.setDaemonThread(true);
+        session.connect();
         return session;
     }
 
     @Override
     public void upload(Path file, String remotePath)
     {
-        LOGGER.info("Uploading {} onto {}@{}:{}", file, getUser(), getHost(), remotePath);
+        Session session = null;
         try {
-            ChannelExec channel = (ChannelExec) getActiveSession().openChannel("exec");
+            session = createSession();
+            LOGGER.info("Uploading {} onto {}@{}:{}", file, session.getUserName(), session.getHost(), remotePath);
+            ChannelExec channel = (ChannelExec) session.openChannel("exec");
             String command = "scp -t " + remotePath;
             channel.setCommand(command);
 
@@ -95,7 +100,10 @@ public class JSchSshClient
             sendSCPFile(file, channel, in, out);
         }
         catch (JSchException | IOException exception) {
-            throw new RuntimeException(exception);
+            Throwables.propagate(exception);
+        }
+        finally {
+            if (session != null) session.disconnect();
         }
     }
 
@@ -145,26 +153,8 @@ public class JSchSshClient
     public void close()
             throws IOException
     {
-        session.disconnect();
     }
 
-    @Override
-    public String getHost()
-    {
-        return session.getHost();
-    }
-
-    @Override
-    public String getUser()
-    {
-        return session.getUserName();
-    }
-
-    @Override
-    public int getPort()
-    {
-        return session.getPort();
-    }
 
     private Iterable<String> quote(List<String> command)
     {

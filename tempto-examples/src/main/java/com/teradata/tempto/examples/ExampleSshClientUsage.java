@@ -45,6 +45,14 @@ public class ExampleSshClientUsage
     @Inject
     private SshClientFactory sshClientFactory;
 
+    @Inject
+    @Named("ssh.roles.host_by_password.host")
+    private String hostByPassword;
+
+    @Inject
+    @Named("ssh.roles.host_by_identity.host")
+    private String hostByIdentity;
+
     @Test(groups = "ssh")
     public void sshClientUsage()
             throws Exception
@@ -59,9 +67,9 @@ public class ExampleSshClientUsage
     public void dynamicSshClient()
             throws Exception
     {
-        SshClient sshClient = sshClientFactory.create(sshClientByPassword.getHost());
+        SshClient sshClient = sshClientFactory.create(hostByPassword);
         try (CliProcess hostnameProcess = sshClient.execute("hostname")) {
-            assertThat(hostnameProcess.nextOutputLine()).contains(sshClientByIdentity.getHost());
+            assertThat(hostnameProcess.nextOutputLine()).contains(hostByIdentity);
             hostnameProcess.waitForWithTimeoutAndKill();
         }
     }

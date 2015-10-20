@@ -36,18 +36,21 @@ public class JschSshClientFactory
     @Override
     public SshClient create(String host, int port, String user, Optional<String> password)
     {
-        try {
-            String passwordToString = password.isPresent() ? '/' + password.get() : "";
-            LOGGER.debug("Allocating new SSH session to: {}{}@{}:{}", user, passwordToString, host, port);
-            Session session = jSch.getSession(user, host, port);
-            if (password.isPresent()) {
-                session.setPassword(password.get());
+        return new JSchSshClient(() -> {
+            try {
+                String passwordToString = password.isPresent() ? '/' + password.get() : "";
+                LOGGER.debug("Allocating new SSH session to: {}{}@{}:{}", user, passwordToString, host, port);
+                Session session = jSch.getSession(user, host, port);
+                if (password.isPresent()) {
+                    session.setPassword(password.get());
+                }
+                session.setConfig(getConfig());
+                return session;
             }
-            session.setConfig(getConfig());
-            return new JSchSshClient(session);
-        } catch (JSchException e) {
-            throw new RuntimeException(e);
-        }
+            catch (JSchException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override

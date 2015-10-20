@@ -56,10 +56,4 @@ public interface SshClient extends Closeable
      * @param remotePath Destination path for file on remote machine.
      */
     void upload(Path file, String remotePath);
-
-    String getHost();
-
-    String getUser();
-
-    int getPort();
 }
