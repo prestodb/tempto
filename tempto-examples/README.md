@@ -7,7 +7,9 @@ smoketest to ensure that you've setup everything properly.
 
 ### Hadoop cluster
 
- You need a cluster with hadoop accessible by name hadoop-master and a presto cluster accessible by name presto-master. In case you want to use different host names (or service ports) you need to change ```src/main/resources/tempto-configuration.yaml``` accordingly.For more details please refer to the [Configuration section](../README.md).
+ You need a cluster with hadoop accessible by name `hadoop-master` and a presto cluster accessible by name `presto-master`.
+ You can alter host names and ports by editing local `src/main/resources/tempto-configuration-local.yaml` configuration file.
+ For more details please refer to the [Configuration section](../README.md).
 
  Ensure that WebHDFS, Hive and Presto are running.
 
