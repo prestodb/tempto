@@ -19,11 +19,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.inject.Binder;
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.teradata.tempto.AfterTestWithContext;
 import com.teradata.tempto.BeforeTestWithContext;
 import com.teradata.tempto.Requirement;
@@ -52,7 +49,6 @@ import org.testng.ITestResult;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,6 +61,7 @@ import static com.teradata.tempto.context.TestContextDsl.runWithTestContext;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.assertTestContextNotSet;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.popAllTestContexts;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.pushAllTestContexts;
+import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.tempto.internal.ReflectionHelper.instantiate;
@@ -238,12 +235,11 @@ public class TestInitializationListener
             return;
         }
 
-        TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
-
         try {
-            runAfterWithContextMethods(testResult, testContextStack.peek());
+            runAfterWithContextMethods(testResult, (GuiceTestContext) testContext());
         }
         finally {
+            TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
             doCleanup(testContextStack, testMethodLevelFulfillers);
             cleanLoggingMdc();
         }
