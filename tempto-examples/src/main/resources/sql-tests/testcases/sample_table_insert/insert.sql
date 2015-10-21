@@ -9,7 +9,7 @@ SELECT * from ${mutableTables.hive.sample_table_created}
 3|C|
 --!
 CREATE TABLE ${mutableTables.hive.sample_table_prepared} ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' AS SELECT * from sample_hive_table;
-SELECT * from ${mutableTables.sample_table_prepared}
+SELECT * from ${mutableTables.hive.sample_table_prepared}
 --!
 1|A|
 2|B|
