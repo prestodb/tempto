@@ -23,11 +23,11 @@ import org.testng.annotations.Test;
 
 import javax.inject.Named;
 
-import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.concurrent.TimeoutException;
 
+import static java.nio.file.Files.readAllLines;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -57,9 +57,11 @@ public class ExampleSshClientUsage
     public void sshClientUsage()
             throws Exception
     {
-        sshClientByPassword.upload(Paths.get("build.gradle"), "/tmp");
-        try (CliProcess lsProcess = sshClientByIdentity.execute("ls /tmp/build.gradle")) {
-            lsProcess.waitForWithTimeoutAndKill();
+        Path etcHosts = Paths.get("/etc/hosts");
+        sshClientByPassword.upload(etcHosts, "/tmp");
+        try (CliProcess catProcess = sshClientByIdentity.execute("cat /tmp/hosts")) {
+            assertThat(catProcess.readRemainingOutputLines()).isNotEqualTo(readAllLines(etcHosts));
+            catProcess.waitForWithTimeoutAndKill();
         }
     }
 
