@@ -60,7 +60,7 @@ public class ExampleSshClientUsage
         Path etcHosts = Paths.get("/etc/hosts");
         sshClientByPassword.upload(etcHosts, "/tmp");
         try (CliProcess catProcess = sshClientByIdentity.execute("cat /tmp/hosts")) {
-            assertThat(catProcess.readRemainingOutputLines()).isNotEqualTo(readAllLines(etcHosts));
+            assertThat(catProcess.readRemainingOutputLines()).isEqualTo(readAllLines(etcHosts));
             catProcess.waitForWithTimeoutAndKill();
         }
     }
