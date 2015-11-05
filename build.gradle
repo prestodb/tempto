@@ -28,7 +28,7 @@ plugins.withType(JavaPlugin) {
 ext.versions = [
         assertj      : '2.0.0',
         guava        : '18.0',
-        guice        : '4.0-beta5',
+        guice        : '4.0',
         log4j        : '1.2.17',
         testng       : '6.9.6',
         spock        : '1.0-groovy-2.4',
@@ -42,7 +42,7 @@ ext.versions = [
         tpchgen      : '0.4',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
-        hive         : '0.13.1-2-SNAPSHOT',
+        hive         : '0.13.1-2',
         presto       : '0.97',
         reflections  : '0.9.9',
         bytebuddy    : '0.7-rc2',
