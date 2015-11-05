@@ -137,6 +137,12 @@ public class SimpleQueryTest
         assertThat(query("select * from " + tableInstance.getNameInDatabase())).hasAnyRows();
     }
 
+    @Test(groups = "failing")
+    public void failingTest()
+    {
+        assertThat(1).isEqualTo(2);
+    }
+
     @Test(groups = "skipped", enabled = false)
     public void disabledTest()
     {
