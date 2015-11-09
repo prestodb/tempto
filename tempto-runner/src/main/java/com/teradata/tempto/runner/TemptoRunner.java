@@ -79,6 +79,9 @@ public class TemptoRunner
         testNG.setXmlSuites(singletonList(testSuite));
         setupTestsFiltering(testNG);
         testNG.run();
+        if (testNG.hasFailure()) {
+            System.exit(1);
+        }
     }
 
     private void setupTestsConfiguration()
