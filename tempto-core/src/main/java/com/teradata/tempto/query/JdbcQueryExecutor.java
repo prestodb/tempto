@@ -151,7 +151,8 @@ public class JdbcQueryExecutor
 
     boolean isSelect(String sql)
     {
-        return sql.trim().toLowerCase().startsWith("select");
+        sql = sql.trim().toLowerCase();
+        return sql.startsWith("select") || sql.startsWith("show");
     }
 
     private static void setQueryParams(PreparedStatement statement, QueryParam[] params)
