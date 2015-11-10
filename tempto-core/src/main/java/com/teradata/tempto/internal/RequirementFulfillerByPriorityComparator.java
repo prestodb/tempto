@@ -15,10 +15,10 @@
 package com.teradata.tempto.internal;
 
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
-import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoSuiteLevelFulfiller;
-import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoTestLevelFulfiller;
 
 import java.util.Comparator;
+
+import static com.teradata.tempto.internal.RequirementFulfillerPriorityHelper.getPriority;
 
 public class RequirementFulfillerByPriorityComparator
         implements Comparator<Class<? extends RequirementFulfiller>>
@@ -28,20 +28,5 @@ public class RequirementFulfillerByPriorityComparator
     public int compare(Class<? extends RequirementFulfiller> o1, Class<? extends RequirementFulfiller> o2)
     {
         return getPriority(o1) - getPriority(o2);
-    }
-
-    private int getPriority(Class<? extends RequirementFulfiller> c)
-    {
-        if (c.getAnnotation(AutoSuiteLevelFulfiller.class) != null) {
-            return c.getAnnotation(AutoSuiteLevelFulfiller.class).priority();
-        }
-        else if (c.getAnnotation(AutoTestLevelFulfiller.class) != null) {
-            return c.getAnnotation(AutoTestLevelFulfiller.class).priority();
-        }
-        else {
-            throw new RuntimeException(
-                    String.format("Class '%s' is not annotated with '%' or '%s'.",
-                            c.getName(), AutoSuiteLevelFulfiller.class.getName(), AutoTestLevelFulfiller.class.getName()));
-        }
     }
 }
