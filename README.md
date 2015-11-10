@@ -308,6 +308,10 @@ Currently we support:
  * `HiveTableDefinition` - allowing defining tables in Hive. Requires a database configuration entry with `hive` table manager defined.
  * `JDBCTableDefinition` - allowing defining table in JDBC databases. Requires a database configuration entry with `jdbc` table manager defined.
 
+`TableDefinition` must be registered in tables repository to be accessible by the tests. This can be done either by:
+  * annotating static final field holding `TableDefinition` reference with `@RepositoryTableDefinition` annotation
+  * explicitly using static call to `TableDefinitionsRepository.registerTableDefinition(TableDefinition)`
+
 Remark: If multiple table managers of the same type (e.g. hive) are defined in the configuration, you have to provide
         database name explicitly in `ImmutableHiveTableRequirement`.
 
@@ -327,6 +331,7 @@ be found in `com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinition
 For example this is how the nation table is built:
 
 ```Java
+    @RepositoryTableDefinition
     public static final HiveTableDefinition NATION =
             HiveTableDefinition.builder()
                     .setName("nation")
