@@ -37,7 +37,7 @@ public interface RequirementFulfiller
     {
         /**
          * With priority you can manage the order of fulfiller execution.
-         * With higher priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
+         * With lower priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
          * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup()} later.
          *
          * @return priority level
@@ -54,7 +54,7 @@ public interface RequirementFulfiller
     {
         /**
          * With priority you can manage the order of fulfiller execution.
-         * With higher priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
+         * With lower priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
          * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup()} later.
          *
          * @return priority level

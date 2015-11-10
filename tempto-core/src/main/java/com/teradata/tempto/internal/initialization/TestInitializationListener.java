@@ -65,6 +65,7 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testConte
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContextIfSet;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.tempto.internal.ReflectionHelper.instantiate;
+import static com.teradata.tempto.internal.RequirementFulfillerPriorityHelper.getPriority;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
 import static com.teradata.tempto.internal.logging.LoggingMdcHelper.cleanLoggingMdc;
 import static com.teradata.tempto.internal.logging.LoggingMdcHelper.setupLoggingMdcForTest;
@@ -112,13 +113,24 @@ public class TestInitializationListener
         return collectFulfillers(BUILTIN_SUITE_LEVEL_FULFILLERS, AutoSuiteLevelFulfiller.class);
     }
 
-    private static List<Class<? extends RequirementFulfiller>> collectFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
+    static List<Class<? extends RequirementFulfiller>> collectFulfillers(List<Class<? extends RequirementFulfiller>> builtinFulfillers, Class<? extends Annotation> filterAnnotation)
     {
-        ImmutableList.Builder<Class<? extends RequirementFulfiller>> resultFulfillers = ImmutableList.builder();
-        resultFulfillers.addAll(builtinFulfillers);
-        resultFulfillers.addAll(scanForFulfillersAndSort(filterAnnotation));
+        List<Class<? extends RequirementFulfiller>> allFulfillers = scanForFulfillersAndSort(filterAnnotation);
+        allFulfillers.addAll(getBuiltInFulfillerPosition(allFulfillers), builtinFulfillers);
 
-        return resultFulfillers.build();
+        return ImmutableList.copyOf(allFulfillers);
+    }
+
+    private static int getBuiltInFulfillerPosition(List<Class<? extends RequirementFulfiller>> allFulfillers)
+    {
+        for (int i = 0; i < allFulfillers.size(); i++) {
+            // Insert the built-in fulfillers before priority 0 user fulfillers
+            if (getPriority(allFulfillers.get(i)) >= 0) {
+                return i;
+            }
+        }
+
+        return allFulfillers.size();
     }
 
     // package scope due testing
@@ -126,7 +138,7 @@ public class TestInitializationListener
     {
         return getAnnotatedSubTypesOf(RequirementFulfiller.class, filterAnnotation)
                 .stream()
-                .sorted(new RequirementFulfillerByPriorityComparator().reversed())
+                .sorted(new RequirementFulfillerByPriorityComparator())
                 .collect(toList());
     }
 

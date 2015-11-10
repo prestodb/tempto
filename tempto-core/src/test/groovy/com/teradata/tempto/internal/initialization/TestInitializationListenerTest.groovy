@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.internal.initialization
 
+import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import com.teradata.tempto.*
 import com.teradata.tempto.configuration.Configuration
@@ -34,7 +35,7 @@ import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.assertTestContextNotSet
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.assertTestContextSet
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration
-import static com.teradata.tempto.internal.initialization.TestInitializationListener.scanForFulfillersAndSort
+import static com.teradata.tempto.internal.initialization.TestInitializationListener.collectFulfillers
 
 class TestInitializationListenerTest
         extends Specification
@@ -42,18 +43,22 @@ class TestInitializationListenerTest
   static final A = 'A'
   static final B = 'B'
   static final C = 'C'
+  static final BUILTIN = 'BuiltIn'
 
   static final SUITE_A_FULFILL = 'AFULFILL'
   static final TEST_B_FULFILL = 'BFULFILL'
   static final THROWING_TEST_C_FULFILL = 'CFULFILL'
+  static final BUILTIN_FULFLILL = 'BUILTIN_FULFILL'
 
   static final SUITE_A_CLEANUP = 'ACLEANUP'
   static final TEST_B_CLEANUP = 'BCLEANUP'
   static final THROWING_TEST_C_CLEANUP = 'CCLEANUP'
+  static final BUILTIN_CLEANUP = 'BUILTIN_CLEANUP'
 
   static final SUITE_A_CALLBACK = 'ACALLBACK'
   static final TEST_B_CALLBACK = 'BCALLBACK'
   static final THROWING_TEST_C_CALLBACK = 'CCALLBACK'
+  static final BUILTIN_CALLBACK = 'BUILTIN_CALLBACK'
 
   static final A_REQUIREMENT = new DummyRequirement(A)
   static final B_REQUIREMENT = new DummyRequirement(B)
@@ -185,13 +190,25 @@ class TestInitializationListenerTest
 
   def 'scan for user fulfillers should sort them by their priority'() {
     when:
-    def fulfillers = scanForFulfillersAndSort(RequirementFulfiller.AutoTestLevelFulfiller.class);
+    def fulfillers = collectFulfillers(ImmutableList.of(), RequirementFulfiller.AutoTestLevelFulfiller.class);
 
     then:
     fulfillers.size() == 3
-    fulfillers[0] == CFulfiller.class // with priority 5
+    fulfillers[0] == BFulfiller.class // with priority -1
     fulfillers[1] == AFulfiller.class // with default priority 0
-    fulfillers[2] == BFulfiller.class // with priority -5
+    fulfillers[2] == CFulfiller.class // with priority 5
+  }
+
+  def 'user fulfillers can be before system level fulfillers'() {
+    when:
+    def fulfillers = collectFulfillers(ImmutableList.of(BuiltInFulfiller.class), RequirementFulfiller.AutoTestLevelFulfiller.class)
+
+    then:
+    fulfillers.size() == 4
+    fulfillers[0] == BFulfiller.class // with priority -1
+    fulfillers[1] == BuiltInFulfiller.class // built in fulfiller
+    fulfillers[2] == AFulfiller.class // with default priority 0
+    fulfillers[3] == CFulfiller.class // with priority 5
   }
 
   @Requires(ARequirement)
@@ -250,7 +267,7 @@ class TestInitializationListenerTest
     }
   }
 
-  @RequirementFulfiller.AutoTestLevelFulfiller(priority = -5)
+  @RequirementFulfiller.AutoTestLevelFulfiller(priority = -1)
   static class BFulfiller
           extends DummyFulfiller
   {
@@ -285,6 +302,16 @@ class TestInitializationListenerTest
     {
       super.fulfill(requirements)
       throw new RuntimeException()
+    }
+  }
+
+  static class BuiltInFulfiller
+          extends DummyFulfiller
+  {
+    @Inject
+    BuiltInFulfiller(TestContext testContext)
+    {
+      super(BUILTIN, BUILTIN_FULFLILL, BUILTIN_CLEANUP, BUILTIN_CALLBACK, testContext)
     }
   }
 
