@@ -77,6 +77,7 @@ public class TemptoRunner
         setupTestsConfiguration();
         TestNG testNG = new TestNG();
         testNG.setXmlSuites(singletonList(testSuite));
+        testNG.setOutputDirectory(options.getReportDir());
         setupTestsFiltering(testNG);
         testNG.run();
         if (testNG.hasFailure()) {
