@@ -21,7 +21,9 @@ import com.teradata.tempto.context.State
 import com.teradata.tempto.context.TestContext
 import com.teradata.tempto.context.TestContextCloseCallback
 import com.teradata.tempto.fulfillment.RequirementFulfiller
+import com.teradata.tempto.fulfillment.TestStatus
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver
+import org.testng.IResultMap
 import org.testng.ITestClass
 import org.testng.ITestContext
 import org.testng.ITestNGMethod
@@ -143,6 +145,10 @@ class TestInitializationListenerTest
     ITestContext suiteContext = Mock(ITestContext)
 
     suiteContext.allTestMethods >> [getITestNGMethod(method, testClass, getITestClass())]
+
+    IResultMap iResultMap = Mock(IResultMap)
+    iResultMap.size() >> 0
+    suiteContext.getFailedTests() >> iResultMap
 
     return suiteContext
   }
@@ -357,7 +363,7 @@ class TestInitializationListenerTest
       return []
     }
 
-    void cleanup()
+    void cleanup(TestStatus testStatus)
     {
       EVENTS.add(new Event(cleanupEventName, this))
     }

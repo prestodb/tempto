@@ -12,12 +12,9 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.uuid;
+package com.teradata.tempto.fulfillment;
 
-/**
- * Generates random String UUIDs.
- */
-public interface UUIDGenerator
+public enum TestStatus
 {
-    public String randomUUID();
+    SUCCESS, FAILURE;
 }

@@ -14,35 +14,33 @@
 
 package com.teradata.tempto.internal.fulfillment.table;
 
-
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.context.State;
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 
 import java.util.Set;
 
-/**
- * Calls dropAllTables on all table managers once per Tempto execution, before other fulfillers
- */
-public class TableManagerCleaner
-    implements RequirementFulfiller
+import static com.google.common.collect.Sets.newHashSet;
+
+public class MutableTablesCleaner
+        implements RequirementFulfiller
 {
     @Inject
-    TableManagerDispatcher tableManagerDispatcher;
+    private TableManagerDispatcher tableManagerDispatcher;
 
     @Override
     public Set<State> fulfill(Set<Requirement> requirements)
     {
-        tableManagerDispatcher.getAllTableManagers().stream().forEach(TableManager::dropAllTables);
-        return Sets.newHashSet();
-    }
+        tableManagerDispatcher.getAllTableManagers().stream().forEach(TableManager::dropAllMutableTables);
+        return newHashSet();
+    };
 
     @Override
-    public void cleanup()
+    public void cleanup(TestStatus status)
     {
     }
 }

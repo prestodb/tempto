@@ -26,7 +26,6 @@ import com.teradata.tempto.fulfillment.table.TablesState;
 import org.slf4j.Logger;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.beust.jcommander.internal.Maps.newHashMap;
@@ -39,7 +38,7 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
 
     private static final Logger LOGGER = getLogger(TableRequirementFulfiller.class);
 
-    private final TableManagerDispatcher tableManagerDispatcher;
+    protected final TableManagerDispatcher tableManagerDispatcher;
     private final Class<T> requirementClass;
 
     private final Map<String, DatabaseTableInstanceMap> databaseTableInstances = newHashMap();
@@ -94,10 +93,4 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
     }
 
     protected abstract TableInstance createTable(TableManager tableManager, T tableRequirement);
-
-    @Override
-    public final void cleanup()
-    {
-        // TableManagers are responsible for cleanUp
-    }
 }

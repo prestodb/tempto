@@ -14,7 +14,6 @@
 
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
@@ -22,9 +21,8 @@ import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
+import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
-import com.teradata.tempto.internal.uuid.UUIDGenerator;
-import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
 
@@ -33,12 +31,10 @@ import javax.inject.Named;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
@@ -51,7 +47,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @TableManager.Descriptor(tableDefinitionClass = JdbcTableDefinition.class, type = "JDBC")
 public class JdbcTableManager
-        implements TableManager<JdbcTableDefinition>
+        extends AbstractTableManager<JdbcTableDefinition>
 {
     private static final int BATCH_SIZE = 10000;
     private static final Logger LOGGER = getLogger(JdbcTableManager.class);
@@ -66,6 +62,7 @@ public class JdbcTableManager
             TableNameGenerator tableNameGenerator,
             @Named("databaseName") String databaseName)
     {
+        super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.tableNameGenerator = checkNotNull(tableNameGenerator, "tableNameGenerator is null");
@@ -84,16 +81,6 @@ public class JdbcTableManager
         return new JdbcTableInstance(tableNameInDatabase, tableNameInDatabase, tableDefinition);
     }
 
-    private void dropTableIgnoreError(String tableNameInDatabase)
-    {
-        try {
-            queryExecutor.executeQuery("DROP TABLE " + tableNameInDatabase);
-        }
-        catch (QueryExecutionException e) {
-            // ignore
-        }
-    }
-
     private PreparedStatement buildPreparedStatementForInsert(String tableName, int columnsCount)
             throws SQLException
     {
@@ -106,7 +93,7 @@ public class JdbcTableManager
     @Override
     public TableInstance createMutable(JdbcTableDefinition tableDefinition, MutableTableRequirement.State state, String name)
     {
-        String tableNameInDatabase = tableNameGenerator.generateUniqueTableNameInDatabase(name);
+        String tableNameInDatabase = tableNameGenerator.generateMutableTableNameInDatabase(name);
         LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
         JdbcTableInstance tableInstance = new JdbcTableInstance(name, tableNameInDatabase, tableDefinition);
         if (state == PREPARED) {
@@ -125,12 +112,6 @@ public class JdbcTableManager
         JdbcTableDataSource dataSource = tableDefinition.getDataSource();
         insertData(tableNameInDatabase, dataSource);
         return tableInstance;
-    }
-
-    @Override
-    public void dropAllTables()
-    {
-        // not implementing since we are thinking of changing the flow here
     }
 
     @Override

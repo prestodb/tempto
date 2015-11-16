@@ -19,11 +19,7 @@ import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
 import com.teradata.tempto.query.QueryExecutor
-import com.teradata.tempto.query.QueryResult
-import com.teradata.tempto.query.QueryType
 import spock.lang.Specification
-
-import java.sql.JDBCType
 
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED
@@ -42,19 +38,8 @@ class HiveTableManagerTest
 
   void setup()
   {
-    tableNameGenerator.generateUniqueTableNameInDatabase(_) >> 'nation_randomSuffix'
+    tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
     tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, hdfsClient, "password", "database");
-  }
-
-  def 'should drop all tables'()
-  {
-    when:
-    tableManager.dropAllTables();
-
-    then:
-    1 * queryExecutor.executeQuery("SHOW TABLES", QueryType.SELECT) >> QueryResult.forSingleValue(JDBCType.VARCHAR, "some_table")
-    1 * queryExecutor.executeQuery("DROP TABLE IF EXISTS some_table")
-    1 * hdfsClient.delete(MUTABLE_TABLES_PATH, _)
   }
 
   def 'should create hive immutable table'()
@@ -76,7 +61,6 @@ class HiveTableManagerTest
     1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
   }
-
 
   def 'should create hive mutable table loaded not partitioned'()
   {

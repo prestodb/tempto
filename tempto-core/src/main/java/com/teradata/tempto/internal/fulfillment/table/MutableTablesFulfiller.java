@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.fulfillment.table;
 
 import com.google.inject.Inject;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTablesState;
 import com.teradata.tempto.fulfillment.table.TableInstance;
@@ -24,25 +25,46 @@ import com.teradata.tempto.fulfillment.table.TablesState;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
+import static com.teradata.tempto.fulfillment.TestStatus.FAILURE;
+import static com.teradata.tempto.fulfillment.table.MutableTablesState.mutableTablesState;
+
 public class MutableTablesFulfiller
         extends TableRequirementFulfiller<MutableTableRequirement>
 {
 
+    private MutableTablesState mutableTablesState;
+
     @Inject
-    public MutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher)
-    {
+    public MutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher) {
         super(tableManagerDispatcher, MutableTableRequirement.class);
     }
 
     @Override
     protected TablesState createState(Map<String, DatabaseTableInstanceMap> databaseTableInstances)
     {
-        return new MutableTablesState(databaseTableInstances);
+        mutableTablesState = new MutableTablesState(databaseTableInstances);
+        return mutableTablesState;
     }
 
     @Override
     protected TableInstance createTable(TableManager tableManager, MutableTableRequirement tableRequirement)
     {
         return tableManager.createMutable(tableRequirement.getTableDefinition(), tableRequirement.getState(), tableRequirement.getName());
+    }
+
+    @Override
+    public final void cleanup(TestStatus testStatus)
+    {
+        checkState(mutableTablesState != null, "No mutable tables, call fullfil method first");
+        if (testStatus == FAILURE) {
+            return;
+        }
+        for (TableManager tableManager : tableManagerDispatcher.getAllTableManagers()) {
+            DatabaseTableInstanceMap mutableTableInstanceMap = mutableTablesState.getDatabaseTableInstanceMap(tableManager.getDatabaseName());
+            for (TableInstance mutableTable : mutableTableInstanceMap.getTableInstances().values()) {
+                tableManager.dropTable(mutableTable.getNameInDatabase());
+            }
+        }
     }
 }

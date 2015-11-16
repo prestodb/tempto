@@ -14,25 +14,25 @@
 
 package com.teradata.tempto.internal.fulfillment.table;
 
-import com.teradata.tempto.internal.uuid.UUIDGenerator;
-
-import javax.inject.Inject;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.UUID;
 
 public class TableNameGenerator
 {
-    private final UUIDGenerator uuidGenerator;
+    private static final String MUTABLE_TABLE_NAME_PREFIX = "tempto_mut_";
 
-    @Inject
-    public TableNameGenerator(UUIDGenerator uuidGenerator)
+    public String generateMutableTableNameInDatabase(String baseTableName)
     {
-        this.uuidGenerator = checkNotNull(uuidGenerator, "uuidGenerator is null");
+        String tableSuffix = randomUUID().replace("-", "");
+        return MUTABLE_TABLE_NAME_PREFIX + baseTableName + "_" + tableSuffix;
     }
 
-    public String generateUniqueTableNameInDatabase(String baseTableName)
+    public boolean isMutableTableName(String tableNameInDatabase)
     {
-        String tableSuffix = uuidGenerator.randomUUID().replace("-", "");
-        return baseTableName + "_" + tableSuffix;
+        return tableNameInDatabase.startsWith(MUTABLE_TABLE_NAME_PREFIX);
+    }
+
+    private String randomUUID()
+    {
+        return UUID.randomUUID().toString();
     }
 }

@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.fulfillment.table
 
+import com.teradata.tempto.fulfillment.TestStatus
 import com.teradata.tempto.fulfillment.table.*
 import spock.lang.Specification
 
@@ -36,6 +37,7 @@ class TableRequirementFulfillerTest
   {
     tableManager.databaseName >> DATABASE_NAME
     otherTableManager.databaseName >> OTHER_DATABASE_NAME
+    tableManagerDispatcher.allTableManagers >> [tableManager, otherTableManager]
     tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.none()) >> tableManager
     tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME)) >> tableManager
     tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(OTHER_DATABASE_NAME)) >> otherTableManager
@@ -66,10 +68,10 @@ class TableRequirementFulfillerTest
     1 * tableManager.createMutable(tableDefinition, LOADED, _) >> mutableTableInstanceLoaded
 
     when:
-    fulfiller.cleanup()
+    fulfiller.cleanup(TestStatus.SUCCESS)
 
     then:
-    0 * _
+    1 * tableManager.dropTable('nation_mutable')
   }
 
   def "test mutable named and created table fulfill/cleanup"()
@@ -101,7 +103,7 @@ class TableRequirementFulfillerTest
     1 * tableManager.createMutable(tableDefinition, CREATED, _) >> mutableTableInstanceNamedCreated
 
     when:
-    fulfiller.cleanup()
+    fulfiller.cleanup(TestStatus.FAILURE)
 
     then:
     0 * _

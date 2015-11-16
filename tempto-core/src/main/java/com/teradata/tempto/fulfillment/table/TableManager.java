@@ -32,10 +32,11 @@ public interface TableManager<T extends TableDefinition>
     @Target({ElementType.TYPE})
     @interface Descriptor
     {
+
         Class<? extends TableDefinition> tableDefinitionClass();
         String type();
-    }
 
+    }
     TableInstance<T> createImmutable(T tableDefinition);
 
     default TableInstance<T> createMutable(T tableDefinition)
@@ -43,13 +44,16 @@ public interface TableManager<T extends TableDefinition>
         return createMutable(tableDefinition, LOADED);
     }
 
-    default TableInstance<T> createMutable(T tableDefinition, State state) {
+    default TableInstance<T> createMutable(T tableDefinition, State state)
+    {
         return createMutable(tableDefinition, state, tableDefinition.getName());
     }
 
     TableInstance<T> createMutable(T tableDefinition, State state, String name);
 
-    void dropAllTables();
+    void dropTable(String nameInDatabase);
+
+    void dropAllMutableTables();
 
     static <T extends TableDefinition> TableInstance<T> createImmutableTable(T tableDefinition)
     {

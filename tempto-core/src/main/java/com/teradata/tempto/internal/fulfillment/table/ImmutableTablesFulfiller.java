@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.fulfillment.table;
 
 import com.google.inject.Inject;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.ImmutableTablesState;
 import com.teradata.tempto.fulfillment.table.TableInstance;
@@ -44,5 +45,10 @@ public class ImmutableTablesFulfiller
     protected TableInstance createTable(TableManager tableManager, ImmutableTableRequirement tableRequirement)
     {
         return tableManager.createImmutable(tableRequirement.getTableDefinition());
+    }
+
+    @Override
+    public void cleanup(TestStatus status)
+    {
     }
 }

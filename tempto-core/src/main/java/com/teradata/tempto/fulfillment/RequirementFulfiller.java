@@ -26,7 +26,7 @@ import java.util.Set;
 public interface RequirementFulfiller
 {
 
-    public static final int DEFAULT_PRIORITY = 0;
+    int DEFAULT_PRIORITY = 0;
 
     /**
      * Apply annotation to fulfillers which should be evaluated at suite level.
@@ -38,7 +38,7 @@ public interface RequirementFulfiller
         /**
          * With priority you can manage the order of fulfiller execution.
          * With lower priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
-         * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup()} later.
+         * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup(TestStatus)} later.
          *
          * @return priority level
          */
@@ -50,12 +50,12 @@ public interface RequirementFulfiller
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
-    public @interface AutoTestLevelFulfiller
+    @interface AutoTestLevelFulfiller
     {
         /**
          * With priority you can manage the order of fulfiller execution.
          * With lower priority fulfiller will {@link com.teradata.tempto.fulfillment.RequirementFulfiller#fulfill} sooner
-         * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup()} later.
+         * and {@link com.teradata.tempto.fulfillment.RequirementFulfiller#cleanup(TestStatus)} later.
          *
          * @return priority level
          */
@@ -64,5 +64,5 @@ public interface RequirementFulfiller
 
     Set<State> fulfill(Set<Requirement> requirements);
 
-    void cleanup();
+    void cleanup(TestStatus status);
 }

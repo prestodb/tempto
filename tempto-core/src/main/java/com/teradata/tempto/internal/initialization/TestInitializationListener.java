@@ -29,6 +29,7 @@ import com.teradata.tempto.context.TestContext;
 import com.teradata.tempto.fulfillment.RequirementFulfiller;
 import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoSuiteLevelFulfiller;
 import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoTestLevelFulfiller;
+import com.teradata.tempto.fulfillment.TestStatus;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.initialization.TestMethodModuleProvider;
@@ -39,7 +40,7 @@ import com.teradata.tempto.internal.context.GuiceTestContext;
 import com.teradata.tempto.internal.context.TestContextStack;
 import com.teradata.tempto.internal.fulfillment.table.ImmutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.MutableTablesFulfiller;
-import com.teradata.tempto.internal.fulfillment.table.TableManagerCleaner;
+import com.teradata.tempto.internal.fulfillment.table.MutableTablesCleaner;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -63,6 +64,8 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.popAllTes
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.pushAllTestContexts;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContextIfSet;
+import static com.teradata.tempto.fulfillment.TestStatus.FAILURE;
+import static com.teradata.tempto.fulfillment.TestStatus.SUCCESS;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.tempto.internal.ReflectionHelper.instantiate;
 import static com.teradata.tempto.internal.RequirementFulfillerPriorityHelper.getPriority;
@@ -79,7 +82,7 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
-            TableManagerCleaner.class,
+            MutableTablesCleaner.class,
             ImmutableTablesFulfiller.class
     );
 
@@ -193,7 +196,8 @@ public class TestInitializationListener
             return;
         }
 
-        doCleanup(suiteTestContextStack.get(), suiteLevelFulfillers);
+        TestStatus testStatus = context.getFailedTests().size() > 0 ? FAILURE : SUCCESS;
+        doCleanup(suiteTestContextStack.get(), suiteLevelFulfillers, testStatus);
     }
 
     @Override
@@ -225,34 +229,36 @@ public class TestInitializationListener
     @Override
     public void onTestSuccess(ITestResult result)
     {
-        onTestFinished(result);
+        onTestFinished(result, SUCCESS);
     }
 
     @Override
     public void onTestFailure(ITestResult result)
     {
         LOGGER.debug("test failure", result.getThrowable());
-        onTestFinished(result);
+        onTestFinished(result, FAILURE);
     }
 
     @Override
     public void onTestSkipped(ITestResult result)
     {
-        onTestFinished(result);
+        onTestFinished(result, SUCCESS);
     }
 
-    private void onTestFinished(ITestResult testResult)
+    private void onTestFinished(ITestResult testResult, TestStatus testStatus)
     {
         if (!testContextIfSet().isPresent()) {
             return;
         }
 
+        boolean runAfterSucceeded = false;
         try {
             runAfterWithContextMethods(testResult, (GuiceTestContext) testContext());
+            runAfterSucceeded = true;
         }
         finally {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
-            doCleanup(testContextStack, testMethodLevelFulfillers);
+            doCleanup(testContextStack, testMethodLevelFulfillers, runAfterSucceeded ? testStatus : FAILURE);
             cleanLoggingMdc();
         }
     }
@@ -264,7 +270,7 @@ public class TestInitializationListener
         }
         catch (RuntimeException e) {
             TestContextStack<GuiceTestContext> testContextStack = (TestContextStack) popAllTestContexts();
-            doCleanup(testContextStack, testMethodLevelFulfillers);
+            doCleanup(testContextStack, testMethodLevelFulfillers, FAILURE);
             throw e;
         }
     }
@@ -308,12 +314,12 @@ public class TestInitializationListener
         }
         catch (RuntimeException e) {
             LOGGER.debug("error during fulfillment", e);
-            doCleanup(testContextStack, successfulFulfillerClasses);
+            doCleanup(testContextStack, successfulFulfillerClasses, FAILURE);
             throw e;
         }
     }
 
-    private void doCleanup(TestContextStack<GuiceTestContext> testContextStack, List<Class<? extends RequirementFulfiller>> fulfillerClasses)
+    private void doCleanup(TestContextStack<GuiceTestContext> testContextStack, List<Class<? extends RequirementFulfiller>> fulfillerClasses, TestStatus testStatus)
     {
         // one base test context plus one test context for each fulfiller
         checkState(testContextStack.size() == fulfillerClasses.size() + 1);
@@ -322,7 +328,7 @@ public class TestInitializationListener
             LOGGER.debug("Cleaning for fulfiller {}", fulfillerClass);
             TestContext testContext = testContextStack.pop();
             testContext.close();
-            runWithTestContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup());
+            runWithTestContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup(testStatus));
         }
 
         // remove close init test context too
