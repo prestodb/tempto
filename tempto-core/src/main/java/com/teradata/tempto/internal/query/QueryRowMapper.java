@@ -15,20 +15,19 @@
 package com.teradata.tempto.internal.query;
 
 import com.teradata.tempto.assertions.QueryAssert.Row;
-import com.teradata.tempto.util.DateTimeUtils;
+
+import javax.xml.bind.DatatypeConverter;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.JDBCType;
 import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInUTC;
+import static java.util.Objects.requireNonNull;
 
 /**
  * This class transforms string values to Java types based on column types.
@@ -62,7 +61,9 @@ public class QueryRowMapper
 
     private Object convertValue(String value, JDBCType expectedType)
     {
-        if(NULL_STRING.equals(value)){
+        requireNonNull(value, "value is null");
+
+        if (NULL_STRING.equals(value)) {
             return null;
         }
 
@@ -71,12 +72,12 @@ public class QueryRowMapper
             case VARCHAR:
             case LONGVARCHAR:
             case LONGNVARCHAR:
-                return value;
             case BINARY:
-            case BOOLEAN:
             case VARBINARY:
             case LONGVARBINARY:
-                return Boolean.valueOf(value);
+                return convertBinary(value);
+            case BOOLEAN:
+                return convertBoolean(value);
             case BIT:
                 return convertBit(value);
             case TINYINT:
@@ -100,8 +101,24 @@ public class QueryRowMapper
             case TIMESTAMP_WITH_TIMEZONE:
                 return parseTimestampInUTC(value);
             default:
-                throw new IllegalArgumentException("Unsupported JDBC type conversion, type: " + expectedType + ", value: " + value);
+                throw unsupportedConversionException(value, expectedType);
         }
+    }
+
+    private byte[] convertBinary(String value)
+    {
+        return DatatypeConverter.parseHexBinary(value);
+    }
+
+    private Boolean convertBoolean(String value)
+    {
+        if (value.equalsIgnoreCase(Boolean.TRUE.toString())) {
+            return true;
+        }
+        else if (value.equalsIgnoreCase(Boolean.FALSE.toString())) {
+            return false;
+        }
+        throw unsupportedConversionException(value, JDBCType.BOOLEAN);
     }
 
     private Boolean convertBit(String value)
@@ -112,6 +129,11 @@ public class QueryRowMapper
         else if (value.equals("1")) {
             return true;
         }
-        throw new IllegalArgumentException("Could not convert value: " + value + ", from BIT type to boolean");
+        throw unsupportedConversionException(value, JDBCType.BIT);
+    }
+
+    private IllegalArgumentException unsupportedConversionException(String value, JDBCType type)
+    {
+        throw new IllegalArgumentException("Unsupported JDBC type conversion, type: " + type + ", value: " + value);
     }
 }
