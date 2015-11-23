@@ -13,7 +13,6 @@
  */
 package com.teradata.tempto.internal.fulfillment.table.hive;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
@@ -36,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @TableManager.Descriptor(tableDefinitionClass = HiveTableDefinition.class, type = "HIVE")
@@ -85,7 +85,8 @@ public class HiveTableManager
         uploadTableData(tableDataPath, tableDefinition.getDataSource());
 
         dropTableIgnoreError(tableNameInDatabase);
-        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
+        createTable(tableDefinition, tableNameInDatabase, tableDataPath);
+        markTableAsExternal(tableNameInDatabase);
 
         return new HiveTableInstance(tableNameInDatabase, tableNameInDatabase, tableDefinition, Optional.<String>empty());
     }
@@ -101,7 +102,7 @@ public class HiveTableManager
             return new HiveTableInstance(name, tableNameInDatabase, tableDefinition, Optional.of(tableDataPath));
         }
 
-        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
+        createTable(tableDefinition, tableNameInDatabase, tableDataPath);
 
         if (tableDefinition.isPartitioned()) {
             int partitionId = 0;
@@ -167,5 +168,15 @@ public class HiveTableManager
             sb.append("/partition_").append(partitionId.get());
         }
         return sb.toString();
+    }
+
+    private void createTable(HiveTableDefinition tableDefinition, String tableNameInDatabase, String tableDataPath)
+    {
+        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableNameInDatabase, tableDataPath));
+    }
+
+    private void markTableAsExternal(String tableNameInDatabase)
+    {
+        queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableNameInDatabase));
     }
 }
