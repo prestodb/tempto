@@ -36,8 +36,8 @@ class SqlResultDescriptorTest
   {
     setup:
     String fileContent = '''-- delimiter: |; ignoreOrder: true; types: VARCHAR|BINARY|BIT|INTEGER|REAL|NUMERIC|DATE|TIME|TIMESTAMP
-A|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|
-B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
+A|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|
+B|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
     SectionParsingResult parsingResult = parseSection(fileContent)
     SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
 
@@ -48,7 +48,7 @@ B|true|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
     resultDescriptor.getExpectedTypes() == Optional.of(expectedTypes)
     List<QueryAssert.Row> rows = resultDescriptor.getRows(expectedTypes)
     rows.size() == 2
-    rows.get(0).getValues() == ['A', true, true, 10, Double.valueOf(20.0), new BigDecimal("30.0"), Date.valueOf('2015-11-01'),
+    rows.get(0).getValues() == ['A', [0xab, 0xcd] as byte[], true, 10, Double.valueOf(20.0), new BigDecimal("30.0"), Date.valueOf('2015-11-01'),
                                 Time.valueOf('10:55:25'), parseTimestampInUTC('2016-11-01 10:55:25')]
   }
 

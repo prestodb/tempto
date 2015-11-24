@@ -72,6 +72,7 @@ public class QueryRowMapper
             case VARCHAR:
             case LONGVARCHAR:
             case LONGNVARCHAR:
+                return value;
             case BINARY:
             case VARBINARY:
             case LONGVARBINARY:
