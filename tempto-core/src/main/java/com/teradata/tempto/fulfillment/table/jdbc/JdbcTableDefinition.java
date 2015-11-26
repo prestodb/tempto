@@ -15,23 +15,36 @@
 package com.teradata.tempto.fulfillment.table.jdbc;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class JdbcTableDefinition
         extends TableDefinition
 {
-    private static final String NAME_MARKER = "%NAME%";
+    public static JdbcTableDefinition jdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    {
+        return jdbcTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
+    }
 
+    public static JdbcTableDefinition jdbcTableDefinition(TableHandle tableHandle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    {
+        return new JdbcTableDefinition(tableHandle, createTableDDLTemplate, dataSource);
+    }
+
+    private static final String NAME_MARKER = "%NAME%";
     private final JdbcTableDataSource dataSource;
+
     private final String createTableDDLTemplate;
 
-    private JdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    private JdbcTableDefinition(TableHandle handle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
     {
-        super(name);
+        super(handle);
+        ;
         this.dataSource = checkNotNull(dataSource, "dataSource is null");
         this.createTableDDLTemplate = checkNotNull(createTableDDLTemplate, "createTableDDLTemplate is null");
         checkArgument(createTableDDLTemplate.contains(NAME_MARKER), "Create table DDL must contain %NAME% placeholder");
@@ -47,11 +60,6 @@ public class JdbcTableDefinition
         return createTableDDLTemplate.replace(NAME_MARKER, name);
     }
 
-    public static JdbcTableDefinition jdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
-    {
-        return new JdbcTableDefinition(name, createTableDDLTemplate, dataSource);
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -62,5 +70,62 @@ public class JdbcTableDefinition
     public int hashCode()
     {
         return reflectionHashCode(this);
+    }
+
+    public static JdbcTableDefinitionBuilder builder(String name)
+    {
+        return new JdbcTableDefinitionBuilder(name);
+    }
+
+    public static JdbcTableDefinitionBuilder like(JdbcTableDefinition tableDefinition)
+    {
+        JdbcTableDefinitionBuilder builder = new JdbcTableDefinitionBuilder(tableDefinition.getName())
+                .setCreateTableDDLTemplate(tableDefinition.createTableDDLTemplate)
+                .setDataSource(tableDefinition.getDataSource());
+        if (tableDefinition.getSchema().isPresent()) {
+            builder.withSchema(tableDefinition.getSchema().get());
+        }
+        return builder;
+    }
+
+    public static class JdbcTableDefinitionBuilder
+    {
+        private TableHandle handle;
+        private String createTableDDLTemplate;
+        private JdbcTableDataSource dataSource;
+
+        private JdbcTableDefinitionBuilder(String name)
+        {
+            this.handle = tableHandle(name);
+        }
+
+        public JdbcTableDefinitionBuilder withSchema(String schema)
+        {
+            this.handle = handle.inSchema(schema);
+            return this;
+        }
+
+        public JdbcTableDefinitionBuilder withDatabase(String database)
+        {
+            this.handle = handle.inDatabase(database);
+            return this;
+        }
+
+        public JdbcTableDefinitionBuilder setCreateTableDDLTemplate(String createTableDDLTemplate)
+        {
+            this.createTableDDLTemplate = createTableDDLTemplate;
+            return this;
+        }
+
+        public JdbcTableDefinitionBuilder setDataSource(JdbcTableDataSource dataSource)
+        {
+            this.dataSource = dataSource;
+            return this;
+        }
+
+        public JdbcTableDefinition build()
+        {
+            return jdbcTableDefinition(handle, createTableDDLTemplate, dataSource);
+        }
     }
 }

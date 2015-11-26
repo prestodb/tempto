@@ -23,7 +23,7 @@ import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.fulfillment.table.TablesState;
 
-import java.util.Map;
+import java.util.List;
 
 public class ImmutableTablesFulfiller
         extends TableRequirementFulfiller<ImmutableTableRequirement>
@@ -36,9 +36,9 @@ public class ImmutableTablesFulfiller
     }
 
     @Override
-    protected TablesState createState(Map databaseTableInstances)
+    protected TablesState createState(List<TableInstance> tables)
     {
-        return new ImmutableTablesState(databaseTableInstances);
+        return new ImmutableTablesState(tables);
     }
 
     @Override

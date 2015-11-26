@@ -15,13 +15,15 @@
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.google.inject.Inject;
-import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
+import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
@@ -53,7 +55,6 @@ public class JdbcTableManager
     private static final Logger LOGGER = getLogger(JdbcTableManager.class);
 
     private final QueryExecutor queryExecutor;
-    private final TableNameGenerator tableNameGenerator;
     private final String databaseName;
 
     @Inject
@@ -65,43 +66,47 @@ public class JdbcTableManager
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
-        this.tableNameGenerator = checkNotNull(tableNameGenerator, "tableNameGenerator is null");
     }
 
     @Override
-    public TableInstance createImmutable(JdbcTableDefinition tableDefinition)
+    public TableInstance createImmutable(JdbcTableDefinition tableDefinition, TableHandle tableHandle)
     {
-        String tableNameInDatabase = tableDefinition.getName();
-        LOGGER.debug("creating immutable table {}", tableNameInDatabase);
-        dropTableIgnoreError(tableNameInDatabase); // ultimately we do not want to drop table here - if data did not change
-        String createTableDDL = tableDefinition.getCreateTableDDL(tableNameInDatabase);
-        queryExecutor.executeQuery(createTableDDL);
+        TableName tableName = createImmutableTableName(tableHandle);
+        LOGGER.debug("creating immutable table {}", tableName);
+        dropTableIgnoreError(tableName); // ultimately we do not want to drop table here - if data did not change
+        createTable(tableDefinition, tableName);
         JdbcTableDataSource dataSource = tableDefinition.getDataSource();
-        insertData(tableNameInDatabase, dataSource);
-        return new JdbcTableInstance(tableNameInDatabase, tableNameInDatabase, tableDefinition);
+        insertData(tableName, dataSource);
+        return new JdbcTableInstance(tableName, tableDefinition);
+    }
+
+    private void createTable(JdbcTableDefinition tableDefinition, TableName tableName)
+    {
+        tableName.getSchema().ifPresent(schema ->
+                        queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
+        );
+        queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase()));
     }
 
     private PreparedStatement buildPreparedStatementForInsert(String tableName, int columnsCount)
             throws SQLException
     {
-
         String questionMarks = range(0, columnsCount).mapToObj(i -> "?").collect(joining(","));
         return queryExecutor.getConnection().prepareStatement(
                 format("INSERT INTO %s VALUES (%s)", tableName, questionMarks));
     }
 
     @Override
-    public TableInstance createMutable(JdbcTableDefinition tableDefinition, MutableTableRequirement.State state, String name)
+    public TableInstance createMutable(JdbcTableDefinition tableDefinition, State state, TableHandle tableHandle)
     {
-        String tableNameInDatabase = tableNameGenerator.generateMutableTableNameInDatabase(name);
-        LOGGER.debug("creating mutable table {}, name in database: {}", tableDefinition.getName(), tableNameInDatabase);
-        JdbcTableInstance tableInstance = new JdbcTableInstance(name, tableNameInDatabase, tableDefinition);
+        TableName tableName = createMutableTableName(tableHandle);
+        LOGGER.debug("creating mutable table {}", tableName);
+        JdbcTableInstance tableInstance = new JdbcTableInstance(tableName, tableDefinition);
         if (state == PREPARED) {
             return tableInstance;
         }
 
-        String createTableDDL = tableDefinition.getCreateTableDDL(tableNameInDatabase);
-        queryExecutor.executeQuery(createTableDDL);
+        createTable(tableDefinition, tableName);
 
         if (state == CREATED) {
             return tableInstance;
@@ -110,7 +115,7 @@ public class JdbcTableManager
         assert state == LOADED;
 
         JdbcTableDataSource dataSource = tableDefinition.getDataSource();
-        insertData(tableNameInDatabase, dataSource);
+        insertData(tableName, dataSource);
         return tableInstance;
     }
 
@@ -126,7 +131,7 @@ public class JdbcTableManager
         return JdbcTableDefinition.class;
     }
 
-    private void insertData(String tableNameInDatabase, JdbcTableDataSource dataSource)
+    private void insertData(TableName tableName, JdbcTableDataSource dataSource)
     {
         Iterator<List<Object>> dataRows = dataSource.getDataRows();
         PreparedStatement preparedStatement = null;
@@ -136,7 +141,7 @@ public class JdbcTableManager
             while (dataRows.hasNext()) {
                 List<Object> values = dataRows.next();
                 if (preparedStatement == null) {
-                    preparedStatement = buildPreparedStatementForInsert(tableNameInDatabase, values.size());
+                    preparedStatement = buildPreparedStatementForInsert(tableName.getNameInDatabase(), values.size());
                 }
                 int pos = 1;
                 for (Object value : values) {

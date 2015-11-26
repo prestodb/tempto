@@ -21,8 +21,7 @@ public class TpchTableDefinitions
 {
     @RepositoryTableDefinition
     public static final HiveTableDefinition NATION =
-            HiveTableDefinition.builder()
-                    .setName("nation")
+            HiveTableDefinition.builder("nation")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   n_nationkey     INT," +
@@ -36,8 +35,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition REGION =
-            HiveTableDefinition.builder()
-                    .setName("region")
+            HiveTableDefinition.builder("region")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   r_regionkey     INT," +
@@ -50,8 +48,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition PART =
-            HiveTableDefinition.builder()
-                    .setName("part")
+            HiveTableDefinition.builder("part")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   p_partkey     INT," +
@@ -70,8 +67,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition SUPPLIER =
-            HiveTableDefinition.builder()
-                    .setName("supplier")
+            HiveTableDefinition.builder("supplier")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   s_suppkey     INT," +
@@ -88,8 +84,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition PART_SUPPLIER =
-            HiveTableDefinition.builder()
-                    .setName("partsupp")
+            HiveTableDefinition.builder("partsupp")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   ps_partkey     INT," +
@@ -104,8 +99,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition CUSTOMER =
-            HiveTableDefinition.builder()
-                    .setName("customer")
+            HiveTableDefinition.builder("customer")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   c_custkey     INT," +
@@ -123,8 +117,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition ORDERS =
-            HiveTableDefinition.builder()
-                    .setName("orders")
+            HiveTableDefinition.builder("orders")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   o_orderkey       INT," +
@@ -143,8 +136,7 @@ public class TpchTableDefinitions
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition LINE_ITEM =
-            HiveTableDefinition.builder()
-                    .setName("lineitem")
+            HiveTableDefinition.builder("lineitem")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
                             "   l_orderkey      INT," +

@@ -15,15 +15,13 @@ package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
-
-import java.util.Optional;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 public class JdbcTableInstance
         extends TableInstance<JdbcTableDefinition>
 {
-
-    public JdbcTableInstance(String name, String nameInDatabase, JdbcTableDefinition tableDefinition)
+    public JdbcTableInstance(TableName tableName, JdbcTableDefinition tableDefinition)
     {
-        super(name, nameInDatabase, tableDefinition);
+        super(tableName, tableDefinition);
     }
 }

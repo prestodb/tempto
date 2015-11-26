@@ -14,17 +14,36 @@
 
 package com.teradata.tempto.fulfillment.table;
 
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
+
 public abstract class TableDefinition
 {
-    protected final String name;
+    protected final TableHandle handle;
 
-    public TableDefinition(String name)
+    public TableDefinition(TableHandle handle)
     {
-        this.name = name;
+        this.handle = requireNonNull(handle, "handle is null");
     }
 
     public String getName()
     {
-        return name;
+        return handle.getName();
+    }
+
+    public Optional<String> getSchema()
+    {
+        return handle.getSchema();
+    }
+
+    public Optional<String> getDatabase()
+    {
+        return handle.getDatabase();
+    }
+
+    public TableHandle getTableHandle()
+    {
+        return handle;
     }
 }

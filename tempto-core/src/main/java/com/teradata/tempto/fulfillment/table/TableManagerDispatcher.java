@@ -28,12 +28,11 @@ public interface TableManagerDispatcher
         return getTableManagerFor(tableInstance.tableDefinition());
     }
 
-    default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition)
-    {
-        return getTableManagerFor(tableDefinition, DatabaseSelectionContext.none());
+    default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition) {
+        return getTableManagerFor(tableDefinition, tableDefinition.getTableHandle());
     }
 
-    <T extends TableDefinition> TableManager<T> getTableManagerFor(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext);
+    TableManager getTableManagerFor(TableDefinition tableDefinition, TableHandle tableHandle);
 
     Collection<TableManager> getAllTableManagers();
 

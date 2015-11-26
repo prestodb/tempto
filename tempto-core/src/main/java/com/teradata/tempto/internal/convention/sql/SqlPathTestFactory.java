@@ -17,16 +17,18 @@ package com.teradata.tempto.internal.convention.sql;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
+import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.internal.ReflectionHelper;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import com.teradata.tempto.internal.convention.ConventionBasedTestProxyGenerator;
+import com.teradata.tempto.internal.convention.MutableTableDescriptor;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.convention.SqlTestsFileUtils;
@@ -44,6 +46,7 @@ import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeEx
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 public class SqlPathTestFactory
@@ -58,13 +61,14 @@ public class SqlPathTestFactory
     private final ConventionBasedTestProxyGenerator proxyGenerator;
     private final Configuration configuration;
 
-    public SqlPathTestFactory(TableDefinitionsRepository tableDefinitionsRepository,
-                              ConventionBasedTestProxyGenerator proxyGenerator,
-                              Configuration configuration)
+    public SqlPathTestFactory(
+            TableDefinitionsRepository tableDefinitionsRepository,
+            ConventionBasedTestProxyGenerator proxyGenerator,
+            Configuration configuration)
     {
-        this.tableDefinitionsRepository = tableDefinitionsRepository;
-        this.proxyGenerator = proxyGenerator;
-        this.configuration = configuration;
+        this.tableDefinitionsRepository = requireNonNull(tableDefinitionsRepository, "tableDefinitionsRepository is null");
+        this.proxyGenerator = requireNonNull(proxyGenerator, "proxyGenerator is null");
+        this.configuration = requireNonNull(configuration, "configuration is null");
     }
 
     @Override
@@ -155,27 +159,32 @@ public class SqlPathTestFactory
     private Requirement getRequirements(SqlQueryDescriptor queryDescriptor)
     {
         List<Requirement> requirements = newArrayList();
-        requirements.addAll(queryDescriptor.getTableDefinitionNames()
-                .stream()
-                .map(requiredTableName -> {
-                    DatabaseSelectionContext databaseSelectionContext = new DatabaseSelectionContext(requiredTableName.getPrefix(), Optional.of(queryDescriptor.getDatabaseName()));
-                    return new ImmutableTableRequirement(tableDefinitionsRepository.getForName(requiredTableName.getName()), databaseSelectionContext);
-                }).collect(toList()));
-        requirements.addAll(queryDescriptor.getMutableTableDescriptors()
-                .stream()
-                .map(descriptor -> {
-                    DatabaseSelectionContext databaseSelectionContext = new DatabaseSelectionContext(descriptor.name.getPrefix(), Optional.of(queryDescriptor.getDatabaseName()));
-                    return MutableTableRequirement.builder(tableDefinitionsRepository.getForName(descriptor.tableDefinitionName))
-                            .withName(descriptor.name.getName())
-                            .withState(descriptor.state)
-                            .withDatabase(databaseSelectionContext)
-                            .build();
-                }).collect(toList()));
+        for (TableHandle tableHandle : queryDescriptor.getTableDefinitionHandles()) {
+            TableDefinition tableDefinition = tableDefinitionsRepository.getForName(tableHandle.getName());
+            tableHandle = resolveTableHandle(queryDescriptor, tableHandle);
+            requirements.add(new ImmutableTableRequirement(tableDefinition, tableHandle));
+        }
+        for (MutableTableDescriptor descriptor : queryDescriptor.getMutableTableDescriptors()) {
+            TableHandle tableHandle = resolveTableHandle(queryDescriptor, descriptor.tableHandle);
+            TableDefinition tableDefinition = tableDefinitionsRepository.getForName(descriptor.tableDefinitionName);
+            requirements.add(MutableTableRequirement.builder(tableDefinition)
+                    .withTableHandle(tableHandle)
+                    .withState(descriptor.state)
+                    .build());
+        }
         requirements.addAll(queryDescriptor.getRequirementClassNames()
                 .stream()
                 .map(this::getRequirementsFromClass)
                 .collect(toList()));
         return compose(requirements);
+    }
+
+    private TableHandle resolveTableHandle(SqlQueryDescriptor queryDescriptor, TableHandle tableHandle)
+    {
+        if (!tableHandle.getDatabase().isPresent()) {
+            tableHandle = tableHandle.inDatabase(queryDescriptor.getDatabaseName());
+        }
+        return tableHandle;
     }
 
     private Requirement getRequirementsFromClass(String requirementClassName)

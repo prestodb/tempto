@@ -11,20 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.teradata.tempto.query;
 
-package com.teradata.tempto.fulfillment.table;
-
-public class ImmutableTableRequirement
-        extends TableRequirement
+public interface QueryExecutorDispatcher
 {
-
-    public ImmutableTableRequirement(TableDefinition tableDefinition)
-    {
-        this(tableDefinition, tableDefinition.getTableHandle());
-    }
-
-    public ImmutableTableRequirement(TableDefinition tableDefinition, TableHandle tableHandle)
-    {
-        super(tableDefinition, tableHandle);
-    }
+    QueryExecutor getQueryExecutor(String connectionName);
 }

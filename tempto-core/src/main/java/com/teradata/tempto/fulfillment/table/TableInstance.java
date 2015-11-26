@@ -13,34 +13,53 @@
  */
 package com.teradata.tempto.fulfillment.table;
 
+import com.teradata.tempto.internal.fulfillment.table.TableName;
+
+import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Describes a table that is instantiated during a test run.
  */
 public class TableInstance<T extends TableDefinition>
 {
-    private final String name;
-    private final String nameInDatabase;
+    private final TableName name;
     private final T tableDefinition;
 
-    protected TableInstance(String name, String nameInDatabase, T tableDefinition)
+    protected TableInstance(TableName name, T tableDefinition)
     {
-        this.name = name;
-        this.nameInDatabase = nameInDatabase;
-        this.tableDefinition = tableDefinition;
+        this.name = requireNonNull(name, "name is null");
+        this.tableDefinition = requireNonNull(tableDefinition, "tableDefinition is null");
     }
 
     public String getName()
     {
-        return name;
+        return name.getName();
+    }
+
+    public String getDatabase()
+    {
+        return name.getDatabase();
+    }
+
+    public Optional<String> getSchema()
+    {
+        return name.getSchema();
     }
 
     public String getNameInDatabase()
     {
-        return nameInDatabase;
+        return name.getNameInDatabase();
     }
 
     public T tableDefinition()
     {
         return tableDefinition;
+    }
+
+    public TableName getTableName()
+    {
+        return name;
     }
 }

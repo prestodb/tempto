@@ -21,6 +21,7 @@ import spock.lang.Specification
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle
 import static junit.framework.TestCase.fail
 
 class TableRequirementFulfillerTest
@@ -28,19 +29,25 @@ class TableRequirementFulfillerTest
 {
   private static final String DATABASE_NAME = "database_name"
   private static final String OTHER_DATABASE_NAME = "other_database_name"
+  private static final String OTHER_DATABASE_NAME_2 = "other_database_name_2"
 
   TableManager tableManager = Mock(TableManager)
   TableManager otherTableManager = Mock(TableManager)
-  TableManagerDispatcher tableManagerDispatcher = Mock(TableManagerDispatcher)
+  TableManager otherTableManager2 = Mock(TableManager)
+  TableManagerDispatcher tableManagerDispatcher
 
   void setup()
   {
     tableManager.databaseName >> DATABASE_NAME
+    tableManager.tableDefinitionClass >> TestTableDefinition
     otherTableManager.databaseName >> OTHER_DATABASE_NAME
-    tableManagerDispatcher.allTableManagers >> [tableManager, otherTableManager]
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.none()) >> tableManager
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME)) >> tableManager
-    tableManagerDispatcher.getTableManagerFor(_ as TableDefinition, DatabaseSelectionContext.forDatabaseName(OTHER_DATABASE_NAME)) >> otherTableManager
+    otherTableManager.tableDefinitionClass >> OtherTestTableDefinition
+    otherTableManager2.databaseName >> OTHER_DATABASE_NAME_2
+    otherTableManager2.tableDefinitionClass >> OtherTestTableDefinition
+    tableManagerDispatcher = new DefaultTableManagerDispatcher([
+            (DATABASE_NAME): tableManager,
+            (OTHER_DATABASE_NAME): otherTableManager,
+            (OTHER_DATABASE_NAME_2): otherTableManager2])
   }
 
   def "test mutable table fulfill/cleanup"()
@@ -48,7 +55,7 @@ class TableRequirementFulfillerTest
     setup:
     def tableDefinition = getTableDefinition("nation")
 
-    def mutableTableInstanceLoaded = new TableInstance("nation", "nation_mutable", tableDefinition)
+    def mutableTableInstanceLoaded = new TableInstance(new TableName(DATABASE_NAME, Optional.empty(), "nation", "nation_mutable"), tableDefinition)
     def mutableTableRequirementLoaded = MutableTableRequirement.builder(tableDefinition).build()
 
     tableManager.createMutable(tableDefinition, LOADED, _) >> mutableTableInstanceLoaded
@@ -62,7 +69,7 @@ class TableRequirementFulfillerTest
     def state = (MutableTablesState) getOnlyElement(states)
     assert state.get('nation') != null
     assert state.get('nation') == mutableTableInstanceLoaded
-    assert state.get('nation', Optional.of(DATABASE_NAME)) == mutableTableInstanceLoaded
+    assert state.get(tableHandle('nation').inDatabase(DATABASE_NAME)) == mutableTableInstanceLoaded
 
     then:
     1 * tableManager.createMutable(tableDefinition, LOADED, _) >> mutableTableInstanceLoaded
@@ -71,7 +78,7 @@ class TableRequirementFulfillerTest
     fulfiller.cleanup(TestStatus.SUCCESS)
 
     then:
-    1 * tableManager.dropTable('nation_mutable')
+    1 * tableManager.dropTable(_)
   }
 
   def "test mutable named and created table fulfill/cleanup"()
@@ -80,7 +87,7 @@ class TableRequirementFulfillerTest
     def tableDefinition = getTableDefinition("nation")
 
     def tableInstanceName = "table_instance_name"
-    def mutableTableInstanceNamedCreated = new TableInstance(tableInstanceName, "nation_mutable", tableDefinition)
+    def mutableTableInstanceNamedCreated = new TableInstance(new TableName(DATABASE_NAME, Optional.empty(), tableInstanceName, tableInstanceName), tableDefinition)
     def mutableTableRequirementNamedCreated = MutableTableRequirement.builder(tableDefinition)
             .withName(tableInstanceName)
             .withState(CREATED)
@@ -97,7 +104,7 @@ class TableRequirementFulfillerTest
     def state = (MutableTablesState) getOnlyElement(states)
     assert state.get(tableInstanceName) != null
     assert state.get(tableInstanceName) == mutableTableInstanceNamedCreated
-    assert state.get(tableInstanceName, Optional.of(DATABASE_NAME)) == mutableTableInstanceNamedCreated
+    assert state.get(tableHandle(tableInstanceName).inDatabase(DATABASE_NAME)) == mutableTableInstanceNamedCreated
 
     then:
     1 * tableManager.createMutable(tableDefinition, CREATED, _) >> mutableTableInstanceNamedCreated
@@ -113,7 +120,7 @@ class TableRequirementFulfillerTest
   {
     setup:
     def tableDefinition = getTableDefinition("nation")
-    def tableInstance = new TableInstance("nation", "nation", tableDefinition)
+    def tableInstance = new TableInstance(new TableName(DATABASE_NAME, Optional.empty(), "nation", "nation"), tableDefinition)
     def requirement = new ImmutableTableRequirement(tableDefinition)
 
     tableManager.createImmutable(tableDefinition) >> tableInstance
@@ -126,7 +133,7 @@ class TableRequirementFulfillerTest
     assert states.size() == 1
     def state = (ImmutableTablesState) getOnlyElement(states)
     assert state.get('nation') == tableInstance
-    assert state.get('nation', Optional.of(DATABASE_NAME)) == tableInstance
+    assert state.get(tableHandle('nation').inDatabase(DATABASE_NAME)) == tableInstance
 
     then:
     1 * tableManager.createImmutable(tableDefinition) >> tableInstance
@@ -141,34 +148,39 @@ class TableRequirementFulfillerTest
   def "test same immutable tables on different databases"()
   {
     setup:
-    def tableDefinition = getTableDefinition("nation")
-    def tableInstance = new TableInstance("nation", "nation", tableDefinition)
-    def requirement = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME))
-    def requirementOnOtherDatabase = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(OTHER_DATABASE_NAME))
+    def tableDefinition = getOtherTableDefinition("nation")
+    def tableInstance = new TableInstance(new TableName(OTHER_DATABASE_NAME, Optional.empty(), "nation", "nation"), tableDefinition)
+    def tableInstance2 = new TableInstance(new TableName(OTHER_DATABASE_NAME_2, Optional.empty(), "nation", "nation"), tableDefinition)
 
-    tableManager.createImmutable(tableDefinition) >> tableInstance
+    def tableHandle = TableHandle.tableHandle("nation").inDatabase(OTHER_DATABASE_NAME)
+    def requirement = new ImmutableTableRequirement(tableDefinition, tableHandle)
+
+    def tableHandle2 = TableHandle.tableHandle("nation").inDatabase(OTHER_DATABASE_NAME_2)
+    def requirement2 = new ImmutableTableRequirement(tableDefinition, tableHandle2)
+
     otherTableManager.createImmutable(tableDefinition) >> tableInstance
+    otherTableManager2.createImmutable(tableDefinition) >> tableInstance2
 
     ImmutableTablesFulfiller fulfiller = new ImmutableTablesFulfiller(tableManagerDispatcher)
 
     when:
-    def states = fulfiller.fulfill([requirement, requirementOnOtherDatabase] as Set)
+    def states = fulfiller.fulfill([requirement, requirement2] as Set)
 
     assert states.size() == 1
     def state = (ImmutableTablesState) getOnlyElement(states)
-    assert state.get('nation', Optional.of(DATABASE_NAME)) == tableInstance
-    assert state.get('nation', Optional.of(OTHER_DATABASE_NAME)) == tableInstance
+    assert state.get(tableHandle) == tableInstance
+    assert state.get(tableHandle2) == tableInstance2
     try {
       state.get('nation')
       fail('Expected exception')
     }
     catch (RuntimeException ex) {
-      assert ex.message.contains('Please specify database.')
+      assert ex.message.contains('please use more detailed table handle')
     }
 
     then:
-    1 * tableManager.createImmutable(tableDefinition) >> tableInstance
     1 * otherTableManager.createImmutable(tableDefinition) >> tableInstance
+    1 * otherTableManager2.createImmutable(tableDefinition) >> tableInstance2
 
     when:
     fulfiller.cleanup()
@@ -181,8 +193,8 @@ class TableRequirementFulfillerTest
   {
     setup:
     def tableDefinition = getTableDefinition("nation")
-    def tableInstance = new TableInstance("nation", "nation", tableDefinition)
-    def requirement = new ImmutableTableRequirement(tableDefinition, DatabaseSelectionContext.forDatabaseName(DATABASE_NAME))
+    def tableInstance = new TableInstance(new TableName(DATABASE_NAME, Optional.empty(), "nation", "nation"), tableDefinition)
+    def requirement = new ImmutableTableRequirement(tableDefinition, tableHandle("nation").inDatabase(DATABASE_NAME))
     def requirementOnDefault = new ImmutableTableRequirement(tableDefinition)
 
     tableManager.createImmutable(tableDefinition) >> tableInstance
@@ -194,7 +206,7 @@ class TableRequirementFulfillerTest
 
     assert states.size() == 1
     def state = (ImmutableTablesState) getOnlyElement(states)
-    assert state.get('nation', Optional.of(DATABASE_NAME)) == tableInstance
+    assert state.get(tableHandle('nation').inDatabase(DATABASE_NAME)) == tableInstance
     assert state.get('nation') == tableInstance
 
     then:
@@ -209,8 +221,25 @@ class TableRequirementFulfillerTest
 
   def getTableDefinition(String tableName)
   {
-    def tableDefinition = Mock(TableDefinition)
-    tableDefinition.name >> tableName
-    return tableDefinition
+    return new TestTableDefinition(tableHandle(tableName))
+  }
+
+  def getOtherTableDefinition(String tableName)
+  {
+    return new OtherTestTableDefinition(tableHandle(tableName))
+  }
+
+  static class TestTableDefinition extends TableDefinition {
+    TestTableDefinition(TableHandle handle)
+    {
+      super(handle)
+    }
+  }
+
+  static class OtherTestTableDefinition extends TableDefinition {
+    OtherTestTableDefinition(TableHandle handle)
+    {
+      super(handle)
+    }
   }
 }

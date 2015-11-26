@@ -14,6 +14,7 @@
 package com.teradata.tempto.internal.fulfillment.table;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
@@ -23,6 +24,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -49,7 +51,7 @@ public abstract class AbstractTableManager<T extends TableDefinition>
                 while (tables.next()) {
                     String tableName = tables.getString("TABLE_NAME");
                     if (tableNameGenerator.isMutableTableName(tableName)) {
-                        dropTableIgnoreError(tableName);
+                        dropTableIgnoreError(createMutableTableName(tableHandle(tableName)));
                     }
                 }
             }
@@ -59,19 +61,40 @@ public abstract class AbstractTableManager<T extends TableDefinition>
         }
     }
 
-    protected void dropTableIgnoreError(String tableNameInDatabase)
+    protected void dropTableIgnoreError(TableName tableName)
     {
         try {
-            dropTable(tableNameInDatabase);
+            dropTable(tableName);
         }
         catch (QueryExecutionException ignored) {
-            LOGGER.debug("{} - unable to drop table: {}", getDatabaseName(), tableNameInDatabase);
+            LOGGER.debug("{} - unable to drop table: {}", getDatabaseName(), tableName);
         }
     }
 
     @Override
-    public void dropTable(String tableNameInDatabase)
+    public void dropTable(TableName tableName)
     {
-        queryExecutor.executeQuery("DROP TABLE " + tableNameInDatabase);
+        queryExecutor.executeQuery("DROP TABLE " + tableName.getNameInDatabase());
+    }
+
+    protected TableName createMutableTableName(TableHandle tableHandle)
+    {
+        String nameInDatabase = tableNameGenerator.generateMutableTableNameInDatabase(tableHandle.getName());
+        return new TableName(
+                tableHandle.getDatabase().orElse(getDatabaseName()),
+                tableHandle.getSchema(),
+                tableHandle.getName(),
+                nameInDatabase
+        );
+    }
+
+    protected TableName createImmutableTableName(TableHandle tableHandle)
+    {
+        return new TableName(
+                tableHandle.getDatabase().orElse(getDatabaseName()),
+                tableHandle.getSchema(),
+                tableHandle.getName(),
+                tableHandle.getName()
+        );
     }
 }

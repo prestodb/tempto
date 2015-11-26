@@ -14,6 +14,8 @@
 
 package com.teradata.tempto.query;
 
+import com.teradata.tempto.context.TestContextDsl;
+
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.JDBCType;
@@ -54,6 +56,8 @@ public interface QueryExecutor
 
     Connection getConnection();
 
+    void close();
+
     /**
      * Executes given query on DB setup in test context.
      *
@@ -61,31 +65,29 @@ public interface QueryExecutor
      * @param params Parameters to be used while executing query
      * @return QueryResult
      */
-    public static QueryResult query(String sql, QueryParam... params)
+    static QueryResult query(String sql, QueryParam... params)
             throws QueryExecutionException
     {
         return defaultQueryExecutor().executeQuery(sql, params);
     }
 
-    public static QueryResult query(String sql, QueryType queryType, QueryParam... params)
+    static QueryResult query(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException
     {
         return defaultQueryExecutor().executeQuery(sql, queryType, params);
     }
 
-    public static QueryExecutor defaultQueryExecutor()
+    static QueryExecutor defaultQueryExecutor()
     {
         return testContext().getDependency(QueryExecutor.class, DEFAULT_DB_NAME);
     }
 
-    public static QueryParam param(JDBCType type, Object value)
+    static QueryParam param(JDBCType type, Object value)
     {
         return new QueryParam(type, value);
     }
 
-    public void close();
-
-    public static class QueryParam
+    class QueryParam
     {
         final JDBCType type;
         final Object value;

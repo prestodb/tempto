@@ -25,11 +25,10 @@ import com.teradata.tempto.fulfillment.table.TableRequirement;
 import com.teradata.tempto.fulfillment.table.TablesState;
 import org.slf4j.Logger;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
-import static com.beust.jcommander.internal.Maps.newHashMap;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class TableRequirementFulfiller<T extends TableRequirement>
@@ -40,8 +39,6 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
 
     protected final TableManagerDispatcher tableManagerDispatcher;
     private final Class<T> requirementClass;
-
-    private final Map<String, DatabaseTableInstanceMap> databaseTableInstances = newHashMap();
 
     public TableRequirementFulfiller(TableManagerDispatcher tableManagerDispatcher, Class<T> requirementClass)
     {
@@ -54,42 +51,27 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
     {
         LOGGER.debug("fulfilling tables for: " + requirementClass);
 
-        requirements.stream()
+        List<TableInstance> tables = requirements.stream()
                 .filter(requirement -> requirement.getClass().isAssignableFrom(requirementClass))
                 .map(requirement -> (T) requirement)
-                .map(requirement -> requirement.copyWithDatabase(getDatabaseName(requirement)))
-                .map(requirement -> (T) requirement)
-                .collect(toSet()).stream()
-                .forEach(this::createTable);
+                .distinct()
+                .map(this::createTable)
+                .collect(toList());
 
-        return ImmutableSet.of(createState(databaseTableInstances));
+        return ImmutableSet.of(createState(tables));
     }
 
-    private String getDatabaseName(T requirement)
-    {
-        return getTableManager(requirement).getDatabaseName();
-    }
+    protected abstract TablesState createState(List<TableInstance> tables);
 
-    protected abstract TablesState createState(Map<String, DatabaseTableInstanceMap> databaseTableInstances);
-
-    private void createTable(T tableRequirement)
+    private TableInstance createTable(T tableRequirement)
     {
         TableManager tableManager = getTableManager(tableRequirement);
-        TableInstance instance = createTable(tableManager, tableRequirement);
-        addDatabaseTable(instance, tableManager.getDatabaseName());
+        return createTable(tableManager, tableRequirement);
     }
 
     private TableManager getTableManager(T tableRequirement)
     {
-        return tableManagerDispatcher.getTableManagerFor(tableRequirement.getTableDefinition(), tableRequirement.getDatabaseSelectionContext());
-    }
-
-    private void addDatabaseTable(TableInstance instance, String databaseName)
-    {
-        if (!databaseTableInstances.containsKey(databaseName)) {
-            databaseTableInstances.put(databaseName, new DatabaseTableInstanceMap(databaseName));
-        }
-        databaseTableInstances.get(databaseName).put(instance);
+        return tableManagerDispatcher.getTableManagerFor(tableRequirement.getTableDefinition(), tableRequirement.getTableHandle());
     }
 
     protected abstract TableInstance createTable(TableManager tableManager, T tableRequirement);

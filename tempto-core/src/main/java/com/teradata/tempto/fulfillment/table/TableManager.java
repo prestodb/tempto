@@ -14,6 +14,7 @@
 package com.teradata.tempto.fulfillment.table;
 
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -37,7 +38,12 @@ public interface TableManager<T extends TableDefinition>
         String type();
 
     }
-    TableInstance<T> createImmutable(T tableDefinition);
+
+    default TableInstance<T> createImmutable(T tableDefinition) {
+        return createImmutable(tableDefinition, tableDefinition.getTableHandle());
+    }
+
+    TableInstance<T> createImmutable(T tableDefinition, TableHandle tableHandle);
 
     default TableInstance<T> createMutable(T tableDefinition)
     {
@@ -46,12 +52,12 @@ public interface TableManager<T extends TableDefinition>
 
     default TableInstance<T> createMutable(T tableDefinition, State state)
     {
-        return createMutable(tableDefinition, state, tableDefinition.getName());
+        return createMutable(tableDefinition, state, tableDefinition.getTableHandle());
     }
 
-    TableInstance<T> createMutable(T tableDefinition, State state, String name);
+    TableInstance<T> createMutable(T tableDefinition, State state, TableHandle tableHandle);
 
-    void dropTable(String nameInDatabase);
+    void dropTable(TableName tableName);
 
     void dropAllMutableTables();
 

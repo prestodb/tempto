@@ -23,11 +23,10 @@ import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.fulfillment.table.TablesState;
 
-import java.util.Map;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.fulfillment.TestStatus.FAILURE;
-import static com.teradata.tempto.fulfillment.table.MutableTablesState.mutableTablesState;
 
 public class MutableTablesFulfiller
         extends TableRequirementFulfiller<MutableTableRequirement>
@@ -41,16 +40,16 @@ public class MutableTablesFulfiller
     }
 
     @Override
-    protected TablesState createState(Map<String, DatabaseTableInstanceMap> databaseTableInstances)
+    protected TablesState createState(List<TableInstance> tables)
     {
-        mutableTablesState = new MutableTablesState(databaseTableInstances);
+        mutableTablesState = new MutableTablesState(tables);
         return mutableTablesState;
     }
 
     @Override
     protected TableInstance createTable(TableManager tableManager, MutableTableRequirement tableRequirement)
     {
-        return tableManager.createMutable(tableRequirement.getTableDefinition(), tableRequirement.getState(), tableRequirement.getName());
+        return tableManager.createMutable(tableRequirement.getTableDefinition(), tableRequirement.getState(), tableRequirement.getTableHandle());
     }
 
     @Override
@@ -61,10 +60,8 @@ public class MutableTablesFulfiller
             return;
         }
         for (TableManager tableManager : tableManagerDispatcher.getAllTableManagers()) {
-            DatabaseTableInstanceMap mutableTableInstanceMap = mutableTablesState.getDatabaseTableInstanceMap(tableManager.getDatabaseName());
-            for (TableInstance mutableTable : mutableTableInstanceMap.getTableInstances().values()) {
-                tableManager.dropTable(mutableTable.getNameInDatabase());
-            }
+            mutableTablesState.getTableNames(tableManager.getDatabaseName()).stream()
+                    .forEach(tableManager::dropTable);
         }
     }
 }

@@ -14,6 +14,7 @@
 package com.teradata.tempto.internal.convention;
 
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -21,12 +22,12 @@ public final class MutableTableDescriptor
 {
     public final String tableDefinitionName;
     public final State state;
-    public final TableName name;
+    public final TableHandle tableHandle;
 
-    MutableTableDescriptor(String tableDefinitionName, State state, TableName name)
+    MutableTableDescriptor(String tableDefinitionName, State state, TableHandle name)
     {
         this.tableDefinitionName = checkNotNull(tableDefinitionName);
         this.state = checkNotNull(state);
-        this.name = checkNotNull(name);
+        this.tableHandle = checkNotNull(name);
     }
 }

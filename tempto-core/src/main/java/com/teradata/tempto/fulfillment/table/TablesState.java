@@ -14,88 +14,104 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.context.State;
-import com.teradata.tempto.internal.fulfillment.table.DatabaseTableInstanceMap;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 public abstract class TablesState
         implements State
 {
-    private final Map<String, DatabaseTableInstanceMap> databaseTableInstances;
+    private final List<TableInstance> tables;
     private final String tableDescription;
 
-    public TablesState(Map<String, DatabaseTableInstanceMap> databaseTableInstances, String tableDescription)
+    public TablesState(List<TableInstance> tables, String tableDescription)
     {
-        this.databaseTableInstances = requireNonNull(databaseTableInstances, "databaseTableInstances is null");
+        this.tables = ImmutableList.copyOf(requireNonNull(tables, "tables is null"));
         this.tableDescription = requireNonNull(tableDescription, "tableDescription is null");
     }
 
     public TableInstance get(String name)
     {
-        return get(name, Optional.empty());
+        return get(tableHandle(name));
     }
 
-    public TableInstance get(String name, Optional<String> database)
+    public TableInstance get(TableHandle tableHandle)
     {
-        if (database.isPresent()) {
-            DatabaseTableInstanceMap databaseTableInstanceMap = getDatabaseTableInstanceMap(database.get());
-            return databaseTableInstanceMap.get(name).orElseThrow(() ->
-                    new IllegalArgumentException(format("No '%s' instance found for name '%s' in database '%s'.", tableDescription, name, database.get())));
-        }
-        List<TableInstance> tableInstances = databaseTableInstances.values().stream()
-                .filter(it -> it.contains(name))
-                .map(it -> it.get(name).get())
+        List<TableInstance> tableInstances = tables.stream()
+                .filter(it -> matches(it, tableHandle))
                 .collect(toList());
 
         switch (tableInstances.size()) {
             case 0:
-                throw new IllegalArgumentException(format("No '%s' instance found for name '%s'.", tableDescription, name));
+                throw new IllegalArgumentException(format("No %s instance found for name %s", tableDescription, tableHandle));
             case 1:
                 return getOnlyElement(tableInstances);
             default:
-                throw new IllegalArgumentException(format("%s instance for name '%s' was found in multiple databases. Please specify database.", tableDescription, name));
+                throw new IllegalArgumentException(format(
+                        "Multiple %s instances found for %s, please use more detailed table handle. Found %s",
+                        tableDescription,
+                        tableHandle,
+                        tableInstances.stream().map(TableInstance::getTableName).collect(toList())));
         }
+    }
+
+    public List<TableName> getTableNames(String databaseName)
+    {
+        return tables.stream()
+                .filter(it -> it.getDatabase().equalsIgnoreCase(databaseName))
+                .map(TableInstance::getTableName)
+                .collect(toList());
     }
 
     public Map<String, String> getNameInDatabaseMap(String databaseName)
     {
-        if (!databaseTableInstances.containsKey(databaseName)) {
-            return ImmutableMap.of();
-        }
-        return getDatabaseTableInstanceMap(databaseName).getTableInstances().entrySet()
-                .stream()
-                .collect(toMap(Entry::getKey, e -> e.getValue().getNameInDatabase()));
+        return getTableNames(databaseName).stream()
+                .collect(toMap(TableName::getName, TableName::getNameInDatabase));
     }
 
-    public DatabaseTableInstanceMap getDatabaseTableInstanceMap(String database)
+    private boolean matches(TableInstance table, TableHandle handle)
     {
-        if(databaseTableInstances.containsKey(database)) {
-            return databaseTableInstances.get(database);
-        } else {
-            return new DatabaseTableInstanceMap(database);
+        if (!table.getName().equalsIgnoreCase(handle.getName())) {
+            return false;
         }
-    }
+        Optional<String> tableSchema = table.getSchema();
+        if (handle.getSchema().isPresent()) {
+            if (!tableSchema.isPresent()) {
+                return false;
+            }
+            if (!tableSchema.get().equalsIgnoreCase(handle.getSchema().get())) {
+                return false;
+            }
+        }
+        if (!tableSchema.isPresent() && handle.getSchema().isPresent()) {
+            return false;
+        }
 
-    public boolean hasDatabaseTableInstanceMap(String database)
-    {
-        return databaseTableInstances.containsKey(database);
+        if (handle.noSchema() && tableSchema.isPresent()) {
+            return false;
+        }
+
+        return !handle.getDatabase().isPresent() || handle.getDatabase().get().equalsIgnoreCase(table.getDatabase());
     }
 
     public Set<String> getDatabaseNames()
     {
-        return databaseTableInstances.keySet();
+        return tables.stream()
+                .map(it -> it.getDatabase())
+                .collect(toSet());
     }
 }
 

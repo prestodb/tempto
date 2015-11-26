@@ -19,7 +19,7 @@ import spock.lang.Specification
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED
-import static java.util.Optional.empty
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle
 import static org.apache.commons.io.IOUtils.toInputStream
 
 class SqlQueryDescriptorTest
@@ -33,9 +33,9 @@ class SqlQueryDescriptorTest
     SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(parsingResult)
 
     expect:
-    queryDescriptor.tableDefinitionNames == [
-            new TableName('table1', empty()),
-            new TableName('table2', Optional.of('prefix'))
+    queryDescriptor.tableDefinitionHandles == [
+            tableHandle('table1'),
+            tableHandle('table2').inDatabase('prefix')
     ] as Set
   }
 
@@ -51,19 +51,19 @@ class SqlQueryDescriptorTest
 
     queryDescriptor.mutableTableDescriptors[0].tableDefinitionName == 'table1'
     queryDescriptor.mutableTableDescriptors[0].state == LOADED;
-    queryDescriptor.mutableTableDescriptors[0].name == new TableName('table1_name', empty())
+    queryDescriptor.mutableTableDescriptors[0].tableHandle == tableHandle('table1_name')
 
     queryDescriptor.mutableTableDescriptors[1].tableDefinitionName == 'table2'
     queryDescriptor.mutableTableDescriptors[1].state == CREATED;
-    queryDescriptor.mutableTableDescriptors[1].name == new TableName('table2', empty())
+    queryDescriptor.mutableTableDescriptors[1].tableHandle == tableHandle('table2')
 
     queryDescriptor.mutableTableDescriptors[2].tableDefinitionName == 'table3'
     queryDescriptor.mutableTableDescriptors[2].state == LOADED;
-    queryDescriptor.mutableTableDescriptors[2].name == new TableName('table3', empty())
+    queryDescriptor.mutableTableDescriptors[2].tableHandle == tableHandle('table3')
 
     queryDescriptor.mutableTableDescriptors[3].tableDefinitionName == 'table4'
     queryDescriptor.mutableTableDescriptors[3].state == CREATED;
-    queryDescriptor.mutableTableDescriptors[3].name == new TableName('table4_1', Optional.of('prefix'))
+    queryDescriptor.mutableTableDescriptors[3].tableHandle == tableHandle('table4_1').inDatabase('prefix')
   }
 
   def 'should fail duplicate mutable table name'()

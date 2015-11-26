@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.teradata.tempto.internal.fulfillment.table.hive
 
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
@@ -20,6 +21,8 @@ import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
 import com.teradata.tempto.query.QueryExecutor
 import spock.lang.Specification
+
+import java.sql.Connection
 
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED
@@ -38,6 +41,9 @@ class HiveTableManagerTest
 
   void setup()
   {
+    Connection connection = Mock()
+    connection.getSchema() >> "schema"
+    queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
     tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, hdfsClient, "password", "database");
   }
@@ -157,8 +163,7 @@ class HiveTableManagerTest
   def getNationHiveTableDefinition()
   {
     HiveDataSource nationDataSource = mockDataSource('some/table/in/hdfs')
-    return HiveTableDefinition.builder()
-            .setName('nation')
+    return HiveTableDefinition.builder("nation")
             .setDataSource(nationDataSource)
             .setCreateTableDDLTemplate(NATION_DDL_TEMPLATE)
             .build()
@@ -173,8 +178,7 @@ class HiveTableManagerTest
 
   def getPartitionedNationHiveTableDefinition()
   {
-    return HiveTableDefinition.builder()
-            .setName('nation')
+    return HiveTableDefinition.builder("nation")
             .setCreateTableDDLTemplate(PARTITIONED_NATION_DDL_TEMPLATE)
             .addPartition("pc=0", mockDataSource("not/important"))
             .addPartition("pc=1", mockDataSource("not/important"))

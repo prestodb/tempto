@@ -16,38 +16,34 @@ package com.teradata.tempto.internal.convention.tabledefinitions;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
-import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import org.slf4j.Logger;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.hiveTableDefinition;
+import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
-import static java.nio.file.Files.newInputStream;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ConventionTableDefinitionsProvider
 {
-    private static final Logger LOGGER = getLogger(ConventionBasedTestFactory.class);
     public static final String DATASETS_PATH_PART = "datasets";
+    private static final Logger LOGGER = getLogger(ConventionBasedTestFactory.class);
 
     public void registerConventionTableDefinitions(TableDefinitionsRepository tableDefinitionsRepository)
     {
@@ -68,7 +64,6 @@ public class ConventionTableDefinitionsProvider
                     .collect(toList());
         }
     }
-
 
     private List<ConventionTableDefinitionDescriptor> getAllConventionTableDefinitionDescriptors(Path dataSetsPath)
     {
@@ -105,12 +100,28 @@ public class ConventionTableDefinitionsProvider
     private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
         HiveDataSource dataSource = new FileBasedHiveDataSource(tableDefinitionDescriptor);
-        return hiveTableDefinition(tableDefinitionDescriptor.getName(), tableDefinitionDescriptor.getParsedDDLFile().getContent(), dataSource);
+        return hiveTableDefinition(
+                getTableHandle(tableDefinitionDescriptor),
+                tableDefinitionDescriptor.getParsedDDLFile().getContent(),
+                dataSource);
     }
 
     private TableDefinition jdbcTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
-        JdbcTableDataSource dataSource= new FileBasedJdbcDataSource(tableDefinitionDescriptor);
-        return JdbcTableDefinition.jdbcTableDefinition(tableDefinitionDescriptor.getName(), tableDefinitionDescriptor.getParsedDDLFile().getContent(), dataSource);
+        JdbcTableDataSource dataSource = new FileBasedJdbcDataSource(tableDefinitionDescriptor);
+        return jdbcTableDefinition(
+                getTableHandle(tableDefinitionDescriptor),
+                tableDefinitionDescriptor.getParsedDDLFile().getContent(),
+                dataSource);
+    }
+
+    private TableHandle getTableHandle(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
+    {
+        TableHandle tableHandle = tableHandle(tableDefinitionDescriptor.getName());
+        Optional<String> schema = tableDefinitionDescriptor.getParsedDDLFile().getSchema();
+        if (schema.isPresent()) {
+            tableHandle = tableHandle.inSchema(schema.get());
+        }
+        return tableHandle;
     }
 }

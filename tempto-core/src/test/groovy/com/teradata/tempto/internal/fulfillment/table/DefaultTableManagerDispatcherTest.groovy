@@ -14,7 +14,6 @@
 
 package com.teradata.tempto.internal.fulfillment.table
 
-import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext
 import com.teradata.tempto.fulfillment.table.TableManager
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
@@ -24,6 +23,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle
 import static java.util.Optional.empty
 import static junit.framework.TestCase.fail
 
@@ -65,29 +65,23 @@ class DefaultTableManagerDispatcherTest
   }
 
   @Unroll
-  def 'test getTableMangerFor'()
+  def 'test getTableMangerFor #tableHandle'()
   {
     expect:
-    instance.getTableManagerFor(definitionClass, databaseSelectionContext) == tableManagers[tableManager]
+    instance.getTableManagerFor(definitionClass, tableHandle) == tableManagers[tableManager]
 
     where:
-    definitionClass       | databaseSelectionContext                                    | tableManager
-    hiveTableDefinition() | DatabaseSelectionContext.forDatabaseName('hive1')               | 'hive1'
-    hiveTableDefinition() | DatabaseSelectionContext.none()                             | 'hive1'
-    jdbcTableDefinition() | DatabaseSelectionContext.forDatabaseName('psql1')               | 'psql1'
-    jdbcTableDefinition() | DatabaseSelectionContext.forDatabaseName('psql2')               | 'psql2'
-    jdbcTableDefinition() | new DatabaseSelectionContext(empty(), Optional.of('psql2')) | 'psql2'
-  }
-
-  private TableManager d()
-  {
-    hiveTableManager1
+    definitionClass       | tableHandle                                                 | tableManager
+    hiveTableDefinition() | hiveTableDefinition().tableHandle                           | 'hive1'
+    hiveTableDefinition() | hiveTableDefinition().tableHandle.inDatabase('hive1')       | 'hive1'
+    jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql1')       | 'psql1'
+    jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql2')       | 'psql2'
   }
 
   def 'multiple databases for table definition class'()
   {
     when:
-    instance.getTableManagerFor(jdbcTableDefinition(), DatabaseSelectionContext.none())
+    instance.getTableManagerFor(jdbcTableDefinition())
     then:
     IllegalStateException e = thrown()
     e.message.contains('Multiple databases found for table definition class \'class com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition\'')
@@ -96,7 +90,7 @@ class DefaultTableManagerDispatcherTest
   def 'no database found'()
   {
     when:
-    instance.getTableManagerFor(jdbcTableDefinition(), DatabaseSelectionContext.forDatabaseName('unknown'))
+    instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().getTableHandle().inDatabase('unknown'))
     then:
     IllegalStateException e = thrown()
     e.message.contains('No table manager found for database name \'unknown\'.')
@@ -105,7 +99,7 @@ class DefaultTableManagerDispatcherTest
   def 'wrong table definition'()
   {
     when:
-    instance.getTableManagerFor(jdbcTableDefinition(), DatabaseSelectionContext.forDatabaseName('hive1'))
+    instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().tableHandle.inDatabase('hive1'))
     then:
     IllegalStateException e = thrown()
     e.message.contains('does not match requested table definition class')
@@ -113,12 +107,12 @@ class DefaultTableManagerDispatcherTest
 
   private JdbcTableDefinition jdbcTableDefinition()
   {
-    return new JdbcTableDefinition('name', 'ddl %NAME% %LOCATION%', Mock(JdbcTableDataSource))
+    return new JdbcTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Mock(JdbcTableDataSource))
   }
 
   private HiveTableDefinition hiveTableDefinition()
   {
-    return new HiveTableDefinition('name', 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty())
+    return new HiveTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty())
   }
 
   def failWith(String message, Closure closure)

@@ -42,34 +42,17 @@ public class MutableTableRequirement
         LOADED
     }
 
-    private final String name;
     private final State state;
 
-    private MutableTableRequirement(String name, State state, TableDefinition tableDefinition, DatabaseSelectionContext databaseName)
+    private MutableTableRequirement(TableHandle handle, State state, TableDefinition tableDefinition)
     {
-        super(tableDefinition, databaseName);
-        this.name = checkNotNull(name);
+        super(tableDefinition, handle);
         this.state = checkNotNull(state);
-    }
-
-    public String getName()
-    {
-        return name;
     }
 
     public State getState()
     {
         return state;
-    }
-
-    @Override
-    public TableRequirement copyWithDatabase(String databaseName)
-    {
-        return builder(getTableDefinition())
-                .withState(getState())
-                .withName(getName())
-                .withDatabase(DatabaseSelectionContext.forDatabaseName(databaseName))
-                .build();
     }
 
     @Override
@@ -92,19 +75,36 @@ public class MutableTableRequirement
     public static class MutableTableRequirementBuilder
     {
         private final TableDefinition tableDefinition;
-        private String name;
+        private TableHandle tableHandle;
         private State state = LOADED;
-        private DatabaseSelectionContext databaseSelectionContext = DatabaseSelectionContext.none();
 
         public MutableTableRequirementBuilder(TableDefinition tableDefinition)
         {
             this.tableDefinition = tableDefinition;
-            this.name = tableDefinition.getName();
+            this.tableHandle = tableDefinition.getTableHandle();
         }
 
         public MutableTableRequirementBuilder withName(String name)
         {
-            this.name = name;
+            this.tableHandle = tableHandle.withName(name);
+            return this;
+        }
+
+        public MutableTableRequirementBuilder withSchema(String schema)
+        {
+            this.tableHandle = tableHandle.inSchema(schema);
+            return this;
+        }
+
+        public MutableTableRequirementBuilder withDatabase(String database)
+        {
+            this.tableHandle = tableHandle.inDatabase(database);
+            return this;
+        }
+
+        public MutableTableRequirementBuilder withTableHandle(TableHandle tableHandle)
+        {
+            this.tableHandle = tableHandle;
             return this;
         }
 
@@ -114,15 +114,9 @@ public class MutableTableRequirement
             return this;
         }
 
-        public MutableTableRequirementBuilder withDatabase(DatabaseSelectionContext databaseSelectionContext)
-        {
-            this.databaseSelectionContext = databaseSelectionContext;
-            return this;
-        }
-
         public MutableTableRequirement build()
         {
-            return new MutableTableRequirement(name, state, tableDefinition, databaseSelectionContext);
+            return new MutableTableRequirement(tableHandle, state, tableDefinition);
         }
     }
 }

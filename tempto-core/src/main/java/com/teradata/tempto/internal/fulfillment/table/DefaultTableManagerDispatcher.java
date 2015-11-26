@@ -16,8 +16,8 @@ package com.teradata.tempto.internal.fulfillment.table;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 
@@ -48,31 +48,31 @@ public class DefaultTableManagerDispatcher<T extends TableDefinition>
     }
 
     @Override
-    public TableManager<T> getTableManagerFor(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext)
+    public TableManager<T> getTableManagerFor(TableDefinition tableDefinition, TableHandle tableHandle)
     {
         Class<? extends TableDefinition> tableDefinitionClass = tableDefinition.getClass();
-        Optional<String> databaseName = databaseSelectionContext.getDatabaseName();
+        if (!classToTableManagers.containsKey(tableDefinitionClass)) {
+            throw new IllegalStateException(format("Table manager for table definition class: %s, is not registered", tableDefinitionClass));
+        }
+
+        List<TableManager> classTableManagers = classToTableManagers.get(tableDefinitionClass);
+        if (classTableManagers.size() == 1)  {
+            return getOnlyElement(classTableManagers);
+        }
+
+        Optional<String> databaseName = tableHandle.getDatabase();
         if (databaseName.isPresent()) {
             TableManager<T> tableManager = getTableManagerFor(databaseName).orElseThrow(() ->
                             new IllegalStateException(format("No table manager found for database name '%s'.", databaseName.get()))
             );
             return checkTableDefinitionType(tableManager, tableDefinitionClass);
         }
-        if (classToTableManagers.containsKey(tableDefinitionClass)) {
-            List<TableManager> classTableManagers = classToTableManagers.get(tableDefinitionClass);
-            switch (classTableManagers.size()) {
-                case 0:
-                    throw new IllegalStateException(format("No table manager found for table definition class '%s'.", tableDefinitionClass));
-                case 1:
-                    return getOnlyElement(classTableManagers);
-                default:
-                    TableManager<T> tableManager = getTableManagerFor(databaseSelectionContext.getQueryExecutorDatabaseName()).orElseThrow(() ->
-                                    multipleTableManagersException(tableDefinitionClass, classTableManagers)
-                    );
-                    return checkTableDefinitionType(tableManager, tableDefinitionClass);
-            }
+
+        if (classTableManagers.size() == 0) {
+            throw new IllegalStateException(format("No table manager found for table definition class '%s'.", tableDefinitionClass));
+        } else {
+            throw multipleTableManagersException(tableDefinitionClass, classTableManagers);
         }
-        throw new IllegalStateException(format("Table manager for table definition class: %s, name: %s is not registered", tableDefinitionClass, databaseSelectionContext));
     }
 
     private TableManager<T> checkTableDefinitionType(TableManager<T> tableManager, Class<? extends TableDefinition> tableDefinitionClass)

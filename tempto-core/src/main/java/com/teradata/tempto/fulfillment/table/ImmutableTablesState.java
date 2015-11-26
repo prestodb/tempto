@@ -14,9 +14,7 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import com.teradata.tempto.internal.fulfillment.table.DatabaseTableInstanceMap;
-
-import java.util.Map;
+import java.util.List;
 
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 
@@ -29,8 +27,8 @@ public class ImmutableTablesState
         return testContext().getDependency(ImmutableTablesState.class);
     }
 
-    public ImmutableTablesState(Map<String, DatabaseTableInstanceMap> databaseTableInstanceMap)
+    public ImmutableTablesState(List<TableInstance> tables)
     {
-        super(databaseTableInstanceMap, "immutable table");
+        super(tables, "immutable table");
     }
 }

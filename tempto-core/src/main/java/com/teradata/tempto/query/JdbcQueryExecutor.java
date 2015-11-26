@@ -47,7 +47,6 @@ public class JdbcQueryExecutor
     public JdbcQueryExecutor(JdbcConnectivityParamsState jdbcParamsState,
             JdbcConnectionsPool jdbcConnectionsPool,
             TestContext testContext)
-            throws SQLException
     {
         this.jdbcParamsState = requireNonNull(jdbcParamsState, "jdbcParamsState is null");
         this.jdbcConnectionsPool = requireNonNull(jdbcConnectionsPool, "jdbcConnectionsPool is null");

@@ -13,8 +13,9 @@
  */
 package com.teradata.tempto.internal.fulfillment.table.hive;
 
-import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableInstance;
+import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 import java.util.Optional;
 
@@ -23,9 +24,9 @@ public class HiveTableInstance
 {
     private final Optional<String> mutableDataHdfsDataPath;
 
-    public HiveTableInstance(String name, String nameInDatabase, HiveTableDefinition tableDefinition, Optional<String> mutableDataHdfsDataPath)
+    public HiveTableInstance(TableName tableName, HiveTableDefinition tableDefinition, Optional<String> mutableDataHdfsDataPath)
     {
-        super(name, nameInDatabase, tableDefinition);
+        super(tableName, tableDefinition);
         this.mutableDataHdfsDataPath = mutableDataHdfsDataPath;
     }
 

@@ -21,6 +21,7 @@ import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.query.QueryExecutor;
 import com.teradata.tempto.query.QueryResult;
 import freemarker.template.Template;

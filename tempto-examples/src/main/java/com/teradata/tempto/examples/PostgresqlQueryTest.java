@@ -17,13 +17,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.teradata.tempto.ProductTest;
 import com.teradata.tempto.Requirement;
+import com.teradata.tempto.Requirements;
 import com.teradata.tempto.RequirementsProvider;
 import com.teradata.tempto.Requires;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.fulfillment.table.DatabaseSelectionContext;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTablesState;
+import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
 import com.teradata.tempto.query.QueryExecutor;
@@ -32,11 +33,11 @@ import org.testng.annotations.Test;
 import javax.inject.Named;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static com.teradata.tempto.fulfillment.table.ImmutableTablesState.immutableTablesState;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
 
 public class PostgresqlQueryTest
@@ -60,41 +61,55 @@ public class PostgresqlQueryTest
         TEST_TABLE_DEFINITION = jdbcTableDefinition("test_table", "CREATE TABLE %NAME% (a int, b varchar(100))", dataSource);
     }
 
-    private static class ImmutableTestJdbcTable
+    private static class ImmutableTestJdbcTables
             implements RequirementsProvider
     {
 
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return new ImmutableTableRequirement(TEST_TABLE_DEFINITION, DatabaseSelectionContext.forDatabaseName("psql"));
+            return Requirements.compose(
+                    new ImmutableTableRequirement(JdbcTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").build()),
+                    new ImmutableTableRequirement(JdbcTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").withSchema("test_schema").build())
+            );
         }
     }
 
-    private static class MutableTestJdbcTable
+    private static class MutableTestJdbcTables
             implements RequirementsProvider
     {
 
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
-            return MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase(DatabaseSelectionContext.forDatabaseName("psql")).build();
+            return Requirements.compose(
+                    MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase("psql").build(),
+                    MutableTableRequirement.builder(TEST_TABLE_DEFINITION).withDatabase("psql").withSchema("test_schema").build()
+            );
         }
     }
 
     @Test(groups = "psql_query")
-    @Requires(ImmutableTestJdbcTable.class)
+    @Requires(ImmutableTestJdbcTables.class)
     public void selectFromImmutableTable()
     {
-        String nameInDatabase = immutableTablesState().get("test_table", Optional.of("psql")).getNameInDatabase();
+        String nameInDatabase = immutableTablesState().get(tableHandle("test_table").withNoSchema()).getNameInDatabase();
         assertThat(queryExecutor.executeQuery("select * from " + nameInDatabase)).containsOnly(row(1, "x"), row(2, "y"));
     }
 
     @Test(groups = "psql_query")
-    @Requires(MutableTestJdbcTable.class)
+    @Requires(MutableTestJdbcTables.class)
     public void selectFromMutableTable()
     {
-        String tableName = mutableTablesState.get("test_table").getNameInDatabase();
+        String tableName = mutableTablesState.get(tableHandle("test_table").withNoSchema()).getNameInDatabase();
         assertThat(queryExecutor.executeQuery("select * from " + tableName)).containsOnly(row(1, "x"), row(2, "y"));
+    }
+
+    @Test(groups = {"psql_query"})
+    @Requires(MutableTestJdbcTables.class)
+    public void selectFromTableInDifferentSchema()
+    {
+        TableInstance tableInstance = mutableTablesState.get(tableHandle("test_table").inSchema("test_schema"));
+        assertThat(queryExecutor.executeQuery("select * from " + tableInstance.getNameInDatabase())).containsOnly(row(1, "x"), row(2, "y"));
     }
 }

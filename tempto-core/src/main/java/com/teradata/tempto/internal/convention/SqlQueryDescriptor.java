@@ -16,6 +16,7 @@ package com.teradata.tempto.internal.convention;
 
 import com.google.common.base.Splitter;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
+import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.tempto.query.QueryType;
 
@@ -63,10 +64,10 @@ public class SqlQueryDescriptor
         return getPropertyValue(DATABASE_HEADER_PROPERTY).orElse(DEFAULT_DB_NAME);
     }
 
-    public Set<TableName> getTableDefinitionNames()
+    public Set<TableHandle> getTableDefinitionHandles()
     {
         return getPropertyValues(TABLES_HEADER_PROPERTY).stream()
-                .map(TableName::parse)
+                .map(TableHandle::parse)
                 .collect(toSet());
     }
 
@@ -83,15 +84,15 @@ public class SqlQueryDescriptor
             String tableDefinitionName = properties.get(MUTABLE_TABLE_DEFINITION_NAME_PROPERTY_INDEX);
             State state = properties.size() >= 2 ? State.valueOf(properties.get(MUTABLE_TABLE_STATE_PROPERTY_INDEX).toUpperCase()) : LOADED;
             String rawTableName = properties.size() >= 3 ? properties.get(MUTABLE_TABLE_NAME_PROPERTY_INDEX) : tableDefinitionName;
-            TableName name = TableName.parse(rawTableName);
+            TableHandle tableHandle = TableHandle.parse(rawTableName);
 
             checkState(!mutableTableDescriptors
                             .stream()
-                            .filter(mutableTableDescriptor -> mutableTableDescriptor.name.equals(name))
+                            .filter(mutableTableDescriptor -> mutableTableDescriptor.tableHandle.equals(tableHandle))
                             .findAny().isPresent(),
-                    "Table with name %s is defined twice", name);
+                    "Table with name %s is defined twice", tableHandle.getName());
 
-            mutableTableDescriptors.add(new MutableTableDescriptor(tableDefinitionName, state, name));
+            mutableTableDescriptors.add(new MutableTableDescriptor(tableDefinitionName, state, tableHandle));
         }
 
         return mutableTableDescriptors;

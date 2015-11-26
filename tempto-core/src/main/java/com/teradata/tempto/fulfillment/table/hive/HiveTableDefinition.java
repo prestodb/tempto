@@ -15,6 +15,8 @@
 package com.teradata.tempto.fulfillment.table.hive;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
+import com.teradata.tempto.fulfillment.table.TableHandle;
+import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +24,10 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createSameRowDataSource;
 import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createStringDataSource;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
@@ -39,9 +43,9 @@ public class HiveTableDefinition
     private final Optional<List<PartitionDefinition>> partitionDefinitions;
     private final String createTableDDLTemplate;
 
-    private HiveTableDefinition(String name, String createTableDDLTemplate, Optional<HiveDataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
+    private HiveTableDefinition(TableHandle handle, String createTableDDLTemplate, Optional<HiveDataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
     {
-        super(name);
+        super(handle);
         checkArgument(dataSource.isPresent() ^ partitionDefinitions.isPresent(), "either dataSource or partitionDefinitions must be set");
         this.dataSource = dataSource;
         this.partitionDefinitions = partitionDefinitions;
@@ -80,18 +84,25 @@ public class HiveTableDefinition
 
     public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, HiveDataSource dataSource)
     {
-        return new HiveTableDefinition(name, createTableDDLTemplate, Optional.of(dataSource), Optional.empty());
+        return hiveTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
     }
 
-    public static HiveTableDefinitionBuilder builder()
+    public static HiveTableDefinition hiveTableDefinition(TableHandle handle, String createTableDDLTemplate, HiveDataSource dataSource)
     {
-        return new HiveTableDefinitionBuilder();
+        return new HiveTableDefinition(handle, createTableDDLTemplate, Optional.of(dataSource), Optional.empty());
+    }
+
+    public static HiveTableDefinitionBuilder builder(String name)
+    {
+        return new HiveTableDefinitionBuilder(name);
     }
 
     public static HiveTableDefinitionBuilder like(HiveTableDefinition hiveTableDefinition)
     {
-        HiveTableDefinitionBuilder hiveTableDefinitionBuilder = new HiveTableDefinitionBuilder();
-        hiveTableDefinitionBuilder.setName(hiveTableDefinition.getName());
+        HiveTableDefinitionBuilder hiveTableDefinitionBuilder = new HiveTableDefinitionBuilder(hiveTableDefinition.getName());
+        if (hiveTableDefinition.getSchema().isPresent()) {
+            hiveTableDefinitionBuilder.inSchema(hiveTableDefinition.getSchema().get());
+        }
         hiveTableDefinitionBuilder.setCreateTableDDLTemplate(hiveTableDefinition.createTableDDLTemplate);
         hiveTableDefinitionBuilder.setDataSource(hiveTableDefinition.getDataSource());
         return hiveTableDefinitionBuilder;
@@ -99,19 +110,29 @@ public class HiveTableDefinition
 
     public static class HiveTableDefinitionBuilder
     {
-
-        private String name;
+        private TableHandle handle;
         private String createTableDDLTemplate;
         private Optional<HiveDataSource> dataSource = Optional.empty();
         private Optional<List<PartitionDefinition>> partitionDefinitions = Optional.empty();
 
-        private HiveTableDefinitionBuilder()
+        private HiveTableDefinitionBuilder(String name)
         {
+            handle = tableHandle(name);
+        }
+
+        public HiveTableDefinitionBuilder inDatabase(String database) {
+            this.handle = handle.inDatabase(database);
+            return this;
+        }
+
+        public HiveTableDefinitionBuilder inSchema(String schema) {
+            this.handle = handle.inSchema(schema);
+            return this;
         }
 
         public HiveTableDefinitionBuilder setName(String name)
         {
-            this.name = name;
+            this.handle = handle.withName(name);
             return this;
         }
 
@@ -129,22 +150,22 @@ public class HiveTableDefinition
 
         public HiveTableDefinitionBuilder setNoData()
         {
-            return setDataSource(createStringDataSource(name, NO_DATA_REVISION, ""));
+            return setDataSource(createStringDataSource(handle.getName(), NO_DATA_REVISION, ""));
         }
 
         public HiveTableDefinitionBuilder setData(String revision, String data)
         {
-            return setDataSource(createStringDataSource(name, revision, data));
+            return setDataSource(createStringDataSource(handle.getName(), revision, data));
         }
 
         public HiveTableDefinitionBuilder setRows(String revision, int rowsCount, String rowData)
         {
-            return setDataSource(createSameRowDataSource(name, revision, 1, rowsCount, rowData));
+            return setDataSource(createSameRowDataSource(handle.getName(), revision, 1, rowsCount, rowData));
         }
 
         public HiveTableDefinitionBuilder setRows(String revision, int splitCount, int rowsInEachSplit, String rowData)
         {
-            return setDataSource(createSameRowDataSource(name, revision, splitCount, rowsInEachSplit, rowData));
+            return setDataSource(createSameRowDataSource(handle.getName(), revision, splitCount, rowsInEachSplit, rowData));
         }
 
         public HiveTableDefinitionBuilder addPartition(String partitionSpec, HiveDataSource dataSource) {
@@ -157,7 +178,7 @@ public class HiveTableDefinition
 
         public HiveTableDefinition build()
         {
-            return new HiveTableDefinition(name, createTableDDLTemplate, dataSource, partitionDefinitions);
+            return new HiveTableDefinition(handle, createTableDDLTemplate, dataSource, partitionDefinitions);
         }
     }
 
@@ -190,9 +211,9 @@ public class HiveTableDefinition
             return dataSource;
         }
 
-        public String getAddPartitionTableDDL(String tableName, String location)
+        public String getAddPartitionTableDDL(TableName tableName, String location)
         {
-            return ADD_PARTITION_DDL_TEMPLATE.replace(NAME_MARKER, tableName).replace(PARTITION_SPEC_MARKER, partitionSpec).replace(LOCATION_MARKER, location);
+            return ADD_PARTITION_DDL_TEMPLATE.replace(NAME_MARKER, tableName.getNameInDatabase()).replace(PARTITION_SPEC_MARKER, partitionSpec).replace(LOCATION_MARKER, location);
         }
     }
 

@@ -25,12 +25,12 @@ public abstract class TableRequirement<T extends TableRequirement>
 {
 
     private final TableDefinition tableDefinition;
-    private final DatabaseSelectionContext databaseSelectionContext;
+    private final TableHandle tableHandle;
 
-    protected TableRequirement(TableDefinition tableDefinition, DatabaseSelectionContext databaseSelectionContext)
+    protected TableRequirement(TableDefinition tableDefinition, TableHandle tableHandle)
     {
         this.tableDefinition = requireNonNull(tableDefinition, "tableDefinition is null");
-        this.databaseSelectionContext = requireNonNull(databaseSelectionContext, "databaseSelectionContext is null");
+        this.tableHandle = requireNonNull(tableHandle, "tableHandle is null");
     }
 
     public TableDefinition getTableDefinition()
@@ -38,12 +38,10 @@ public abstract class TableRequirement<T extends TableRequirement>
         return tableDefinition;
     }
 
-    public DatabaseSelectionContext getDatabaseSelectionContext()
+    public TableHandle getTableHandle()
     {
-        return databaseSelectionContext;
+        return tableHandle;
     }
-
-    public abstract T copyWithDatabase(String databaseName);
 
     @Override
     public boolean equals(Object o)

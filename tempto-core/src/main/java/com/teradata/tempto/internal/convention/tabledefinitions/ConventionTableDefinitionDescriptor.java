@@ -26,17 +26,16 @@ import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
-import static com.teradata.tempto.internal.convention.tabledefinitions.TableType.HIVE;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 
 class ConventionTableDefinitionDescriptor
 {
-
     public static class ParsedDDLFile
             extends SqlDescriptor
     {
         private final TableType tableType;
+        private final Optional<String> schema;
 
         public static ParsedDDLFile forPath(Path dataFile)
         {
@@ -49,6 +48,7 @@ class ConventionTableDefinitionDescriptor
         {
             super(sqlSectionParsingResult);
             tableType = getTableTypeFromProperties();
+            schema = getPropertyValue("schema");
         }
 
         private TableType getTableTypeFromProperties()
@@ -60,6 +60,11 @@ class ConventionTableDefinitionDescriptor
         public TableType getTableType()
         {
             return tableType;
+        }
+
+        public Optional<String> getSchema()
+        {
+            return schema;
         }
     }
 
