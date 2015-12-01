@@ -38,8 +38,7 @@ class SqlResultDescriptorTest
     String fileContent = '''-- delimiter: |; ignoreOrder: true; types: VARCHAR|BINARY|BIT|INTEGER|REAL|NUMERIC|DATE|TIME|TIMESTAMP
 A|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|
 B|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
-    SectionParsingResult parsingResult = parseSection(fileContent)
-    SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
+    SqlResultDescriptor resultDescriptor = parse(fileContent)
 
     expect:
     resultDescriptor.isIgnoreOrder()
@@ -58,8 +57,7 @@ B|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
     String fileContent = '''-- delimiter: |; ignoreOrder: false
 A|
 B|'''
-    SectionParsingResult parsingResult = parseSection(fileContent)
-    SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
+    SqlResultDescriptor resultDescriptor = parse(fileContent)
 
     expect:
     !resultDescriptor.isIgnoreOrder()
@@ -77,8 +75,7 @@ B|'''
     String fileContent = '''-- delimiter: |; ignoreOrder: true; joinAllRowsToOne: true; types: VARCHAR
 A|
 B|'''
-    SectionParsingResult parsingResult = parseSection(fileContent)
-    SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(parsingResult)
+    SqlResultDescriptor resultDescriptor = parse(fileContent)
 
     expect:
     resultDescriptor.isIgnoreOrder()
@@ -91,8 +88,27 @@ B|'''
     rows.get(0).getValues() == ['A\nB']
   }
 
-  def parseSection(String content)
+  def 'record with empty lines'()
   {
-    getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(content)))
+    setup:
+
+    String fileContent = "-- delimiter: |; joinAllRowsToOne: true; types: VARCHAR\n" +
+            'This\nrecord\n\\\nhas\n\\\n\\\nempty\n\\\n\\\n\\\nlines\n\\\n|'
+    SqlResultDescriptor resultDescriptor = parse(fileContent)
+
+    expect:
+    resultDescriptor.isJoinAllRowsToOne()
+
+    def expectedTypes = [VARCHAR]
+    resultDescriptor.getExpectedTypes() == Optional.of(expectedTypes)
+    def rows = resultDescriptor.getRows(expectedTypes)
+    rows.size() == 1
+    rows.get(0).getValues() == ['This\nrecord\n\nhas\n\n\nempty\n\n\n\nlines\n\n']\
+  }
+
+  private SqlResultDescriptor parse(String fileContent)
+  {
+    SectionParsingResult parsingResult = getOnlyElement(new AnnotatedFileParser().parseFile(toInputStream(fileContent)))
+    return new SqlResultDescriptor(parsingResult)
   }
 }
