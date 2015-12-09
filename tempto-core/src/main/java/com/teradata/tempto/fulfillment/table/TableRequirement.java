@@ -43,6 +43,8 @@ public abstract class TableRequirement<T extends TableRequirement>
         return tableHandle;
     }
 
+    public abstract T copyWithDatabase(String databaseName);
+
     @Override
     public boolean equals(Object o)
     {

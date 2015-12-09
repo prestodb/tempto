@@ -54,11 +54,18 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
         List<TableInstance> tables = requirements.stream()
                 .filter(requirement -> requirement.getClass().isAssignableFrom(requirementClass))
                 .map(requirement -> (T) requirement)
+                .map(requirement -> requirement.copyWithDatabase(getDatabaseName(requirement)))
+                .map(requirement -> (T) requirement)
                 .distinct()
                 .map(this::createTable)
                 .collect(toList());
 
         return ImmutableSet.of(createState(tables));
+    }
+
+    private String getDatabaseName(T requirement)
+    {
+        return getTableManager(requirement).getDatabaseName();
     }
 
     protected abstract TablesState createState(List<TableInstance> tables);

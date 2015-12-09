@@ -56,6 +56,16 @@ public class MutableTableRequirement
     }
 
     @Override
+    public TableRequirement copyWithDatabase(String databaseName)
+    {
+        TableHandle tableHandle = getTableHandle().inDatabase(databaseName);
+        return builder(getTableDefinition())
+                .withState(getState())
+                .withTableHandle(tableHandle)
+                .build();
+    }
+
+    @Override
     public boolean equals(Object o)
     {
         return reflectionEquals(this, o);

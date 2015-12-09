@@ -27,4 +27,10 @@ public class ImmutableTableRequirement
     {
         super(tableDefinition, tableHandle);
     }
+
+    @Override
+    public ImmutableTableRequirement copyWithDatabase(String databaseName)
+    {
+        return new ImmutableTableRequirement(getTableDefinition(), getTableHandle().inDatabase(databaseName));
+    }
 }
