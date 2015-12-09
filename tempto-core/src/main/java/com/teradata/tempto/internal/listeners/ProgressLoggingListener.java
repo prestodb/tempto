@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.listeners;
 
 import com.google.common.base.Joiner;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
@@ -87,7 +88,7 @@ public class ProgressLoggingListener
     private void logTestEnd(String outcome)
     {
         long executionTime = System.currentTimeMillis() - testStartTime;
-        LOGGER.info("{}     /    took: {}ms", outcome, executionTime);
+        LOGGER.info("{}     /    took {}", outcome, DurationFormatUtils.formatDuration(executionTime, "m' minutes and 's' seconds'"));
     }
 
     @Override
