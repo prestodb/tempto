@@ -38,7 +38,7 @@ public class TableHandle
             if (parts.size() == 2) {
                 return tableHandle(parts.get(1)).inDatabase(parts.get(0));
             }
-            return tableHandle(parts.get(3)).inDatabase(parts.get(0)).inSchema(parts.get(1));
+            return tableHandle(parts.get(2)).inDatabase(parts.get(0)).inSchema(parts.get(1));
         }
         else {
             return tableHandle(value);
