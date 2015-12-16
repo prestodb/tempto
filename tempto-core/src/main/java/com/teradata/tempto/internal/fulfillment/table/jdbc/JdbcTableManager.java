@@ -155,8 +155,10 @@ public class JdbcTableManager
                     batchRows.clear();
                 }
             }
-            executeBatchWithVerification(preparedStatement, rowsInserted - batchRows.size(), batchRows);
-            batchRows.clear();
+            if (preparedStatement != null) {
+                executeBatchWithVerification(preparedStatement, rowsInserted - batchRows.size(), batchRows);
+                batchRows.clear();
+            }
         }
         catch (SQLException e) {
             throw new RuntimeException(e);
@@ -176,6 +178,7 @@ public class JdbcTableManager
     private void executeBatchWithVerification(PreparedStatement preparedStatement, int baseBatchRowIndex, List<List<Object>> batchRows)
             throws SQLException
     {
+        checkNotNull(preparedStatement);
         int[] insertCounts = preparedStatement.executeBatch();
         for (int rowIndex = 0; rowIndex < insertCounts.length; ++rowIndex) {
             if (insertCounts[rowIndex] != 1) {
