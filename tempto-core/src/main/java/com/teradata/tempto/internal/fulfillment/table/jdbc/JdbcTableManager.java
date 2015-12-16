@@ -157,7 +157,6 @@ public class JdbcTableManager
             }
             if (preparedStatement != null) {
                 executeBatchWithVerification(preparedStatement, rowsInserted - batchRows.size(), batchRows);
-                batchRows.clear();
             }
         }
         catch (SQLException e) {
