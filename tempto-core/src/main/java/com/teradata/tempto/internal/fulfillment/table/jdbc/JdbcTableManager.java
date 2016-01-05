@@ -25,17 +25,22 @@ import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
+import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED;
@@ -43,6 +48,7 @@ import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.Stat
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Locale.ENGLISH;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -73,11 +79,69 @@ public class JdbcTableManager
     {
         TableName tableName = createImmutableTableName(tableHandle);
         LOGGER.debug("creating immutable table {}", tableName);
-        dropTableIgnoreError(tableName); // ultimately we do not want to drop table here - if data did not change
-        createTable(tableDefinition, tableName);
-        JdbcTableDataSource dataSource = tableDefinition.getDataSource();
-        insertData(tableName, dataSource);
+        // TODO: drop and recreate table if the underlying data has changed
+        if (!tableExists(tableName)) {
+            createTable(tableDefinition, tableName);
+            JdbcTableDataSource dataSource = tableDefinition.getDataSource();
+            insertData(tableName, dataSource);
+        }
         return new JdbcTableInstance(tableName, tableDefinition);
+    }
+
+    private boolean tableExists(TableName tableName)
+    {
+        Connection connection = queryExecutor.getConnection();
+        try {
+            DatabaseMetaData metadata = connection.getMetaData();
+            String escape = metadata.getSearchStringEscape();
+            try (ResultSet resultSet = metadata.getTables(
+                    connection.getCatalog(),
+                    escapeNamePattern(tableName.getSchema().orElse(null), escape),
+                    escapeNamePattern(tableName.getName(), escape),
+                    new String[] {"TABLE"})
+            ) {
+                while (resultSet.next()) {
+                    if (tableNameMatches(tableName, resultSet) && tableSchemaMatches(tableName, resultSet)) {
+                        LOGGER.info("Table {} already exists", tableName.getNameInDatabase());
+                        return true;
+                    }
+                }
+            }
+        }
+        catch (SQLException e) {
+            throw new QueryExecutionException(e);
+        }
+        return false;
+    }
+
+    private static String escapeNamePattern(String name, String escape)
+    {
+        if ((name == null) || (escape == null)) {
+            return name;
+        }
+        checkArgument(!escape.equals("_"), "Escape string must not be '_'");
+        checkArgument(!escape.equals("%"), "Escape string must not be '%'");
+        name = name.replace(escape, escape + escape);
+        name = name.replace("_", escape + "_");
+        name = name.replace("%", escape + "%");
+        return name;
+    }
+
+    private boolean tableNameMatches(TableName tableName, ResultSet resultSet)
+            throws SQLException
+    {
+        return resultSet.getString("TABLE_NAME").toLowerCase(ENGLISH).equals(tableName.getNameInDatabase().toLowerCase());
+    }
+
+    private boolean tableSchemaMatches(TableName tableName, ResultSet resultSet)
+            throws SQLException
+    {
+        if (tableName.getSchema().isPresent()) {
+            return resultSet.getString("TABLE_SCHEM").toLowerCase(ENGLISH).equals(tableName.getSchema().get().toLowerCase());
+        }
+        else {
+            return true;
+        }
     }
 
     private void createTable(JdbcTableDefinition tableDefinition, TableName tableName)
@@ -85,6 +149,7 @@ public class JdbcTableManager
         tableName.getSchema().ifPresent(schema ->
                         queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
         );
+
         queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase()));
     }
 
