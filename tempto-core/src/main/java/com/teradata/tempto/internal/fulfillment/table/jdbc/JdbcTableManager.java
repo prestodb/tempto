@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.google.inject.Inject;
+import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableHandle;
@@ -27,6 +28,7 @@ import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
+import com.teradata.tempto.query.QueryResult;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
@@ -39,6 +41,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,15 +65,18 @@ public class JdbcTableManager
 
     private final QueryExecutor queryExecutor;
     private final String databaseName;
+    private final Configuration configuration;
 
     @Inject
     public JdbcTableManager(
             QueryExecutor queryExecutor,
             TableNameGenerator tableNameGenerator,
-            @Named("databaseName") String databaseName)
+            @Named("databaseName") String databaseName,
+            Configuration configuration)
     {
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
+        this.configuration = configuration;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
     }
 
@@ -84,6 +90,8 @@ public class JdbcTableManager
             createTable(tableDefinition, tableName);
             JdbcTableDataSource dataSource = tableDefinition.getDataSource();
             insertData(tableName, dataSource);
+        } else {
+            LOGGER.info("Table {} already exists, skipping creation of immutable table", tableName.getNameInDatabase());
         }
         return new JdbcTableInstance(tableName, tableDefinition);
     }
@@ -100,18 +108,12 @@ public class JdbcTableManager
                     escapeNamePattern(tableName.getName(), escape),
                     new String[] {"TABLE"})
             ) {
-                while (resultSet.next()) {
-                    if (tableNameMatches(tableName, resultSet) && tableSchemaMatches(tableName, resultSet)) {
-                        LOGGER.info("Table {} already exists", tableName.getNameInDatabase());
-                        return true;
-                    }
-                }
+                return QueryResult.forResultSet(resultSet).getRowsCount() > 0;
             }
         }
         catch (SQLException e) {
             throw new QueryExecutionException(e);
         }
-        return false;
     }
 
     private static String escapeNamePattern(String name, String escape)
@@ -127,28 +129,14 @@ public class JdbcTableManager
         return name;
     }
 
-    private boolean tableNameMatches(TableName tableName, ResultSet resultSet)
-            throws SQLException
-    {
-        return resultSet.getString("TABLE_NAME").toLowerCase(ENGLISH).equals(tableName.getNameInDatabase().toLowerCase());
-    }
-
-    private boolean tableSchemaMatches(TableName tableName, ResultSet resultSet)
-            throws SQLException
-    {
-        if (tableName.getSchema().isPresent()) {
-            return resultSet.getString("TABLE_SCHEM").toLowerCase(ENGLISH).equals(tableName.getSchema().get().toLowerCase());
-        }
-        else {
-            return true;
-        }
-    }
-
     private void createTable(JdbcTableDefinition tableDefinition, TableName tableName)
     {
-        tableName.getSchema().ifPresent(schema ->
-                        queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
-        );
+        boolean skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
+        if (!skipCreateSchema) {
+            tableName.getSchema().ifPresent(schema ->
+                            queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
+            );
+        }
 
         queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase()));
     }

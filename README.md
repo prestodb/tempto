@@ -176,13 +176,16 @@ databases:           # database connections
     jdbc_user: hdfs
     jdbc_password: na
 
-  psql:           # posgresql
+  psql:           # postgresql
     jdbc_driver_class: org.postgresql.Driver
     jdbc_url: jdbc:postgresql://localhost:5432/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
     table_manager_type: jdbc
+    # (optional) flag to skip schema creation, if a given database does not support
+    # CREATE SCHEMA IF EXISTS syntax
+    skip_create_schema: true
 
 ```
 

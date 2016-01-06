@@ -16,6 +16,7 @@ package com.teradata.tempto.fulfillment.table
 
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition
+import com.teradata.tempto.internal.configuration.EmptyConfiguration
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.fulfillment.table.jdbc.JdbcTableManager
 import com.teradata.tempto.query.QueryExecutor
@@ -24,6 +25,7 @@ import spock.lang.Specification
 import java.sql.Connection
 import java.sql.DatabaseMetaData
 import java.sql.ResultSet
+import java.sql.ResultSetMetaData
 
 public class JdbcTableManagerTest
         extends Specification
@@ -43,8 +45,11 @@ public class JdbcTableManagerTest
     def mockMetadata = Mock(DatabaseMetaData)
     mockExecutor.connection >> mockConnection
     mockConnection.getMetaData() >> mockMetadata
-    mockMetadata.getTables(_, _, _, _) >> Mock(ResultSet)
-    tableManager = new JdbcTableManager(mockExecutor, new TableNameGenerator(), "db_name")
+
+    def mockResultSet = Mock(ResultSet)
+    mockMetadata.getTables(_, _, _, _) >> mockResultSet
+    mockResultSet.getMetaData() >> Mock(ResultSetMetaData)
+    tableManager = new JdbcTableManager(mockExecutor, new TableNameGenerator(), "db_name", EmptyConfiguration.emptyConfiguration())
   }
 
   def 'table without rows does not throw'()
