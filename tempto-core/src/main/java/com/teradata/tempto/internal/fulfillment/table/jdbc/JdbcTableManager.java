@@ -86,14 +86,25 @@ public class JdbcTableManager
         TableName tableName = createImmutableTableName(tableHandle);
         LOGGER.debug("creating immutable table {}", tableName);
         // TODO: drop and recreate table if the underlying data has changed
-        if (!tableExists(tableName)) {
-            createTable(tableDefinition, tableName);
-            JdbcTableDataSource dataSource = tableDefinition.getDataSource();
-            insertData(tableName, dataSource);
+
+        if (!tableName.getSchema().isPresent()) {
+            // If there's no schema specified, you need to drop and recreate the table because there
+            // could be a table from another schema that has the same name
+            dropTableIgnoreError(tableName);
+            createAndInsertData(tableDefinition, tableName);
+        } else if (!tableExists(tableName)) {
+            createAndInsertData(tableDefinition, tableName);
         } else {
             LOGGER.info("Table {} already exists, skipping creation of immutable table", tableName.getNameInDatabase());
         }
         return new JdbcTableInstance(tableName, tableDefinition);
+    }
+
+    private void createAndInsertData(JdbcTableDefinition tableDefinition, TableName tableName)
+    {
+        createTable(tableDefinition, tableName);
+        JdbcTableDataSource dataSource = tableDefinition.getDataSource();
+        insertData(tableName, dataSource);
     }
 
     private boolean tableExists(TableName tableName)
