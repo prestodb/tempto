@@ -39,7 +39,7 @@ public class QueryResultValueComparator
         implements Comparator<Object>
 {
 
-    private static final double DOUBLE_FUZZY_MATCH_THRESHOLD = 0.00000000001;
+    private static final double MACHINE_EPSILON_DOUBLE_64B = Math.pow(2,-53);
     private final JDBCType type;
 
     private QueryResultValueComparator(JDBCType type)
@@ -188,8 +188,7 @@ public class QueryResultValueComparator
         if (isFloatingPointValue(actual) && isFloatingPointValue(expected)) {
             Double actualDouble = Double.valueOf(actual.toString());
             Double expectedDouble = Double.valueOf(expected.toString());
-            Double threshold = expectedDouble * DOUBLE_FUZZY_MATCH_THRESHOLD;
-            return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, threshold);
+            return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, MACHINE_EPSILON_DOUBLE_64B);
         }
         return -1;
     }
