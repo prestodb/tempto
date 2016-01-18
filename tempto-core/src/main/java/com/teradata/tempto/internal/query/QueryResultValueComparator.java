@@ -177,12 +177,12 @@ public class QueryResultValueComparator
 
     private int longEqual(Object actual, Object expected)
     {
-        if (isIntegerValue(actual) && isIntegerValue(expected)) {
-            Long actualLong = Long.valueOf(actual.toString());
-            Long expectedLong = Long.valueOf(expected.toString());
-            return actualLong.compareTo(expectedLong);
+        if (!(isIntegerValue(actual) && isIntegerValue(expected))) {
+            return -1;
         }
-        return -1;
+        Long actualLong = getLongValue(actual);
+        Long expectedLong = getLongValue(expected);
+        return actualLong.compareTo(expectedLong);
     }
 
     private static int floatingEqualWithTolerance(Object actual, Object expected, double tolerance)
@@ -190,9 +190,7 @@ public class QueryResultValueComparator
         if (!(isFloatingPointValue(actual) && isFloatingPointValue(expected))) {
             return -1;
         }
-        Double actualDouble = Double.valueOf(actual.toString());
-        Double expectedDouble = Double.valueOf(expected.toString());
-        return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, tolerance);
+        return DoubleMath.fuzzyCompare(getDoubleValue(actual), getDoubleValue(expected), tolerance);
     }
 
     private int singleFloatingEqual(Object actual, Object expected)
@@ -237,13 +235,24 @@ public class QueryResultValueComparator
         return -1;
     }
 
-    private boolean isIntegerValue(Object value)
+    private static boolean isIntegerValue(Object value)
     {
         return (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte);
+    }
+
+    private static long getLongValue(Object object)
+    {
+        return ((Number) object).longValue();
     }
 
     private static boolean isFloatingPointValue(Object value)
     {
         return (value instanceof Float || value instanceof Double);
     }
+
+    private static double getDoubleValue(Object object)
+    {
+        return ((Number) object).doubleValue();
+    }
+
 }
