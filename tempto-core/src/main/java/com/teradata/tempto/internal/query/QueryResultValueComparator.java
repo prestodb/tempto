@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.query;
 
+import com.google.common.base.Throwables;
 import com.google.common.math.DoubleMath;
 import com.google.common.primitives.UnsignedBytes;
 
@@ -105,28 +106,28 @@ public class QueryResultValueComparator
 
     private int arrayEqual(Object actual, Object expected)
     {
-        if (actual instanceof Array && expected instanceof List) {
-            Array actualArray = (Array) actual;
-            QueryResultValueComparator elementComparator;
-            elementComparator = comparatorForArrayElements(actualArray);
-            List actualList = arrayAsList(actualArray);
-            List expectedList = (List) expected;
-
-            if (actualList.size() != expectedList.size()) {
-                return -1;
-            }
-
-            for (int i = 0; i < actualList.size(); ++i) {
-                Object actualValue = actualList.get(i);
-                Object expectedValue = expectedList.get(i);
-                int compareResult = elementComparator.compare(actualValue, expectedValue);
-                if (compareResult != 0) {
-                    return compareResult;
-                }
-            }
-            return 0;
+        if (!(actual instanceof Array && expected instanceof List)) {
+            return -1;
         }
-        return -1;
+        Array actualArray = (Array) actual;
+        QueryResultValueComparator elementComparator;
+        elementComparator = comparatorForArrayElements(actualArray);
+        List actualList = arrayAsList(actualArray);
+        List expectedList = (List) expected;
+
+        if (actualList.size() != expectedList.size()) {
+            return -1;
+        }
+
+        for (int i = 0; i < actualList.size(); ++i) {
+            Object actualValue = actualList.get(i);
+            Object expectedValue = expectedList.get(i);
+            int compareResult = elementComparator.compare(actualValue, expectedValue);
+            if (compareResult != 0) {
+                return compareResult;
+            }
+        }
+        return 0;
     }
 
     private QueryResultValueComparator comparatorForArrayElements(Array actualArray)
@@ -136,7 +137,7 @@ public class QueryResultValueComparator
             elementComparator = comparatorForType(JDBCType.valueOf(actualArray.getBaseType()));
         }
         catch (SQLException e) {
-            throw new RuntimeException();
+            throw Throwables.propagate(e);
         }
         return elementComparator;
     }
@@ -147,7 +148,7 @@ public class QueryResultValueComparator
             return Arrays.asList((Object[])array.getArray());
         }
         catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw Throwables.propagate(e);
         }
     }
 
