@@ -39,7 +39,8 @@ public class QueryResultValueComparator
         implements Comparator<Object>
 {
 
-    private static final double MACHINE_EPSILON_DOUBLE_64B = Math.pow(2,-53);
+    private static final double MACHINE_EPSILON_FLOATING_32B = Math.pow(2,-24);
+    private static final double MACHINE_EPSILON_FLOATING_64B = Math.pow(2,-53);
     private final JDBCType type;
 
     private QueryResultValueComparator(JDBCType type)
@@ -81,6 +82,7 @@ public class QueryResultValueComparator
                 return longEqual(actual, expected);
             case REAL:
             case FLOAT:
+                return singleFloatingEqual(actual, expected);
             case DOUBLE:
                 return doubleEqual(actual, expected);
             case DECIMAL:
@@ -183,14 +185,24 @@ public class QueryResultValueComparator
         return -1;
     }
 
+    private static int floatingEqualWithTolerance(Object actual, Object expected, double tolerance)
+    {
+        if (!(isFloatingPointValue(actual) && isFloatingPointValue(expected))) {
+            return -1;
+        }
+        Double actualDouble = Double.valueOf(actual.toString());
+        Double expectedDouble = Double.valueOf(expected.toString());
+        return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, tolerance);
+    }
+
+    private int singleFloatingEqual(Object actual, Object expected)
+    {
+        return floatingEqualWithTolerance(actual, expected, MACHINE_EPSILON_FLOATING_32B);
+    }
+
     private int doubleEqual(Object actual, Object expected)
     {
-        if (isFloatingPointValue(actual) && isFloatingPointValue(expected)) {
-            Double actualDouble = Double.valueOf(actual.toString());
-            Double expectedDouble = Double.valueOf(expected.toString());
-            return DoubleMath.fuzzyCompare(actualDouble, expectedDouble, MACHINE_EPSILON_DOUBLE_64B);
-        }
-        return -1;
+        return floatingEqualWithTolerance(actual, expected, MACHINE_EPSILON_FLOATING_64B);
     }
 
     private int bigDecimalEqual(Object actual, Object expected)
@@ -230,7 +242,7 @@ public class QueryResultValueComparator
         return (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte);
     }
 
-    private boolean isFloatingPointValue(Object value)
+    private static boolean isFloatingPointValue(Object value)
     {
         return (value instanceof Float || value instanceof Double);
     }
