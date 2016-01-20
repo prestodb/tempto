@@ -1,4 +1,5 @@
 /*
+/*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,6 +243,9 @@ public class JdbcTableManager
             throws SQLException
     {
         checkNotNull(preparedStatement);
+        if (batchRows.size() == 0) {
+            return;
+        }
         int[] insertCounts = preparedStatement.executeBatch();
         for (int rowIndex = 0; rowIndex < insertCounts.length; ++rowIndex) {
             if (insertCounts[rowIndex] != 1) {
