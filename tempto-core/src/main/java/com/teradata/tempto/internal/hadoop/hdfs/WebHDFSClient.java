@@ -24,16 +24,28 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthSchemeProvider;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.KerberosCredentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.config.Lookup;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.auth.SPNegoSchemeFactory;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -47,6 +59,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,18 +90,49 @@ public class WebHDFSClient
     private static final int NUMBER_OF_RETRIES = 3;
 
     private final HostAndPort nameNode;
-
     private final CloseableHttpClient httpClient;
 
     @Inject
     public WebHDFSClient(
             @Named("hdfs.webhdfs.host") String webHdfsNameNodeHost,
-            @Named("hdfs.webhdfs.port") int webHdfsNameNodePort)
+            @Named("hdfs.webhdfs.port") int webHdfsNameNodePort,
+            @Named("hdfs.webhdfs.authentication") String authentication,
+            @Named("hdfs.webhdfs.user") String user,
+            @Named("hdfs.webhdfs.password") String password)
     {
         this.nameNode = fromParts(checkNotNull(webHdfsNameNodeHost), webHdfsNameNodePort);
         checkArgument(webHdfsNameNodePort > 0, "Invalid name node WebHDFS port number: %s", webHdfsNameNodePort);
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        httpClientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true));
 
-        this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
+
+        // https://github.com/spring-projects/spring-security-kerberos/blob/master/spring-security-kerberos-client
+        // /src/main/java/org/springframework/security/kerberos/client/KerberosRestTemplate.java
+        if ("SPNEGO".equals(authentication)) {
+            Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
+                    .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true))
+                    .build();
+            httpClientBuilder.setDefaultAuthSchemeRegistry(authSchemeRegistry);
+
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            AuthScope authscope = new AuthScope(null, -1, null);
+            credentialsProvider.setCredentials(authscope, new Credentials() {
+                @Override
+                public Principal getUserPrincipal()
+                {
+                    return null;
+                }
+
+                @Override
+                public String getPassword()
+                {
+                    return null;
+                }
+            });
+            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        }
+
+        this.httpClient = httpClientBuilder.build();
     }
 
     @Override
@@ -96,7 +140,7 @@ public class WebHDFSClient
     {
         // TODO: reconsider permission=777
         HttpPut mkdirRequest = new HttpPut(buildUri(path, username, "MKDIRS", Pair.of("permission", "777")));
-        try (CloseableHttpResponse response = httpClient.execute(mkdirRequest)) {
+        try (CloseableHttpResponse response = executeRequest(mkdirRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("MKDIRS", path, username, mkdirRequest, response);
             }
@@ -112,7 +156,7 @@ public class WebHDFSClient
     {
         Pair[] params = {Pair.of("recursive", "true")};
         HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, username, "DELETE", params));
-        try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
+        try (CloseableHttpResponse response = executeRequest(removeFileOrDirectoryRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("DELETE", path, username, removeFileOrDirectoryRequest, response);
             }
@@ -156,7 +200,7 @@ public class WebHDFSClient
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
         writeRequest.setEntity(entity);
 
-        try (CloseableHttpResponse response = httpClient.execute(writeRequest)) {
+        try (CloseableHttpResponse response = executeRequest(writeRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
                 throw invalidStatusException("CREATE", path, username, writeRequest, response);
             }
@@ -172,7 +216,7 @@ public class WebHDFSClient
     public void loadFile(String path, String username, OutputStream outputStream)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, username, "OPEN"));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        try (CloseableHttpResponse response = executeRequest(readRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("OPEN", path, username, readRequest, response);
             }
@@ -191,7 +235,7 @@ public class WebHDFSClient
     public long getLength(String path, String username)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        try (CloseableHttpResponse response = executeRequest(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != SC_OK) {
                 throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
@@ -208,7 +252,7 @@ public class WebHDFSClient
     public boolean exist(String path, String username)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        try (CloseableHttpResponse response = executeRequest(readRequest)) {
             return response.getStatusLine().getStatusCode() == SC_OK;
         }
         catch (IOException e) {
@@ -221,7 +265,7 @@ public class WebHDFSClient
     {
         Pair[] params = {Pair.of("xattr.name", key), Pair.of("xattr.value", value), Pair.of("flag", "CREATE")};
         HttpPut setXAttrRequest = new HttpPut(buildUri(path, username, "SETXATTR", params));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = executeRequest(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("SETXATTR", path, username, setXAttrRequest, response);
             }
@@ -237,7 +281,7 @@ public class WebHDFSClient
     {
         Pair[] params = {Pair.of("xattr.name", key)};
         HttpPut setXAttrRequest = new HttpPut(buildUri(path, username, "REMOVEXATTR", params));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = executeRequest(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("SETXATTR", path, username, setXAttrRequest, response);
             }
@@ -253,7 +297,7 @@ public class WebHDFSClient
     {
         Pair[] params = {Pair.of("xattr.name", key)};
         HttpGet setXAttrRequest = new HttpGet(buildUri(path, username, "GETXATTRS", params));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = executeRequest(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 return Optional.empty();
             }
@@ -276,7 +320,7 @@ public class WebHDFSClient
 
     private String executeAndGetRedirectUri(HttpUriRequest request)
     {
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
+        try (CloseableHttpResponse response = executeRequest(request)) {
             if (response.getStatusLine().getStatusCode() != SC_TEMPORARY_REDIRECT) {
                 throw new RuntimeException("Expected redirect for request: " + request);
             }
@@ -323,6 +367,13 @@ public class WebHDFSClient
                     ", path: " + path +
                     ", username: " + username);
         }
+    }
+
+    public CloseableHttpResponse executeRequest(
+            final HttpUriRequest request)
+            throws IOException
+    {
+        return httpClient.execute(request);
     }
 
     private RuntimeException invalidStatusException(String operation, String path, String username, HttpRequest request, HttpResponse response)
