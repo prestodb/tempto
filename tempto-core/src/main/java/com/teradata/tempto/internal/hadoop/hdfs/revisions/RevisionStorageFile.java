@@ -26,13 +26,11 @@ public class RevisionStorageFile
 {
 
     private final HdfsClient hdfsClient;
-    private final String hdfsUser;
     private final String testDataBasePath;
 
-    RevisionStorageFile(HdfsClient hdfsClient, String hdfsUser, String testDataBasePath)
+    RevisionStorageFile(HdfsClient hdfsClient, String testDataBasePath)
     {
         this.hdfsClient = hdfsClient;
-        this.hdfsUser = hdfsUser;
         this.testDataBasePath = testDataBasePath;
     }
 
@@ -41,11 +39,11 @@ public class RevisionStorageFile
     {
         String markerFilePath = markerFilePath(hdfsPath);
 
-        if (!hdfsClient.exist(markerFilePath, hdfsUser)) {
+        if (!hdfsClient.exist(markerFilePath)) {
             return Optional.empty();
         }
 
-        return Optional.of(hdfsClient.loadFile(markerFilePath, hdfsUser));
+        return Optional.of(hdfsClient.loadFile(markerFilePath));
     }
 
     @Override
@@ -53,14 +51,14 @@ public class RevisionStorageFile
     {
         String markerFilePath = markerFilePath(hdfsPath);
 
-        hdfsClient.delete(markerFilePath, hdfsUser);
-        hdfsClient.saveFile(markerFilePath, hdfsUser, revision);
+        hdfsClient.delete(markerFilePath);
+        hdfsClient.saveFile(markerFilePath, revision);
     }
 
     @Override
     public void remove(String hdfsPath)
     {
-        hdfsClient.delete(markerFilePath(hdfsPath), hdfsUser);
+        hdfsClient.delete(markerFilePath(hdfsPath));
     }
 
     private String markerFilePath(String path)

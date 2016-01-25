@@ -36,47 +36,46 @@ public interface HdfsClient
     interface RepeatableContentProducer
     {
         /**
-         * @throws IOException If the stream cannot be opened
          * @return a content {@link InputStream}. It will be automatically closed after use.
+         * @throws IOException If the stream cannot be opened
          */
         InputStream getInputStream()
                 throws IOException;
     }
 
-    void createDirectory(String path, String username);
+    void createDirectory(String path);
 
-    void delete(String path, String username);
+    void delete(String path);
 
-    void saveFile(String path, String username, InputStream input);
+    void saveFile(String path, InputStream input);
 
-    void saveFile(String path, String username, RepeatableContentProducer repeatableContentProducer);
+    void saveFile(String path, RepeatableContentProducer repeatableContentProducer);
 
-    default void saveFile(String path, String username, String content)
+    default void saveFile(String path, String content)
     {
-        saveFile(path, username, new ByteArrayInputStream(content.getBytes()));
+        saveFile(path, new ByteArrayInputStream(content.getBytes()));
     }
 
-    void loadFile(String path, String username, OutputStream outputStream);
+    void loadFile(String path, OutputStream outputStream);
 
-    void setXAttr(String path, String username, String key, String value);
+    void setXAttr(String path, String key, String value);
 
-    void removeXAttr(String path, String username, String key);
+    void removeXAttr(String path, String key);
 
-    Optional<String> getXAttr(String path, String username, String key);
+    Optional<String> getXAttr(String path, String key);
 
-    default String loadFile(String path, String username)
+    default String loadFile(String path)
     {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        loadFile(path, username, output);
+        loadFile(path, output);
         return new String(output.toByteArray(), defaultCharset());
     }
 
     /**
      * @param path File to be examined
-     * @param username HDFS user name
      * @return length of a file stored in HDFS, -1 if file not exists
      */
-    long getLength(String path, String username);
+    long getLength(String path);
 
-    boolean exist(String path, String username);
+    boolean exist(String path);
 }

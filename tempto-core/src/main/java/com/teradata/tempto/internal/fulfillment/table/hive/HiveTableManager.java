@@ -53,7 +53,6 @@ public class HiveTableManager
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
     private final String testDataBasePath;
     private final HdfsClient hdfsClient;
-    private final String hdfsUsername;
     private final String databaseName;
 
     @Inject
@@ -62,7 +61,6 @@ public class HiveTableManager
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             HdfsClient hdfsClient,
-            @Named("hdfs.username") String hdfsUsername,
             @Named("databaseName") String databaseName)
     {
         super(queryExecutor, tableNameGenerator);
@@ -71,7 +69,6 @@ public class HiveTableManager
         this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
         this.hdfsClient = checkNotNull(hdfsClient, "hdfsClientd is null");
-        this.hdfsUsername = checkNotNull(hdfsUsername, "hdfsUsername is null");
     }
 
     @Override
@@ -127,7 +124,7 @@ public class HiveTableManager
     public void dropAllMutableTables()
     {
         super.dropAllMutableTables();
-        hdfsClient.delete(getMutableTablesDir(), hdfsUsername);
+        hdfsClient.delete(getMutableTablesDir());
     }
 
     @Override

@@ -43,12 +43,11 @@ public class TpchDataSourceTest
         assertThat(path).isEqualTo("/tempto/tpch/sf-1_00/REGION");
 
         HdfsClient hdfsClient = testContext().getDependency(HdfsClient.class);
-        String hdfsUsername = testContext().getDependency(String.class, "hdfs.username");
 
         Iterable<TpchEntity> generator = REGION.getTpchTableEntity().createGenerator(1.0, 1, 1);
         String expectedData = IOUtils.toString(new TpchEntityByteSource<>(generator).openStream());
-        hdfsClient.saveFile(path + "/data_0", hdfsUsername, new TpchEntityByteSource<>(generator).openStream());
-        String storedData = hdfsClient.loadFile(path + "/data_0", hdfsUsername);
+        hdfsClient.saveFile(path + "/data_0", new TpchEntityByteSource<>(generator).openStream());
+        String storedData = hdfsClient.loadFile(path + "/data_0");
 
         assertThat(expectedData).isEqualTo(storedData);
     }

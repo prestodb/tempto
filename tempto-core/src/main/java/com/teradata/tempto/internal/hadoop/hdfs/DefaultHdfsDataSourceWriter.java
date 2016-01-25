@@ -22,7 +22,6 @@ import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -36,16 +35,13 @@ public class DefaultHdfsDataSourceWriter
     private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
 
     private final HdfsClient hdfsClient;
-    private final String hdfsUsername;
     private final RevisionStorage revisionStorage;
 
     @Inject
     public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient,
-            RevisionStorage revisionStorage,
-            @Named("hdfs.username") String hdfsUsername)
+            RevisionStorage revisionStorage)
     {
         this.hdfsClient = hdfsClient;
-        this.hdfsUsername = hdfsUsername;
         this.revisionStorage = revisionStorage;
     }
 
@@ -57,8 +53,8 @@ public class DefaultHdfsDataSourceWriter
         }
 
         revisionStorage.remove(dataSourcePath);
-        hdfsClient.delete(dataSourcePath, hdfsUsername);
-        hdfsClient.createDirectory(dataSourcePath, hdfsUsername);
+        hdfsClient.delete(dataSourcePath);
+        hdfsClient.createDirectory(dataSourcePath);
         storeTableFiles(dataSourcePath, dataSource);
         revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
     }
@@ -87,7 +83,7 @@ public class DefaultHdfsDataSourceWriter
         for (RepeatableContentProducer fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;
             LOGGER.debug("Saving new file {} ({})", filePath, dataSource.revisionMarker());
-            hdfsClient.saveFile(filePath, hdfsUsername, fileContent);
+            hdfsClient.saveFile(filePath, fileContent);
             fileIndex++;
         }
     }

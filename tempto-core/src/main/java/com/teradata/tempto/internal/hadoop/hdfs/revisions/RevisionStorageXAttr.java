@@ -31,31 +31,29 @@ public class RevisionStorageXAttr
     private static final String REVISON_XATTR_NAME = "user.test-data-revision";
 
     private final HdfsClient hdfsClient;
-    private final String hdfsUser;
 
-    RevisionStorageXAttr(HdfsClient hdfsClient, String hdfsUser)
+    RevisionStorageXAttr(HdfsClient hdfsClient)
     {
         this.hdfsClient = hdfsClient;
-        this.hdfsUser = hdfsUser;
     }
 
     @Override
     public Optional<String> get(String hdfsPath)
     {
-        return hdfsClient.getXAttr(hdfsPath, hdfsUser, REVISON_XATTR_NAME);
+        return hdfsClient.getXAttr(hdfsPath, REVISON_XATTR_NAME);
     }
 
     @Override
     public void put(String hdfsPath, String revision)
     {
-        hdfsClient.setXAttr(hdfsPath, hdfsUser, REVISON_XATTR_NAME, revision);
+        hdfsClient.setXAttr(hdfsPath, REVISON_XATTR_NAME, revision);
     }
 
     @Override
     public void remove(String hdfsPath)
     {
         if(get(hdfsPath).isPresent()){
-            hdfsClient.removeXAttr(hdfsPath, hdfsUser, REVISON_XATTR_NAME);
+            hdfsClient.removeXAttr(hdfsPath, REVISON_XATTR_NAME);
         }
     }
 }

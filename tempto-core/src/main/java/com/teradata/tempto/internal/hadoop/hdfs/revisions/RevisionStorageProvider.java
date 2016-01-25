@@ -32,16 +32,13 @@ public class RevisionStorageProvider
     private static final String TEST_X_ATTR_VALUE = "test-attr-value";
 
     private final HdfsClient hdfsClient;
-    private final String hdfsUser;
     private final String testDataBasePath;
 
     @Inject
     public RevisionStorageProvider(HdfsClient hdfsClient,
-            @Named("hdfs.username") String hdfsUser,
             @Named("tests.hdfs.path") String testDataBasePath)
     {
         this.hdfsClient = hdfsClient;
-        this.hdfsUser = hdfsUser;
         this.testDataBasePath = testDataBasePath;
     }
 
@@ -49,26 +46,26 @@ public class RevisionStorageProvider
     {
         if (xAttrsSupported()) {
             LOGGER.debug("HDFS xAttrs supported. Lets use RevisionMarkerXAttr.");
-            return new RevisionStorageXAttr(hdfsClient, hdfsUser);
+            return new RevisionStorageXAttr(hdfsClient);
         }
         else {
             LOGGER.debug("HDFS xAttrs are not supported. Lets use RevisionMarkerFile.");
-            return new RevisionStorageFile(hdfsClient, hdfsUser, testDataBasePath);
+            return new RevisionStorageFile(hdfsClient, testDataBasePath);
         }
     }
 
     private boolean xAttrsSupported()
     {
         try {
-            hdfsClient.createDirectory(testDataBasePath, hdfsUser);
-            hdfsClient.setXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
-            boolean supported = hdfsClient.getXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
-            hdfsClient.removeXAttr(testDataBasePath, hdfsUser, TEST_X_ATTR_KEY);
+            hdfsClient.createDirectory(testDataBasePath);
+            hdfsClient.setXAttr(testDataBasePath, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
+            boolean supported = hdfsClient.getXAttr(testDataBasePath, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
+            hdfsClient.removeXAttr(testDataBasePath, TEST_X_ATTR_KEY);
             return supported;
         }
         catch (RuntimeException e) {
             if (isXAttrsWebCallRelated(e)) {
-                LOGGER.debug("Could not get xAttr for path: " + testDataBasePath + " in hdfs, user: " + hdfsUser + "; e=" + e.getMessage());
+                LOGGER.debug("Could not get xAttr for path: " + testDataBasePath + " in hdfs; e=" + e.getMessage());
                 return false;
             }
             throw e;

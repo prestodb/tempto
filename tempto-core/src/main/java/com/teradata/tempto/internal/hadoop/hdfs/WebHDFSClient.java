@@ -77,28 +77,29 @@ public class WebHDFSClient
     private static final int NUMBER_OF_RETRIES = 3;
 
     private final HostAndPort nameNode;
-
+    private final String username;
     private final CloseableHttpClient httpClient;
 
     @Inject
     public WebHDFSClient(
             @Named("hdfs.webhdfs.host") String webHdfsNameNodeHost,
-            @Named("hdfs.webhdfs.port") int webHdfsNameNodePort)
+            @Named("hdfs.webhdfs.port") int webHdfsNameNodePort,
+            @Named("hdfs.username") String username)
     {
         this.nameNode = fromParts(checkNotNull(webHdfsNameNodeHost), webHdfsNameNodePort);
+        this.username = checkNotNull(username, "username is null");
         checkArgument(webHdfsNameNodePort > 0, "Invalid name node WebHDFS port number: %s", webHdfsNameNodePort);
-
         this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
     }
 
     @Override
-    public void createDirectory(String path, String username)
+    public void createDirectory(String path)
     {
         // TODO: reconsider permission=777
-        HttpPut mkdirRequest = new HttpPut(buildUri(path, username, "MKDIRS", Pair.of("permission", "777")));
+        HttpPut mkdirRequest = new HttpPut(buildUri(path, "MKDIRS", Pair.of("permission", "777")));
         try (CloseableHttpResponse response = httpClient.execute(mkdirRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("MKDIRS", path, username, mkdirRequest, response);
+                throw invalidStatusException("MKDIRS", path, mkdirRequest, response);
             }
             logger.debug("Created directory {} - username: {}", path, username);
         }
@@ -108,13 +109,13 @@ public class WebHDFSClient
     }
 
     @Override
-    public void delete(String path, String username)
+    public void delete(String path)
     {
         Pair[] params = {Pair.of("recursive", "true")};
-        HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, username, "DELETE", params));
+        HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, "DELETE", params));
         try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("DELETE", path, username, removeFileOrDirectoryRequest, response);
+                throw invalidStatusException("DELETE", path, removeFileOrDirectoryRequest, response);
             }
             logger.debug("Removed file or directory {} - username: {}", path, username);
         }
@@ -124,10 +125,10 @@ public class WebHDFSClient
     }
 
     @Override
-    public void saveFile(String path, String username, InputStream input)
+    public void saveFile(String path, InputStream input)
     {
         try {
-            saveFile(path, username, new BufferedHttpEntity(new InputStreamEntity(input)));
+            saveFile(path, new BufferedHttpEntity(new InputStreamEntity(input)));
         }
         catch (IOException e) {
             throw new RuntimeException("Could not create buffered http entity", e);
@@ -135,9 +136,9 @@ public class WebHDFSClient
     }
 
     @Override
-    public void saveFile(String path, String username, RepeatableContentProducer repeatableContentProducer)
+    public void saveFile(String path, RepeatableContentProducer repeatableContentProducer)
     {
-        saveFile(path, username, new EntityTemplate(toApacheContentProducer(repeatableContentProducer)));
+        saveFile(path, new EntityTemplate(toApacheContentProducer(repeatableContentProducer)));
     }
 
     private ContentProducer toApacheContentProducer(RepeatableContentProducer repeatableContentProducer)
@@ -149,16 +150,16 @@ public class WebHDFSClient
         };
     }
 
-    private void saveFile(String path, String username, HttpEntity entity)
+    private void saveFile(String path, HttpEntity entity)
     {
         Pair<String, String> params = Pair.of("overwrite", "true");
-        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, username, "CREATE", params)));
+        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, "CREATE", params)));
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
         writeRequest.setEntity(entity);
 
         try (CloseableHttpResponse response = httpClient.execute(writeRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
-                throw invalidStatusException("CREATE", path, username, writeRequest, response);
+                throw invalidStatusException("CREATE", path, writeRequest, response);
             }
             long length = waitForFileSavedAndReturnLength(path, username);
             logger.debug("Saved file {} - username: {}, size: {}", path, username, byteCountToDisplaySize(length));
@@ -169,12 +170,12 @@ public class WebHDFSClient
     }
 
     @Override
-    public void loadFile(String path, String username, OutputStream outputStream)
+    public void loadFile(String path, OutputStream outputStream)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, username, "OPEN"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "OPEN"));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("OPEN", path, username, readRequest, response);
+                throw invalidStatusException("OPEN", path, readRequest, response);
             }
 
             IOUtils.copy(response.getEntity().getContent(), outputStream);
@@ -188,13 +189,13 @@ public class WebHDFSClient
 
     @Override
     @SuppressWarnings("unchecked")
-    public long getLength(String path, String username)
+    public long getLength(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS"));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != SC_OK) {
-                throw invalidStatusException("GETFILESTATUS", path, username, readRequest, response);
+                throw invalidStatusException("GETFILESTATUS", path, readRequest, response);
             }
             Map<String, Object> responseObject = deserializeJsonResponse(response);
             return ((Number) ((Map<String, Object>) responseObject.get("FileStatus")).get("length")).longValue();
@@ -205,9 +206,9 @@ public class WebHDFSClient
     }
 
     @Override
-    public boolean exist(String path, String username)
+    public boolean exist(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, username, "GETFILESTATUS"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS"));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             return response.getStatusLine().getStatusCode() == SC_OK;
         }
@@ -217,13 +218,13 @@ public class WebHDFSClient
     }
 
     @Override
-    public void setXAttr(String path, String username, String key, String value)
+    public void setXAttr(String path, String key, String value)
     {
         Pair[] params = {Pair.of("xattr.name", key), Pair.of("xattr.value", value), Pair.of("flag", "CREATE")};
-        HttpPut setXAttrRequest = new HttpPut(buildUri(path, username, "SETXATTR", params));
+        HttpPut setXAttrRequest = new HttpPut(buildUri(path, "SETXATTR", params));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("SETXATTR", path, username, setXAttrRequest, response);
+                throw invalidStatusException("SETXATTR", path, setXAttrRequest, response);
             }
             logger.debug("Set xAttr {} = {} for {}, username: {}", key, value, path, username);
         }
@@ -233,13 +234,13 @@ public class WebHDFSClient
     }
 
     @Override
-    public void removeXAttr(String path, String username, String key)
+    public void removeXAttr(String path, String key)
     {
         Pair[] params = {Pair.of("xattr.name", key)};
-        HttpPut setXAttrRequest = new HttpPut(buildUri(path, username, "REMOVEXATTR", params));
+        HttpPut setXAttrRequest = new HttpPut(buildUri(path, "REMOVEXATTR", params));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("SETXATTR", path, username, setXAttrRequest, response);
+                throw invalidStatusException("SETXATTR", path, setXAttrRequest, response);
             }
             logger.debug("Remove xAttr {} for {}, username: {}", key, path, username);
         }
@@ -249,16 +250,16 @@ public class WebHDFSClient
     }
 
     @Override
-    public Optional<String> getXAttr(String path, String username, String key)
+    public Optional<String> getXAttr(String path, String key)
     {
         Pair[] params = {Pair.of("xattr.name", key)};
-        HttpGet setXAttrRequest = new HttpGet(buildUri(path, username, "GETXATTRS", params));
+        HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", params));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 return Optional.empty();
             }
             if (response.getStatusLine().getStatusCode() != SC_OK) {
-                throw invalidStatusException("GETXATTRS", path, username, setXAttrRequest, response);
+                throw invalidStatusException("GETXATTRS", path, setXAttrRequest, response);
             }
 
             Map<String, Object> responseObject = deserializeJsonResponse(response);
@@ -294,10 +295,10 @@ public class WebHDFSClient
      */
     private long waitForFileSavedAndReturnLength(String path, String username)
     {
-        return getLength(path, username);
+        return getLength(path);
     }
 
-    private URI buildUri(String path, String username, String operation, Pair<String, String>... parameters)
+    private URI buildUri(String path, String operation, Pair<String, String>... parameters)
     {
         try {
             if (!path.startsWith("/")) {
@@ -308,8 +309,7 @@ public class WebHDFSClient
                     .setHost(nameNode.getHostText())
                     .setPort(nameNode.getPort())
                     .setPath("/webhdfs/v1" + checkNotNull(path))
-                    .setParameter("op", checkNotNull(operation))
-                    .setParameter("user.name", checkNotNull(username));
+                    .setParameter("op", checkNotNull(operation));
 
             for (Pair<String, String> parameter : parameters) {
                 uriBuilder.setParameter(parameter.getKey(), parameter.getValue());
@@ -320,12 +320,11 @@ public class WebHDFSClient
         catch (URISyntaxException e) {
             throw new RuntimeException("Could not create save file URI" +
                     ", nameNode: " + nameNode +
-                    ", path: " + path +
-                    ", username: " + username);
+                    ", path: " + path);
         }
     }
 
-    private RuntimeException invalidStatusException(String operation, String path, String username, HttpRequest request, HttpResponse response)
+    private RuntimeException invalidStatusException(String operation, String path, HttpRequest request, HttpResponse response)
             throws IOException
     {
         return new RuntimeException("Operation " + operation +
