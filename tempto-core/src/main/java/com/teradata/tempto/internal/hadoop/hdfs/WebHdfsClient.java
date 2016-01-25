@@ -18,6 +18,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HostAndPort;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,13 +36,7 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,9 +48,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.net.HostAndPort.fromParts;
+import static java.util.Collections.emptyMap;
 import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
 import static org.apache.commons.io.IOUtils.copyLarge;
 import static org.apache.http.HttpStatus.SC_CREATED;
@@ -66,31 +61,29 @@ import static org.slf4j.LoggerFactory.getLogger;
 /**
  * HDFS client based on WebHDFS REST API.
  */
-public class WebHDFSClient
+public class WebHdfsClient
         implements HdfsClient
 {
-
-    private static final Logger logger = getLogger(WebHDFSClient.class);
+    private static final Logger logger = getLogger(WebHdfsClient.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
-    private static final int NUMBER_OF_RETRIES = 3;
-
-    private final HostAndPort nameNode;
+    private final HostAndPort namenode;
     private final String username;
-    private final CloseableHttpClient httpClient;
+    private final HttpRequestsExecutor httpRequestsExecutor;
 
     @Inject
-    public WebHDFSClient(
-            @Named("hdfs.webhdfs.host") String webHdfsNameNodeHost,
-            @Named("hdfs.webhdfs.port") int webHdfsNameNodePort,
-            @Named("hdfs.username") String username)
+    public WebHdfsClient(
+            @Named("hdfs.webhdfs.host") String namenodeHost,
+            @Named("hdfs.webhdfs.port") int namenodePort,
+            @Named("hdfs.username") String username,
+            HttpRequestsExecutor httpRequestsExecutor)
     {
-        this.nameNode = fromParts(checkNotNull(webHdfsNameNodeHost), webHdfsNameNodePort);
+        checkNotNull(namenodeHost, "namenodeHost is null");
+        this.namenode = HostAndPort.fromParts(namenodeHost, namenodePort);
         this.username = checkNotNull(username, "username is null");
-        checkArgument(webHdfsNameNodePort > 0, "Invalid name node WebHDFS port number: %s", webHdfsNameNodePort);
-        this.httpClient = HttpClientBuilder.create().setRetryHandler(new DefaultHttpRequestRetryHandler(NUMBER_OF_RETRIES, true)).build();
+        this.httpRequestsExecutor = checkNotNull(httpRequestsExecutor, "username is null");
     }
 
     @Override
@@ -98,7 +91,7 @@ public class WebHDFSClient
     {
         // TODO: reconsider permission=777
         HttpPut mkdirRequest = new HttpPut(buildUri(path, "MKDIRS", ImmutableMap.of("permission", "777")));
-        try (CloseableHttpResponse response = httpClient.execute(mkdirRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(mkdirRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("MKDIRS", path, mkdirRequest, response);
             }
@@ -113,7 +106,7 @@ public class WebHDFSClient
     public void delete(String path)
     {
         HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, "DELETE", ImmutableMap.of("recursive", "true")));
-        try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(removeFileOrDirectoryRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("DELETE", path, removeFileOrDirectoryRequest, response);
             }
@@ -152,12 +145,12 @@ public class WebHDFSClient
 
     private void saveFile(String path, HttpEntity entity)
     {
-        Map<String, String> params = ImmutableMap.of("overwrite", "true");
-        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, "CREATE", params)));
+        String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(
+                buildUri(path, "CREATE", ImmutableMap.of("overwrite", "true"))));
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
         writeRequest.setEntity(entity);
 
-        try (CloseableHttpResponse response = httpClient.execute(writeRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(writeRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
                 throw invalidStatusException("CREATE", path, writeRequest, response);
             }
@@ -173,7 +166,7 @@ public class WebHDFSClient
     public void loadFile(String path, OutputStream outputStream)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, "OPEN", ImmutableMap.of()));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(readRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("OPEN", path, readRequest, response);
             }
@@ -191,8 +184,8 @@ public class WebHDFSClient
     @SuppressWarnings("unchecked")
     public long getLength(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", ImmutableMap.of()));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", emptyMap()));
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != SC_OK) {
                 throw invalidStatusException("GETFILESTATUS", path, readRequest, response);
@@ -208,8 +201,8 @@ public class WebHDFSClient
     @Override
     public boolean exist(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", ImmutableMap.of()));
-        try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", emptyMap()));
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(readRequest)) {
             return response.getStatusLine().getStatusCode() == SC_OK;
         }
         catch (IOException e) {
@@ -226,7 +219,7 @@ public class WebHDFSClient
                 "flag", "CREATE"
         );
         HttpPut setXAttrRequest = new HttpPut(buildUri(path, "SETXATTR", params));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("SETXATTR", path, setXAttrRequest, response);
             }
@@ -241,7 +234,7 @@ public class WebHDFSClient
     public void removeXAttr(String path, String key)
     {
         HttpPut setXAttrRequest = new HttpPut(buildUri(path, "REMOVEXATTR", ImmutableMap.of("xattr.name", key)));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("SETXATTR", path, setXAttrRequest, response);
             }
@@ -257,7 +250,7 @@ public class WebHDFSClient
     public Optional<String> getXAttr(String path, String key)
     {
         HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", ImmutableMap.of("xattr.name", key)));
-        try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 return Optional.empty();
             }
@@ -280,7 +273,7 @@ public class WebHDFSClient
 
     private String executeAndGetRedirectUri(HttpUriRequest request)
     {
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
+        try (CloseableHttpResponse response = httpRequestsExecutor.execute(request)) {
             if (response.getStatusLine().getStatusCode() != SC_TEMPORARY_REDIRECT) {
                 throw new RuntimeException("Expected redirect for request: " + request);
             }
@@ -309,8 +302,8 @@ public class WebHDFSClient
             }
             URIBuilder uriBuilder = new URIBuilder()
                     .setScheme("http")
-                    .setHost(nameNode.getHostText())
-                    .setPort(nameNode.getPort())
+                    .setHost(namenode.getHostText())
+                    .setPort(namenode.getPort())
                     .setPath("/webhdfs/v1" + checkNotNull(path))
                     .setParameter("op", checkNotNull(operation));
 
@@ -322,7 +315,7 @@ public class WebHDFSClient
         }
         catch (URISyntaxException e) {
             throw new RuntimeException("Could not create save file URI" +
-                    ", nameNode: " + nameNode +
+                    ", nameNode: " + namenode +
                     ", path: " + path);
         }
     }

@@ -143,6 +143,18 @@ hdfs:                     # HDFS related settings
     port: 50070           # port of HDFS REST interface
 ```
 
+Framework supports the `SPNEGO` authentication for HDFS. Below is the sample configuration:
+ 
+```YAML
+hdfs:                     
+  username: user@EXAMPLE.COM          # kerberos principal to use for accessing HDFS
+  webhdfs:
+    host: master                      # hostname exposing HDFS REST interface
+    port: 50070                       # port of HDFS REST interface
+    authentication: SPNEGO            # authentication type now is set to `SPNEGO`
+    keytab: /path/to/user.keytab      # path to the `user` keytab
+```
+
 * **databases**
 
 Currently we support only JDBC based database connections. Multiple such connections may be defined in this
