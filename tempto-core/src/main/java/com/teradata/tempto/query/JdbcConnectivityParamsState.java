@@ -35,6 +35,8 @@ public class JdbcConnectivityParamsState
     public final boolean pooling;
     public final Optional<String> jar;
     public Optional<String> prepareStatement;
+    public Optional<String> kerberosPrincipal;
+    public Optional<String> kerberosKeytab;
 
     public JdbcConnectivityParamsState(
             String name,
@@ -44,7 +46,9 @@ public class JdbcConnectivityParamsState
             String password,
             boolean pooling,
             Optional<String> jar,
-            Optional<String> prepareStatement)
+            Optional<String> prepareStatement,
+            Optional<String> kerberosPrincipal,
+            Optional<String> kerberosKeytab)
     {
         this.name = name;
         this.driverClass = driverClass;
@@ -54,6 +58,8 @@ public class JdbcConnectivityParamsState
         this.pooling = pooling;
         this.jar = jar;
         this.prepareStatement = prepareStatement;
+        this.kerberosPrincipal = kerberosPrincipal;
+        this.kerberosKeytab = kerberosKeytab;
     }
 
     @Override

@@ -33,6 +33,8 @@ public class JdbcConnectionsConfiguration
     private static final String JDBC_JAR = "jdbc_jar";
     private static final String ALIAS_KEY = "alias";
     private static final String PREPARE_STATEMENT_KEY = "prepare_statement";
+    private static final String KERBEROS_PRINCIPAL_KEY = "kerberos_principal";
+    private static final String KERBEROS_KEYTAB_KEY = "kerberos_keytab";
 
     private final Configuration configuration;
 
@@ -59,7 +61,9 @@ public class JdbcConnectionsConfiguration
                 connectionConfiguration.getStringMandatory(JDBC_PASSWORD_KEY),
                 connectionConfiguration.getBoolean(JDBC_POOLING_KEY).orElse(true),
                 connectionConfiguration.getString(JDBC_JAR),
-                connectionConfiguration.getString(PREPARE_STATEMENT_KEY));
+                connectionConfiguration.getString(PREPARE_STATEMENT_KEY),
+                connectionConfiguration.getString(KERBEROS_PRINCIPAL_KEY),
+                connectionConfiguration.getString(KERBEROS_KEYTAB_KEY));
 
         return jdbcConnectivityParamsState;
     }

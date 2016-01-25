@@ -181,6 +181,15 @@ databases:           # database connections
     jdbc_pooling: false                                                               # (optional) should connection pooling be used (it does not work for Hive due to driver issues)
     jdbc_jar: tempto-hive-jdbc/build/libs/hive-jdbc-fat.jar                           # (optional) Path to jar containing database driver. Required if jar is not present in global classpath.
     table_manager_type: hive
+    
+  hive_kerberos:
+    jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
+    jdbc_url: jdbc:hive2://master:10000/default;principal=hive/master@EXAMPLE.COM;auth=kerberos;kerberosAuthType=fromSubject;
+    jdbc_user: username
+    jdbc_password: na 
+    jdbc_pooling: false
+    kerberos_principal: USERNAME@EXAMPLE.COM
+    kerberos_keytab: /path/to/username.keytab  
  
   presto:           # connection named presto
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver

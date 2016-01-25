@@ -40,6 +40,8 @@ databases:
     jdbc_pooling: false
     jdbc_jar: /path/to/jar.jar
     prepare_statement: USE schema
+    kerberos_principal: HIVE@EXAMPLE.COM
+    kerberos_keytab: example.keytab
 
   b_alias:
     alias: b
@@ -47,15 +49,17 @@ databases:
 
   private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('a', 'com.acme.ADriver', 'jdbc:a://localhost:8080',
-                  'auser', 'apassword', true, empty(), empty())
+                  'auser', 'apassword', true, empty(), empty(), empty(), empty())
 
   private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('b', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'))
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'),
+                  Optional.of('HIVE@EXAMPLE.COM'), Optional.of('example.keytab'))
 
   private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
           new JdbcConnectivityParamsState('b_alias', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'))
+                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'),
+                  Optional.of('HIVE@EXAMPLE.COM'), Optional.of('example.keytab'))
 
   def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
 

@@ -45,6 +45,8 @@ class JdbcQueryExecutorTest
           '',
           true,
           empty(),
+          empty(),
+          empty(),
           empty())
 
   private static TestContext testContext = new GuiceTestContext();

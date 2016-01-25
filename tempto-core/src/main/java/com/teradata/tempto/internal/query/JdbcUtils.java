@@ -43,7 +43,10 @@ public final class JdbcUtils
 
     public static DataSource dataSource(JdbcConnectivityParamsState jdbcParamsState)
     {
-        if (jdbcParamsState.pooling) {
+        if (jdbcParamsState.kerberosPrincipal.isPresent()) {
+            return createKerberosDataSource(jdbcParamsState);
+        }
+        else if (jdbcParamsState.pooling) {
             return createPoolingDataSource(jdbcParamsState);
         }
         else {
@@ -68,7 +71,13 @@ public final class JdbcUtils
         return new NonPoolingJdbcDataSource(jdbcParamsState, getDatabaseDriver(jdbcParamsState));
     }
 
-    private static Driver getDatabaseDriver(JdbcConnectivityParamsState jdbcParamsState) {
+    private static DataSource createKerberosDataSource(JdbcConnectivityParamsState jdbcParamsState)
+    {
+        return new KerberosJdbcDataSource(jdbcParamsState, getDatabaseDriver(jdbcParamsState));
+    }
+
+    private static Driver getDatabaseDriver(JdbcConnectivityParamsState jdbcParamsState)
+    {
         try {
             Class<?> driverClass = Class.forName(jdbcParamsState.driverClass, true, getDriverClassLoader(jdbcParamsState));
             return (Driver) driverClass.newInstance();
