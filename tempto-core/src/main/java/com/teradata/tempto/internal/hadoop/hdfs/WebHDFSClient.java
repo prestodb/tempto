@@ -16,11 +16,11 @@ package com.teradata.tempto.internal.hadoop.hdfs;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HostAndPort;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -49,6 +49,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -96,7 +97,7 @@ public class WebHDFSClient
     public void createDirectory(String path)
     {
         // TODO: reconsider permission=777
-        HttpPut mkdirRequest = new HttpPut(buildUri(path, "MKDIRS", Pair.of("permission", "777")));
+        HttpPut mkdirRequest = new HttpPut(buildUri(path, "MKDIRS", ImmutableMap.of("permission", "777")));
         try (CloseableHttpResponse response = httpClient.execute(mkdirRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("MKDIRS", path, mkdirRequest, response);
@@ -111,8 +112,7 @@ public class WebHDFSClient
     @Override
     public void delete(String path)
     {
-        Pair[] params = {Pair.of("recursive", "true")};
-        HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, "DELETE", params));
+        HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, "DELETE", ImmutableMap.of("recursive", "true")));
         try (CloseableHttpResponse response = httpClient.execute(removeFileOrDirectoryRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("DELETE", path, removeFileOrDirectoryRequest, response);
@@ -152,7 +152,7 @@ public class WebHDFSClient
 
     private void saveFile(String path, HttpEntity entity)
     {
-        Pair<String, String> params = Pair.of("overwrite", "true");
+        Map<String, String> params = ImmutableMap.of("overwrite", "true");
         String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(buildUri(path, "CREATE", params)));
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
         writeRequest.setEntity(entity);
@@ -161,7 +161,7 @@ public class WebHDFSClient
             if (response.getStatusLine().getStatusCode() != SC_CREATED) {
                 throw invalidStatusException("CREATE", path, writeRequest, response);
             }
-            long length = waitForFileSavedAndReturnLength(path, username);
+            long length = waitForFileSavedAndReturnLength(path);
             logger.debug("Saved file {} - username: {}, size: {}", path, username, byteCountToDisplaySize(length));
         }
         catch (IOException e) {
@@ -172,7 +172,7 @@ public class WebHDFSClient
     @Override
     public void loadFile(String path, OutputStream outputStream)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, "OPEN"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "OPEN", ImmutableMap.of()));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("OPEN", path, readRequest, response);
@@ -191,7 +191,7 @@ public class WebHDFSClient
     @SuppressWarnings("unchecked")
     public long getLength(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", ImmutableMap.of()));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode != SC_OK) {
@@ -208,7 +208,7 @@ public class WebHDFSClient
     @Override
     public boolean exist(String path)
     {
-        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS"));
+        HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", ImmutableMap.of()));
         try (CloseableHttpResponse response = httpClient.execute(readRequest)) {
             return response.getStatusLine().getStatusCode() == SC_OK;
         }
@@ -220,7 +220,11 @@ public class WebHDFSClient
     @Override
     public void setXAttr(String path, String key, String value)
     {
-        Pair[] params = {Pair.of("xattr.name", key), Pair.of("xattr.value", value), Pair.of("flag", "CREATE")};
+        Map<String, String> params = ImmutableMap.of(
+                "xattr.name", key,
+                "xattr.value", value,
+                "flag", "CREATE"
+        );
         HttpPut setXAttrRequest = new HttpPut(buildUri(path, "SETXATTR", params));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
@@ -236,8 +240,7 @@ public class WebHDFSClient
     @Override
     public void removeXAttr(String path, String key)
     {
-        Pair[] params = {Pair.of("xattr.name", key)};
-        HttpPut setXAttrRequest = new HttpPut(buildUri(path, "REMOVEXATTR", params));
+        HttpPut setXAttrRequest = new HttpPut(buildUri(path, "REMOVEXATTR", ImmutableMap.of("xattr.name", key)));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() != SC_OK) {
                 throw invalidStatusException("SETXATTR", path, setXAttrRequest, response);
@@ -249,11 +252,11 @@ public class WebHDFSClient
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<String> getXAttr(String path, String key)
     {
-        Pair[] params = {Pair.of("xattr.name", key)};
-        HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", params));
+        HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", ImmutableMap.of("xattr.name", key)));
         try (CloseableHttpResponse response = httpClient.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 return Optional.empty();
@@ -293,12 +296,12 @@ public class WebHDFSClient
      * it is not possible to immediately set xAttr. Calling GETFILESTATUS seems to introduce
      * some synchronization point, so it should be used just after saving file.
      */
-    private long waitForFileSavedAndReturnLength(String path, String username)
+    private long waitForFileSavedAndReturnLength(String path)
     {
         return getLength(path);
     }
 
-    private URI buildUri(String path, String operation, Pair<String, String>... parameters)
+    private URI buildUri(String path, String operation, Map<String, String> parameters)
     {
         try {
             if (!path.startsWith("/")) {
@@ -311,7 +314,7 @@ public class WebHDFSClient
                     .setPath("/webhdfs/v1" + checkNotNull(path))
                     .setParameter("op", checkNotNull(operation));
 
-            for (Pair<String, String> parameter : parameters) {
+            for (Entry<String, String> parameter : parameters.entrySet()) {
                 uriBuilder.setParameter(parameter.getKey(), parameter.getValue());
             }
 
