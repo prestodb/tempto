@@ -18,8 +18,6 @@ import com.teradata.tempto.internal.configuration.YamlConfiguration
 import com.teradata.tempto.query.JdbcConnectivityParamsState
 import spock.lang.Specification
 
-import static java.util.Optional.empty
-
 class JdbcConnectionsConfigurationTest
         extends Specification
 {
@@ -48,18 +46,39 @@ databases:
 """)
 
   private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
-          new JdbcConnectivityParamsState('a', 'com.acme.ADriver', 'jdbc:a://localhost:8080',
-                  'auser', 'apassword', true, empty(), empty(), empty(), empty())
+          JdbcConnectivityParamsState.builder()
+                  .setName('a')
+                  .setDriverClass('com.acme.ADriver')
+                  .setUrl('jdbc:a://localhost:8080')
+                  .setUser('auser')
+                  .setPassword('apassword')
+                  .build()
 
   private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
-          new JdbcConnectivityParamsState('b', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'),
-                  Optional.of('HIVE@EXAMPLE.COM'), Optional.of('example.keytab'))
+          JdbcConnectivityParamsState.builder()
+                  .setName('b')
+                  .setDriverClass('com.acme.BDriver')
+                  .setUrl('jdbc:b://localhost:8080')
+                  .setUser('buser')
+                  .setPassword('bpassword')
+                  .setJar(Optional.of('/path/to/jar.jar'))
+                  .setPrepareStatement(Optional.of('USE schema'))
+                  .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
+                  .setKerberosKeytab(Optional.of('example.keytab'))
+                  .build();
 
   private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
-          new JdbcConnectivityParamsState('b_alias', 'com.acme.BDriver', 'jdbc:b://localhost:8080',
-                  'buser', 'bpassword', false, Optional.of('/path/to/jar.jar'), Optional.of('USE schema'),
-                  Optional.of('HIVE@EXAMPLE.COM'), Optional.of('example.keytab'))
+          JdbcConnectivityParamsState.builder()
+                  .setName('b_alias')
+                  .setDriverClass('com.acme.BDriver')
+                  .setUrl('jdbc:b://localhost:8080')
+                  .setUser('buser')
+                  .setPassword('bpassword')
+                  .setJar(Optional.of('/path/to/jar.jar'))
+                  .setPrepareStatement(Optional.of('USE schema'))
+                  .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
+                  .setKerberosKeytab(Optional.of('example.keytab'))
+                  .build();
 
   def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
 

@@ -45,7 +45,8 @@ public class JdbcConnectionsConfiguration
         return configuration.getSubconfiguration(DATABASES_CONFIGURATION_SECTION).listKeyPrefixes(1);
     }
 
-    public JdbcConnectivityParamsState getConnectionConfiguration(String connectionName) {
+    public JdbcConnectivityParamsState getConnectionConfiguration(String connectionName)
+    {
 
         Configuration connectionConfiguration = getDatabaseConnectionSubConfiguration(connectionName);
         Optional<String> alias = connectionConfiguration.getString(ALIAS_KEY);
@@ -53,25 +54,22 @@ public class JdbcConnectionsConfiguration
             connectionConfiguration = getDatabaseConnectionSubConfiguration(alias.get());
         }
 
-        JdbcConnectivityParamsState jdbcConnectivityParamsState = new JdbcConnectivityParamsState(
-                connectionName,
-                connectionConfiguration.getStringMandatory(JDBC_DRIVER_CLASS),
-                connectionConfiguration.getStringMandatory(JDBC_URL_KEY),
-                connectionConfiguration.getStringMandatory(JDBC_USER_KEY),
-                connectionConfiguration.getStringMandatory(JDBC_PASSWORD_KEY),
-                connectionConfiguration.getBoolean(JDBC_POOLING_KEY).orElse(true),
-                connectionConfiguration.getString(JDBC_JAR),
-                connectionConfiguration.getString(PREPARE_STATEMENT_KEY),
-                connectionConfiguration.getString(KERBEROS_PRINCIPAL_KEY),
-                connectionConfiguration.getString(KERBEROS_KEYTAB_KEY));
-
-        return jdbcConnectivityParamsState;
+        return JdbcConnectivityParamsState.builder()
+                .setName(connectionName)
+                .setDriverClass(connectionConfiguration.getStringMandatory(JDBC_DRIVER_CLASS))
+                .setUrl(connectionConfiguration.getStringMandatory(JDBC_URL_KEY))
+                .setUser(connectionConfiguration.getStringMandatory(JDBC_USER_KEY))
+                .setPassword(connectionConfiguration.getStringMandatory(JDBC_PASSWORD_KEY))
+                .setPooling(connectionConfiguration.getBoolean(JDBC_POOLING_KEY).orElse(false))
+                .setJar(connectionConfiguration.getString(JDBC_JAR))
+                .setPrepareStatement(connectionConfiguration.getString(PREPARE_STATEMENT_KEY))
+                .setKerberosPrincipal(connectionConfiguration.getString(KERBEROS_PRINCIPAL_KEY))
+                .setKerberosKeytab(connectionConfiguration.getString(KERBEROS_KEYTAB_KEY))
+                .build();
     }
 
     private Configuration getDatabaseConnectionSubConfiguration(String connectionName)
     {
         return configuration.getSubconfiguration(KeyUtils.joinKey(DATABASES_CONFIGURATION_SECTION, connectionName));
     }
-
-
 }

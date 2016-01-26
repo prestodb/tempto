@@ -31,23 +31,19 @@ import static com.teradata.tempto.internal.query.JdbcUtils.connection
 import static com.teradata.tempto.internal.query.JdbcUtils.registerDriver
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
-import static java.util.Optional.empty
 
 class JdbcQueryExecutorTest
         extends Specification
 {
 
-  private static final JdbcConnectivityParamsState JDBC_STATE = new JdbcConnectivityParamsState(
-          'connection_name',
-          'org.hsqldb.jdbc.JDBCDriver',
-          'jdbc:hsqldb:mem:mydb',
-          'sa',
-          '',
-          true,
-          empty(),
-          empty(),
-          empty(),
-          empty())
+  private static final JdbcConnectivityParamsState JDBC_STATE =
+          JdbcConnectivityParamsState.builder()
+                  .setName('connection_name')
+                  .setDriverClass('org.hsqldb.jdbc.JDBCDriver')
+                  .setUrl('jdbc:hsqldb:mem:mydb')
+                  .setUser('sa')
+                  .setPooling(true)
+                  .build();
 
   private static TestContext testContext = new GuiceTestContext();
   private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool(), testContext);
