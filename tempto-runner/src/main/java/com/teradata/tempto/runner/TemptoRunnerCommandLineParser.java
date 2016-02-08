@@ -14,8 +14,8 @@
 
 package com.teradata.tempto.runner;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -25,60 +25,51 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
-import static java.util.Collections.emptySet;
-import static java.util.Optional.empty;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE_LOCAL;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.EXCLUDED_GROUPS;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.GROUPS;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.HELP;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.PACKAGE;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.REPORT_DIR;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.TESTS;
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.requireNonNull;
 
 public class TemptoRunnerCommandLineParser
 {
     public static class ParsingException
             extends RuntimeException
     {
-        public ParsingException(String message)
-        {
-            super(message);
-        }
-
         public ParsingException(String message, Throwable cause)
         {
             super(message, cause);
         }
     }
 
-    private static final String CLASS_PATH_OPTION = "classpath";
-    private static final String PACKAGE_OPTION = "package";
-
-    private static final String CONFIG_FILE_OPTION = "config";
-    private static final String CONFIG_FILE_DEFAULT = "classpath:/tempto-configuration.yaml";
-
-    private static final String CONFIG_FILE_LOCAL_OPTION = "config-local";
-    private static final String CONFIG_FILE_LOCAL_DEFAULT = "classpath:/tempto-configuration-local.yaml";
-
-    private static final String REPORT_DIR_OPTION = "report-dir";
-    private static final String REPORT_DIR_DEFAULT = "./test-reports";
-
-    private static final String GROUPS_OPTION = "groups";
-    private static final String EXCLUDED_GROUPS_OPTION = "excluded-groups";
-    private static final String TESTS_OPTION = "tests";
-
-    private static final String HELP_OPTION = "help";
-    private static final Comparator<Option> ALL_EQUAL_OPTION_COMPARATOR = (a, b) -> 0;
-    private static final Function<String, Set<String>> SPLIT_ON_COMMA = s -> ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(s));
+    private static final Comparator<Option> OPTION_BY_LONG_OPT_COMPARATOR = Comparator.comparing(Option::getLongOpt);
 
     private final String appName;
-    private final Map<String, DefaultValue> defaultsMap;
+    private final List<Option> options;
+    private final Map<String, DefaultValue> defaults;
 
-
-    private TemptoRunnerCommandLineParser(String appName, Map<String, DefaultValue> defaultsMap)
+    private TemptoRunnerCommandLineParser(String appName, List<Option> options, Map<String, DefaultValue> defaults)
     {
+        requireNonNull(appName, "appName is null");
+        requireNonNull(options, "options is null");
+        requireNonNull(defaults, "defaults is null");
+
         this.appName = appName;
-        this.defaultsMap = defaultsMap;
+        this.options = ImmutableList.copyOf(options);
+        this.defaults = ImmutableMap.copyOf(defaults);
     }
 
     public TemptoRunnerOptions parseCommandLine(String[] argv)
@@ -103,7 +94,7 @@ public class TemptoRunnerCommandLineParser
     {
         Options options = buildOptions();
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.setOptionComparator(ALL_EQUAL_OPTION_COMPARATOR);
+        helpFormatter.setOptionComparator(OPTION_BY_LONG_OPT_COMPARATOR);
         helpFormatter.printHelp(printWriter,
                 120,
                 appName,
@@ -118,64 +109,42 @@ public class TemptoRunnerCommandLineParser
     private Options buildOptions()
     {
         Options options = new Options();
-        addOptionWithArg(options, PACKAGE_OPTION, Optional.of("p"), true, "Java package to be scanned for tests");
-        addOptionWithArg(options, CONFIG_FILE_OPTION, empty(), false, "URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
-        addOptionWithArg(options, CONFIG_FILE_LOCAL_OPTION, Optional.of("c"), false, "URI to Test local configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.");
-        addOptionWithArg(options, REPORT_DIR_OPTION, Optional.of("r"), false, "Test reports directory");
-        addOptionWithArg(options, GROUPS_OPTION, Optional.of("g"), false, "Test groups to be run");
-        addOptionWithArg(options, EXCLUDED_GROUPS_OPTION, Optional.of("x"), false, "Test groups to be excluded");
-        addOptionWithArg(options, TESTS_OPTION, Optional.of("t"), false, "Test patterns to be included (not yet supported)");
-        options.addOption("h", HELP_OPTION, false, "Shows help message");
-        return options;
-    }
-
-    private void addOptionWithArg(Options options, String longOptionName, Optional<String> shortOptionName, boolean required, String description)
-    {
-        if (isChangable(longOptionName)) {
-            options.addOption(Option.builder(shortOptionName.orElse(null))
-                    .longOpt(longOptionName)
-                    .hasArg()
-                    .required(required)
-                    .desc(description).build());
+        for (Option option : this.options) {
+            if (isChangable(option.getLongOpt())) {
+                options.addOption(option);
+            }
         }
+        return options;
     }
 
     private boolean isChangable(String option)
     {
-        return !defaultsMap.containsKey(option) || defaultsMap.get(option).isChangeable();
+        return !defaults.containsKey(option) || defaults.get(option).isChangeable();
     }
 
     private TemptoRunnerOptions commandLineToOptions(CommandLine commandLine)
     {
-        String testsPackage = getOptionValue(commandLine, PACKAGE_OPTION).get();
-        String configFile = getOptionValue(commandLine, CONFIG_FILE_OPTION).get();
-        String configFileLocal = getOptionValue(commandLine, CONFIG_FILE_LOCAL_OPTION).get();
-        String reportDir = getOptionValue(commandLine, REPORT_DIR_OPTION).get();
-
-        Set<String> testGroups = getOptionValue(commandLine, GROUPS_OPTION).map(SPLIT_ON_COMMA).orElse(emptySet());
-        Set<String> excludedGroups = getOptionValue(commandLine, EXCLUDED_GROUPS_OPTION).map(SPLIT_ON_COMMA).orElse(emptySet());
-        Set<String> tests = getOptionValue(commandLine, TESTS_OPTION).map(SPLIT_ON_COMMA).orElse(emptySet());
-        boolean helpRequested = commandLine.hasOption(HELP_OPTION);
-
-        return TemptoRunnerOptions.builder()
-                .setTestsPackage(testsPackage)
-                .setConfigFile(configFile)
-                .setConfigFileLocal(configFileLocal)
-                .setReportDir(reportDir)
-                .setTestGroups(testGroups)
-                .setExcludeGroups(excludedGroups)
-                .setTests(tests)
-                .setHelpRequested(helpRequested)
-                .build();
+        ImmutableMap.Builder<String, String> values = ImmutableMap.<String, String>builder();
+        for (Option option : options) {
+            Optional<String> value = getOptionValue(commandLine, option);
+            if (value.isPresent()) {
+                values.put(option.getLongOpt(), value.get());
+            }
+        }
+        return new TemptoRunnerOptions(values.build());
     }
 
-    private Optional<String> getOptionValue(CommandLine commandLine, String option)
+    private Optional<String> getOptionValue(CommandLine commandLine, Option option)
     {
-        if (defaultsMap.containsKey(option)) {
-            return Optional.of(commandLine.getOptionValue(option, defaultsMap.get(option).getValue()));
+        String longOpt = option.getLongOpt();
+        if (defaults.containsKey(longOpt)) {
+            return Optional.of(commandLine.getOptionValue(longOpt, defaults.get(longOpt).getValue()));
+        }
+        else if (commandLine.hasOption(longOpt)) {
+            return Optional.of(TRUE.toString());
         }
         else {
-            return Optional.ofNullable(commandLine.getOptionValue(option));
+            return Optional.ofNullable(commandLine.getOptionValue(longOpt));
         }
     }
 
@@ -187,66 +156,83 @@ public class TemptoRunnerCommandLineParser
     public static class Builder
     {
         private final String appName;
-        private Map<String, DefaultValue> defaultsMap = createInitialDefaultsMap();
+        private final List<Option> options = new ArrayList<>();
+        private final Map<String, DefaultValue> defaults = new HashMap<>();
 
         private Builder(String appName)
         {
             this.appName = appName;
+            addOption(CONFIG_FILE);
+            addOption(CONFIG_FILE_LOCAL);
+            addOption(EXCLUDED_GROUPS);
+            addOption(GROUPS);
+            addOption(PACKAGE);
+            addOption(REPORT_DIR);
+            addOption(TESTS);
+            addOption(HELP);
+            setReportDir("./test-reports", true);
+            setConfigFile("classpath:/tempto-configuration.yaml", true);
+            setConfigLocalFile("classpath:/tempto-configuration-local.yaml", true);
         }
 
-        private static Map<String, DefaultValue> createInitialDefaultsMap()
+        public Builder addOption(Option option)
         {
-            Map<String, DefaultValue> defaultsMap = new HashMap<>();
-            defaultsMap.put(REPORT_DIR_OPTION, new DefaultValue(REPORT_DIR_DEFAULT, true));
-            defaultsMap.put(CONFIG_FILE_OPTION, new DefaultValue(CONFIG_FILE_DEFAULT, true));
-            defaultsMap.put(CONFIG_FILE_LOCAL_OPTION, new DefaultValue(CONFIG_FILE_LOCAL_DEFAULT, true));
-            return defaultsMap;
+            checkArgument(!contains(option), "Options %s is already added", option.getLongOpt());
+            options.add(option);
+            return this;
         }
 
-        public Builder setClassPath(String classpath, boolean changable)
-        {
-            return setDefaultValue(CLASS_PATH_OPTION, classpath, changable);
-        }
-
-        public Builder setLocalClassPath(boolean changeable)
-        {
-            return setDefaultValue(CLASS_PATH_OPTION, null, changeable);
+        private boolean contains(Option option) {
+            return options.stream().anyMatch(o -> o.getLongOpt().equals(option.getLongOpt()));
         }
 
         public Builder setTestsPackage(String testsPackage, boolean changeable)
         {
-            return setDefaultValue(PACKAGE_OPTION, testsPackage, changeable);
+            return setDefaultValue(PACKAGE, testsPackage, changeable);
         }
 
         public Builder setConfigFile(String configFile, boolean changeable)
         {
-            return setDefaultValue(CONFIG_FILE_OPTION, configFile, changeable);
+            return setDefaultValue(CONFIG_FILE, configFile, changeable);
+        }
+
+        private void setConfigLocalFile(String configFile, boolean changeable)
+        {
+            setDefaultValue(CONFIG_FILE_LOCAL, configFile, changeable);
         }
 
         public Builder setReportDir(String reportDir, boolean changeable)
         {
-            return setDefaultValue(REPORT_DIR_OPTION, reportDir, changeable);
+            return setDefaultValue(REPORT_DIR, reportDir, changeable);
         }
 
         public Builder setExcludedGroups(String excludedGroups, boolean changeable)
         {
-            return setDefaultValue(EXCLUDED_GROUPS_OPTION, excludedGroups, changeable);
+            return setDefaultValue(EXCLUDED_GROUPS, excludedGroups, changeable);
         }
 
         public Builder setGroups(String groups, boolean changeable)
         {
-            return setDefaultValue(GROUPS_OPTION, groups, changeable);
+            return setDefaultValue(GROUPS, groups, changeable);
         }
 
-        private Builder setDefaultValue(String option, String value, boolean changeable)
+        public Builder setDefaultValue(Option option, Object value)
         {
-            defaultsMap.put(option, new DefaultValue(value, changeable));
+            return setDefaultValue(option, value.toString(), true);
+        }
+
+        private Builder setDefaultValue(Option option, String value, boolean changeable)
+        {
+            if (!contains(option)) {
+                addOption(option);
+            }
+            defaults.put(option.getLongOpt(), new DefaultValue(value.toString(), changeable));
             return this;
         }
 
         public TemptoRunnerCommandLineParser build()
         {
-            return new TemptoRunnerCommandLineParser(appName, defaultsMap);
+            return new TemptoRunnerCommandLineParser(appName, options, defaults);
         }
     }
 

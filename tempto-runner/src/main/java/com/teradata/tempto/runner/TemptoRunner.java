@@ -43,8 +43,9 @@ public class TemptoRunner
     private final TemptoRunnerOptions options;
 
     public static void runTempto(TemptoRunnerCommandLineParser parser, String[] args) {
+        TemptoRunnerOptions options = parser.parseCommandLine(args);
         try {
-            TemptoRunner.runTempto(parser, parser.parseCommandLine(args));
+            TemptoRunner.runTempto(parser, options);
         }
         catch (TemptoRunnerCommandLineParser.ParsingException e) {
             System.err.println("Could not parse command line. " + e.getMessage());
@@ -68,7 +69,7 @@ public class TemptoRunner
     private void run()
     {
         LOG.debug("running tempto with options: {}", options);
-        if (options.helpRequested()) {
+        if (options.isHelpRequested()) {
             parser.printHelpMessage();
             return;
         }

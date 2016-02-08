@@ -14,168 +14,137 @@
 
 package com.teradata.tempto.runner;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.apache.commons.cli.Option;
+
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.copyOf;
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.builder.ToStringBuilder.reflectionToString;
 
 public class TemptoRunnerOptions
 {
-    private final String testsPackage;
-    private final String configFile;
-    private final String configFileLocal;
-    private final String reportDir;
-    private final Set<String> testGroups;
-    private final Set<String> excludeGroups;
-    private final Set<String> tests;
-    private final boolean helpRequested;
+    public static final Option PACKAGE = Option.builder("p")
+            .longOpt("package")
+            .desc("Java package to be scanned for tests")
+            .hasArg()
+            .required()
+            .build();
 
-    private TemptoRunnerOptions(
-            String testsPackage,
-            String configFile,
-            String configFileLocal,
-            String reportDir,
-            Set<String> testGroups,
-            Set<String> excludeGroups,
-            Set<String> tests,
-            boolean helpRequested)
-    {
-        this.testGroups = copyOf(checkNotNull(testGroups, "testGroups can not be null"));
-        this.excludeGroups = copyOf(checkNotNull(excludeGroups, "excludeGroups can not be null"));
-        this.tests = copyOf(checkNotNull(tests, "tests can not be null"));
-        this.helpRequested = helpRequested;
-        this.testsPackage = checkNotNull(testsPackage);
-        this.configFile = checkNotNull(configFile, "configFile can not be null");
-        this.configFileLocal = checkNotNull(configFileLocal, "configFileLocal can not be null");
-        this.reportDir = reportDir;
-    }
+    public static final Option CONFIG_FILE = Option.builder()
+            .longOpt("config")
+            .desc("URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
+            .hasArg()
+            .build();
 
-    public static Builder builder()
+    public static final Option CONFIG_FILE_LOCAL = Option.builder()
+            .longOpt("config-local")
+            .desc("URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
+            .hasArg()
+            .build();
+
+    public static final Option REPORT_DIR = Option.builder("r")
+            .longOpt("report-dir")
+            .desc("Test reports directory")
+            .hasArg()
+            .build();
+
+    public static final Option GROUPS = Option.builder("g")
+            .longOpt("groups")
+            .desc("Test groups to be run")
+            .valueSeparator(',')
+            .hasArg()
+            .build();
+
+    public static final Option EXCLUDED_GROUPS = Option.builder("x")
+            .longOpt("excluded-groups")
+            .desc("Test groups to be excluded")
+            .valueSeparator(',')
+            .hasArg()
+            .build();
+
+    public static final Option TESTS = Option.builder("t")
+            .longOpt("tests")
+            .desc("Test patterns to be included (not yet supported)")
+            .valueSeparator(',')
+            .hasArg()
+            .build();
+
+    public static final Option HELP = Option.builder("h")
+            .longOpt("help")
+            .build();
+
+    private final Map<String, String> values;
+
+    public TemptoRunnerOptions(Map<String, String> values)
     {
-        return new Builder();
+        requireNonNull(values, "values is null");
+        this.values = ImmutableMap.copyOf(values);
     }
 
     public String getReportDir()
     {
-        return reportDir;
+        return getValue(REPORT_DIR.getLongOpt()).get();
     }
 
     public String getTestsPackage()
     {
-        return testsPackage;
+        return getValue(PACKAGE.getLongOpt()).get();
     }
 
     public String getConfigFile()
     {
-        return configFile;
+        return getValue(CONFIG_FILE.getLongOpt()).get();
     }
 
     public String getConfigFileLocal()
     {
-        return configFileLocal;
+        return getValue(CONFIG_FILE_LOCAL.getLongOpt()).get();
     }
 
     public Set<String> getTestGroups()
     {
-        return testGroups;
+        return getValues(GROUPS.getLongOpt());
     }
 
     public Set<String> getExcludeGroups()
     {
-        return excludeGroups;
+        return getValues(EXCLUDED_GROUPS.getLongOpt());
     }
-
 
     public Set<String> getTests()
     {
-        return tests;
+        return getValues(TESTS.getLongOpt());
     }
 
     public boolean isHelpRequested()
     {
-        return helpRequested;
+        return isSet(HELP);
     }
 
-    public boolean helpRequested()
+    public Set<String> getValues(String option)
     {
-        return helpRequested;
+        return getValue(option).map(v -> ImmutableSet.copyOf(Splitter.on(',').omitEmptyStrings().trimResults().split(v))).orElse(ImmutableSet.<String>of());
+    }
+
+    public Optional<String> getValue(String option)
+    {
+        return Optional.ofNullable(values.get(option));
+    }
+
+    public boolean isSet(Option option)
+    {
+        return getValue(option.getLongOpt()).map(v -> v.equals(TRUE.toString())).orElse(false);
     }
 
     @Override
     public String toString()
     {
         return reflectionToString(this);
-    }
-
-    public static class Builder
-    {
-        private String testsPackage;
-        private String configFile;
-        private String configFileLocal;
-        private String reportDir;
-        private Set<String> testGroups;
-        private Set<String> excludeGroups;
-        private Set<String> tests;
-
-        private boolean helpRequested;
-
-        private Builder() {}
-
-        public Builder setTestsPackage(String testsPackage)
-        {
-            this.testsPackage = testsPackage;
-            return this;
-        }
-
-        public Builder setConfigFile(String configFile)
-        {
-            this.configFile = configFile;
-            return this;
-        }
-
-        public Builder setConfigFileLocal(String configFileLocal)
-        {
-            this.configFileLocal = configFileLocal;
-            return this;
-        }
-
-        public Builder setReportDir(String reportDir)
-        {
-            this.reportDir = reportDir;
-            return this;
-        }
-
-        public Builder setTestGroups(Set<String> testGroups)
-        {
-            this.testGroups = testGroups;
-            return this;
-        }
-
-        public Builder setExcludeGroups(Set<String> excludeGroups)
-        {
-            this.excludeGroups = excludeGroups;
-            return this;
-        }
-
-
-        public Builder setTests(Set<String> tests)
-        {
-            this.tests = tests;
-            return this;
-        }
-
-
-        public Builder setHelpRequested(boolean helpRequested)
-        {
-            this.helpRequested = helpRequested;
-            return this;
-        }
-
-        public TemptoRunnerOptions build()
-        {
-            return new TemptoRunnerOptions(testsPackage, configFile, configFileLocal, reportDir, testGroups,
-                    excludeGroups, tests, helpRequested);
-        }
     }
 }
