@@ -140,12 +140,11 @@ public class TemptoRunnerCommandLineParser
         if (defaults.containsKey(longOpt)) {
             return Optional.of(commandLine.getOptionValue(longOpt, defaults.get(longOpt).getValue()));
         }
-        else if (commandLine.hasOption(longOpt)) {
+        Optional<String> value = Optional.ofNullable(commandLine.getOptionValue(longOpt));
+        if (!value.isPresent() && commandLine.hasOption(longOpt)) {
             return Optional.of(TRUE.toString());
         }
-        else {
-            return Optional.ofNullable(commandLine.getOptionValue(longOpt));
-        }
+        return value;
     }
 
     public static Builder builder(String appName)
@@ -182,7 +181,8 @@ public class TemptoRunnerCommandLineParser
             return this;
         }
 
-        private boolean contains(Option option) {
+        private boolean contains(Option option)
+        {
             return options.stream().anyMatch(o -> o.getLongOpt().equals(option.getLongOpt()));
         }
 
