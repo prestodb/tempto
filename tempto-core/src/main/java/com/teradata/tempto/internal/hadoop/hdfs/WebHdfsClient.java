@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyMap;
@@ -249,7 +250,7 @@ public class WebHdfsClient
     @Override
     public Optional<String> getXAttr(String path, String key)
     {
-        HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", ImmutableMap.of("xattr.name", key)));
+        HttpGet setXAttrRequest = new HttpGet(buildUri(path, "GETXATTRS", ImmutableMap.of()));
         try (CloseableHttpResponse response = httpRequestsExecutor.execute(setXAttrRequest)) {
             if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
                 return Optional.empty();
@@ -259,12 +260,17 @@ public class WebHdfsClient
             }
 
             Map<String, Object> responseObject = deserializeJsonResponse(response);
-            if (responseObject.get("XAttrs") == null) {
+            Object xAttrs = responseObject.get("XAttrs");
+            if (xAttrs == null) {
                 return Optional.empty();
             }
 
-            String xArgValue = StringUtils.strip(((Map<String, Object>) ((List<Object>) responseObject.get("XAttrs")).get(0)).get("value").toString(), "\"");
-            return Optional.of(xArgValue);
+            Optional<String> value = ((List<Object>) xAttrs).stream()
+                    .map(it -> (Map<String, String>) it)
+                    .filter(it -> it.get("name").equals(key))
+                    .map(it -> it.get("value"))
+                    .findFirst();
+            return value;
         }
         catch (IOException e) {
             throw new RuntimeException("Could not get xAttr for path: " + path + " in hdfs, user: " + username, e);
