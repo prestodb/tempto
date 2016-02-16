@@ -34,6 +34,12 @@ public interface Configuration
 
     int getIntMandatory(String key, String errorMessage);
 
+    Optional<Double> getDouble(String key);
+
+    double getDoubleMandatory(String key);
+
+    double getDoubleMandatory(String key, String errorMessage);
+
     Optional<Boolean> getBoolean(String key);
 
     boolean getBooleanMandatory(String key);

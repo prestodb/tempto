@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.query
 
+import com.teradata.tempto.configuration.Configuration
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,8 +31,12 @@ class QueryResultValueComparatorTest
   @Unroll
   def 'queryResultValueComparator(#type).compare(#actual,#expected) = #result'()
   {
+    setup:
+    Configuration configuration = Mock(Configuration)
+    configuration.getDouble(_) >> Optional.empty()
+
     expect:
-    QueryResultValueComparator.comparatorForType(type).compare(actual, expected) == result
+    QueryResultValueComparator.comparatorForType(type, configuration).compare(actual, expected) == result
 
     where:
     type                    | actual                                   | expected                                 | result
@@ -71,6 +76,12 @@ class QueryResultValueComparatorTest
     DOUBLE                  | Double.valueOf(0.0)                      | Double.valueOf(1.0)                      | -1
     DOUBLE                  | Double.valueOf(0.0)                      | "a"                                      | -1
 
+    DOUBLE                  | Double.valueOf(1.0)                      | Double.valueOf(1.00000001)               | -1
+    DOUBLE                  | Double.valueOf(1.0)                      | Double.valueOf(1.000000000000001)        | -1
+    DOUBLE                  | Double.valueOf(1.0)                      | Double.valueOf(1.0000000000000001)       | 0
+    FLOAT                   | Float.valueOf(1.0)                       | Float.valueOf(1.0000001)                 | -1
+    FLOAT                   | Float.valueOf(1.0)                       | Float.valueOf(1.00000001)                | 0
+
     NUMERIC                 | BigDecimal.valueOf(0.0)                  | BigDecimal.valueOf(0.0)                  | 0
     DECIMAL                 | BigDecimal.valueOf(0.0)                  | BigDecimal.valueOf(0.0)                  | 0
     NUMERIC                 | BigDecimal.valueOf(1.0)                  | BigDecimal.valueOf(0.0)                  | 1
@@ -95,7 +106,34 @@ class QueryResultValueComparatorTest
     TIMESTAMP               | Timestamp.valueOf("2015-02-15 10:10:10") | "a"                                      | -1
   }
 
-  byte[] byteArray(int value)
+  @Unroll
+  def 'queryResultValueComparator(#type).compare(#actual,#expected) = #result with 0.01 tolerance'()
+  {
+    setup:
+    Configuration configuration = Mock(Configuration)
+    configuration.getDouble(_) >> Optional.of(Double.valueOf(0.01))
+
+    expect:
+    QueryResultValueComparator.comparatorForType(type, configuration).compare(actual, expected) == result
+
+    where:
+    type   | actual              | expected                 | result
+    DOUBLE | Double.valueOf(1.0) | Double.valueOf(1.0)      | 0
+    DOUBLE | Double.valueOf(1.009999) | Double.valueOf(1.0) | 0
+    DOUBLE | Double.valueOf(1.01) | Double.valueOf(1.0)     | 1
+    FLOAT  | Double.valueOf(1.0) | Double.valueOf(1.0)      | 0
+    FLOAT  | Double.valueOf(1.009999) | Double.valueOf(1.0) | 0
+    FLOAT  | Double.valueOf(1.01) | Double.valueOf(1.0)     | 1
+
+    DOUBLE | Double.valueOf(1000.0) | Double.valueOf(1000.0)   | 0
+    DOUBLE | Double.valueOf(1010.0) | Double.valueOf(1000.0)   | 0
+    DOUBLE | Double.valueOf(1010.001) | Double.valueOf(1000.0) | 1
+    FLOAT  | Double.valueOf(1000.0) | Double.valueOf(1000.0)   | 0
+    FLOAT  | Double.valueOf(1010.0) | Double.valueOf(1000.0)   | 0
+    FLOAT  | Double.valueOf(1010.001) | Double.valueOf(1000.0) | 1
+  }
+
+  private byte[] byteArray(int value)
   {
     return [value];
   }

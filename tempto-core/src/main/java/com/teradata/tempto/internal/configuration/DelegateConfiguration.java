@@ -70,6 +70,24 @@ public abstract class DelegateConfiguration
     }
 
     @Override
+    public Optional<Double> getDouble(String key)
+    {
+        return getDelegate().getDouble(key);
+    }
+
+    @Override
+    public double getDoubleMandatory(String key)
+    {
+        return getDelegate().getDoubleMandatory(key);
+    }
+
+    @Override
+    public double getDoubleMandatory(String key, String errorMessage)
+    {
+        return getDelegate().getDoubleMandatory(key, errorMessage);
+    }
+
+    @Override
     public Optional<Boolean> getBoolean(String key)
     {
         return getDelegate().getBoolean(key);
@@ -104,7 +122,7 @@ public abstract class DelegateConfiguration
     {
         return getDelegate().getStringListMandatory(key);
     }
-    
+
     @Override
     public Set<String> listKeys()
     {
