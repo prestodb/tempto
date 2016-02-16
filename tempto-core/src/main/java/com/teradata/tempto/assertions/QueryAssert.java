@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.assertions;
 
+import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
 import com.teradata.tempto.query.QueryExecutionException;
@@ -30,10 +31,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
 import static com.teradata.tempto.query.QueryResult.fromSqlIndex;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
 import static java.lang.String.format;
@@ -85,7 +88,8 @@ public class QueryAssert
         List<Row> rows = null;
         try {
             rows = sqlResultDescriptor.getRows(columnTypes);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             failWithMessage("Could not map expected file content to query column types; types=%s; content=<%s>; error=<%s>",
                     columnTypes, sqlResultDescriptor.getOriginalContent(), e.getMessage());
         }
@@ -177,9 +181,9 @@ public class QueryAssert
     }
 
     /**
-     * @see #contains(java.util.List)
      * @param rows Rows to be matched
      * @return this
+     * @see #contains(java.util.List)
      */
     public QueryAssert contains(Row... rows)
     {
@@ -188,6 +192,7 @@ public class QueryAssert
 
     /**
      * Verifies that the actual result set consist of only {@code rows} in any order
+     *
      * @param rows Rows to be matched
      * @return this
      */
@@ -200,9 +205,9 @@ public class QueryAssert
     }
 
     /**
-     * @see #containsOnly(java.util.List)
      * @param rows Rows to be matched
      * @return this
+     * @see #containsOnly(java.util.List)
      */
     public QueryAssert containsOnly(Row... rows)
     {
@@ -237,10 +242,9 @@ public class QueryAssert
     }
 
     /**
-     * @see #containsExactly(java.util.List)
-     *
      * @param rows Rows to be matched
      * @return this
+     * @see #containsExactly(java.util.List)
      */
     public QueryAssert containsExactly(Row... rows)
     {
@@ -264,8 +268,9 @@ public class QueryAssert
 
     private static List<Comparator<Object>> getComparators(QueryResult queryResult)
     {
+        Configuration configuration = createTestConfiguration();
         return queryResult.getColumnTypes().stream()
-                .map(QueryResultValueComparator::comparatorForType)
+                .map(it -> QueryResultValueComparator.comparatorForType(it, configuration))
                 .collect(Collectors.toList());
     }
 

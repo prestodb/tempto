@@ -223,7 +223,14 @@ This section is used to configure various properties used during test execution.
 tests:
   hdfs:
     path: /tempto  # where to store test data on HDFS
+  assert:
+    float_tolerance: 0.0001
 ```
+
+| property | description |
+|----------|-------------|
+| tests.hdfs.path | defines where data for tables will be stored in hdfs |
+| tests.assert.float_tolerance | defines tolerance for floating point values comparision |
 
 ## Java based tests
 

@@ -17,6 +17,7 @@ package com.teradata.tempto.internal.query;
 import com.google.common.base.Throwables;
 import com.google.common.math.DoubleMath;
 import com.google.common.primitives.UnsignedBytes;
+import com.teradata.tempto.configuration.Configuration;
 
 import java.math.BigDecimal;
 import java.sql.Array;
@@ -28,8 +29,10 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Comparator for query result values. It should be instantiated per column with given JDBCType.
@@ -40,18 +43,20 @@ public class QueryResultValueComparator
         implements Comparator<Object>
 {
 
-    private static final double MACHINE_EPSILON_FLOATING_32B = Math.pow(2,-24);
-    private static final double MACHINE_EPSILON_FLOATING_64B = Math.pow(2,-53);
-    private final JDBCType type;
+    public static final String FLOAT_TOLERANCE_CONFIGURATION_KEY = "tests.assert.float_tolerance";
 
-    private QueryResultValueComparator(JDBCType type)
+    private final JDBCType type;
+    private final Configuration configuration;
+
+    private QueryResultValueComparator(JDBCType type, Configuration configuration)
     {
-        this.type = type;
+        this.type = requireNonNull(type, "type is null");
+        this.configuration = requireNonNull(configuration, "configuration is null");
     }
 
-    public static QueryResultValueComparator comparatorForType(JDBCType type)
+    public static QueryResultValueComparator comparatorForType(JDBCType type, Configuration configuration)
     {
-        return new QueryResultValueComparator(type);
+        return new QueryResultValueComparator(type, configuration);
     }
 
     @Override
@@ -83,9 +88,9 @@ public class QueryResultValueComparator
                 return longEqual(actual, expected);
             case REAL:
             case FLOAT:
-                return singleFloatingEqual(actual, expected);
+                return floatingEqual(actual, expected);
             case DOUBLE:
-                return doubleEqual(actual, expected);
+                return floatingEqual(actual, expected);
             case DECIMAL:
             case NUMERIC:
                 return bigDecimalEqual(actual, expected);
@@ -134,7 +139,7 @@ public class QueryResultValueComparator
     {
         QueryResultValueComparator elementComparator;
         try {
-            elementComparator = comparatorForType(JDBCType.valueOf(actualArray.getBaseType()));
+            elementComparator = comparatorForType(JDBCType.valueOf(actualArray.getBaseType()), configuration);
         }
         catch (SQLException e) {
             throw Throwables.propagate(e);
@@ -145,7 +150,7 @@ public class QueryResultValueComparator
     private List arrayAsList(Array array)
     {
         try {
-            return Arrays.asList((Object[])array.getArray());
+            return Arrays.asList((Object[]) array.getArray());
         }
         catch (SQLException e) {
             throw Throwables.propagate(e);
@@ -186,22 +191,19 @@ public class QueryResultValueComparator
         return actualLong.compareTo(expectedLong);
     }
 
-    private static int floatingEqualWithTolerance(Object actual, Object expected, double tolerance)
+    private int floatingEqual(Object actual, Object expected)
     {
         if (!(isFloatingPointValue(actual) && isFloatingPointValue(expected))) {
             return -1;
         }
-        return DoubleMath.fuzzyCompare(getDoubleValue(actual), getDoubleValue(expected), tolerance);
-    }
 
-    private int singleFloatingEqual(Object actual, Object expected)
-    {
-        return floatingEqualWithTolerance(actual, expected, MACHINE_EPSILON_FLOATING_32B);
-    }
-
-    private int doubleEqual(Object actual, Object expected)
-    {
-        return floatingEqualWithTolerance(actual, expected, MACHINE_EPSILON_FLOATING_64B);
+        double expectedDouble = getDoubleValue(expected);
+        double tolerance = 0;
+        Optional<Double> configTolerance = configuration.getDouble(FLOAT_TOLERANCE_CONFIGURATION_KEY);
+        if (configTolerance.isPresent()) {
+            tolerance = configTolerance.get() * expectedDouble;
+        }
+        return DoubleMath.fuzzyCompare(getDoubleValue(actual), expectedDouble, tolerance);
     }
 
     private int bigDecimalEqual(Object actual, Object expected)
@@ -255,5 +257,4 @@ public class QueryResultValueComparator
     {
         return ((Number) object).doubleValue();
     }
-
 }

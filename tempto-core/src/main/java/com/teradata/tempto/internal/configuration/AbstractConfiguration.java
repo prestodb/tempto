@@ -74,6 +74,28 @@ public abstract class AbstractConfiguration
     }
 
     @Override
+    public Optional<Double> getDouble(String key)
+    {
+        Optional<Object> optionalValue = get(key);
+        return checkValueOfTypeOrParseIfNeeded(key, optionalValue, Double.class, Double::parseDouble);
+    }
+
+    @Override
+    public double getDoubleMandatory(String key)
+
+    {
+        return getDoubleMandatory(key, standardValueNotFoundMessage(key));
+    }
+
+    @Override
+    public double getDoubleMandatory(String key, String errorMessage)
+    {
+        Optional<Double> value = getDouble(key);
+        checkValuePresent(value, errorMessage);
+        return value.get();
+    }
+
+    @Override
     public Optional<Boolean> getBoolean(String key)
     {
         Optional<Object> optionalValue = get(key);
@@ -117,7 +139,7 @@ public abstract class AbstractConfiguration
     {
         return getStringListMandatory(key, standardValueNotFoundMessage(key));
     }
-    
+
     @Override
     public Set<String> listKeyPrefixes(int prefixesLength)
     {
