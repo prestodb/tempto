@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.query
 
 import com.teradata.tempto.context.TestContext
+import com.teradata.tempto.internal.configuration.TestConfigurationFactory
 import com.teradata.tempto.internal.context.GuiceTestContext
 import com.teradata.tempto.query.JdbcConnectionsPool
 import com.teradata.tempto.query.JdbcConnectivityParamsState
@@ -50,6 +51,7 @@ class JdbcQueryExecutorTest
 
   def setupSpec()
   {
+    System.setProperty(TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY, TestConfigurationFactory.CLASSPATH_PROTOCOL + "/configuration/global-configuration-tempto.yaml");
     registerDriver(JDBC_STATE)
   }
 
