@@ -1,4 +1,5 @@
 value:
+  default: ${not.exisiting.key:-default_value}
   both: global
   global: global
 

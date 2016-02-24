@@ -37,6 +37,7 @@ class TestConfigurationFactoryTest
     configuration.getStringMandatory('value.local') == 'local'
     configuration.getStringMandatory('value.both') == 'local'
     configuration.getStringMandatory('value.global') == 'global'
+    configuration.getStringMandatory('value.default') == 'default_value'
 
     configuration.getStringMandatory('resolve.local') == 'local'
     configuration.getStringMandatory('resolve.both') == 'local'
