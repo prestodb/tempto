@@ -39,12 +39,12 @@ class ConfigurationVariableResolverTest
     configuration.getStringMandatory('variable') == System.getenv(ENV_VARIABLE_KEY)
   }
 
-  def resolveSystemEnvHasHigherPrioryThanFromConfiguration()
+  def resolveSystemEnvHasHigherPriorityThanFromConfiguration()
   {
     setup:
     def configuration = new MapConfiguration([
             variable: '${'  + ENV_VARIABLE_KEY + '}',
-            ENV_VARIABLE_KEY: 'value from configuration'
+            (ENV_VARIABLE_KEY): 'value from configuration'
     ])
 
     when:
@@ -52,6 +52,41 @@ class ConfigurationVariableResolverTest
 
     then:
     configuration.getStringMandatory('variable') == System.getenv(ENV_VARIABLE_KEY)
+  }
+
+  def resolveSystemEnvHasHigherPriorityThanFromSystemProperties()
+  {
+    System.setProperty(ENV_VARIABLE_KEY, 'value from system properties')
+    setup:
+    def configuration = new MapConfiguration([
+            variable: '${'  + ENV_VARIABLE_KEY + '}',
+            (ENV_VARIABLE_KEY): 'value from configuration'
+    ])
+
+    when:
+    configuration = resolver.resolve(configuration)
+
+    then:
+    configuration.getStringMandatory('variable') == System.getenv(ENV_VARIABLE_KEY)
+  }
+
+  def resolveSystemPropertiesHasHigherPriorityThanFromConfiguration()
+  {
+    def key = "SYSTEM_PROPERTY"
+    def valueFromSystemProperties = 'value from system properties'
+    System.setProperty(key, valueFromSystemProperties)
+
+    setup:
+    def configuration = new MapConfiguration([
+            variable: '${' + key + '}',
+            (key): 'value from configuration'
+    ])
+
+    when:
+    configuration = resolver.resolve(configuration)
+
+    then:
+    configuration.getStringMandatory('variable') == valueFromSystemProperties
   }
 
   def resolveConfigurationVariables()
@@ -95,7 +130,7 @@ class ConfigurationVariableResolverTest
         then:
         configuration.getStringList('list_alias') == ['ala', 'kota', '1']
     }
-    
+
   def unableToResolveWhenCyclicReferences()
   {
     setup:

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 /**
@@ -32,17 +33,8 @@ public class ConfigurationVariableResolver
 {
     public Configuration resolve(Configuration configuration)
     {
-        configuration = replaceEnvVariables(configuration);
-        return replaceConfigurationVariables(configuration);
-    }
-
-    private Configuration replaceEnvVariables(Configuration configuration)
-    {
-        return resolveVariables(configuration, System.getenv());
-    }
-
-    private Configuration replaceConfigurationVariables(Configuration configuration)
-    {
+        configuration = resolveVariables(configuration, System.getenv());
+        configuration = resolveVariables(configuration, (Map) System.getProperties());
         return resolveVariables(configuration, configuration.asMap());
     }
 
