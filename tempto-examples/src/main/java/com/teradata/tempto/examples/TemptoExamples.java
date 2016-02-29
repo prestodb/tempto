@@ -17,6 +17,8 @@ package com.teradata.tempto.examples;
 import com.teradata.tempto.runner.TemptoRunner;
 import com.teradata.tempto.runner.TemptoRunnerCommandLineParser;
 
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION;
+
 public class TemptoExamples
 {
 
@@ -25,7 +27,7 @@ public class TemptoExamples
         TemptoRunnerCommandLineParser parser = TemptoRunnerCommandLineParser
                 .builder("tempto examples")
                 .setTestsPackage("com.teradata.tempto.examples", false)
-                .setConfigFile("classpath:/tempto-configuration.yaml", false)
+                .setConfigFile(DEFAULT_TEST_CONFIGURATION_LOCATION, false)
                 .build();
         TemptoRunner.runTempto(parser, args);
     }

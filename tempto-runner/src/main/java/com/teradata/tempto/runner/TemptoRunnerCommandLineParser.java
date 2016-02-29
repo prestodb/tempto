@@ -16,6 +16,7 @@ package com.teradata.tempto.runner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.teradata.tempto.internal.configuration.TestConfigurationFactory;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -170,8 +171,8 @@ public class TemptoRunnerCommandLineParser
             addOption(TESTS);
             addOption(HELP);
             setReportDir("./test-reports", true);
-            setConfigFile("classpath:/tempto-configuration.yaml", true);
-            setConfigLocalFile("classpath:/tempto-configuration-local.yaml", true);
+            setConfigFile(TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION, true);
+            setConfigLocalFile(TestConfigurationFactory.DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION, true);
         }
 
         public Builder addOption(Option option)

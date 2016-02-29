@@ -28,6 +28,7 @@ import java.sql.Connection
 
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY
 import static com.teradata.tempto.internal.query.JdbcUtils.connection
 import static com.teradata.tempto.internal.query.JdbcUtils.registerDriver
 import static java.sql.JDBCType.INTEGER
@@ -51,7 +52,7 @@ class JdbcQueryExecutorTest
 
   def setupSpec()
   {
-    System.setProperty(TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY, TestConfigurationFactory.CLASSPATH_PROTOCOL + "/configuration/global-configuration-tempto.yaml");
+    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml");
     registerDriver(JDBC_STATE)
   }
 

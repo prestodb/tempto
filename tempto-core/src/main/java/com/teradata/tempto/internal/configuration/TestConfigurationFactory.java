@@ -17,9 +17,10 @@ import com.teradata.tempto.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Optional;
 
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
@@ -31,62 +32,64 @@ public class TestConfigurationFactory
     public static final String TEST_CONFIGURATION_URI_KEY = "tempto.configuration";
     public static final String LOCAL_TEST_CONFIGURATION_URI_KEY = "tempto.configuration.local";
 
-    public static final String CLASSPATH_PROTOCOL = "classpath:";
-
-    private static final String DEFAULT_TEST_CONFIGURATION_URI = CLASSPATH_PROTOCOL + "/tempto-configuration.yaml";
-    private static final String LOCAL_DEFAULT_TEST_CONFIGURATION_URI = CLASSPATH_PROTOCOL + "/tempto-configuration-local.yaml";
-
-    // TODO @Inject, unstatic this class
-    private static final ConfigurationVariableResolver CONFIGURATION_VARIABLE_RESOLVER = new ConfigurationVariableResolver();
+    public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
+    public static final String DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION = "tempto-configuration-local.yaml";
 
     public static Configuration createTestConfiguration()
     {
         Configuration configuration = new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration());
-        return CONFIGURATION_VARIABLE_RESOLVER.resolve(configuration);
+        return new ConfigurationVariableResolver().resolve(configuration);
     }
 
     private static Configuration readTestConfiguration()
     {
-        String testConfigurationUri = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_URI);
+        String testConfigurationUri = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
         Optional<InputStream> testConfigurationStream = getConfigurationInputStream(testConfigurationUri);
         if (!testConfigurationStream.isPresent()) {
-            throw new IllegalArgumentException("tempto configuration URI is incorrect: " + testConfigurationUri);
+            throw new IllegalArgumentException("Unable find to configuration: " + testConfigurationUri);
         }
         return parseConfiguration(testConfigurationStream.get());
     }
 
     private static Configuration readLocalConfiguration()
     {
-        String localTestConfigurationUri = System.getProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, LOCAL_DEFAULT_TEST_CONFIGURATION_URI);
-        Optional<InputStream> localTestConfigurationStream = getConfigurationInputStream(localTestConfigurationUri);
+        String configurationLocation = System.getProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION);
+        Optional<InputStream> localTestConfigurationStream = getConfigurationInputStream(configurationLocation);
         if (localTestConfigurationStream.isPresent()) {
             InputStream testConfigurationStream = localTestConfigurationStream.get();
             return parseConfiguration(testConfigurationStream);
         }
         else {
+            LOGGER.warn("Unable to find local configuration: {}", configurationLocation);
             return emptyConfiguration();
         }
     }
 
-    private static Optional<InputStream> getConfigurationInputStream(String testConfigurationUri)
+    private static Optional<InputStream> getConfigurationInputStream(String location)
     {
-        if (testConfigurationUri.startsWith(CLASSPATH_PROTOCOL)) {
-            InputStream input = YamlConfiguration.class.getResourceAsStream(testConfigurationUri.substring(CLASSPATH_PROTOCOL.length()));
-            if (input == null) {
-                LOGGER.warn("Unable to find configuration: {}", testConfigurationUri);
-                return Optional.empty();
-            }
-            return Optional.of(input);
+        Optional<InputStream> inputStream = getFileInputStream(location);
+        if (!inputStream.isPresent()) {
+            inputStream = getResourceInputStream(location);
         }
-        else {
-            try {
-                return Optional.of(new URL(testConfigurationUri).openConnection().getInputStream());
-            }
-            catch (IOException e) {
-                LOGGER.warn("Unable to find configuration: {}", testConfigurationUri);
-                return Optional.empty();
-            }
+        return inputStream;
+    }
+
+    private static Optional<InputStream> getFileInputStream(String path)
+    {
+        try {
+            return Optional.of(new FileInputStream(path));
         }
+        catch (FileNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<InputStream> getResourceInputStream(String path)
+    {
+        if(!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return Optional.ofNullable(TestConfigurationFactory.class.getResourceAsStream(path));
     }
 
     private static YamlConfiguration parseConfiguration(InputStream testConfigurationStream)
