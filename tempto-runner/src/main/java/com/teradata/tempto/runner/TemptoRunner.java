@@ -15,7 +15,6 @@
 package com.teradata.tempto.runner;
 
 import com.google.common.base.Joiner;
-import com.teradata.tempto.dns.TemptoNameServiceDescriptor;
 import com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +36,6 @@ import static java.util.Collections.singletonList;
 
 public class TemptoRunner
 {
-    static {
-        TemptoNameServiceDescriptor.enableHostMapping();
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(TemptoRunner.class);
     private static final int METHOD_SELECTOR_PRIORITY = 20;
     private static final String METHOD_SELECTOR_CLASS_NAME = TestNameGroupNameMethodSelector.class.getName();
