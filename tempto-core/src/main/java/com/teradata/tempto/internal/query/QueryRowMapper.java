@@ -84,6 +84,7 @@ public class QueryRowMapper
             case TINYINT:
             case SMALLINT:
             case INTEGER:
+                return Integer.valueOf(value);
             case BIGINT:
                 return Long.valueOf(value);
             case REAL:

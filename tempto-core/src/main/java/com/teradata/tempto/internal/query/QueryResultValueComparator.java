@@ -84,6 +84,7 @@ public class QueryResultValueComparator
             case TINYINT:
             case SMALLINT:
             case INTEGER:
+                return integerEqual(actual, expected);
             case BIGINT:
                 return longEqual(actual, expected);
             case REAL:
@@ -183,12 +184,22 @@ public class QueryResultValueComparator
 
     private int longEqual(Object actual, Object expected)
     {
-        if (!(isIntegerValue(actual) && isIntegerValue(expected))) {
+        if (!(isLongOrNarrower(actual) && isLongOrNarrower(expected))) {
             return -1;
         }
-        Long actualLong = getLongValue(actual);
-        Long expectedLong = getLongValue(expected);
+        Long actualLong = ((Number) actual).longValue();
+        Long expectedLong = ((Number) expected).longValue();
         return actualLong.compareTo(expectedLong);
+    }
+
+    private int integerEqual(Object actual, Object expected)
+    {
+        if (!(isIntegerOrNarrower(actual) && isIntegerOrNarrower(expected))) {
+            return -1;
+        }
+        Integer actualInteger = ((Number) actual).intValue();
+        Integer expectedInteger = ((Number) expected).intValue();
+        return actualInteger.compareTo(expectedInteger);
     }
 
     private int floatingEqual(Object actual, Object expected)
@@ -238,14 +249,14 @@ public class QueryResultValueComparator
         return -1;
     }
 
-    private static boolean isIntegerValue(Object value)
+    private static boolean isLongOrNarrower(Object value)
     {
-        return (value instanceof Long || value instanceof Integer || value instanceof Short || value instanceof Byte);
+        return (value instanceof Long || isIntegerOrNarrower(value));
     }
 
-    private static long getLongValue(Object object)
+    private static boolean isIntegerOrNarrower(Object value)
     {
-        return ((Number) object).longValue();
+        return (value instanceof Integer || value instanceof Short || value instanceof Byte);
     }
 
     private static boolean isFloatingPointValue(Object value)
