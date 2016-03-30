@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.internal.fulfillment.table;
 
+import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableManager;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static java.util.Objects.requireNonNull;
@@ -45,19 +47,26 @@ public abstract class AbstractTableManager<T extends TableDefinition>
     @Override
     public void dropAllMutableTables()
     {
+        getTableNames().stream()
+                .filter(tableNameGenerator::isMutableTableName)
+                .forEach(tableName -> dropTableIgnoreError(createMutableTableName(tableHandle(tableName))));
+    }
+
+    private List<String> getTableNames()
+    {
         try {
+            ImmutableList.Builder<String> tableNames = ImmutableList.builder();
             DatabaseMetaData metaData = queryExecutor.getConnection().getMetaData();
             try (ResultSet tables = metaData.getTables(null, null, null, null)) {
                 while (tables.next()) {
-                    String tableName = tables.getString("TABLE_NAME");
-                    if (tableNameGenerator.isMutableTableName(tableName)) {
-                        dropTableIgnoreError(createMutableTableName(tableHandle(tableName)));
-                    }
+                    tableNames.add(tables.getString("TABLE_NAME"));
                 }
             }
+            return tableNames.build();
         }
         catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOGGER.debug("Unable to list table names", e);
+            return ImmutableList.of();
         }
     }
 
