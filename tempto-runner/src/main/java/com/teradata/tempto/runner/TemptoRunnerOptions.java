@@ -38,13 +38,13 @@ public class TemptoRunnerOptions
 
     public static final Option CONFIG_FILE = Option.builder()
             .longOpt("config")
-            .desc("URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
+            .desc("Path to main test configuration YAML file. If file does not exists in local file system then classpath is checked")
             .hasArg()
             .build();
 
     public static final Option CONFIG_FILE_LOCAL = Option.builder()
             .longOpt("config-local")
-            .desc("URI to Test main configuration YAML file. If lacks uri schema defaults to file:. If file is not found defaults to classpath:.")
+            .desc("Path to local test configuration YAML file. If file does not exists in local file system then classpath is checked")
             .hasArg()
             .build();
 
@@ -70,7 +70,7 @@ public class TemptoRunnerOptions
 
     public static final Option TESTS = Option.builder("t")
             .longOpt("tests")
-            .desc("Test patterns to be included (not yet supported)")
+            .desc("Test name suffix to be included")
             .valueSeparator(',')
             .hasArg()
             .build();
