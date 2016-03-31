@@ -795,14 +795,30 @@ To run example tests command would look like this:
 $ java -jar tempto-examples/build/libs/tempto-examples-all.jar
 ```
 
-**Tests selection**
+**Runner parameters**
 
-By default all tests found in classpath are executed but user may limit that.
+By default all tests found in classpath are executed but user may limit that by using `--groups`, `--tests` and `--exclude-groups`. Note that, it depends of runner implementation which of belowing parateters are exposed and which are fixed.
 
 <table>
     <tr>
+        <td>Switch</td>
+        <td>Description</td>
+        <td>Default</td>
+    </tr>
+    <tr>
+        <td>--convention-test-dir</td>
+        <td>Location of convention test directory. If not found in local file system then classpath is checked.</td>
+        <td>sql-tests</td>
+    </tr>
+    <tr>
+        <td>--report-dir</td>
+        <td>Location of test executionn reports directory.</td>
+        <td>test-reports</td>
+    </tr>
+    <tr>
         <td>--groups</td>
         <td>List of groups to be executed.</td>
+        <td>All groups are selected.</td>
     </tr>
     <tr>
         <td>--tests</td>
@@ -811,13 +827,14 @@ By default all tests found in classpath are executed but user may limit that.
             looks like: sql_tests.testcases.sample_table.allRows. Tests which name ends with one of patterns specified
             in --tests parameter will be executed.
         </td>
+        <td>All tests are selected.</td>
     </tr>
     <tr>
         <td>--exclude-groups</td>
         <td>List of test groups which should be excluded from execution.</td>
+        <td>No groups are excluded.</td>
     </tr>
 </table>
-
 
 ## Acknowledgements
 

@@ -17,6 +17,7 @@ package com.teradata.tempto.runner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.teradata.tempto.internal.configuration.TestConfigurationFactory;
+import com.teradata.tempto.internal.convention.ConventionTestsUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE_LOCAL;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.CONVENTION_TESTS_DIR;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.EXCLUDED_GROUPS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.GROUPS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.HELP;
@@ -162,8 +164,6 @@ public class TemptoRunnerCommandLineParser
         private Builder(String appName)
         {
             this.appName = appName;
-            addOption(CONFIG_FILE);
-            addOption(CONFIG_FILE_LOCAL);
             addOption(EXCLUDED_GROUPS);
             addOption(GROUPS);
             addOption(PACKAGE);
@@ -173,6 +173,7 @@ public class TemptoRunnerCommandLineParser
             setReportDir("./test-reports", true);
             setConfigFile(TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION, true);
             setConfigLocalFile(TestConfigurationFactory.DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION, true);
+            setConventionTestDirectory(ConventionTestsUtils.DEFAULT_CONVENTION_TESTS_DIR, true);
         }
 
         public Builder addOption(Option option)
@@ -197,14 +198,19 @@ public class TemptoRunnerCommandLineParser
             return setDefaultValue(CONFIG_FILE, configFile, changeable);
         }
 
-        private void setConfigLocalFile(String configFile, boolean changeable)
+        private Builder setConfigLocalFile(String configFile, boolean changeable)
         {
-            setDefaultValue(CONFIG_FILE_LOCAL, configFile, changeable);
+            return setDefaultValue(CONFIG_FILE_LOCAL, configFile, changeable);
         }
 
         public Builder setReportDir(String reportDir, boolean changeable)
         {
             return setDefaultValue(REPORT_DIR, reportDir, changeable);
+        }
+
+        private Builder setConventionTestDirectory(String conventionTestsDir, boolean changeable)
+        {
+            return setDefaultValue(CONVENTION_TESTS_DIR, conventionTestsDir, changeable);
         }
 
         public Builder setExcludedGroups(String excludedGroups, boolean changeable)

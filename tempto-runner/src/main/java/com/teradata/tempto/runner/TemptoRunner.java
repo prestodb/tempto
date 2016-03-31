@@ -30,6 +30,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY;
+import static com.teradata.tempto.internal.convention.ConventionTestsUtils.CONVENTION_TESTS_DIR_KEY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_GROUPS_TO_EXCLUDE_PROPERTY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_GROUPS_TO_RUN_PROPERTY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_NAMES_TO_RUN_PROPERTY;
@@ -47,7 +48,8 @@ public class TemptoRunner
     private final TemptoRunnerCommandLineParser parser;
     private final TemptoRunnerOptions options;
 
-    public static void runTempto(TemptoRunnerCommandLineParser parser, String[] args) {
+    public static void runTempto(TemptoRunnerCommandLineParser parser, String[] args)
+    {
         TemptoRunnerOptions options = parser.parseCommandLine(args);
         try {
             TemptoRunner.runTempto(parser, options);
@@ -65,7 +67,8 @@ public class TemptoRunner
         new TemptoRunner(parser, options).run();
     }
 
-    private TemptoRunner(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options) {
+    private TemptoRunner(TemptoRunnerCommandLineParser parser, TemptoRunnerOptions options)
+    {
 
         this.parser = parser;
         this.options = options;
@@ -81,6 +84,7 @@ public class TemptoRunner
 
         XmlSuite testSuite = getXmlSuite();
         setupTestsConfiguration();
+        System.setProperty(CONVENTION_TESTS_DIR_KEY, options.getConventionTestsDirectory());
         TestNG testNG = new TestNG();
         testNG.setXmlSuites(singletonList(testSuite));
         testNG.setOutputDirectory(options.getReportDir());

@@ -23,12 +23,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -41,7 +40,10 @@ import static java.nio.file.Files.exists;
 
 public final class ConventionTestsUtils
 {
-    private static final String CONVENTION_TESTS_ROOT_DIR = "sql-tests";
+    public static final String CONVENTION_TESTS_DIR_KEY = "tempto.convention.tests.dir";
+
+    public static final String DEFAULT_CONVENTION_TESTS_DIR = "sql-tests";
+
     private static final String FILE_SCHEME = "file";
     private static final String JAR_SCHEME = "jar";
     private static final String JAR_FILE_PREFIX = "!";
@@ -53,7 +55,17 @@ public final class ConventionTestsUtils
     public static Optional<Path> getConventionsTestsPath(String child)
     {
         try {
-            Enumeration<URL> productTestUrls = getSystemResources(CONVENTION_TESTS_ROOT_DIR + "/" + child);
+            ensureTemporaryTestsRootPathExists();
+
+            String childLocation = System.getProperty(CONVENTION_TESTS_DIR_KEY) + "/" + child;
+            Path childPath = Paths.get(childLocation);
+            if (Files.exists(childPath)) {
+                Path temporaryChildPath = temporaryTestsRootPath.get().resolve(child);
+                copyRecursive(childPath, temporaryChildPath);
+                return Optional.of(temporaryChildPath);
+            }
+
+            Enumeration<URL> productTestUrls = getSystemResources(childLocation);
             Set<URI> productTestUris = new HashSet<>();
             while (productTestUrls.hasMoreElements()) {
                 URL url = productTestUrls.nextElement();
@@ -80,8 +92,6 @@ public final class ConventionTestsUtils
     private static Path copyTestsToTemporaryDirectory(Set<URI> productTestsUris, String child)
             throws IOException
     {
-        ensureTemporaryTestsRootPathExists();
-
         Path temporaryTestsPath = temporaryTestsRootPath.get().resolve(child);
         if (!exists(temporaryTestsPath)) {
             for (URI uri : productTestsUris) {

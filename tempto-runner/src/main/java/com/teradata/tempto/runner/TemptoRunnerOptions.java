@@ -54,6 +54,12 @@ public class TemptoRunnerOptions
             .hasArg()
             .build();
 
+    public static final Option CONVENTION_TESTS_DIR = Option.builder("c")
+            .longOpt("convention-test-dir")
+            .desc("Convention test directory. If not found in local file system then classpath is checked.")
+            .hasArg()
+            .build();
+
     public static final Option GROUPS = Option.builder("g")
             .longOpt("groups")
             .desc("Test groups to be run")
@@ -110,6 +116,11 @@ public class TemptoRunnerOptions
     public Set<String> getTestGroups()
     {
         return getValues(GROUPS.getLongOpt());
+    }
+
+    public String getConventionTestsDirectory()
+    {
+        return getValue(CONVENTION_TESTS_DIR.getLongOpt()).get();
     }
 
     public Set<String> getExcludeGroups()
