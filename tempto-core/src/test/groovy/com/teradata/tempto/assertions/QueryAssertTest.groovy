@@ -28,6 +28,7 @@ import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
 import static AnnotatedFileParser.SectionParsingResult
+import static java.sql.JDBCType.BIGINT
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
 
@@ -36,7 +37,7 @@ public class QueryAssertTest
 {
 
   private final QueryResult NATION_JOIN_REGION_QUERY_RESULT = new QueryResult(
-          [INTEGER, VARCHAR, VARCHAR],
+          [BIGINT, VARCHAR, VARCHAR],
           HashBiMap.create([
                   "n.nationkey": 1,
                   "n.name"     : 2,
@@ -123,14 +124,14 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected <1> column, to be type: <VARCHAR>, but was: <INTEGER>'
+    e.message == 'Expected <1> column, to be type: <VARCHAR>, but was: <BIGINT>'
   }
 
   def 'hasColumnCount with index'()
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .column(1, INTEGER, EMPTY_COLUMN_VALUE_ASSERT)
+            .column(1, BIGINT, EMPTY_COLUMN_VALUE_ASSERT)
 
     then:
     noExceptionThrown()
@@ -153,7 +154,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected column count to be <1>, but was <3> - columns <[INTEGER, VARCHAR, VARCHAR]>'
+    e.message == 'Expected column count to be <1>, but was <3> - columns <[BIGINT, VARCHAR, VARCHAR]>'
   }
 
   def 'hasColumns - different column types'()
@@ -163,13 +164,13 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError)
-    e.message == 'Expected <0> column of type <VARCHAR>, but was <INTEGER>, actual columns: [INTEGER, VARCHAR, VARCHAR]'
+    e.message == 'Expected <0> column of type <VARCHAR>, but was <BIGINT>, actual columns: [BIGINT, VARCHAR, VARCHAR]'
   }
 
   def 'hasColumns'()
   {
     when:
-    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasColumns(INTEGER, VARCHAR, VARCHAR)
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT).hasColumns(BIGINT, VARCHAR, VARCHAR)
 
     then:
     noExceptionThrown()
@@ -282,7 +283,7 @@ public class QueryAssertTest
   def 'Matches file - ok - with types'()
   {
     def parsingResult = parseResultFor('''\
--- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR|VARCHAR
+-- delimiter: |; ignoreOrder: false; types: BIGINT|VARCHAR|VARCHAR
 1|ALGERIA|AFRICA|
 2|ARGENTINA|SOUTH AMERICA|
 ''')
@@ -297,7 +298,7 @@ public class QueryAssertTest
   def 'Matches file - failed - wrong explicit types in result file'()
   {
     def parsingResult = parseResultFor('''\
--- delimiter: |; ignoreOrder: false; types: INTEGER|INTEGER|INTEGER
+-- delimiter: |; ignoreOrder: false; types: BIGINT|BIGINT|BIGINT
 1|ALGERIA|AFRICA|
 2|ARGENTINA|SOUTH AMERICA|
 ''')
@@ -307,7 +308,7 @@ public class QueryAssertTest
 
     then:
     def e = thrown(AssertionError.class);
-    e.getMessage() == "Expected <1> column of type <INTEGER>, but was <VARCHAR>, actual columns: [INTEGER, VARCHAR, VARCHAR]"
+    e.getMessage() == "Expected <1> column of type <BIGINT>, but was <VARCHAR>, actual columns: [BIGINT, VARCHAR, VARCHAR]"
   }
 
   def 'Matches file - ok - no explicit types'()
@@ -357,7 +358,7 @@ B|ARGENTINA|SOUTH AMERICA|
 
     then:
     def e = thrown(AssertionError.class)
-    e.getMessage() == '''Could not map expected file content to query column types; types=[INTEGER, VARCHAR, VARCHAR]; content=<-- delimiter: |; ignoreOrder: false
+    e.getMessage() == '''Could not map expected file content to query column types; types=[BIGINT, VARCHAR, VARCHAR]; content=<-- delimiter: |; ignoreOrder: false
 A|ALGERIA|AFRICA|
 B|ARGENTINA|SOUTH AMERICA|>; error=<For input string: "A">'''
   }
