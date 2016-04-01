@@ -140,7 +140,7 @@ public class QueryAssertTest
   {
     when:
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
-            .column('n.nationkey', INTEGER, EMPTY_COLUMN_VALUE_ASSERT)
+            .column('n.nationkey', BIGINT, EMPTY_COLUMN_VALUE_ASSERT)
 
     then:
     noExceptionThrown()
