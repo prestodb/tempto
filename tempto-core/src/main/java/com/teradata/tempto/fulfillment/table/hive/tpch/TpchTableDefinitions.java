@@ -24,9 +24,9 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("nation")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   n_nationkey     BIGINT," +
+                            "   n_nationkey     INT," +
                             "   n_name          STRING," +
-                            "   n_regionkey     BIGINT," +
+                            "   n_regionkey     INT," +
                             "   n_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
                             "LOCATION '%LOCATION%'")
@@ -38,7 +38,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("region")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   r_regionkey     BIGINT," +
+                            "   r_regionkey     INT," +
                             "   r_name          STRING," +
                             "   r_comment       STRING) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' " +
@@ -51,7 +51,7 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("part")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   p_partkey     BIGINT," +
+                            "   p_partkey     INT," +
                             "   p_name        STRING," +
                             "   p_mfgr        STRING," +
                             "   p_brand       STRING," +
@@ -70,10 +70,10 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("supplier")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   s_suppkey     BIGINT," +
+                            "   s_suppkey     INT," +
                             "   s_name        STRING," +
                             "   s_address     STRING," +
-                            "   s_nationkey   BIGINT," +
+                            "   s_nationkey   INT," +
                             "   s_phone       STRING," +
                             "   s_acctbal     DOUBLE," +
                             "   s_comment     STRING) " +
@@ -87,8 +87,8 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("partsupp")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   ps_partkey     BIGINT," +
-                            "   ps_suppkey     BIGINT," +
+                            "   ps_partkey     INT," +
+                            "   ps_suppkey     INT," +
                             "   ps_availqty    INT," +
                             "   ps_supplycost  DOUBLE," +
                             "   ps_comment     STRING) " +
@@ -102,10 +102,10 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("customer")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   c_custkey     BIGINT," +
+                            "   c_custkey     INT," +
                             "   c_name        STRING," +
                             "   c_address     STRING," +
-                            "   c_nationkey   BIGINT," +
+                            "   c_nationkey   INT," +
                             "   c_phone       STRING," +
                             "   c_acctbal     DOUBLE  ," +
                             "   c_mktsegment  STRING," +
@@ -120,8 +120,8 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("orders")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   o_orderkey       BIGINT," +
-                            "   o_custkey        BIGINT," +
+                            "   o_orderkey       INT," +
+                            "   o_custkey        INT," +
                             "   o_orderstatus    STRING," +
                             "   o_totalprice     DOUBLE," +
                             "   o_orderdate      DATE," +
@@ -139,9 +139,9 @@ public class TpchTableDefinitions
             HiveTableDefinition.builder("lineitem")
                     .setCreateTableDDLTemplate("" +
                             "CREATE EXTERNAL TABLE %NAME%(" +
-                            "   l_orderkey      BIGINT," +
-                            "   l_partkey       BIGINT," +
-                            "   l_suppkey       BIGINT," +
+                            "   l_orderkey      INT," +
+                            "   l_partkey       INT," +
+                            "   l_suppkey       INT," +
                             "   l_linenumber    INT," +
                             "   l_quantity      DOUBLE," +
                             "   l_extendedprice DOUBLE," +

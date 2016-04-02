@@ -154,7 +154,7 @@ class HiveTableManagerTest
 
   private static final String NATION_DDL_TEMPLATE = '''
     CREATE TABLE %NAME%(
-            n_nationid BIGINT,
+            n_nationid INT,
             n_name STRING)
             ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
             LOCATION '%LOCATION%'
@@ -171,7 +171,7 @@ class HiveTableManagerTest
 
   private static final String PARTITIONED_NATION_DDL_TEMPLATE = '''
     CREATE TABLE %NAME%(
-            n_nationid BIGINT,
+            n_nationid INT,
             n_name STRING)
             ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
 '''

@@ -39,7 +39,7 @@ ext.versions = [
         cglib        : '3.1',
         httpclient   : '4.4',
         ioutils      : '2.4',
-        tpchgen      : '0.6',
+        tpchgen      : '0.4',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
         hive         : '0.13.1-3',
