@@ -1,4 +1,4 @@
-# Tempto - test framework
+# Tempto - test framework [![Build Status](https://travis-ci.org/prestodb/tempto.svg?branch=master)](https://travis-ci.org/prestodb/tempto)
 
 This project allows developers to write and execute tests for SQL databases running
 on Hadoop. Individual test requirements such as data generation, HDFS file copy/storage
