@@ -15,8 +15,9 @@
 package com.teradata.tempto.assertions
 
 import com.google.common.collect.HashBiMap
-import com.teradata.tempto.internal.convention.SqlResultDescriptor
 import com.teradata.tempto.internal.convention.AnnotatedFileParser
+import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult
+import com.teradata.tempto.internal.convention.SqlResultDescriptor
 import com.teradata.tempto.query.QueryExecutionException
 import com.teradata.tempto.query.QueryResult
 import org.assertj.core.api.AbstractListAssert
@@ -27,7 +28,7 @@ import java.sql.ResultSet
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
-import static AnnotatedFileParser.SectionParsingResult
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY
 import static java.sql.JDBCType.BIGINT
 import static java.sql.JDBCType.INTEGER
 import static java.sql.JDBCType.VARCHAR
@@ -54,6 +55,11 @@ public class QueryAssertTest
     {
       // DO NOTHING
     }
+  }
+
+  def setupSpec()
+  {
+    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml");
   }
 
   def 'hasResultCount fails'()

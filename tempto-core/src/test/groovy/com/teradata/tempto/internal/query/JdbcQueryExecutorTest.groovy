@@ -15,7 +15,6 @@
 package com.teradata.tempto.internal.query
 
 import com.teradata.tempto.context.TestContext
-import com.teradata.tempto.internal.configuration.TestConfigurationFactory
 import com.teradata.tempto.internal.context.GuiceTestContext
 import com.teradata.tempto.query.JdbcConnectionsPool
 import com.teradata.tempto.query.JdbcConnectivityParamsState
