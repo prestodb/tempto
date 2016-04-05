@@ -1,0 +1,60 @@
+version: '2'
+services:
+  hadoop-master:
+    hostname: hadoop-master
+    image: 'teradatalabs/cdh5-hive'
+    ports:
+      - '1080:1080'
+      - '8020:8020'
+      - '8088:8088'
+      - '9083:9083'
+      - '10000:10000'
+      - '50070:50070'
+      - '50075:50075'
+
+  psql1:
+    hostname: psql1
+    image: 'postgres'
+    ports:
+      - '15432:5432'
+    environment:
+      POSTGRES_USER: blah
+      POSTGRES_PASSWORD: blah
+
+  psql2:
+    hostname: psql2
+    image: 'postgres'
+    ports:
+      - '15433:5432'
+    environment:
+      POSTGRES_USER: blah
+      POSTGRES_PASSWORD: blah
+
+  ssh:
+    hostname: ssh
+    build: 'ssh'
+    ports:
+      - '2222:22'
+
+  presto-master:
+    hostname: presto-master
+    build: 'presto-server'
+    ports: 
+      - '8080:8080'
+    depends_on:
+      - 'hadoop-master'
+      - 'psql1'
+      - 'psql2'
+
+  presto-cli:
+    build: 'presto-cli'
+    depends_on:
+      - 'presto-master'
+
+  runner:
+    image: 'teradatalabs/centos6-java8-oracle'
+    volumes:
+      - '..:/workspace'
+    depends_on:
+      - 'presto-master'
+

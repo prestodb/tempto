@@ -1,0 +1,26 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+sudo: required
+dist: trusty
+
+services:
+  - docker
+
+before_install:
+  # This section can be removed once travis get equipped with docker 1.10 and docker-compose 1.6
+  - |
+    sudo apt-get update
+    sudo apt-get -o "Dpkg::Options::=--force-confold" -y install docker-engine
+    sudo rm /usr/local/bin/docker-compose
+    curl -L https://github.com/docker/compose/releases/download/1.6.2/docker-compose-`uname -s`-`uname -m` > docker-compose
+    chmod +x docker-compose
+    sudo mv docker-compose /usr/local/bin
+
+install: ./gradlew build -x test
+
+script:
+  - ./gradlew test
+  - ./tempto-examples/bin/run_on_docker.sh -x failing

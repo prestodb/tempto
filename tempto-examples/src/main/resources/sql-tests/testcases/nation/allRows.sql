@@ -1,4 +1,4 @@
--- database: hive; groups: example_smoketest,blah; tables: nation
+-- database: hive; groups: example_smoketest; tables: nation
 -- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR|INTEGER|VARCHAR
 --! name: query_1
 SELECT * FROM nation

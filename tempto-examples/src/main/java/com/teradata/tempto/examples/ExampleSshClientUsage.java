@@ -14,6 +14,8 @@
 
 package com.teradata.tempto.examples;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.net.HostAndPort;
 import com.google.inject.Inject;
 import com.teradata.tempto.ProductTest;
 import com.teradata.tempto.process.CliProcess;
@@ -50,8 +52,16 @@ public class ExampleSshClientUsage
     private String hostByPassword;
 
     @Inject
+    @Named("ssh.roles.host_by_password.port")
+    private Integer hostByPasswordPort;
+
+    @Inject
     @Named("ssh.roles.host_by_identity.host")
     private String hostByIdentity;
+
+    @Inject
+    @Named("ssh.roles.host_by_identity.port")
+    private Integer hostByIdentityPort;
 
     @Test(groups = "ssh")
     public void sshClientUsage()
@@ -69,10 +79,16 @@ public class ExampleSshClientUsage
     public void dynamicSshClient()
             throws Exception
     {
-        SshClient sshClient = sshClientFactory.create(hostByPassword);
-        try (CliProcess hostnameProcess = sshClient.execute("hostname")) {
-            assertThat(hostnameProcess.nextOutputLine()).contains(hostByIdentity);
-            hostnameProcess.waitForWithTimeoutAndKill();
+        SshClient sshClient = sshClientFactory.create(hostByPassword, hostByIdentityPort);
+        try (CliProcess remoteProcess = sshClient.execute("echo success")) {
+            assertThat(remoteProcess.nextOutputLine()).contains("success");
+            remoteProcess.waitForWithTimeoutAndKill();
+        }
+
+        sshClient = sshClientFactory.create(hostByIdentity, hostByIdentityPort);
+        try (CliProcess remoteProcess = sshClient.execute("echo success")) {
+            assertThat(remoteProcess.nextOutputLine()).contains("success");
+            remoteProcess.waitForWithTimeoutAndKill();
         }
     }
 

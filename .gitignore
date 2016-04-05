@@ -18,9 +18,6 @@ out/
 # tests logging output
 tempto_logs
 
-# tempto local configuration
-*-local.yaml
-
 # python packaging artifacts
 dist/
 

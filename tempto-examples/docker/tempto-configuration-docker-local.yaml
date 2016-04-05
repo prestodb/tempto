@@ -1,0 +1,20 @@
+cluster:
+  presto: presto-master
+  hadoop: hadoop-master
+  psql1: psql1
+  psql2: psql2
+  ssh: ssh
+
+databases:
+  psql:
+    port: 5432
+  psql2:
+    port: 5432
+ssh:
+  identity: /workspace/docker/ssh/keys/key
+  roles:
+    host_by_identity:
+      user: root 
+    host_by_password:
+      user: root 
+      password: s3cr37_p@55

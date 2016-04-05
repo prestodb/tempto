@@ -1,0 +1,12 @@
+hosts:
+  hadoop-master: ${DOCKER_MACHINE}
+ssh:
+  identity: ssh/keys/key
+  roles:
+    host_by_identity:
+      port: 2222
+      user: root 
+    host_by_password:
+      port: 2222
+      user: root 
+      password: s3cr37_p@55

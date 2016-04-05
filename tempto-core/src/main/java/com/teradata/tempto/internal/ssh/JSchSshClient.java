@@ -62,7 +62,7 @@ public class JSchSshClient
     {
         try {
             Session session = createSession();
-            LOGGER.info("Executing on {}@{}: {}", session.getUserName(), session.getHost(), command);
+            LOGGER.info("Executing on {}@{}:{}: {}", session.getUserName(), session.getHost(), session.getPort(), command);
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             channel.setCommand(command);
             JSchCliProcess process = new JSchCliProcess(session, channel);
@@ -89,7 +89,7 @@ public class JSchSshClient
         Session session = null;
         try {
             session = createSession();
-            LOGGER.info("Uploading {} onto {}@{}:{}", file, session.getUserName(), session.getHost(), remotePath);
+            LOGGER.info("Uploading {} onto {}@{}:{}:{}", file, session.getUserName(), session.getHost(), session.getPort(), remotePath);
             ChannelExec channel = (ChannelExec) session.openChannel("exec");
             String command = "scp -t " + remotePath;
             channel.setCommand(command);

@@ -1,7 +1,16 @@
+DOCKER_MACHINE: localhost
+
+cluster:
+  presto: ${DOCKER_MACHINE}
+  hadoop: ${DOCKER_MACHINE}
+  psql1: ${DOCKER_MACHINE}
+  psql2: ${DOCKER_MACHINE}
+  ssh: ${DOCKER_MACHINE}
+
 hdfs:
   username: hdfs
   webhdfs:
-    host: ${DOCKER_MACHINE}
+    host: ${cluster.hadoop}
     port: 50070
 
 databases:
@@ -10,7 +19,7 @@ databases:
 
   hive:
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
-    jdbc_url: jdbc:hive2://${DOCKER_MACHINE}:10000
+    jdbc_url: jdbc:hive2://${cluster.hadoop}:10000
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
@@ -18,14 +27,15 @@ databases:
 
   presto:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
-    jdbc_url: jdbc:presto://${DOCKER_MACHINE}:8080/hive/default
+    jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/default
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
 
   psql:
     jdbc_driver_class: org.postgresql.Driver
-    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE}:15432/postgres
+    port: 15432
+    jdbc_url: jdbc:postgresql://${cluster.psql1}:${databases.psql2.port}/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
@@ -33,7 +43,8 @@ databases:
 
   psql2:
     jdbc_driver_class: org.postgresql.Driver
-    jdbc_url: jdbc:postgresql://${DOCKER_MACHINE}:15433/postgres
+    port: 15433
+    jdbc_url: jdbc:postgresql://${cluster.psql2}:${databases.psql2.port}/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
@@ -47,25 +58,22 @@ ssh:
   identity: ${IDENTITY}
   roles:
     host_by_password:
-      host: ${HOST}
+      host: ${cluster.ssh}
       port: 22
       user: ${USER_A}
       password: ${USER_A_PASSWORD}
 
     host_by_identity:
-      host: ${HOST}
+      host: ${cluster.ssh}
       port: 22
       user: ${USER_B}
 
 hosts:
   localhost_alias: localhost
   teradata_alias: teradata.com
-  hadoop-master: ${DOCKER_MACHINE}
 
 list:
   string:
     - ala
     - ma
     - kota
-
-DOCKER_MACHINE: localhost

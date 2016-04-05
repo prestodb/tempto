@@ -24,7 +24,4 @@ public abstract class ConventionBasedTest
         implements RequirementsProvider, WithName, WithTestGroups
 {
     public abstract void test();
-
-
-
 }
