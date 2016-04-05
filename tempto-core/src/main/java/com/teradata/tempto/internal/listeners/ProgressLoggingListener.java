@@ -60,7 +60,6 @@ public class ProgressLoggingListener
                 started, getMethodsCountFromContext(testCase.getTestContext()), testMetadata.testName, Joiner.on(", ").join(testMetadata.testGroups));
     }
 
-
     @Override
     public void onTestSuccess(ITestResult testCase)
     {
@@ -87,8 +86,15 @@ public class ProgressLoggingListener
 
     private void logTestEnd(String outcome)
     {
-        long executionTime = System.currentTimeMillis() - testStartTime;
-        LOGGER.info("{}     /    took {}", outcome, DurationFormatUtils.formatDuration(executionTime, "m' minutes and 's' seconds'"));
+        if (LOGGER.isInfoEnabled()) {
+            long executionTime = System.currentTimeMillis() - testStartTime;
+            if (executionTime > 1000) {
+                LOGGER.info("{}     /    took {}", outcome, DurationFormatUtils.formatDuration(executionTime, "m' minutes and 's' seconds'"));
+            }
+            else {
+                LOGGER.info(outcome);
+            }
+        }
     }
 
     @Override
