@@ -57,8 +57,8 @@ public class SshClientModuleProvider
                 for (String role : rolesConfiguration.listKeyPrefixes(1)) {
                     Configuration roleConfiguration = rolesConfiguration.getSubconfiguration(role);
                     String host = roleConfiguration.getStringMandatory(HOST_KEY);
-                    int port = roleConfiguration.getIntMandatory(PORT_KEY);
-                    String user = roleConfiguration.getStringMandatory(USER_KEY);
+                    int port = roleConfiguration.getInt(PORT_KEY).orElse(22);
+                    String user = roleConfiguration.getString(USER_KEY).orElse("root");
                     Optional<String> password = roleConfiguration.getString(PASSWORD_KEY);
 
                     Key<SshClient> sshClientKey = Key.get(SshClient.class, named(role));
