@@ -19,6 +19,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.ReadOnlyTableManager;
 import com.teradata.tempto.fulfillment.table.TableManager;
@@ -34,6 +35,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.name.Names.named;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
 
 @AutoModuleProvider
@@ -50,8 +52,13 @@ public class TableManagerDispatcherModuleProvider
                 Configuration databasesSectionConfiguration = configuration.getSubconfiguration("databases");
                 Set<String> databaseNames = databasesSectionConfiguration.listKeyPrefixes(1);
 
-                Map<String, ? extends Class<? extends TableManager>> tableManagerClasses = getTableManagerClassesByType();
+                if (databaseNames.isEmpty()) {
+                    bind(new TypeLiteral<Map<String, TableManager>>() {}).toInstance(emptyMap());
+                    bind(new TypeLiteral<Map<String, QueryExecutor>>() {}).toInstance(emptyMap());
+                    return;
+                }
 
+                Map<String, ? extends Class<? extends TableManager>> tableManagerClasses = getTableManagerClassesByType();
                 for (String database : databaseNames) {
                     Configuration databaseConfiguration = databasesSectionConfiguration.getSubconfiguration(database);
                     String tableManagerType = databaseConfiguration.getString("table_manager_type").orElse(ReadOnlyTableManager.TYPE.toLowerCase());

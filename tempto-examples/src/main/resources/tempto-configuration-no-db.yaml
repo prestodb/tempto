@@ -1,0 +1,14 @@
+DOCKER_MACHINE: localhost
+
+cluster:
+  ssh: ${DOCKER_MACHINE}
+
+ssh:
+  identity: ${IDENTITY}
+  roles:
+    host_by_password:
+      host: ${cluster.ssh}
+      password: ${USER_A_PASSWORD}
+
+    host_by_identity:
+      host: ${cluster.ssh}
