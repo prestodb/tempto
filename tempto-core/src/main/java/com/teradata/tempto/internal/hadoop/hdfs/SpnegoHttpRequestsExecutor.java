@@ -77,21 +77,25 @@ public class SpnegoHttpRequestsExecutor
     private final CloseableHttpClient httpClient;
     private final KerberosAuthentication kerberosAuthentication;
     private final HttpContext spnegoAwareHttpContext;
+    private final boolean useCanonicalHostname;
 
     @Inject
-    public SpnegoHttpRequestsExecutor(CloseableHttpClient httpClient,
-            KerberosAuthentication kerberosAuthentication)
+    public SpnegoHttpRequestsExecutor(
+            CloseableHttpClient httpClient,
+            KerberosAuthentication kerberosAuthentication,
+            Configuration configuration)
     {
         this.httpClient = requireNonNull(httpClient, "httpClient is null");
         this.kerberosAuthentication = requireNonNull(kerberosAuthentication, "kerberosAuthentication is null");
         this.spnegoAwareHttpContext = createSpnegoAwareHttpContext();
+        this.useCanonicalHostname = configuration.getBoolean("hdfs.webhdfs.spnego_use_canonical_hostname").orElse(false);
     }
 
     private HttpContext createSpnegoAwareHttpContext()
     {
         HttpClientContext httpContext = HttpClientContext.create();
         Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build();
+                .register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true, useCanonicalHostname)).build();
         httpContext.setAuthSchemeRegistry(authSchemeRegistry);
 
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
