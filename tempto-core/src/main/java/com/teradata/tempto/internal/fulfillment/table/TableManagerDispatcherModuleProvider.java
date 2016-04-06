@@ -20,6 +20,7 @@ import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.teradata.tempto.configuration.Configuration;
+import com.teradata.tempto.fulfillment.table.ReadOnlyTableManager;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
@@ -27,15 +28,12 @@ import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.query.QueryExecutor;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.name.Names.named;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
 @AutoModuleProvider
@@ -56,11 +54,7 @@ public class TableManagerDispatcherModuleProvider
 
                 for (String database : databaseNames) {
                     Configuration databaseConfiguration = databasesSectionConfiguration.getSubconfiguration(database);
-                    Optional<String> tableMangerTypeOptional = databaseConfiguration.getString("table_manager_type");
-                    if (!tableMangerTypeOptional.isPresent()) {
-                        continue;
-                    }
-                    String tableManagerType = tableMangerTypeOptional.get();
+                    String tableManagerType = databaseConfiguration.getString("table_manager_type").orElse(ReadOnlyTableManager.TYPE.toLowerCase());
                     checkArgument(tableManagerClasses.containsKey(tableManagerType),
                             "unknown table manager type %s for database %s; expecting one of %s",
                             tableManagerType, database, tableManagerClasses.keySet());

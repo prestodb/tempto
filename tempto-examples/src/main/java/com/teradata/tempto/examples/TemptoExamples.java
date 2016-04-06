@@ -21,13 +21,12 @@ import static com.teradata.tempto.internal.configuration.TestConfigurationFactor
 
 public class TemptoExamples
 {
-
     public static void main(String[] args)
     {
         TemptoRunnerCommandLineParser parser = TemptoRunnerCommandLineParser
                 .builder("tempto examples")
                 .setTestsPackage("com.teradata.tempto.examples", false)
-                .setConfigFile(DEFAULT_TEST_CONFIGURATION_LOCATION, false)
+                .setConfigFile(DEFAULT_TEST_CONFIGURATION_LOCATION, true)
                 .build();
         TemptoRunner.runTempto(parser, args);
     }

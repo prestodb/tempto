@@ -29,13 +29,21 @@ import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorageProvide
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.Set;
+
+import static com.teradata.tempto.internal.hadoop.hdfs.WebHdfsClient.CONF_HDFS_WEBHDFS_HOST_KEY;
+import static com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorageProvider.CONF_TESTS_HDFS_PATH_KEY;
 
 @AutoModuleProvider
 public class HdfsModuleProvider
         implements SuiteModuleProvider
 {
+    private static final Logger logger = LoggerFactory.getLogger(HdfsModuleProvider.class);
+
     private static final String AUTHENTICATION_SPNEGO = "SPNEGO";
     private static final int NUMBER_OF_HTTP_RETRIES = 3;
 
@@ -47,6 +55,15 @@ public class HdfsModuleProvider
             @Override
             protected void configure()
             {
+                Set<String> configurationKeys = configuration.listKeys();
+                if (!configurationKeys.contains(CONF_HDFS_WEBHDFS_HOST_KEY)
+                        || !configurationKeys.contains(CONF_TESTS_HDFS_PATH_KEY)) {
+                    logger.debug("No HDFS support enabled as '{}' or '{}' is configured",
+                            CONF_HDFS_WEBHDFS_HOST_KEY,
+                            CONF_TESTS_HDFS_PATH_KEY);
+                    return;
+                }
+
                 install(httpRequestsExecutorModule());
 
                 bind(HdfsClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);

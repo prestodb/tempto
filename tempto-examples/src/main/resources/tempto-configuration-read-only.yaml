@@ -1,0 +1,25 @@
+DOCKER_MACHINE: localhost
+
+cluster:
+  presto: ${DOCKER_MACHINE}
+  ssh: ${DOCKER_MACHINE}
+
+databases:
+  default:
+    alias: presto
+
+  presto:
+    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
+    jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/default
+    jdbc_user: hdfs
+    jdbc_password: na
+
+ssh:
+  identity: ${IDENTITY}
+  roles:
+    host_by_password:
+      host: ${cluster.ssh}
+      password: ${USER_A_PASSWORD}
+
+    host_by_identity:
+      host: ${cluster.ssh}

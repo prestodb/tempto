@@ -28,6 +28,8 @@ public class RevisionStorageProvider
 {
     private static final Logger LOGGER = getLogger(RevisionStorageProvider.class);
 
+    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.hdfs.path";
+
     private static final String TEST_X_ATTR_KEY = "user.test-attr-key";
     private static final String TEST_X_ATTR_VALUE = "test-attr-value";
 
@@ -36,7 +38,7 @@ public class RevisionStorageProvider
 
     @Inject
     public RevisionStorageProvider(HdfsClient hdfsClient,
-            @Named("tests.hdfs.path") String testDataBasePath)
+            @Named(CONF_TESTS_HDFS_PATH_KEY) String testDataBasePath)
     {
         this.hdfsClient = hdfsClient;
         this.testDataBasePath = testDataBasePath;

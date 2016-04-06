@@ -24,3 +24,4 @@ install: ./gradlew build -x test
 script:
   - ./gradlew test
   - ./tempto-examples/bin/run_on_docker.sh -x failing
+  - ./tempto-examples/bin/run_on_docker.sh --config tempto-configuration-read-only.yaml -g in_memory

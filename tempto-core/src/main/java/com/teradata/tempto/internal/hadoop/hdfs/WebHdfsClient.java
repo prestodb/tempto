@@ -65,6 +65,10 @@ public class WebHdfsClient
 {
     private static final Logger logger = getLogger(WebHdfsClient.class);
 
+    public static final String CONF_HDFS_WEBHDFS_HOST_KEY = "hdfs.webhdfs.host";
+    public static final String CONF_HDFS_WEBHDFS_PORT_KEY = "hdfs.webhdfs.port";
+    public static final String CONF_HDFS_USERNAME_KEY = "hdfs.username";
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<Map<String, Object>>() {};
 
@@ -74,9 +78,9 @@ public class WebHdfsClient
 
     @Inject
     public WebHdfsClient(
-            @Named("hdfs.webhdfs.host") String namenodeHost,
-            @Named("hdfs.webhdfs.port") int namenodePort,
-            @Named("hdfs.username") String username,
+            @Named(CONF_HDFS_WEBHDFS_HOST_KEY) String namenodeHost,
+            @Named(CONF_HDFS_WEBHDFS_PORT_KEY) int namenodePort,
+            @Named(CONF_HDFS_USERNAME_KEY) String username,
             HttpRequestsExecutor httpRequestsExecutor)
     {
         checkNotNull(namenodeHost, "namenodeHost is null");
