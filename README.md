@@ -782,7 +782,9 @@ There is no such possibility for convention based tests right now.
 ### Using tempto runner
 
 Tests can be run using the tempto runner. This is a java library which enables user to create an
-executable jar which make it easy for the user to run the tests.
+executable jar which makes it easy for the user to run the tests. All you need to do is to make an executable jar
+is to add tempto-runner to dependencies and create a main class which will call `TemptoRunner.runTempto` (see `tempto-examples` and its main class `TemptoExamples.java` for an example).
+
 To see a verbose description of all the execution options run:
 
 ```Shell
