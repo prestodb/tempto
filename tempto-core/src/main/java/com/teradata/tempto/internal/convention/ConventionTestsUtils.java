@@ -57,7 +57,7 @@ public final class ConventionTestsUtils
         try {
             ensureTemporaryTestsRootPathExists();
 
-            String childLocation = System.getProperty(CONVENTION_TESTS_DIR_KEY) + "/" + child;
+            String childLocation = System.getProperty(CONVENTION_TESTS_DIR_KEY, DEFAULT_CONVENTION_TESTS_DIR) + "/" + child;
             Path childPath = Paths.get(childLocation);
             if (Files.exists(childPath)) {
                 Path temporaryChildPath = temporaryTestsRootPath.get().resolve(child);
