@@ -60,7 +60,7 @@ public class TestConfigurationFactory
             return parseConfiguration(testConfigurationStream);
         }
         else {
-            LOGGER.warn("Unable to find local configuration: {}", configurationLocation);
+            LOGGER.info("Default configuration is being used. Local configuration is absent: {}", configurationLocation);
             return emptyConfiguration();
         }
     }
