@@ -53,6 +53,8 @@ services:
 
   runner:
     image: 'teradatalabs/centos6-java8-oracle'
+    ports:
+      - '5005:5005'
     volumes:
       - '..:/workspace'
     depends_on:
