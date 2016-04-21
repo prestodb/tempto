@@ -32,11 +32,72 @@ environment.
 
 ## Running tests
 
+Running tempto example product requires a testing cluster which is provisioned by docker containers and managed by docker-compose.
+
+Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
+
+### By automation script
+
 To run example product tests use the following command:
 
 ```
 tempto-examples/bin/run_on_docker.sh
 ```
 
-Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
+### Manual execution of product tests
+#### Provisioning of testing cluster
+
+To run example product tests first you need to setup a testing cluster
+
+```
+cd tempto-examples/docker
+docker-compose up -d
+# wait a while to make sure that testing clusters is up and ready
+```
+
+#### Product tests execution on Linux-based operating systems
+
+You can run product tests with:
+
+```
+cd tempto-examples/docker
+java -jar ../build/libs/tempto-examples-all.jar
+```
+
+To run product tests in debugging mode you can:
+
+```
+cd tempto-examples/docker
+java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -jar ../build/libs/tempto-examples-all.jar
+```
+
+then you can attach IDE to start debug session.
+
+After you finish with example product tests execution you can teardown the cluster:
+
+
+#### Product tests execution on MAC
+
+To run product tests on MAC please do:
+
+```
+cd tempto-examples/docker
+docker-compose runner java -jar /workspace/build/libs/tempto-examples-all.jar --config-local /workspace/docker/tempto-configuration-docker-local.yaml
+```
+
+To run product tests in debugging mode you can:
+
+```
+cd tempto-examples/docker
+docker-compose run -p 5005:5005 runner java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -jar /workspace/build/libs/tempto-examples-all.jar --config-local /workspace/docker/tempto-configuration-docker-local.yaml
+```
+
+then you can attach IDE to start debug session.
+
+#### Tearing down the testing cluster
+```
+cd tempto-examples/docker
+docker-compose down
+```
+
 
