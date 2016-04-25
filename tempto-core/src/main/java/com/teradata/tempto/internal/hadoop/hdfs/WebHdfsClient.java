@@ -183,9 +183,7 @@ public class WebHdfsClient
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public long getLength(String path)
+    private Object getAttributeValue(String path, String attribute)
     {
         HttpGet readRequest = new HttpGet(buildUri(path, "GETFILESTATUS", emptyMap()));
         try (CloseableHttpResponse response = httpRequestsExecutor.execute(readRequest)) {
@@ -194,11 +192,25 @@ public class WebHdfsClient
                 throw invalidStatusException("GETFILESTATUS", path, readRequest, response);
             }
             Map<String, Object> responseObject = deserializeJsonResponse(response);
-            return ((Number) ((Map<String, Object>) responseObject.get("FileStatus")).get("length")).longValue();
+            return ((Map<String, Object>) responseObject.get("FileStatus")).get(attribute);
         }
         catch (IOException e) {
             throw new RuntimeException("Could not get file status: " + path + " , user: " + username, e);
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public long getLength(String path)
+    {
+        return ((Number) getAttributeValue (path, "length")).longValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public String getOwner(String path)
+    {
+        return ((String) getAttributeValue (path, "owner"));
     }
 
     @Override
