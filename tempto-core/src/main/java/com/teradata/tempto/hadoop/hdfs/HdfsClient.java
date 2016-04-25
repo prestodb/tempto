@@ -78,4 +78,6 @@ public interface HdfsClient
     long getLength(String path);
 
     boolean exist(String path);
+
+    String getOwner(String path);
 }
