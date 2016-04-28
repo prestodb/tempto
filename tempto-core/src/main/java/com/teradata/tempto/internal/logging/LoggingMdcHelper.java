@@ -23,6 +23,8 @@ public class LoggingMdcHelper
     private static final String MDC_TEST_ID_KEY = "test_id";
     private static final TestMetadataReader testMetadataReader = new TestMetadataReader();
 
+    private LoggingMdcHelper() {}
+
     public static void setupLoggingMdcForTest(ITestResult testCase) {
         TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         String testId = testMetadata.testName;
