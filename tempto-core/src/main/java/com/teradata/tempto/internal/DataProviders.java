@@ -29,6 +29,8 @@ import static java.util.Arrays.asList;
 public class DataProviders
 {
 
+    private DataProviders() {}
+
     /**
      * Obtains list of parameter sets for test method based on defined data provider.
      * If no data provider is defined then {@link Optional#empty()} is returned.

@@ -159,4 +159,6 @@ public class TpchTableDefinitions
                             "LOCATION '%LOCATION%'")
                     .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, 1.0))
                     .build();
+
+    private TpchTableDefinitions() {}
 }

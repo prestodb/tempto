@@ -35,6 +35,8 @@ public class TestConfigurationFactory
     public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
     public static final String DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION = "tempto-configuration-local.yaml";
 
+    private TestConfigurationFactory() {}
+
     public static Configuration createTestConfiguration()
     {
         Configuration configuration = new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration());

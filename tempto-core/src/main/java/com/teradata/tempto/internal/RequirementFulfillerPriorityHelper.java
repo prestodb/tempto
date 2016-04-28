@@ -18,6 +18,8 @@ import com.teradata.tempto.fulfillment.RequirementFulfiller;
 
 public class RequirementFulfillerPriorityHelper
 {
+    private RequirementFulfillerPriorityHelper() {}
+
     public static int getPriority(Class<? extends RequirementFulfiller> c)
     {
         if (c.getAnnotation(RequirementFulfiller.AutoSuiteLevelFulfiller.class) != null) {

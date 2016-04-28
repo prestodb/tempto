@@ -18,6 +18,7 @@ import java.util.Optional;
 
 public class TableRequirements
 {
+    private TableRequirements() {}
 
     /**
      * Requirement for mutable table.
