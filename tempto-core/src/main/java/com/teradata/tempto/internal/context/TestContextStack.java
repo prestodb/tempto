@@ -16,13 +16,15 @@ package com.teradata.tempto.internal.context;
 
 import com.teradata.tempto.context.TestContext;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Stack;
 
 public class TestContextStack<C extends TestContext>
         implements Iterable<C>
 {
-    private final Stack<C> testContextStack = new Stack<>();
+    private final Deque<C> testContextStack = new ArrayDeque<>();
 
     public void push(C testContext)
     {
@@ -46,7 +48,7 @@ public class TestContextStack<C extends TestContext>
 
     public boolean empty()
     {
-        return testContextStack.empty();
+        return testContextStack.isEmpty();
     }
 
     @Override

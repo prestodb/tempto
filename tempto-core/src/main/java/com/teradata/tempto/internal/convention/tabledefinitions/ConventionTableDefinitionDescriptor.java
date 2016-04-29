@@ -37,18 +37,18 @@ class ConventionTableDefinitionDescriptor
         private final TableType tableType;
         private final Optional<String> schema;
 
-        public static ParsedDDLFile forPath(Path dataFile)
-        {
-            List<SectionParsingResult> sectionParsingResults = new AnnotatedFileParser().parseFile(dataFile);
-            SectionParsingResult onlySection = getOnlyElement(sectionParsingResults);
-            return new ParsedDDLFile(onlySection);
-        }
-
         private ParsedDDLFile(SectionParsingResult sqlSectionParsingResult)
         {
             super(sqlSectionParsingResult);
             tableType = getTableTypeFromProperties();
             schema = getPropertyValue("schema");
+        }
+
+        public static ParsedDDLFile forPath(Path dataFile)
+        {
+            List<SectionParsingResult> sectionParsingResults = new AnnotatedFileParser().parseFile(dataFile);
+            SectionParsingResult onlySection = getOnlyElement(sectionParsingResults);
+            return new ParsedDDLFile(onlySection);
         }
 
         private TableType getTableTypeFromProperties()

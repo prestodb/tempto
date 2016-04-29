@@ -22,13 +22,13 @@ public class ImmutableTablesState
         extends TablesState
 {
 
-    public static ImmutableTablesState immutableTablesState()
-    {
-        return testContext().getDependency(ImmutableTablesState.class);
-    }
-
     public ImmutableTablesState(List<TableInstance> tables)
     {
         super(tables, "immutable table");
+    }
+
+    public static ImmutableTablesState immutableTablesState()
+    {
+        return testContext().getDependency(ImmutableTablesState.class);
     }
 }

@@ -53,6 +53,17 @@ public class TableDefinitionsRepository
 
     private static final TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY;
 
+    private final Map<String, TableDefinition> tableDefinitions = new MapMaker().makeMap();
+
+    public TableDefinitionsRepository()
+    {
+    }
+
+    public TableDefinitionsRepository(Collection<TableDefinition> tableDefinitions)
+    {
+        tableDefinitions.stream().forEach(this::register);
+    }
+
     static {
         // ExceptionInInitializerError is not always appropriately logged, lets log exceptions explicitly here
         try {
@@ -84,17 +95,6 @@ public class TableDefinitionsRepository
     public static TableDefinitionsRepository tableDefinitionsRepository()
     {
         return TABLE_DEFINITIONS_REPOSITORY;
-    }
-
-    private final Map<String, TableDefinition> tableDefinitions = new MapMaker().makeMap();
-
-    public TableDefinitionsRepository()
-    {
-    }
-
-    public TableDefinitionsRepository(Collection<TableDefinition> tableDefinitions)
-    {
-        tableDefinitions.stream().forEach(this::register);
     }
 
     public <T extends TableDefinition> T register(T tableDefinition)

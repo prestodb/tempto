@@ -30,6 +30,7 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -100,7 +101,7 @@ public class QueryAssert
             containsExactly(rows);
         }
 
-        if (!sqlResultDescriptor.isIgnoreExcessRows()) {
+        if (!sqlResultDescriptor.isIgnoreExcessRows() && Objects.nonNull(rows)) {
             hasRowsCount(rows.size());
         }
 
@@ -402,7 +403,7 @@ public class QueryAssert
             for (String expectedErrorMessage : expectedErrorMessages) {
                 if (!exceptionMessage.contains(expectedErrorMessage)) {
                     throw new AssertionError(format(
-                            "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
+                            "Query failed with unexpected error message: '%s' %n Expected error message was '%s'",
                             exceptionMessage,
                             expectedErrorMessage
                     ));

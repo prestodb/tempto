@@ -25,11 +25,11 @@ public class EmptyConfiguration extends AbstractConfiguration
 
     private static final EmptyConfiguration INSTANCE = new EmptyConfiguration();
 
+    private EmptyConfiguration() {}
+
     public static Configuration emptyConfiguration() {
         return INSTANCE;
     }
-
-    private EmptyConfiguration() {}
 
     @Override
     public Optional<Object> get(String key)

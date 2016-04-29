@@ -21,6 +21,10 @@ public final class ProcessUtils
 {
     private static final int SUCCESS_EXIT_CODE = 0;
 
+    private ProcessUtils()
+    {
+    }
+
     public static void execute(String... cmdarray)
     {
         checkState(cmdarray.length > 0);
@@ -33,9 +37,5 @@ public final class ProcessUtils
         catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private ProcessUtils()
-    {
     }
 }

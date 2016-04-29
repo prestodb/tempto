@@ -107,6 +107,20 @@ public class TestInitializationListener
                 createTestConfiguration());
     }
 
+    public TestInitializationListener(
+            List<? extends SuiteModuleProvider> suiteModuleProviders,
+            List<? extends TestMethodModuleProvider> testMethodModuleProviders,
+            List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers,
+            List<Class<? extends RequirementFulfiller>> testMethodLevelFulfillers,
+            Configuration configuration)
+    {
+        this.suiteModuleProviders = suiteModuleProviders;
+        this.testMethodModuleProviders = testMethodModuleProviders;
+        this.suiteLevelFulfillers = suiteLevelFulfillers;
+        this.testMethodLevelFulfillers = testMethodLevelFulfillers;
+        this.configuration = configuration;
+    }
+
     private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()
     {
         return collectFulfillers(BUILTIN_TEST_METHOD_LEVEL_FULFILLERS, AutoTestLevelFulfiller.class);
@@ -154,20 +168,6 @@ public class TestInitializationListener
     public static List<? extends TestMethodModuleProvider> getTestMethodModuleProviders()
     {
         return instantiate(getAnnotatedSubTypesOf(TestMethodModuleProvider.class, AutoModuleProvider.class));
-    }
-
-    public TestInitializationListener(
-            List<? extends SuiteModuleProvider> suiteModuleProviders,
-            List<? extends TestMethodModuleProvider> testMethodModuleProviders,
-            List<Class<? extends RequirementFulfiller>> suiteLevelFulfillers,
-            List<Class<? extends RequirementFulfiller>> testMethodLevelFulfillers,
-            Configuration configuration)
-    {
-        this.suiteModuleProviders = suiteModuleProviders;
-        this.testMethodModuleProviders = testMethodModuleProviders;
-        this.suiteLevelFulfillers = suiteLevelFulfillers;
-        this.testMethodLevelFulfillers = testMethodLevelFulfillers;
-        this.configuration = configuration;
     }
 
     @Override

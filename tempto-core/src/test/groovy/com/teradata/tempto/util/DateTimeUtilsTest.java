@@ -30,9 +30,9 @@ public class DateTimeUtilsTest
     public void shouldParseMultipleFormatsInUTC()
             throws Exception
     {
-        assertThat(parseTimestampInUTC("2015-05-10 12:15:35.123").getTime()).isEqualTo(1431260135123l);
-        assertThat(parseTimestampInUTC("2015-05-10 12:15:35").getTime()).isEqualTo(1431260135000l);
-        assertThat(parseTimestampInUTC("2015-05-10 12:15").getTime()).isEqualTo(1431260100000l);
-        assertThat(parseTimestampInUTC("2015-05-10").getTime()).isEqualTo(1431216000000l);
+        assertThat(parseTimestampInUTC("2015-05-10 12:15:35.123").getTime()).isEqualTo(1431260135123L);
+        assertThat(parseTimestampInUTC("2015-05-10 12:15:35").getTime()).isEqualTo(1431260135000L);
+        assertThat(parseTimestampInUTC("2015-05-10 12:15").getTime()).isEqualTo(1431260100000L);
+        assertThat(parseTimestampInUTC("2015-05-10").getTime()).isEqualTo(1431216000000L);
     }
 }

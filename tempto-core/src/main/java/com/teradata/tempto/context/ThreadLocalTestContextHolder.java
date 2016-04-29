@@ -48,6 +48,8 @@ public final class ThreadLocalTestContextHolder
         }
     };
 
+    private ThreadLocalTestContextHolder() {}
+
     public static TestContext testContext()
     {
         assertTestContextSet();
@@ -110,6 +112,4 @@ public final class ThreadLocalTestContextHolder
             testContextStackThreadLocal.set(new TestContextStack<>());
         }
     }
-
-    private ThreadLocalTestContextHolder() {}
 }

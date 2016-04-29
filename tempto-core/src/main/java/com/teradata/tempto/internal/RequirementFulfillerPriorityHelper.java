@@ -28,7 +28,7 @@ public class RequirementFulfillerPriorityHelper
         }
         else {
             throw new RuntimeException(
-                    String.format("Class '%s' is not annotated with '%' or '%s'.",
+                    String.format("Class '%s' is not annotated with '%s' or '%s'.",
                             c.getName(), RequirementFulfiller.AutoSuiteLevelFulfiller.class.getName(), RequirementFulfiller.AutoTestLevelFulfiller.class.getName()));
         }
     }
