@@ -16,7 +16,6 @@ package com.teradata.tempto.internal.fulfillment.table.hive
 
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
-import com.teradata.tempto.hadoop.hdfs.HdfsClient
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
 import com.teradata.tempto.query.QueryExecutor
@@ -31,11 +30,10 @@ class HiveTableManagerTest
         extends Specification
 {
   String ROOT_PATH = "/tests-path"
-  String MUTABLE_TABLES_PATH = ROOT_PATH + HiveTableManager.MUTABLE_TABLES_DIR
+  String MUTABLE_TABLES_PATH = '/user/hive/warehouse/'
 
   QueryExecutor queryExecutor = Mock()
   HdfsDataSourceWriter dataSourceWriter = Mock()
-  HdfsClient hdfsClient = Mock()
   TableNameGenerator tableNameGenerator = Mock()
   HiveTableManager tableManager
 
@@ -45,7 +43,7 @@ class HiveTableManagerTest
     connection.getSchema() >> "schema"
     queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, hdfsClient, "database");
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, "database");
   }
 
   def 'should create hive immutable table'()
@@ -59,7 +57,6 @@ class HiveTableManagerTest
     def nationDefinition = getNationHiveTableDefinition()
     def nationTableInstance = tableManager.createImmutable(nationDefinition)
 
-
     then:
     nationTableInstance.name == expectedTableName
     nationTableInstance.nameInDatabase == expectedTableNameInDatabase
@@ -71,7 +68,7 @@ class HiveTableManagerTest
   def 'should create hive mutable table loaded not partitioned'()
   {
     setup:
-    def expectedTableLocation = "/tests-path/mutable_tables/nation_randomSuffix"
+    def expectedTableLocation = "/user/hive/warehouse/nation_randomSuffix"
     def expectedTableName = "nation"
     def expectedTableNameInDatabase = "nation_randomSuffix"
 
@@ -83,7 +80,7 @@ class HiveTableManagerTest
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
     1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
-    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
+    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
   }
 
   def 'should create hive mutable table created not partitioned'()
@@ -100,7 +97,7 @@ class HiveTableManagerTest
     then:
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
-    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
+    1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
   }
 
   def 'should create hive mutable table loaded partitioned'()
@@ -147,9 +144,13 @@ class HiveTableManagerTest
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=1) LOCATION '$expectedPartition1Location'")
   }
 
-  private String expandDDLTemplate(String template, String tableName, String location = "n/a")
+  private String expandDDLTemplate(String template, String tableName, String location = null)
   {
-    return template.replace('%NAME%', tableName).replaceAll('%LOCATION%', location);
+    String ddl = template.replace('%NAME%', tableName)
+    if (location) {
+      ddl += " LOCATION '${location}'"
+    }
+    return ddl
   }
 
   private static final String NATION_DDL_TEMPLATE = '''
@@ -157,7 +158,6 @@ class HiveTableManagerTest
             n_nationid BIGINT,
             n_name STRING)
             ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
-            LOCATION '%LOCATION%'
 '''
 
   def getNationHiveTableDefinition()

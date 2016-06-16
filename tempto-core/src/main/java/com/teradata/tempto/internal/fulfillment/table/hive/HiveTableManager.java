@@ -20,7 +20,6 @@ import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
@@ -45,14 +44,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class HiveTableManager
         extends AbstractTableManager<HiveTableDefinition>
 {
-    public static final String MUTABLE_TABLES_DIR = "/mutable_tables/";
-
     private static final Logger LOGGER = getLogger(HiveTableManager.class);
 
     private final QueryExecutor queryExecutor;
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
     private final String testDataBasePath;
-    private final HdfsClient hdfsClient;
     private final String databaseName;
 
     @Inject
@@ -60,7 +56,6 @@ public class HiveTableManager
             HdfsDataSourceWriter hdfsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
-            HdfsClient hdfsClient,
             @Named("databaseName") String databaseName)
     {
         super(queryExecutor, tableNameGenerator);
@@ -68,7 +63,6 @@ public class HiveTableManager
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
-        this.hdfsClient = checkNotNull(hdfsClient, "hdfsClientd is null");
     }
 
     @Override
@@ -83,24 +77,23 @@ public class HiveTableManager
         uploadTableData(tableDataPath, tableDefinition.getDataSource());
 
         dropTableIgnoreError(tableName);
-        createTable(tableDefinition, tableName, tableDataPath);
+        createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableNameInDatabase);
 
-        return new HiveTableInstance(tableName, tableDefinition, Optional.<String>empty());
+        return new HiveTableInstance(tableName, tableDefinition);
     }
 
     @Override
     public HiveTableInstance createMutable(HiveTableDefinition tableDefinition, State state, TableHandle tableHandle)
     {
         TableName tableName = createMutableTableName(tableHandle);
-        String tableDataPath = getMutableTableHdfsPath(tableName, Optional.empty());
-        LOGGER.debug("creating mutable table {}, data path: {}", tableName, tableDataPath);
+        LOGGER.debug("creating mutable table {}", tableName);
 
         if (state == PREPARED) {
-            return new HiveTableInstance(tableName, tableDefinition, Optional.of(tableDataPath));
+            return new HiveTableInstance(tableName, tableDefinition);
         }
 
-        createTable(tableDefinition, tableName, tableDataPath);
+        createTable(tableDefinition, tableName, Optional.empty());
 
         if (tableDefinition.isPartitioned()) {
             int partitionId = 0;
@@ -114,17 +107,11 @@ public class HiveTableManager
             }
         }
         else if (state == LOADED) {
+            String tableDataPath = getMutableTableHdfsPath(tableName, Optional.empty());
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        return new HiveTableInstance(tableName, tableDefinition, Optional.of(tableDataPath));
-    }
-
-    @Override
-    public void dropAllMutableTables()
-    {
-        super.dropAllMutableTables();
-        hdfsClient.delete(getMutableTablesDir());
+        return new HiveTableInstance(tableName, tableDefinition);
     }
 
     @Override
@@ -149,18 +136,10 @@ public class HiveTableManager
         return testDataBasePath + "/" + dataSource.getPathSuffix();
     }
 
-    private String getMutableTablesDir()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.append(testDataBasePath);
-        sb.append(MUTABLE_TABLES_DIR);
-        return sb.toString();
-    }
-
     private String getMutableTableHdfsPath(TableName tableName, Optional<Integer> partitionId)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(getMutableTablesDir());
+        sb.append("/user/hive/warehouse/");
         sb.append(tableName.getNameInDatabase());
         if (partitionId.isPresent()) {
             sb.append("/partition_").append(partitionId.get());
@@ -168,10 +147,10 @@ public class HiveTableManager
         return sb.toString();
     }
 
-    private void createTable(HiveTableDefinition tableDefinition, TableName tableName, String tableDataPath)
+    private void createTable(HiveTableDefinition tableDefinition, TableName tableName, Optional<String> tableDataPath)
     {
         tableName.getSchema().ifPresent(schema ->
-            queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
+                queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
         );
         queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase(), tableDataPath));
     }

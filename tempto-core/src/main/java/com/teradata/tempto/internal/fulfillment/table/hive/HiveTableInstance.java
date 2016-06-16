@@ -17,21 +17,11 @@ import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 
-import java.util.Optional;
-
 public class HiveTableInstance
         extends TableInstance<HiveTableDefinition>
 {
-    private final Optional<String> mutableDataHdfsDataPath;
-
-    public HiveTableInstance(TableName tableName, HiveTableDefinition tableDefinition, Optional<String> mutableDataHdfsDataPath)
+    public HiveTableInstance(TableName tableName, HiveTableDefinition tableDefinition)
     {
         super(tableName, tableDefinition);
-        this.mutableDataHdfsDataPath = mutableDataHdfsDataPath;
-    }
-
-    public Optional<String> getMutableDataHdfsDataPath()
-    {
-        return mutableDataHdfsDataPath;
     }
 }

@@ -38,6 +38,7 @@ public class HiveTableDefinition
     private static final String LOCATION_MARKER = "%LOCATION%";
     private static final String PARTITION_SPEC_MARKER = "%PARTITION_SPEC%";
     private static final String NO_DATA_REVISION = "NO_DATA_REVISION";
+    private static final String EXTERNAL_MARKER = "%EXTERNAL%";
 
     private final Optional<HiveDataSource> dataSource;
     private final Optional<List<PartitionDefinition>> partitionDefinitions;
@@ -52,12 +53,6 @@ public class HiveTableDefinition
         this.createTableDDLTemplate = createTableDDLTemplate;
 
         checkArgument(createTableDDLTemplate.contains(NAME_MARKER), "Create table DDL must contain %NAME% placeholder");
-        if (partitionDefinitions.isPresent()) {
-            checkArgument(!createTableDDLTemplate.contains(LOCATION_MARKER), "Create table DDL must contain not %LOCATION% placeholder for partitioned table");
-        }
-        else {
-            checkArgument(createTableDDLTemplate.contains(LOCATION_MARKER), "Create table DDL must contain %LOCATION% placeholder");
-        }
     }
 
     public HiveDataSource getDataSource()
@@ -77,9 +72,16 @@ public class HiveTableDefinition
         return partitionDefinitions.isPresent();
     }
 
-    public String getCreateTableDDL(String name, String location)
+    public String getCreateTableDDL(String name, Optional<String> location)
     {
-        return createTableDDLTemplate.replace(NAME_MARKER, name).replace(LOCATION_MARKER, location);
+        String ddl = createTableDDLTemplate.replace(NAME_MARKER, name);
+        String external = "";
+        if (location.isPresent()) {
+            external = " EXTERNAL ";
+            ddl += " LOCATION '" + location.get() + "'";
+        }
+
+        return ddl.replace(EXTERNAL_MARKER, external);
     }
 
     public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, HiveDataSource dataSource)
@@ -213,7 +215,9 @@ public class HiveTableDefinition
 
         public String getAddPartitionTableDDL(TableName tableName, String location)
         {
-            return ADD_PARTITION_DDL_TEMPLATE.replace(NAME_MARKER, tableName.getNameInDatabase()).replace(PARTITION_SPEC_MARKER, partitionSpec).replace(LOCATION_MARKER, location);
+            return ADD_PARTITION_DDL_TEMPLATE.replace(NAME_MARKER, tableName.getNameInDatabase())
+                    .replace(PARTITION_SPEC_MARKER, partitionSpec)
+                    .replace(LOCATION_MARKER, location);
         }
     }
 
