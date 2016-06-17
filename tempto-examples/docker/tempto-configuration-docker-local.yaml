@@ -5,11 +5,11 @@ cluster:
   psql2: psql2
   ssh: ssh
 
-databases:
-  psql:
-    port: 5432
-  psql2:
-    port: 5432
+psql:
+  port: 5432
+psql2:
+  port: 5432
+
 ssh:
   identity: /workspace/docker/ssh/keys/key
   roles:

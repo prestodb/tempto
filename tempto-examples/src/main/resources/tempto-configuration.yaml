@@ -13,6 +13,11 @@ hdfs:
     host: ${cluster.hadoop}
     port: 50070
 
+psql:
+  port: 15432
+psql2:
+  port: 15433
+
 databases:
   default:
     alias: presto
@@ -34,8 +39,7 @@ databases:
 
   psql:
     jdbc_driver_class: org.postgresql.Driver
-    port: 15432
-    jdbc_url: jdbc:postgresql://${cluster.psql1}:${databases.psql2.port}/postgres
+    jdbc_url: jdbc:postgresql://${cluster.psql1}:${psql2.port}/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
@@ -43,8 +47,7 @@ databases:
 
   psql2:
     jdbc_driver_class: org.postgresql.Driver
-    port: 15433
-    jdbc_url: jdbc:postgresql://${cluster.psql2}:${databases.psql2.port}/postgres
+    jdbc_url: jdbc:postgresql://${cluster.psql2}:${psql2.port}/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true
