@@ -99,7 +99,7 @@ run_product_tests "$*" &
 PRODUCT_TESTS_PROCESS_ID=$!
 EXIT_CODE=$?
 wait $PRODUCT_TESTS_PROCESS_ID
-set-x
+set -e
 
 cleanup
 
