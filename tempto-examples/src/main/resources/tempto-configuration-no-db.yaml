@@ -8,7 +8,11 @@ ssh:
   roles:
     host_by_password:
       host: ${cluster.ssh}
+      port: 22
+      user: ${USER_A}
       password: ${USER_A_PASSWORD}
 
     host_by_identity:
       host: ${cluster.ssh}
+      port: 22
+      user: ${USER_B}
