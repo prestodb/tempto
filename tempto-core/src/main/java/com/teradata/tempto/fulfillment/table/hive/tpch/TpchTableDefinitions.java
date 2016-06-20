@@ -17,6 +17,9 @@ package com.teradata.tempto.fulfillment.table.hive.tpch;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
+// Table definitions according to: http://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v2.17.1.pdf
+// TODO: support for DECIMAL and CHAR
+// TODO: move to separate module
 public class TpchTableDefinitions
 {
     @RepositoryTableDefinition
@@ -25,9 +28,9 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   n_nationkey     BIGINT," +
-                            "   n_name          STRING," +
+                            "   n_name          VARCHAR(25)," +
                             "   n_regionkey     BIGINT," +
-                            "   n_comment       STRING) " +
+                            "   n_comment       VARCHAR(152)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
                     .build();
@@ -38,8 +41,8 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   r_regionkey     BIGINT," +
-                            "   r_name          STRING," +
-                            "   r_comment       STRING) " +
+                            "   r_name          VARCHAR(25)," +
+                            "   r_comment       VARCHAR(152)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.REGION, 1.0))
                     .build();
@@ -50,14 +53,14 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   p_partkey     BIGINT," +
-                            "   p_name        STRING," +
-                            "   p_mfgr        STRING," +
-                            "   p_brand       STRING," +
-                            "   p_type        STRING," +
+                            "   p_name        VARCHAR(55)," +
+                            "   p_mfgr        VARCHAR(25)," +
+                            "   p_brand       VARCHAR(10)," +
+                            "   p_type        VARCHAR(25)," +
                             "   p_size        INT," +
-                            "   p_container   STRING," +
+                            "   p_container   VARCHAR(10)," +
                             "   p_retailprice DOUBLE," +
-                            "   p_comment     STRING) " +
+                            "   p_comment     VARCHAR(23)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.PART, 1.0))
                     .build();
@@ -68,12 +71,12 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   s_suppkey     BIGINT," +
-                            "   s_name        STRING," +
-                            "   s_address     STRING," +
+                            "   s_name        VARCHAR(25)," +
+                            "   s_address     VARCHAR(40)," +
                             "   s_nationkey   BIGINT," +
-                            "   s_phone       STRING," +
+                            "   s_phone       VARCHAR(15)," +
                             "   s_acctbal     DOUBLE," +
-                            "   s_comment     STRING) " +
+                            "   s_comment     VARCHAR(101)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, 1.0))
                     .build();
@@ -87,7 +90,7 @@ public class TpchTableDefinitions
                             "   ps_suppkey     BIGINT," +
                             "   ps_availqty    INT," +
                             "   ps_supplycost  DOUBLE," +
-                            "   ps_comment     STRING) " +
+                            "   ps_comment     VARCHAR(199)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, 1.0))
                     .build();
@@ -98,13 +101,13 @@ public class TpchTableDefinitions
                     .setCreateTableDDLTemplate("" +
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   c_custkey     BIGINT," +
-                            "   c_name        STRING," +
-                            "   c_address     STRING," +
+                            "   c_name        VARCHAR(25)," +
+                            "   c_address     VARCHAR(40)," +
                             "   c_nationkey   BIGINT," +
-                            "   c_phone       STRING," +
+                            "   c_phone       VARCHAR(15)," +
                             "   c_acctbal     DOUBLE  ," +
-                            "   c_mktsegment  STRING," +
-                            "   c_comment     STRING) " +
+                            "   c_mktsegment  VARCHAR(10)," +
+                            "   c_comment     VARCHAR(117)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.CUSTOMER, 1.0))
                     .build();
@@ -116,13 +119,13 @@ public class TpchTableDefinitions
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "   o_orderkey       BIGINT," +
                             "   o_custkey        BIGINT," +
-                            "   o_orderstatus    STRING," +
+                            "   o_orderstatus    VARCHAR(1)," +
                             "   o_totalprice     DOUBLE," +
                             "   o_orderdate      DATE," +
-                            "   o_orderpriority  STRING,  " +
-                            "   o_clerk          STRING, " +
+                            "   o_orderpriority  VARCHAR(15),  " +
+                            "   o_clerk          VARCHAR(15), " +
                             "   o_shippriority   INT," +
-                            "   o_comment        STRING) " +
+                            "   o_comment        VARCHAR(79)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.ORDERS, 1.0))
                     .build();
@@ -140,14 +143,14 @@ public class TpchTableDefinitions
                             "   l_extendedprice DOUBLE," +
                             "   l_discount      DOUBLE," +
                             "   l_tax           DOUBLE," +
-                            "   l_returnflag    STRING," +
-                            "   l_linestatus    STRING," +
+                            "   l_returnflag    VARCHAR(1)," +
+                            "   l_linestatus    VARCHAR(1)," +
                             "   l_shipdate      DATE," +
                             "   l_commitdate    DATE," +
                             "   l_receiptdate   DATE," +
-                            "   l_shipinstruct  STRING," +
-                            "   l_shipmode      STRING," +
-                            "   l_comment       STRING) " +
+                            "   l_shipinstruct  VARCHAR(25)," +
+                            "   l_shipmode      VARCHAR(10)," +
+                            "   l_comment       VARCHAR(44)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, 1.0))
                     .build();
