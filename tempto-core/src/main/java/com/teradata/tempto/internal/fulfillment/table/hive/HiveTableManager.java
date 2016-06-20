@@ -50,19 +50,22 @@ public class HiveTableManager
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
     private final String testDataBasePath;
     private final String databaseName;
+    private final String hiveDatabasePath;
 
     @Inject
     public HiveTableManager(QueryExecutor queryExecutor,
             HdfsDataSourceWriter hdfsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
-            @Named("databaseName") String databaseName)
+            @Named("databaseName") String databaseName,
+            @Named("hive.database.path") String databasePath)
     {
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
+        this.hiveDatabasePath = checkNotNull(databasePath, "databasePath");
     }
 
     @Override
@@ -139,7 +142,7 @@ public class HiveTableManager
     private String getMutableTableHdfsPath(TableName tableName, Optional<Integer> partitionId)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("/user/hive/warehouse/");
+        sb.append(hiveDatabasePath);
         sb.append(tableName.getNameInDatabase());
         if (partitionId.isPresent()) {
             sb.append("/partition_").append(partitionId.get());

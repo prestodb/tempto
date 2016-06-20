@@ -57,6 +57,10 @@ tests:
   hdfs:
     path: /tempto
 
+hive:
+  database:
+    path: /user/hive/warehouse/
+
 ssh:
   identity: ${IDENTITY}
   roles:
