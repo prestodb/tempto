@@ -13,7 +13,7 @@ hdfs:
     host: ${cluster.hadoop}
     port: 50070
 
-psql:
+psql1:
   port: 15432
 psql2:
   port: 15433
@@ -39,7 +39,7 @@ databases:
 
   psql:
     jdbc_driver_class: org.postgresql.Driver
-    jdbc_url: jdbc:postgresql://${cluster.psql1}:${psql2.port}/postgres
+    jdbc_url: jdbc:postgresql://${cluster.psql1}:${psql1.port}/postgres
     jdbc_user: blah
     jdbc_password: blah
     jdbc_pooling: true

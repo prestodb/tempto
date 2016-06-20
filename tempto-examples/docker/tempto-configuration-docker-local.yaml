@@ -5,7 +5,7 @@ cluster:
   psql2: psql2
   ssh: ssh
 
-psql:
+psql1:
   port: 5432
 psql2:
   port: 5432
