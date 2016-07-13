@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.sql;
 
+import com.teradata.tempto.query.QueryExecutor;
 import com.teradata.tempto.sql.view.ViewContextProvider;
 
 import static com.teradata.tempto.query.QueryExecutor.defaultQueryExecutor;
@@ -39,6 +40,11 @@ public final class SqlContexts
     {
         String viewName = generateRandomName("TEST_VIEW_");
         return new ViewContextProvider(viewName, selectSql, defaultQueryExecutor());
+    }
+
+    public static ViewContextProvider createViewAs(String viewName, String selectSql, QueryExecutor queryExecutor)
+    {
+        return new ViewContextProvider(viewName, selectSql, queryExecutor);
     }
 
     private static String generateRandomName(String prefix)
