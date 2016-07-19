@@ -105,7 +105,7 @@ public abstract class CliProcessBase
     public String nextErrorLine()
     {
         String nextLine = processError.nextLine();
-        LOGGER.info("processError: {}", nextLine);
+        LOGGER.debug("processError: {}", nextLine);
         return nextLine;
     }
 
@@ -113,7 +113,7 @@ public abstract class CliProcessBase
     public String nextErrorToken()
     {
         String next = processError.next();
-        LOGGER.info("processError: {}", next);
+        LOGGER.debug("processError: {}", next);
         return next;
     }
 
