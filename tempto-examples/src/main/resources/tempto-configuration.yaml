@@ -84,3 +84,9 @@ list:
     - ala
     - ma
     - kota
+
+ldap:
+  url: ldap://ldapserverhost
+  admin:
+    dn: cn=admin,dc=tempto,dc=com
+    password: admin
