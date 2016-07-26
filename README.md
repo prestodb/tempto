@@ -431,6 +431,59 @@ One can request that mutable table is in one of three states:
  * `CREATED` - table is created but is not populated with data
  * `LOADED` - table is created and populated with data
 
+#### LdapObjectRequirement
+
+When this requirement is fulfilled, it will create an LDAP Entry in the configured LDAP Server. Only
+`OpenLDAP` LDAP server is supported now.
+
+The tempto configuration yaml must have the following configuration for this requirement:
+
+```ldap:
+     url: ldap://ldapserverhost
+     admin:
+       dn: cn=admin,dc=tempto,dc=com
+       password: admin
+```
+
+The LDAP Server used must be configured with an admin user and password who has privileges to create entities.
+
+##### LdapObjectDefinition
+
+`LdapObjectRequirement` takes a list of `LdapObjectDefinition`s. The LDAP objects are created in the order in this list.
+
+The requirement can be defined as:
+
+```Java
+        @Override
+        public Requirement getRequirements()
+        {
+            new LdapObjectRequirement(Arrays.asList(TEST_ORG, TEST_USER))
+        }
+```
+
+In this example, `TEST_ORG` (which could be the LDAP `organizationUnit` for `TEST_USER`) is created first and then the `TEST_USER`. 
+These definitions have objects analogous to an `OpenLDAP` entry definition and should be like:
+
+```Java
+    public static final LdapObjectDefinition TEST_USER =
+                LdapObjectDefinition.builder("TestUser")
+                        .setDistinguishedName("uid=testuser,ou=Test,dc=tempto,dc=com")
+                        .setAttributes(testUserAttributes())
+                        .addObjectClasses(Arrays.asList("person", "inetOrgPerson"))
+                                .build();
+
+        private static Map<String, String> testUserAttributes()
+        {
+            Map<String, String> attributes = newHashMap();
+            attributes.put("cn", "Test User");
+            attributes.put("sn", "User");
+            attributes.put("password", "testp@ss");
+            return attributes;
+        }
+```
+
+If the `TEST_USER` already exists in the LDAP server, then the fulfiller will ignore adding this entry.
+
 #### Advanced requirement concepts
 
 ##### allOf and compose
