@@ -22,13 +22,13 @@ public class MutableTablesState
         extends TablesState
 {
 
-    public static MutableTablesState mutableTablesState()
-    {
-        return testContext().getDependency(MutableTablesState.class);
-    }
-
     public MutableTablesState(List<TableInstance> tables)
     {
         super(tables, "mutable table");
+    }
+
+    public static MutableTablesState mutableTablesState()
+    {
+        return testContext().getDependency(MutableTablesState.class);
     }
 }

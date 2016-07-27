@@ -23,6 +23,10 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 public final class SqlContexts
 {
 
+    private SqlContexts()
+    {
+    }
+
     /**
      * Helper method designed to be used with lambda expressions containing assertions used
      * on newly created view:
@@ -50,9 +54,5 @@ public final class SqlContexts
     private static String generateRandomName(String prefix)
     {
         return prefix + randomAlphanumeric(4);
-    }
-
-    private SqlContexts()
-    {
     }
 }

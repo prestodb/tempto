@@ -61,6 +61,10 @@ public final class ReflectionHelper
                 }
             });
 
+    private ReflectionHelper()
+    {
+    }
+
     public static <T> T getStaticFieldValue(Field field)
     {
         try {
@@ -111,9 +115,5 @@ public final class ReflectionHelper
         catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private ReflectionHelper()
-    {
     }
 }

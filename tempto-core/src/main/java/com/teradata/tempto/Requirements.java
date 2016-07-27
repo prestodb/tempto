@@ -30,6 +30,10 @@ import static java.util.Arrays.asList;
  */
 public final class Requirements
 {
+    private Requirements()
+    {
+    }
+
     public static CompositeRequirement compose(Requirement... requirements)
     {
         return compose(asList(requirements));
@@ -123,9 +127,5 @@ public final class Requirements
             }
             return newExpandedRequirementsSets;
         }
-    }
-
-    private Requirements()
-    {
     }
 }

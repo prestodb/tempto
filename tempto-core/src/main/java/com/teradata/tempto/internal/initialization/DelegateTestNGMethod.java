@@ -54,6 +54,11 @@ public abstract class DelegateTestNGMethod
         delegate.setTestClass(cls);
     }
 
+    /**
+     * @deprecated Kept for backwards compatibility
+     *
+     * @return
+     */
     @Override
     @Deprecated
     public Method getMethod()
@@ -67,6 +72,11 @@ public abstract class DelegateTestNGMethod
         return delegate.getMethodName();
     }
 
+    /**
+     * @deprecated Kept for backwards compatibility
+     *
+     * @return
+     */
     @Override
     @Deprecated
     public Object[] getInstances()

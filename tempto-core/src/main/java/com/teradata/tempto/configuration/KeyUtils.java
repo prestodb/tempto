@@ -24,11 +24,11 @@ import static java.util.Arrays.asList;
 
 public final class KeyUtils
 {
-    private KeyUtils() {}
-
     private static final char KEY_SEPARATOR = '.';
     private static final Splitter KEY_SPLITTER = Splitter.on(KEY_SEPARATOR);
     private static final Joiner KEY_JOINER = Joiner.on(KEY_SEPARATOR).skipNulls();
+
+    private KeyUtils() {}
 
     public static List<String> splitKey(String key)
     {

@@ -27,18 +27,18 @@ public final class JavaProcessLauncher
     private final String javaBin;
     private final String classpath;
 
+    public JavaProcessLauncher(String javaBin, String classpath)
+    {
+        this.javaBin = javaBin;
+        this.classpath = classpath;
+    }
+
     public static JavaProcessLauncher defaultJavaProcessLauncher()
     {
         return new JavaProcessLauncher(
                 System.getProperty("java.home") + File.separator + "bin" + File.separator + "java",
                 System.getProperty("java.class.path")
         );
-    }
-
-    public JavaProcessLauncher(String javaBin, String classpath)
-    {
-        this.javaBin = javaBin;
-        this.classpath = classpath;
     }
 
     public Process launch(Class clazz, List<String> arguments)

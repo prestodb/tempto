@@ -44,15 +44,15 @@ public class JdbcDataFileDescriptor
 
     private final List<JDBCType> columnTypes;
 
-    public static JdbcDataFileDescriptor sqlResultDescriptorFor(Path file)
-    {
-        return new JdbcDataFileDescriptor(getOnlyElement(new AnnotatedFileParser().parseFile(file)));
-    }
-
     public JdbcDataFileDescriptor(SectionParsingResult sqlSectionParsingResult)
     {
         super(sqlSectionParsingResult);
         this.columnTypes = parseColumnTypes(sqlSectionParsingResult);
+    }
+
+    public static JdbcDataFileDescriptor sqlResultDescriptorFor(Path file)
+    {
+        return new JdbcDataFileDescriptor(getOnlyElement(new AnnotatedFileParser().parseFile(file)));
     }
 
     private List<JDBCType> parseColumnTypes(SectionParsingResult sqlFileSectionParsingResult)

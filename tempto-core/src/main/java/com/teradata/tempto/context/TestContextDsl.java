@@ -21,6 +21,10 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testConte
 
 public final class TestContextDsl
 {
+    private TestContextDsl()
+    {
+    }
+
     public static IndexedRunnable withChildTestContext(IndexedRunnable runnable)
     {
         return (int threadIndex) -> {
@@ -53,9 +57,5 @@ public final class TestContextDsl
         finally {
             popTestContext();
         }
-    }
-
-    private TestContextDsl()
-    {
     }
 }

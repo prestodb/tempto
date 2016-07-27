@@ -52,6 +52,17 @@ public class SqlResultDescriptor
 
     private final Optional<List<JDBCType>> expectedTypes;
 
+    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult)
+    {
+        this(sqlSectionParsingResult, newHashMap());
+    }
+
+    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult, Map<String, String> baseProperties)
+    {
+        super(sqlSectionParsingResult, baseProperties);
+        this.expectedTypes = parseExpectedTypes(sqlSectionParsingResult);
+    }
+
     public static SqlResultDescriptor sqlResultDescriptorForResource(String resourceName)
     {
         try {
@@ -71,17 +82,6 @@ public class SqlResultDescriptor
             throws IOException
     {
         return new SqlResultDescriptor(getOnlyElement(new AnnotatedFileParser().parseFile(inputStream)));
-    }
-
-    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult)
-    {
-        this(sqlSectionParsingResult, newHashMap());
-    }
-
-    public SqlResultDescriptor(SectionParsingResult sqlSectionParsingResult, Map<String, String> baseProperties)
-    {
-        super(sqlSectionParsingResult, baseProperties);
-        this.expectedTypes = parseExpectedTypes(sqlSectionParsingResult);
     }
 
     private Optional<List<JDBCType>> parseExpectedTypes(SectionParsingResult sqlFileSectionParsingResult)

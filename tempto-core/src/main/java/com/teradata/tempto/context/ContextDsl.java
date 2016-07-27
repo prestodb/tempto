@@ -21,6 +21,10 @@ package com.teradata.tempto.context;
 public final class ContextDsl
 {
 
+    private ContextDsl()
+    {
+    }
+
     public static <T> void executeWith(ContextProvider<T> provider, ContextRunnable<T> runnable)
     {
         T context = provider.setup();
@@ -31,9 +35,5 @@ public final class ContextDsl
         finally {
             provider.cleanup(context);
         }
-    }
-
-    private ContextDsl()
-    {
     }
 }

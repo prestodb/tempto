@@ -52,6 +52,10 @@ public final class ConventionTestsUtils
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConventionTestsUtils.class);
 
+    private ConventionTestsUtils()
+    {
+    }
+
     public static Optional<Path> getConventionsTestsPath(String child)
     {
         try {
@@ -142,9 +146,5 @@ public final class ConventionTestsUtils
         catch (IOException e) {
             throw new RuntimeException("Could not process URI: " + uri, e);
         }
-    }
-
-    private ConventionTestsUtils()
-    {
     }
 }

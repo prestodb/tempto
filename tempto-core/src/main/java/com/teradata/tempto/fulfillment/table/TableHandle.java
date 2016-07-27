@@ -25,6 +25,25 @@ import static java.util.Objects.requireNonNull;
 
 public class TableHandle
 {
+    private final Optional<String> database;
+
+    private final Optional<String> schema;
+    private final String name;
+    private final boolean requireNoSchema;
+
+    private TableHandle(Optional<String> database, Optional<String> schema, String name) {
+        this(database, schema, name, false);
+    }
+
+    private TableHandle(Optional<String> database, Optional<String> schema, String name, boolean requireNoSchema)
+    {
+        checkArgument(!(requireNoSchema && schema.isPresent()), "Schema given while required no schema.");
+        this.database = requireNonNull(database, "database is null");
+        this.schema = requireNonNull(schema, "schema is null");
+        this.name = requireNonNull(name, "name is null");
+        this.requireNoSchema = requireNoSchema;
+    }
+
     public static TableHandle tableHandle(String name)
     {
         return new TableHandle(Optional.empty(), Optional.empty(), name);
@@ -43,25 +62,6 @@ public class TableHandle
         else {
             return tableHandle(value);
         }
-    }
-
-    private final Optional<String> database;
-
-    private final Optional<String> schema;
-    private final String name;
-    private final boolean requireNoSchema;
-
-    private TableHandle(Optional<String> database, Optional<String> schema, String name) {
-        this(database, schema, name, false);
-    }
-
-    private TableHandle(Optional<String> database, Optional<String> schema, String name, boolean requireNoSchema)
-    {
-        checkArgument(!(requireNoSchema && schema.isPresent()), "Schema given while required no schema.");
-        this.database = requireNonNull(database, "database is null");
-        this.schema = requireNonNull(schema, "schema is null");
-        this.name = requireNonNull(name, "name is null");
-        this.requireNoSchema = requireNoSchema;
     }
 
     public TableHandle withName(String name)

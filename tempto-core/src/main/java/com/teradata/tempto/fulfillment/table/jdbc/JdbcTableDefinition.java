@@ -26,16 +26,6 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 public class JdbcTableDefinition
         extends TableDefinition
 {
-    public static JdbcTableDefinition jdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
-    {
-        return jdbcTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
-    }
-
-    public static JdbcTableDefinition jdbcTableDefinition(TableHandle tableHandle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
-    {
-        return new JdbcTableDefinition(tableHandle, createTableDDLTemplate, dataSource);
-    }
-
     private static final String NAME_MARKER = "%NAME%";
     private final JdbcTableDataSource dataSource;
 
@@ -48,6 +38,16 @@ public class JdbcTableDefinition
         this.dataSource = checkNotNull(dataSource, "dataSource is null");
         this.createTableDDLTemplate = checkNotNull(createTableDDLTemplate, "createTableDDLTemplate is null");
         checkArgument(createTableDDLTemplate.contains(NAME_MARKER), "Create table DDL must contain %NAME% placeholder");
+    }
+
+    public static JdbcTableDefinition jdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    {
+        return jdbcTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
+    }
+
+    public static JdbcTableDefinition jdbcTableDefinition(TableHandle tableHandle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    {
+        return new JdbcTableDefinition(tableHandle, createTableDDLTemplate, dataSource);
     }
 
     public JdbcTableDataSource getDataSource()

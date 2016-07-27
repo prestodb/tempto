@@ -66,8 +66,8 @@ public interface CliProcess extends Closeable
      * @throws TimeoutRuntimeException
      */
     void waitForWithTimeoutAndKill()
-            throws InterruptedException, TimeoutRuntimeException, CommandExecutionException;
+            throws InterruptedException, CommandExecutionException;
 
     void waitForWithTimeoutAndKill(Duration timeout)
-            throws InterruptedException, TimeoutRuntimeException, CommandExecutionException;
+            throws InterruptedException, CommandExecutionException;
 }

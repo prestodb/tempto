@@ -31,6 +31,10 @@ import static java.sql.DriverManager.getConnection;
 
 public final class JdbcUtils
 {
+    private JdbcUtils()
+    {
+    }
+
     public static void registerDriver(JdbcConnectivityParamsState jdbcParamsState)
     {
         try {
@@ -109,9 +113,5 @@ public final class JdbcUtils
                 jdbcParamsState.url,
                 jdbcParamsState.user,
                 jdbcParamsState.password);
-    }
-
-    private JdbcUtils()
-    {
     }
 }
