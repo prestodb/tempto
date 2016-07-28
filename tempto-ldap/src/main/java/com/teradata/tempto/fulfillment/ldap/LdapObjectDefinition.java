@@ -14,6 +14,9 @@
 
 package com.teradata.tempto.fulfillment.ldap;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import java.util.List;
 import java.util.Map;
 
@@ -26,12 +29,12 @@ public class LdapObjectDefinition
     private final Map<String, String> attributes;
     private final List<String> objectClasses;
 
-    public LdapObjectDefinition(String id, String distinguishedName, Map<String, String> attributes, List<String> objectClasses)
+    private LdapObjectDefinition(String id, String distinguishedName, Map<String, String> attributes, List<String> objectClasses)
     {
         this.id = requireNonNull(id, "id is null");
         this.distinguishedName = requireNonNull(distinguishedName, "distinguishedName is null");
-        this.attributes = requireNonNull(attributes, "attributes is null");
-        this.objectClasses = requireNonNull(objectClasses, "objectClasses is null");
+        this.attributes = ImmutableMap.copyOf(requireNonNull(attributes, "attributes is null"));
+        this.objectClasses = ImmutableList.copyOf(requireNonNull(objectClasses, "objectClasses is null"));
     }
 
     public static LdapObjectDefinitionBuilder builder(String id)
@@ -67,7 +70,7 @@ public class LdapObjectDefinition
         private List<String> objectClasses;
         private Map<String, String> attributes;
 
-        public LdapObjectDefinitionBuilder(String id)
+        private LdapObjectDefinitionBuilder(String id)
         {
             this.id = requireNonNull(id, "id is null");
         }
@@ -85,13 +88,13 @@ public class LdapObjectDefinition
 
         public LdapObjectDefinitionBuilder setAttributes(Map<String, String> attributes)
         {
-            this.attributes = attributes;
+            this.attributes = ImmutableMap.copyOf(attributes);
             return this;
         }
 
         public LdapObjectDefinitionBuilder addObjectClasses(List<String> objectClasses)
         {
-            this.objectClasses = objectClasses;
+            this.objectClasses = ImmutableList.copyOf(objectClasses);
             return this;
         }
     }

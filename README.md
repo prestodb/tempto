@@ -446,7 +446,6 @@ The tempto configuration yaml must have the following configuration for this req
 ```
 
 The LDAP Server used must be configured with an admin user and password who has privileges to create entities.
-If a similar entry already exists in the LDAP server, then the fulfiller will ignore adding that entry.
 
 ##### LdapObjectDefinition
 
@@ -482,6 +481,8 @@ These definitions have objects analogous to an `OpenLDAP` entry definition and s
             return attributes;
         }
 ```
+
+If the `TEST_USER` already exists in the LDAP server, then the fulfiller will ignore adding this entry.
 
 #### Advanced requirement concepts
 

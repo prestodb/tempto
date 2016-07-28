@@ -41,8 +41,8 @@ import static java.util.stream.Collectors.toList;
 public class DefaultLdapObjectEntryManager
         implements LdapObjectEntryManager
 {
-    private final DirContext context;
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultLdapObjectEntryManager.class);
+    private final DirContext context;
 
     @Inject
     public DefaultLdapObjectEntryManager(
