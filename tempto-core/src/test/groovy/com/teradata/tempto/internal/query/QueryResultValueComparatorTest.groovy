@@ -131,6 +131,13 @@ class QueryResultValueComparatorTest
     FLOAT  | Double.valueOf(1000.0) | Double.valueOf(1000.0)   | 0
     FLOAT  | Double.valueOf(1010.0) | Double.valueOf(1000.0)   | 0
     FLOAT  | Double.valueOf(1010.001) | Double.valueOf(1000.0) | 1
+
+    DOUBLE | Double.valueOf(-1000.0)   | Double.valueOf(-1000.0) | 0
+    DOUBLE | Double.valueOf(-1010.0)   | Double.valueOf(-1000.0) | 0
+    DOUBLE | Double.valueOf(-1010.001) | Double.valueOf(-1000.0) | -1
+    FLOAT  | Double.valueOf(-1000.0)   | Double.valueOf(-1000.0) | 0
+    FLOAT  | Double.valueOf(-1010.0)   | Double.valueOf(-1000.0) | 0
+    FLOAT  | Double.valueOf(-1010.001) | Double.valueOf(-1000.0) | -1
   }
 
   private byte[] byteArray(int value)

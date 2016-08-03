@@ -212,7 +212,7 @@ public class QueryResultValueComparator
         double tolerance = 0;
         Optional<Double> configTolerance = configuration.getDouble(FLOAT_TOLERANCE_CONFIGURATION_KEY);
         if (configTolerance.isPresent()) {
-            tolerance = configTolerance.get() * expectedDouble;
+            tolerance = Math.abs(configTolerance.get() * expectedDouble);
         }
         return DoubleMath.fuzzyCompare(getDoubleValue(actual), expectedDouble, tolerance);
     }
