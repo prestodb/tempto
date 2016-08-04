@@ -41,6 +41,7 @@ import static com.teradata.tempto.query.QueryResult.fromSqlIndex;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
 import static java.lang.String.format;
 import static java.sql.JDBCType.INTEGER;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -405,12 +406,12 @@ public class QueryAssert
 
         public Row(Object... values)
         {
-            this(ImmutableList.copyOf(values));
+            this(newArrayList(values));
         }
 
         public Row(List<Object> values)
         {
-            this.values = ImmutableList.copyOf(values);
+            this.values = requireNonNull(values, "values is null");
         }
 
         public List<Object> getValues()
