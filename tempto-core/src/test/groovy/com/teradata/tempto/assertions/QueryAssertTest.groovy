@@ -254,7 +254,7 @@ public class QueryAssertTest
     then:
     def e = thrown(AssertionError)
     e.message == 'Not equal rows:\n' +
-            '1 - expected: <2|ARGENTINA|valid_value|>\n1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'
+            '1 - expected: 2|ARGENTINA|valid_value|\n1 - actual:   2|ARGENTINA|SOUTH AMERICA|'
   }
 
   def 'hasRowsInOrder - different order'()
@@ -269,8 +269,8 @@ public class QueryAssertTest
     then:
     def e = thrown(AssertionError)
     e.message == 'Not equal rows:\n' +
-            '0 - expected: <2|ARGENTINA|SOUTH AMERICA|>\n0 - actual:   <1|ALGERIA|AFRICA|>\n' +
-            '1 - expected: <1|ALGERIA|AFRICA|>\n1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'
+            '0 - expected: 2|ARGENTINA|SOUTH AMERICA|\n0 - actual:   1|ALGERIA|AFRICA|\n' +
+            '1 - expected: 1|ALGERIA|AFRICA|\n1 - actual:   2|ARGENTINA|SOUTH AMERICA|'
   }
 
   def 'hasRowsInOrder'()
@@ -347,8 +347,8 @@ public class QueryAssertTest
     def e = thrown(AssertionError.class)
     e.getMessage() == '''\
 Not equal rows:
-1 - expected: <3|ARGENTINA|SOUTH AMERICA|>
-1 - actual:   <2|ARGENTINA|SOUTH AMERICA|>'''
+1 - expected: 3|ARGENTINA|SOUTH AMERICA|
+1 - actual:   2|ARGENTINA|SOUTH AMERICA|'''
   }
 
   def 'Matches file - failed - cannot map expected result to types from db result'()
