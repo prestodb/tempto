@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE_LOCAL;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONVENTION_TESTS_DIR;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.DISPLAY_CONVENTION_RESULTS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.EXCLUDED_GROUPS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.GROUPS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.HELP;
@@ -170,6 +171,7 @@ public class TemptoRunnerCommandLineParser
             addOption(REPORT_DIR);
             addOption(TESTS);
             addOption(HELP);
+            addOption(DISPLAY_CONVENTION_RESULTS);
             setReportDir("./test-reports", true);
             setConfigFile(TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION, true);
             setConfigLocalFile(TestConfigurationFactory.DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION, true);

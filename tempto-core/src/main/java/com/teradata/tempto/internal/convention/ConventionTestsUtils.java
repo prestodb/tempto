@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.copyRecursive;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.ClassLoader.getSystemResources;
 import static java.nio.file.FileSystems.newFileSystem;
 import static java.nio.file.Files.createTempDirectory;
@@ -41,6 +43,8 @@ import static java.nio.file.Files.exists;
 public final class ConventionTestsUtils
 {
     public static final String CONVENTION_TESTS_DIR_KEY = "tempto.convention.tests.dir";
+
+    public static final String DISPLAY_CONVENTION_TESTS_RESULTS_KEY = "tempto.convention.tests.results";
 
     public static final String DEFAULT_CONVENTION_TESTS_DIR = "sql-tests";
 
@@ -142,6 +146,10 @@ public final class ConventionTestsUtils
         catch (IOException e) {
             throw new RuntimeException("Could not process URI: " + uri, e);
         }
+    }
+
+    public static boolean isDisplayConventionTestResultsRequested() {
+        return System.getProperty(DISPLAY_CONVENTION_TESTS_RESULTS_KEY, FALSE.toString()).equals(TRUE.toString());
     }
 
     private ConventionTestsUtils()

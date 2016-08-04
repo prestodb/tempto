@@ -403,12 +403,12 @@ public class QueryAssert
     {
         private final List<Object> values;
 
-        private Row(Object... values)
+        public Row(Object... values)
         {
             this(ImmutableList.copyOf(values));
         }
 
-        private Row(List<Object> values)
+        public Row(List<Object> values)
         {
             this.values = ImmutableList.copyOf(values);
         }

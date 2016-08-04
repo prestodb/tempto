@@ -16,12 +16,11 @@ package com.teradata.tempto.internal.convention.sql;
 
 import com.google.common.base.Splitter;
 import com.teradata.tempto.Requirement;
+import com.teradata.tempto.assertions.QueryAssert;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
-import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.query.QueryExecutor;
 import com.teradata.tempto.query.QueryResult;
 import freemarker.template.Template;
@@ -45,8 +44,8 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.tempto.fulfillment.table.MutableTablesState.mutableTablesState;
+import static com.teradata.tempto.internal.convention.ConventionTestsUtils.isDisplayConventionTestResultsRequested;
 import static com.teradata.tempto.internal.convention.ProcessUtils.execute;
-import static java.lang.Character.isAlphabetic;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -112,9 +111,17 @@ public class SqlQueryConventionBasedTest
             List<String> queries = splitQueries(queryDescriptor.getContent());
             checkState(!queries.isEmpty(), "At least one query must be present");
 
+
             for (String query : queries) {
                 String sql = resolveTemplates(query);
                 queryResult = queryExecutor.executeQuery(sql);
+
+                if (isDisplayConventionTestResultsRequested()) {
+                    System.out.println("Results for: " + sql);
+                    for (List<Object> row : queryResult.rows()) {
+                        System.out.println(new QueryAssert.Row(row));
+                    }
+                }
             }
 
             return queryResult;
