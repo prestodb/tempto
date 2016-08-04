@@ -41,7 +41,6 @@ import static java.util.stream.Collectors.toList;
  */
 public class QueryResult
 {
-
     private final List<JDBCType> columnTypes;
     private final BiMap<String, Integer> columnNamesIndexes;
     private final List<List<Object>> values;
@@ -182,7 +181,6 @@ public class QueryResult
 
     public static class QueryResultBuilder
     {
-
         private final List<JDBCType> columnTypes = newArrayList();
         private final BiMap<String, Integer> columnNamesIndexes = HashBiMap.create();
         private final List<List<Object>> values = newArrayList();

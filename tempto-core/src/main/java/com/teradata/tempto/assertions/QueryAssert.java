@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.assertions;
 
+import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
@@ -295,28 +296,13 @@ public class QueryAssert
             msg.append('\n');
             msg.append(unequalRowIndex);
             msg.append(" - expected: ");
-            formatRow(msg, rows.get(unequalRowIndex).getValues());
+            msg.append(rows.get(unequalRowIndex));
             msg.append('\n');
             msg.append(unequalRowIndex);
             msg.append(" - actual:   ");
-            formatRow(msg, actual.row(unequalRowIndex));
+            msg.append(new Row(actual.row(unequalRowIndex)));
         }
         return msg.toString();
-    }
-
-    private void formatRow(StringBuilder msg, List<Object> rowValues)
-    {
-        msg.append('<');
-        for (Object rowValue : rowValues) {
-            if (rowValue instanceof Double || rowValue instanceof Float) {
-                msg.append(DECIMAL_FORMAT.format(rowValue));
-            }
-            else if (rowValue != null) {
-                msg.append(rowValue.toString());
-            }
-            msg.append('|');
-        }
-        msg.append('>');
     }
 
     private boolean containsRow(List<Object> expectedRow)
@@ -415,12 +401,16 @@ public class QueryAssert
 
     public static class Row
     {
-
         private final List<Object> values;
 
         private Row(Object... values)
         {
-            this.values = newArrayList(values);
+            this(ImmutableList.copyOf(values));
+        }
+
+        private Row(List<Object> values)
+        {
+            this.values = ImmutableList.copyOf(values);
         }
 
         public List<Object> getValues()
@@ -432,5 +422,22 @@ public class QueryAssert
         {
             return new Row(values);
         }
+
+        @Override
+        public String toString()
+        {
+            StringBuilder msg = new StringBuilder();
+            for (Object value : values) {
+                if (value instanceof Double || value instanceof Float) {
+                    msg.append(DECIMAL_FORMAT.format(value));
+                }
+                else if (value != null) {
+                    msg.append(value.toString());
+                }
+                msg.append('|');
+            }
+            return msg.toString();
+        }
+
     }
 }

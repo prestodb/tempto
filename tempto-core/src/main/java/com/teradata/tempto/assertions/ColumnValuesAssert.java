@@ -24,6 +24,5 @@ import java.util.List;
  */
 public interface ColumnValuesAssert<T>
 {
-
     void assertColumnValues(AbstractListAssert<?, ? extends List<? extends T>, T> columnAssert);
 }
