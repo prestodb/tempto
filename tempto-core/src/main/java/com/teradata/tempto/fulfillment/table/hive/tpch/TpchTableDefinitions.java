@@ -18,7 +18,7 @@ import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
 // Table definitions according to: http://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v2.17.1.pdf
-// TODO: support for DECIMAL and CHAR
+// TODO: support for CHAR
 // TODO: move to separate module
 public class TpchTableDefinitions
 {
@@ -59,7 +59,7 @@ public class TpchTableDefinitions
                             "   p_type        VARCHAR(25)," +
                             "   p_size        INT," +
                             "   p_container   VARCHAR(10)," +
-                            "   p_retailprice DOUBLE," +
+                            "   p_retailprice DECIMAL(12,2)," +
                             "   p_comment     VARCHAR(23)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.PART, 1.0))
@@ -75,7 +75,7 @@ public class TpchTableDefinitions
                             "   s_address     VARCHAR(40)," +
                             "   s_nationkey   BIGINT," +
                             "   s_phone       VARCHAR(15)," +
-                            "   s_acctbal     DOUBLE," +
+                            "   s_acctbal     DECIMAL(12,2)," +
                             "   s_comment     VARCHAR(101)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, 1.0))
@@ -89,7 +89,7 @@ public class TpchTableDefinitions
                             "   ps_partkey     BIGINT," +
                             "   ps_suppkey     BIGINT," +
                             "   ps_availqty    INT," +
-                            "   ps_supplycost  DOUBLE," +
+                            "   ps_supplycost  DECIMAL(12,2)," +
                             "   ps_comment     VARCHAR(199)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, 1.0))
@@ -105,7 +105,7 @@ public class TpchTableDefinitions
                             "   c_address     VARCHAR(40)," +
                             "   c_nationkey   BIGINT," +
                             "   c_phone       VARCHAR(15)," +
-                            "   c_acctbal     DOUBLE  ," +
+                            "   c_acctbal     DECIMAL(12,2)," +
                             "   c_mktsegment  VARCHAR(10)," +
                             "   c_comment     VARCHAR(117)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
@@ -120,7 +120,7 @@ public class TpchTableDefinitions
                             "   o_orderkey       BIGINT," +
                             "   o_custkey        BIGINT," +
                             "   o_orderstatus    VARCHAR(1)," +
-                            "   o_totalprice     DOUBLE," +
+                            "   o_totalprice     DECIMAL(12,2)," +
                             "   o_orderdate      DATE," +
                             "   o_orderpriority  VARCHAR(15),  " +
                             "   o_clerk          VARCHAR(15), " +
@@ -139,10 +139,10 @@ public class TpchTableDefinitions
                             "   l_partkey       BIGINT," +
                             "   l_suppkey       BIGINT," +
                             "   l_linenumber    INT," +
-                            "   l_quantity      DOUBLE," +
-                            "   l_extendedprice DOUBLE," +
-                            "   l_discount      DOUBLE," +
-                            "   l_tax           DOUBLE," +
+                            "   l_quantity      DECIMAL(12,2)," +
+                            "   l_extendedprice DECIMAL(12,2)," +
+                            "   l_discount      DECIMAL(12,2)," +
+                            "   l_tax           DECIMAL(12,2)," +
                             "   l_returnflag    VARCHAR(1)," +
                             "   l_linestatus    VARCHAR(1)," +
                             "   l_shipdate      DATE," +
