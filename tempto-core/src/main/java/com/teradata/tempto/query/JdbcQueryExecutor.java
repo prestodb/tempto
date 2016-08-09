@@ -61,7 +61,7 @@ public class JdbcQueryExecutor
         try {
             connection = jdbcConnectionsPool.connectionFor(jdbcParamsState);
         }
-        catch (SQLException e){
+        catch (SQLException e) {
             throw Throwables.propagate(e);
         }
     }
@@ -102,6 +102,8 @@ public class JdbcQueryExecutor
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
             throws QueryExecutionException
     {
+        sql = removeTrailingSemicolon(sql);
+
         LOGGER.debug("executing on {} query {} with params {}", jdbcUrl, sql, params);
 
         try {
@@ -167,5 +169,10 @@ public class JdbcQueryExecutor
     public void close()
     {
         closeConnection();
+    }
+
+    private String removeTrailingSemicolon(String sql)
+    {
+        return sql.trim().replaceAll(";$", "");
     }
 }
