@@ -438,7 +438,8 @@ When this requirement is fulfilled, it will create an LDAP Entry in the configur
 
 The tempto configuration yaml must have the following configuration for this requirement:
 
-```ldap:
+```
+  ldap:
      url: ldap://ldapserverhost
      admin:
        dn: cn=admin,dc=tempto,dc=com
