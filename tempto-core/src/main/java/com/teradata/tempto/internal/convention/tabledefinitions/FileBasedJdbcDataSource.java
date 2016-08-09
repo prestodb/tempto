@@ -21,6 +21,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.teradata.tempto.internal.convention.tabledefinitions.JdbcDataFileDescriptor.sqlResultDescriptorFor;
+import static java.util.Collections.emptyIterator;
 
 public class FileBasedJdbcDataSource
         implements JdbcTableDataSource
@@ -35,7 +36,8 @@ public class FileBasedJdbcDataSource
     @Override
     public Iterator<List<Object>> getDataRows()
     {
-        JdbcDataFileDescriptor jdbcDataFileDescriptor = sqlResultDescriptorFor(tableDefinitionDescriptor.getDataFile());
-        return jdbcDataFileDescriptor.getRows().iterator();
+        return tableDefinitionDescriptor.getDataFile()
+                .map(dataFile -> sqlResultDescriptorFor(dataFile).getRows().iterator())
+                .orElse(emptyIterator());
     }
 }

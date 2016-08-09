@@ -25,6 +25,7 @@ import java.util.Optional;
 import static com.google.common.base.MoreObjects.toStringHelper;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
+import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
@@ -71,19 +72,26 @@ class ConventionTableDefinitionDescriptor
     private final String name;
     private final Path ddlFile;
     private ParsedDDLFile parsedDDLFile;
-    private final Path dataFile;
-    private final Path revisionFile;
+    private final Optional<Path> dataFile;
+    private final Optional<Path> revisionFile;
 
-    public ConventionTableDefinitionDescriptor(Path ddlFile, Path dataFile, Path revisionFile)
+    public ConventionTableDefinitionDescriptor(Path ddlFile)
     {
         checkArgument(exists(ddlFile) && isRegularFile(ddlFile), "Invalid file: %s", ddlFile);
-        checkArgument(exists(dataFile) && isRegularFile(dataFile), "Invalid file: %s", dataFile);
-        checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "Invalid file: %s", revisionFile);
 
         this.name = getFilenameWithoutExtension(ddlFile);
         this.ddlFile = ddlFile;
-        this.dataFile = dataFile;
-        this.revisionFile = revisionFile;
+
+        Path dataFile = changeExtension(ddlFile, "data");
+        if(exists(dataFile) && isRegularFile(dataFile)) {
+            Path revisionFile = changeExtension(ddlFile, "data-revision");
+            checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "No revision file found: %s", revisionFile);
+            this.dataFile = Optional.of(dataFile);
+            this.revisionFile = Optional.of(revisionFile);
+        } else {
+            this.dataFile = Optional.empty();
+            this.revisionFile = Optional.empty();
+        }
     }
 
     public String getName()
@@ -91,7 +99,7 @@ class ConventionTableDefinitionDescriptor
         return name;
     }
 
-    public Path getDataFile()
+    public Optional<Path> getDataFile()
     {
         return dataFile;
     }
@@ -104,7 +112,7 @@ class ConventionTableDefinitionDescriptor
         return parsedDDLFile;
     }
 
-    public Path getRevisionFile()
+    public Optional<Path> getRevisionFile()
     {
         return revisionFile;
     }

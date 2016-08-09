@@ -72,7 +72,7 @@ public class ConventionTableDefinitionsProvider
 
             try {
                 return StreamSupport.stream(newDirectoryStream(dataSetsPath, "*.ddl").spliterator(), false)
-                        .map(ddlFile -> new ConventionTableDefinitionDescriptor(ddlFile, changeExtension(ddlFile, "data"), changeExtension(ddlFile, "data-revision")))
+                        .map(ddlFile -> new ConventionTableDefinitionDescriptor(ddlFile))
                         .collect(toList());
             }
             catch (IOException e) {

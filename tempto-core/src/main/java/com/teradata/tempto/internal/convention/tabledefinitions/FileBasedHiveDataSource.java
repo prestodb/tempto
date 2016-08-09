@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
+import com.google.common.collect.ImmutableSet;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
@@ -22,10 +23,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 import static java.lang.String.format;
-import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newInputStream;
 import static java.nio.file.Files.readAllBytes;
-import static java.util.Collections.singleton;
 
 public class FileBasedHiveDataSource
         implements HiveDataSource
@@ -49,26 +48,32 @@ public class FileBasedHiveDataSource
     @Override
     public Collection<RepeatableContentProducer> data()
     {
-        Path dataFile = tableDefinitionDescriptor.getDataFile();
+        return tableDefinitionDescriptor.getDataFile()
+                .map(this::asRepeatableContentProducer)
+                .map(ImmutableSet::of)
+                .orElse(ImmutableSet.of());
+    }
 
-        if (!exists(dataFile)) {
-            throw new IllegalStateException("Data file " + tableDefinitionDescriptor.getDataFile() + " should exist");
-        }
-
-        return singleton(() -> newInputStream(dataFile));
+    private RepeatableContentProducer asRepeatableContentProducer(Path dataFile)
+    {
+        return () -> newInputStream(dataFile);
     }
 
     @Override
     public String revisionMarker()
     {
-        try {
-            if (revisionMarker == null) {
-                revisionMarker = new String(readAllBytes(tableDefinitionDescriptor.getRevisionFile()));
-            }
-            return revisionMarker;
-        }
-        catch (IOException e) {
-            throw new IllegalStateException("Could not read revision file: " + tableDefinitionDescriptor.getRevisionFile());
-        }
+        return tableDefinitionDescriptor.getRevisionFile()
+                .map(revisionFile -> {
+                    try {
+                        if (revisionMarker == null) {
+                            revisionMarker = new String(readAllBytes(revisionFile));
+                        }
+                        return revisionMarker;
+                    }
+                    catch (IOException e) {
+                        throw new IllegalStateException("Could not read revision file: " + tableDefinitionDescriptor.getRevisionFile());
+                    }
+                })
+                .orElse("");
     }
 }
