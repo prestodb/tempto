@@ -65,7 +65,11 @@ public class HiveTableManager
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
-        this.hiveDatabasePath = checkNotNull(databasePath, "databasePath");
+        checkNotNull(databasePath, "databasePath");
+        if (!databasePath.endsWith("/")) {
+            databasePath += "/";
+        }
+        this.hiveDatabasePath = databasePath;
     }
 
     @Override
