@@ -52,7 +52,8 @@ class TestNameGroupNameMethodSelectorTest
     'p.q.r.abc' | []           | ['abc']          | null              | null               | true
     'p.q.r.abc' | []           | ['r.abc']        | null              | null               | true
     'p.q.r.abc' | []           | ['p.q.r.abc']    | null              | null               | true
-    'p.q.r.abc' | []           | ['bc']           | null              | null               | false
+    'p.q.r.abc' | []           | ['bc']           | null              | null               | true
+    'p.q.r.abc' | []           | ['xbc']          | null              | null               | false
     'abc'       | ['g1', 'g2'] | ['xyz', 'abc']   | ['g1', 'g3']      | ['g1']             | false
     'abc'       | ['g1', 'g2'] | ['xyz', 'abc']   | ['g1', 'g3']      | ['g2']             | false
     'abc'       | ['g1', 'g2'] | ['xyz', 'abc']   | ['g1', 'g3']      | ['g5']             | true
