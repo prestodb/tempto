@@ -39,7 +39,6 @@ import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import com.teradata.tempto.internal.context.GuiceTestContext;
 import com.teradata.tempto.internal.context.TestContextStack;
 import com.teradata.tempto.internal.fulfillment.table.ImmutableTablesFulfiller;
-import com.teradata.tempto.internal.fulfillment.table.MutableTablesCleaner;
 import com.teradata.tempto.internal.fulfillment.table.MutableTablesFulfiller;
 import org.slf4j.Logger;
 import org.testng.ITestContext;
@@ -83,7 +82,6 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
-            MutableTablesCleaner.class,
             ImmutableTablesFulfiller.class
     );
 

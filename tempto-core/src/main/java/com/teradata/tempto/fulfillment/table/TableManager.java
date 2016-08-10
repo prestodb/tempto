@@ -59,7 +59,7 @@ public interface TableManager<T extends TableDefinition>
 
     void dropTable(TableName tableName);
 
-    void dropAllMutableTables();
+    void dropStaleMutableTables();
 
     static <T extends TableDefinition> TableInstance<T> createImmutableTable(T tableDefinition)
     {

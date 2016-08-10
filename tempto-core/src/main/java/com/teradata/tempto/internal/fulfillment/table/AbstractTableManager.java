@@ -37,6 +37,7 @@ public abstract class AbstractTableManager<T extends TableDefinition>
 
     private final QueryExecutor queryExecutor;
     private final TableNameGenerator tableNameGenerator;
+    private boolean staleMutableTablesDropped = false;
 
     public AbstractTableManager(QueryExecutor queryExecutor, TableNameGenerator tableNameGenerator)
     {
@@ -45,11 +46,14 @@ public abstract class AbstractTableManager<T extends TableDefinition>
     }
 
     @Override
-    public void dropAllMutableTables()
+    public void dropStaleMutableTables()
     {
-        getTableNames().stream()
-                .filter(tableNameGenerator::isMutableTableName)
-                .forEach(tableName -> dropTableIgnoreError(createMutableTableName(tableHandle(tableName))));
+        if (!staleMutableTablesDropped) {
+            getTableNames().stream()
+                    .filter(tableNameGenerator::isMutableTableName)
+                    .forEach(tableName -> dropTableIgnoreError(createMutableTableName(tableHandle(tableName))));
+        }
+        staleMutableTablesDropped = true;
     }
 
     private List<String> getTableNames()

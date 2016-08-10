@@ -34,7 +34,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public abstract class TableRequirementFulfiller<T extends TableRequirement>
         implements RequirementFulfiller
 {
-
     private static final Logger LOGGER = getLogger(TableRequirementFulfiller.class);
 
     protected final TableManagerDispatcher tableManagerDispatcher;
@@ -73,6 +72,7 @@ public abstract class TableRequirementFulfiller<T extends TableRequirement>
     private TableInstance createTable(T tableRequirement)
     {
         TableManager tableManager = getTableManager(tableRequirement);
+        tableManager.dropStaleMutableTables();
         return createTable(tableManager, tableRequirement);
     }
 

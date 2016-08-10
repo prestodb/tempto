@@ -56,7 +56,7 @@ public class ReadOnlyTableManager<T extends TableDefinition>
     }
 
     @Override
-    public void dropAllMutableTables() {}
+    public void dropStaleMutableTables() {}
 
     @Override
     public String getDatabaseName()
