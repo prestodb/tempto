@@ -52,7 +52,6 @@ public class JdbcQueryExecutor
         this.jdbcConnectionsPool = requireNonNull(jdbcConnectionsPool, "jdbcConnectionsPool is null");
         this.jdbcUrl = jdbcParamsState.url;
         testContext.registerCloseCallback(context -> this.close());
-        openConnection();
     }
 
     public void openConnection()
@@ -96,12 +95,19 @@ public class JdbcQueryExecutor
     @Override
     public Connection getConnection()
     {
-        return requireNonNull(connection, "connection is null");
+        if (connection == null) {
+            openConnection();
+        }
+        return connection;
     }
 
     private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
             throws QueryExecutionException
     {
+        if (connection == null) {
+            openConnection();
+        }
+
         sql = removeTrailingSemicolon(sql);
 
         LOGGER.debug("executing on {} query {} with params {}", jdbcUrl, sql, params);
