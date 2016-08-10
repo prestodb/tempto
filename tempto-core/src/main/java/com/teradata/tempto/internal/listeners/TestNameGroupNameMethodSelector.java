@@ -94,8 +94,7 @@ public class TestNameGroupNameMethodSelector
             return true;
         }
 
-        return indexOf(testNamesToRun.get(),
-                testName -> testMetadata.testName.equals(testName) || testMetadata.testName.endsWith("." + testName)) != -1;
+        return indexOf(testNamesToRun.get(), testName -> testMetadata.testName.contains(testName)) != -1;
     }
 
     private boolean includeBasedOnGroups(TestMetadata testMetadata)
