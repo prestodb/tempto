@@ -23,6 +23,7 @@ databases:
     alias: presto
 
   hive:
+    path: /user/hive/warehouse/
     jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
     jdbc_url: jdbc:hive2://${cluster.hadoop}:10000
     jdbc_user: hdfs
@@ -56,10 +57,6 @@ databases:
 tests:
   hdfs:
     path: /tempto
-
-hive:
-  database:
-    path: /user/hive/warehouse/
 
 ssh:
   identity: ${IDENTITY}

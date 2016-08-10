@@ -58,7 +58,7 @@ public class HiveTableManager
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
-            @Named("hive.database.path") String databasePath)
+            @Named("databases.hive.path") String databasePath)
     {
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
