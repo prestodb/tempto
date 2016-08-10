@@ -1,0 +1,88 @@
+# This configuration contains only presto and hive configured correctly
+# psql instances configuration and ssh configuration is wrongly configured
+# in purpouse to test that not needed configuration is not used.
+# So when running test only for particular database, only configuration for 
+# this database is needed.
+
+DOCKER_MACHINE: localhost
+
+cluster:
+  presto: ${DOCKER_MACHINE}
+  hadoop: ${DOCKER_MACHINE}
+  psql1: wrong
+  psql2: wrong
+
+hdfs:
+  username: hdfs
+  webhdfs:
+    host: ${cluster.hadoop}
+    port: 50070
+
+psql1:
+  port: 15432
+psql2:
+  port: 15433
+
+databases:
+  default:
+    alias: presto
+
+  hive:
+    path: /user/hive/warehouse
+    jdbc_driver_class: org.apache.hive.jdbc.HiveDriver
+    jdbc_url: jdbc:hive2://${cluster.hadoop}:10000
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+    table_manager_type: hive
+
+  presto:
+    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
+    jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/default
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
+
+  psql:
+    jdbc_driver_class: org.postgresql.Driver
+    jdbc_url: jdbc:postgresql://${cluster.psql1}:${psql1.port}/postgres
+    jdbc_user: blah
+    jdbc_password: blah
+    jdbc_pooling: true
+    table_manager_type: jdbc
+
+  psql2:
+    jdbc_driver_class: org.postgresql.Driver
+    jdbc_url: jdbc:postgresql://${cluster.psql2}:${psql2.port}/postgres
+    jdbc_user: blah
+    jdbc_password: blah
+    jdbc_pooling: true
+    table_manager_type: jdbc
+
+tests:
+  hdfs:
+    path: /tempto
+
+ssh:
+  identity: wrong
+  roles:
+    host_by_password:
+      host: wrong
+      port: 22
+      user: ${USER_A}
+      password: ${USER_A_PASSWORD}
+
+    host_by_identity:
+      host: wrong
+      port: 22
+      user: ${USER_B}
+
+hosts:
+  localhost_alias: localhost
+  teradata_alias: teradata.com
+
+list:
+  string:
+    - ala
+    - ma
+    - kota
