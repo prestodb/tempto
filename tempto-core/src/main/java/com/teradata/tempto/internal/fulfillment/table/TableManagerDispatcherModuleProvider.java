@@ -44,62 +44,73 @@ public class TableManagerDispatcherModuleProvider
 {
     public Module getModule(Configuration configuration)
     {
-        return new AbstractModule()
+        return new TableManagerModule(configuration);
+    }
+
+    private static class TableManagerModule
+            extends AbstractModule
+    {
+        private final Configuration configuration;
+
+        public TableManagerModule(Configuration configuration)
         {
-            @Override
-            protected void configure()
-            {
-                Configuration databasesSectionConfiguration = configuration.getSubconfiguration("databases");
-                Set<String> databaseNames = databasesSectionConfiguration.listKeyPrefixes(1);
+            this.configuration = configuration;
+        }
 
-                if (databaseNames.isEmpty()) {
-                    bind(new TypeLiteral<Map<String, TableManager>>() {}).toInstance(emptyMap());
-                    bind(new TypeLiteral<Map<String, QueryExecutor>>() {}).toInstance(emptyMap());
-                    return;
-                }
+        @Override
+        protected void configure()
+        {
+            Configuration databasesSectionConfiguration = configuration.getSubconfiguration("databases");
+            Set<String> databaseNames = databasesSectionConfiguration.listKeyPrefixes(1);
 
-                Map<String, ? extends Class<? extends TableManager>> tableManagerClasses = getTableManagerClassesByType();
-                for (String database : databaseNames) {
-                    Configuration databaseConfiguration = databasesSectionConfiguration.getSubconfiguration(database);
-                    String tableManagerType = databaseConfiguration.getString("table_manager_type").orElse(ReadOnlyTableManager.TYPE.toLowerCase());
-                    checkArgument(tableManagerClasses.containsKey(tableManagerType),
-                            "unknown table manager type %s for database %s; expecting one of %s",
-                            tableManagerType, database, tableManagerClasses.keySet());
+            if (databaseNames.isEmpty()) {
+                bind(new TypeLiteral<Map<String, TableManager>>() {}).toInstance(emptyMap());
+                bind(new TypeLiteral<Map<String, QueryExecutor>>() {}).toInstance(emptyMap());
+                return;
+            }
 
-                    Class<? extends TableManager> tableManagerClass = tableManagerClasses.get(tableManagerType.toLowerCase());
+            Map<String, ? extends Class<? extends TableManager>> tableManagerClasses = getTableManagerClassesByType();
+            for (String database : databaseNames) {
+                Configuration databaseConfiguration = databasesSectionConfiguration.getSubconfiguration(database);
+                String tableManagerType = databaseConfiguration.getString("table_manager_type")
+                        .orElse(ReadOnlyTableManager.TYPE.toLowerCase());
+                checkArgument(tableManagerClasses.containsKey(tableManagerType),
+                        "unknown table manager type %s for database %s; expecting one of %s",
+                        tableManagerType, database, tableManagerClasses.keySet());
 
-                    Key<TableManager> tableManagerKey = Key.get(TableManager.class, named(database));
-                    PrivateModule tableManagerPrivateModule = new PrivateModule()
+                Class<? extends TableManager> tableManagerClass = tableManagerClasses.get(tableManagerType.toLowerCase());
+
+                Key<TableManager> tableManagerKey = Key.get(TableManager.class, named(database));
+                PrivateModule tableManagerPrivateModule = new PrivateModule()
+                {
+                    @Override
+                    protected void configure()
                     {
-                        @Override
-                        protected void configure()
-                        {
-                            // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
-                            bind(QueryExecutor.class).to(Key.get(QueryExecutor.class, named(database)));
-                            bind(Key.get(String.class, named("databaseName"))).toInstance(database);
-                            bind(tableManagerKey).to(tableManagerClass);
-                            expose(tableManagerKey);
-                        }
-                    };
-                    install(tableManagerPrivateModule);
-                    newMapBinder(binder(), String.class, TableManager.class).addBinding(database).to(tableManagerKey);
-                }
+                        // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
+                        bind(QueryExecutor.class).to(Key.get(QueryExecutor.class, named(database)));
+                        bind(Key.get(String.class, named("databaseName"))).toInstance(database);
+                        bind(tableManagerKey).to(tableManagerClass);
+                        expose(tableManagerKey);
+                    }
+                };
+                install(tableManagerPrivateModule);
+                newMapBinder(binder(), String.class, TableManager.class).addBinding(database).to(tableManagerKey);
             }
+        }
 
-            private Map<String, ? extends Class<? extends TableManager>> getTableManagerClassesByType()
-            {
-                return getAnnotatedSubTypesOf(TableManager.class, TableManager.Descriptor.class).stream()
-                        .collect(toMap(
-                                tableManagerClass -> tableManagerClass.getAnnotation(TableManager.Descriptor.class).type().toLowerCase(),
-                                tableManagerClass -> tableManagerClass));
-            }
+        private Map<String, ? extends Class<? extends TableManager>> getTableManagerClassesByType()
+        {
+            return getAnnotatedSubTypesOf(TableManager.class, TableManager.Descriptor.class).stream()
+                    .collect(toMap(
+                            tableManagerClass -> tableManagerClass.getAnnotation(TableManager.Descriptor.class).type().toLowerCase(),
+                            tableManagerClass -> tableManagerClass));
+        }
 
-            @Inject
-            @Provides
-            public TableManagerDispatcher defaultTableManagerDispatcher(Map<String, TableManager> tableManagers)
-            {
-                return new DefaultTableManagerDispatcher(tableManagers);
-            }
-        };
+        @Inject
+        @Provides
+        public TableManagerDispatcher defaultTableManagerDispatcher(Map<String, TableManager> tableManagers)
+        {
+            return new DefaultTableManagerDispatcher(tableManagers);
+        }
     }
 }
