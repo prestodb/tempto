@@ -34,13 +34,24 @@ public class TestConfigurationFactory
 
     public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
     public static final String DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION = "tempto-configuration-local.yaml";
+    private static Configuration configuration = null;
 
     private TestConfigurationFactory() {}
 
-    public static Configuration createTestConfiguration()
+    public static synchronized Configuration testConfiguration()
     {
-        Configuration configuration = new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration());
-        return new ConfigurationVariableResolver().resolve(configuration);
+        if (configuration == null) {
+            configuration = createTestConfiguration();
+        }
+        return configuration;
+    }
+
+    // Exposed only for tests
+    @Deprecated
+    static Configuration createTestConfiguration()
+    {
+        return new ConfigurationVariableResolver()
+                .resolve(new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration()));
     }
 
     private static Configuration readTestConfiguration()
@@ -88,7 +99,7 @@ public class TestConfigurationFactory
 
     private static Optional<InputStream> getResourceInputStream(String path)
     {
-        if(!path.startsWith("/")) {
+        if (!path.startsWith("/")) {
             path = "/" + path;
         }
         return Optional.ofNullable(TestConfigurationFactory.class.getResourceAsStream(path));

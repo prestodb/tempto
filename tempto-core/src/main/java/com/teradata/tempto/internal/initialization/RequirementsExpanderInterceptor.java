@@ -29,7 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 
 /**
  * Interceptor which for each TestNGMethod creates one or more RequirementAwareTestNGMethods.
@@ -50,7 +50,7 @@ public class RequirementsExpanderInterceptor
 
     public RequirementsExpanderInterceptor()
     {
-        this.testSpecificRequirementsResolver = new TestSpecificRequirementsResolver(createTestConfiguration());
+        this.testSpecificRequirementsResolver = new TestSpecificRequirementsResolver(testConfiguration());
     }
 
     public static int getMethodsCountFromContext(ITestContext context)

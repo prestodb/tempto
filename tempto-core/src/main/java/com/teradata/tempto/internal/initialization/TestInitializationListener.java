@@ -70,7 +70,7 @@ import static com.teradata.tempto.fulfillment.TestStatus.SUCCESS;
 import static com.teradata.tempto.internal.ReflectionHelper.getAnnotatedSubTypesOf;
 import static com.teradata.tempto.internal.ReflectionHelper.instantiate;
 import static com.teradata.tempto.internal.RequirementFulfillerPriorityHelper.getPriority;
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 import static com.teradata.tempto.internal.logging.LoggingMdcHelper.cleanLoggingMdc;
 import static com.teradata.tempto.internal.logging.LoggingMdcHelper.setupLoggingMdcForTest;
 import static java.util.Collections.emptyList;
@@ -104,7 +104,7 @@ public class TestInitializationListener
     {
         this(getSuiteModuleProviders(), getTestMethodModuleProviders(),
                 getSuiteLevelFulfillers(), getTestMethodLevelFulfillers(),
-                createTestConfiguration());
+                testConfiguration());
     }
 
     private static List<Class<? extends RequirementFulfiller>> getTestMethodLevelFulfillers()

@@ -14,7 +14,6 @@
 
 package com.teradata.tempto.assertions;
 
-import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
@@ -36,7 +35,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 import static com.teradata.tempto.query.QueryResult.fromSqlIndex;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
 import static java.lang.String.format;
@@ -269,7 +268,7 @@ public class QueryAssert
 
     private static List<Comparator<Object>> getComparators(QueryResult queryResult)
     {
-        Configuration configuration = createTestConfiguration();
+        Configuration configuration = testConfiguration();
         return queryResult.getColumnTypes().stream()
                 .map(it -> QueryResultValueComparator.comparatorForType(it, configuration))
                 .collect(Collectors.toList());

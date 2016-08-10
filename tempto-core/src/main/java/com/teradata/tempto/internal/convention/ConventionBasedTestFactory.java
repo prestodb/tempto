@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -76,7 +76,7 @@ public class ConventionBasedTestFactory
     @SuppressWarnings("unchecked")
     private List<PathTestFactory> setupFactories()
     {
-        Configuration configuration = createTestConfiguration();
+        Configuration configuration = testConfiguration();
         return ImmutableList.of(
                 new RecursionPathTestFactory(),
                 new GeneratorPathTestFactory(),

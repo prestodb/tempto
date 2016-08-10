@@ -19,7 +19,7 @@ import sun.net.spi.nameservice.NameServiceDescriptor;
 
 import java.util.Map;
 
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.createTestConfiguration;
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 
 public class TemptoNameServiceDescriptor
         implements NameServiceDescriptor
@@ -38,7 +38,7 @@ public class TemptoNameServiceDescriptor
     public NameService createNameService()
             throws Exception
     {
-        Configuration configuration = createTestConfiguration();
+        Configuration configuration = testConfiguration();
         Map hosts = configuration.getSubconfiguration("hosts").asMap();
         return new MapBasedNameService(hosts);
     }
