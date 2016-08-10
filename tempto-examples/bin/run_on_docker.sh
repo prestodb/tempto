@@ -39,7 +39,7 @@ function check_presto() {
 }
 
 function run_product_tests() {
-  ${DOCKER_COMPOSE} run runner \
+  ${DOCKER_COMPOSE} run --rm -T runner \
     java -jar /workspace/build/libs/tempto-examples-all.jar \
     --config-local /workspace/docker/tempto-configuration-docker-local.yaml \
     $*
@@ -97,8 +97,8 @@ retry check_presto
 set +e
 run_product_tests "$*" &
 PRODUCT_TESTS_PROCESS_ID=$!
-EXIT_CODE=$?
 wait $PRODUCT_TESTS_PROCESS_ID
+EXIT_CODE=$?
 set -e
 
 cleanup
