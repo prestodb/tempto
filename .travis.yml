@@ -26,4 +26,4 @@ script:
   - ./tempto-examples/bin/run_on_docker.sh -x failing
   - ./tempto-examples/bin/run_on_docker.sh --config tempto-configuration-read-only.yaml -g in_memory
   - ./tempto-examples/bin/run_on_docker.sh --config tempto-configuration-no-db.yaml -g ssh
-  - ./tempto-examples/bin/run_on_docker.sh --config-local tempto-configuration-invalid-ssh-and-psql.yaml -g in_memory
+  - ./tempto-examples/bin/run_on_docker.sh --config tempto-configuration-invalid-ssh-and-psql.yaml -g in_memory
