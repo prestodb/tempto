@@ -42,7 +42,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,7 +51,6 @@ import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.Stat
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Locale.ENGLISH;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -93,9 +91,11 @@ public class JdbcTableManager
             // could be a table from another schema that has the same name
             dropTableIgnoreError(tableName);
             createAndInsertData(tableDefinition, tableName);
-        } else if (!tableExists(tableName)) {
+        }
+        else if (!tableExists(tableName)) {
             createAndInsertData(tableDefinition, tableName);
-        } else {
+        }
+        else {
             LOGGER.info("Table {} already exists, skipping creation of immutable table", tableName.getNameInDatabase());
         }
         return new JdbcTableInstance(tableName, tableDefinition);
@@ -146,7 +146,7 @@ public class JdbcTableManager
         boolean skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
         if (!skipCreateSchema) {
             tableName.getSchema().ifPresent(schema ->
-                            queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
+                    queryExecutor.executeQuery("CREATE SCHEMA IF NOT EXISTS " + schema)
             );
         }
 
