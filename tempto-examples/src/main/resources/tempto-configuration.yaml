@@ -37,6 +37,7 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
+    table_manager_type: jdbc 
 
   psql:
     jdbc_driver_class: org.postgresql.Driver

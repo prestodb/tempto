@@ -1,5 +1,5 @@
 -- type: jdbc
 CREATE TABLE %NAME% (
-  id INT,
+  id BIGINT,
   name VARCHAR(100)
 )

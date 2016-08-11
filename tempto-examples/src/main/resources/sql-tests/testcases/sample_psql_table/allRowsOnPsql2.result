@@ -1,4 +1,4 @@
--- delimiter: |; ignoreOrder: false; types: INTEGER|VARCHAR
+-- delimiter: |; ignoreOrder: false; types: BIGINT|VARCHAR
 3|A|
 2|null|
 1|C|
