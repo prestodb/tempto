@@ -23,14 +23,15 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.teradata.tempto.internal.fulfillment.table.jdbc.JdbcTableManager.partitionBy;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
-//TODO remove this class once Presto support prepared statement
-@Deprecated
 class InsertLoader
         implements Loader
 {
+    private static final int ROWS_PER_INSERT = 100;
+
     private final QueryExecutor queryExecutor;
     private final String tableName;
     private final List<JDBCType> columnTypes;
@@ -47,24 +48,32 @@ class InsertLoader
     public void load(List<List<Object>> batch)
             throws SQLException
     {
-        for (List<Object> row : batch) {
-            queryExecutor.executeQuery(insertSql(row));
+        for (List<List<Object>> rowsToInsert : partitionBy(batch.iterator(), ROWS_PER_INSERT)) {
+            if (rowsToInsert.isEmpty()) {
+                continue;
+            }
+            queryExecutor.executeQuery(insertSql(rowsToInsert));
         }
     }
 
-    private String insertSql(List<Object> row)
+    private String insertSql(List<List<Object>> rows)
     {
-        checkArgument(
-                row.size() == columnTypes.size(),
-                "Row has different number of columns: %d vs %d",
-                row.size(),
-                columnTypes.size());
+        String values = rows.stream()
+                .map(row -> {
+                    checkArgument(
+                            row.size() == columnTypes.size(),
+                            "Row has different number of columns: %d vs %d",
+                            row.size(),
+                            columnTypes.size());
+                    String rowValues = IntStream.range(0, row.size())
+                            .mapToObj(i -> asStringValue(columnTypes.get(i), row.get(i)))
+                            .collect(joining(","));
 
-        String values = IntStream.range(0, row.size())
-                .mapToObj(i -> asStringValue(columnTypes.get(i), row.get(i)))
+                    return "(" + rowValues + ")";
+                })
                 .collect(joining(","));
 
-        return String.format("INSERT INTO %s VALUES (%s)", tableName, values);
+        return String.format("INSERT INTO %s VALUES %s", tableName, values);
     }
 
     private String asStringValue(JDBCType jdbcType, Object o) {

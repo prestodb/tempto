@@ -188,7 +188,7 @@ public class JdbcTableManager
             return;
         }
         try (Loader loader = new LoaderFactory().create(queryExecutor, tableName.getNameInDatabase())) {
-            for (List<List<Object>> batch : asBatches(dataRows)) {
+            for (List<List<Object>> batch : partitionBy(dataRows, BATCH_SIZE)) {
                 loader.load(batch);
             }
         }
@@ -197,7 +197,7 @@ public class JdbcTableManager
         }
     }
 
-    private static Iterable<List<List<Object>>> asBatches(Iterator<List<Object>> dataRows)
+    public static Iterable<List<List<Object>>> partitionBy(Iterator<List<Object>> dataRows, int partitionSize)
     {
         return () -> new Iterator<List<List<Object>>>()
         {
@@ -211,7 +211,7 @@ public class JdbcTableManager
             public List<List<Object>> next()
             {
                 List<List<Object>> batch = new ArrayList<>();
-                while (dataRows.hasNext() && batch.size() < BATCH_SIZE) {
+                while (dataRows.hasNext() && batch.size() < partitionSize) {
                     batch.add(dataRows.next());
                 }
                 return batch;
