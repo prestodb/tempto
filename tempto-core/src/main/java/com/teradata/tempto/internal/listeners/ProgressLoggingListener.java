@@ -15,12 +15,14 @@
 package com.teradata.tempto.internal.listeners;
 
 import com.google.common.base.Joiner;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static com.teradata.tempto.internal.initialization.RequirementsExpanderInterceptor.getMethodsCountFromContext;
 
@@ -53,11 +55,10 @@ public class ProgressLoggingListener
     {
         TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         testStartTime = System.currentTimeMillis();
-
-        LOGGER.info("");
         started++;
-        LOGGER.info("[{} of {}] {} (Groups: {})",
-                started, getMethodsCountFromContext(testCase.getTestContext()), testMetadata.testName, Joiner.on(", ").join(testMetadata.testGroups));
+        int total = getMethodsCountFromContext(testCase.getTestContext());
+        String testGroups = Joiner.on(", ").join(testMetadata.testGroups);
+        LOGGER.info("[{} of {}] {} (Groups: {})", started, total, testMetadata.testName, testGroups);
     }
 
     @Override
@@ -71,29 +72,27 @@ public class ProgressLoggingListener
     public void onTestFailure(ITestResult testCase)
     {
         failed++;
-        if (testCase.getThrowable() != null) {
-            LOGGER.error("Exception: ", testCase.getThrowable());
-        }
         logTestEnd("FAILURE");
+        if (testCase.getThrowable() != null) {
+            LOGGER.error("Failure cause:", testCase.getThrowable());
+        }
     }
 
     @Override
     public void onTestSkipped(ITestResult testCase)
     {
         skipped++;
-        logTestEnd("SKIPPED");
+        LOGGER.info("SKIPPED");
     }
 
     private void logTestEnd(String outcome)
     {
-        if (LOGGER.isInfoEnabled()) {
-            long executionTime = System.currentTimeMillis() - testStartTime;
-            if (executionTime > 1000) {
-                LOGGER.info("{}     /    took {}", outcome, DurationFormatUtils.formatDuration(executionTime, "m' minutes and 's' seconds'"));
-            }
-            else {
-                LOGGER.info(outcome);
-            }
+        long executionTime = System.currentTimeMillis() - testStartTime;
+        if (executionTime < 1000) {
+            LOGGER.info(outcome);
+        } else {
+            BigDecimal durationSeconds = new BigDecimal(executionTime).divide(new BigDecimal(1000), 1, RoundingMode.HALF_UP);
+            LOGGER.info("{}     /    took {} seconds", outcome, durationSeconds);
         }
     }
 
