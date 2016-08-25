@@ -24,6 +24,7 @@ import org.testng.ITestResult;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.initialization.RequirementsExpanderInterceptor.getMethodsCountFromContext;
 
 public class ProgressLoggingListener
@@ -90,7 +91,8 @@ public class ProgressLoggingListener
         long executionTime = System.currentTimeMillis() - testStartTime;
         if (executionTime < 1000) {
             LOGGER.info(outcome);
-        } else {
+        }
+        else {
             BigDecimal durationSeconds = new BigDecimal(executionTime).divide(new BigDecimal(1000), 1, RoundingMode.HALF_UP);
             LOGGER.info("{}     /    took {} seconds", outcome, durationSeconds);
         }
@@ -104,6 +106,7 @@ public class ProgressLoggingListener
     @Override
     public void onFinish(ITestContext context)
     {
+        checkState(succeeded + failed + skipped > 0, "No tests executed");
         LOGGER.info("");
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
