@@ -29,7 +29,7 @@ import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
-
+import javax.naming.directory.ModificationItem;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -99,12 +99,20 @@ public class DefaultLdapObjectEntryManager
 
         ldapObjectDefinition.getAttributes()
                 .forEach((k, v) -> entries.put(new BasicAttribute(k, v)));
+
+        List<ModificationItem> modificationItems = ldapObjectDefinition.getModificationAttributes().entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream()
+                        .map(attribute -> new ModificationItem(DirContext.ADD_ATTRIBUTE, new BasicAttribute(entry.getKey(), attribute))))
+                .collect(toList());
+
         ldapObjectDefinition.getObjectClasses()
                 .forEach(objectClass::add);
         entries.put(objectClass);
 
         try {
             context.createSubcontext(ldapObjectDefinition.getDistinguishedName(), entries);
+            context.modifyAttributes(ldapObjectDefinition.getDistinguishedName(), modificationItems.stream().toArray(ModificationItem[]::new));
+            LOGGER.info("Successfully added entry " + ldapObjectDefinition.getId());
         }
         catch (NameAlreadyBoundException e) {
             LOGGER.info(format("LDAP Entry %s already exists. Ignoring...", ldapObjectDefinition.getId()));

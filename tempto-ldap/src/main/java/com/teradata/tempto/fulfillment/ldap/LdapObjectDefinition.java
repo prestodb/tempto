@@ -28,12 +28,14 @@ public class LdapObjectDefinition
     private final String distinguishedName;
     private final Map<String, String> attributes;
     private final List<String> objectClasses;
+    private final Map<String, List<String>> modificationAttributes;
 
-    private LdapObjectDefinition(String id, String distinguishedName, Map<String, String> attributes, List<String> objectClasses)
+    private LdapObjectDefinition(String id, String distinguishedName, Map<String, String> attributes, Map<String, List<String>> modificationAttributes, List<String> objectClasses)
     {
         this.id = requireNonNull(id, "id is null");
         this.distinguishedName = requireNonNull(distinguishedName, "distinguishedName is null");
         this.attributes = ImmutableMap.copyOf(requireNonNull(attributes, "attributes is null"));
+        this.modificationAttributes = ImmutableMap.copyOf(requireNonNull(modificationAttributes, "modificationAttributes is null"));
         this.objectClasses = ImmutableList.copyOf(requireNonNull(objectClasses, "objectClasses is null"));
     }
 
@@ -62,6 +64,11 @@ public class LdapObjectDefinition
         return distinguishedName;
     }
 
+    public Map<String, List<String>> getModificationAttributes()
+    {
+        return modificationAttributes;
+    }
+
     public static class LdapObjectDefinitionBuilder
     {
 
@@ -69,6 +76,7 @@ public class LdapObjectDefinition
         private String distinguishedName;
         private List<String> objectClasses;
         private Map<String, String> attributes;
+        private Map<String, List<String>> modificationAttributes;
 
         private LdapObjectDefinitionBuilder(String id)
         {
@@ -77,7 +85,7 @@ public class LdapObjectDefinition
 
         public LdapObjectDefinition build()
         {
-            return new LdapObjectDefinition(id, distinguishedName, attributes, objectClasses);
+            return new LdapObjectDefinition(id, distinguishedName, attributes, modificationAttributes == null ? ImmutableMap.of() : modificationAttributes, objectClasses);
         }
 
         public LdapObjectDefinitionBuilder setDistinguishedName(String distinguishedName)
@@ -92,7 +100,13 @@ public class LdapObjectDefinition
             return this;
         }
 
-        public LdapObjectDefinitionBuilder addObjectClasses(List<String> objectClasses)
+        public LdapObjectDefinitionBuilder setModificationAttributes(Map<String, List<String>> modificationAttributes)
+        {
+            this.modificationAttributes = ImmutableMap.copyOf(modificationAttributes);
+            return this;
+        }
+
+        public LdapObjectDefinitionBuilder setObjectClasses(List<String> objectClasses)
         {
             this.objectClasses = ImmutableList.copyOf(objectClasses);
             return this;

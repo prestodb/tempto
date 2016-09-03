@@ -14,6 +14,9 @@
 
 package com.teradata.tempto.fulfillment.ldap;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -25,14 +28,14 @@ public class OpenLdapObjectDefinitions
             LdapObjectDefinition.builder("TestOrg")
                     .setDistinguishedName("ou=Test,dc=tempto,dc=com")
                     .setAttributes(newHashMap())
-                    .addObjectClasses(Arrays.asList("organizationalUnit"))
+                    .setObjectClasses(Arrays.asList("organizationalUnit"))
                     .build();
 
     public static final LdapObjectDefinition TEST_GROUP =
             LdapObjectDefinition.builder("TestGroup")
                     .setDistinguishedName("cn=TestGroup,ou=Test,dc=tempto,dc=com")
                     .setAttributes(testGroupAttributes())
-                    .addObjectClasses(Arrays.asList("groupOfNames"))
+                    .setObjectClasses(Arrays.asList("groupOfNames"))
                             .build();
 
     private static Map<String, String> testGroupAttributes()
@@ -47,7 +50,8 @@ public class OpenLdapObjectDefinitions
             LdapObjectDefinition.builder("TestUser")
                     .setDistinguishedName("uid=testuser,ou=Test,dc=tempto,dc=com")
                     .setAttributes(testUserAttributes())
-                    .addObjectClasses(Arrays.asList("person", "inetOrgPerson"))
+                    .setModificationAttributes(ImmutableMap.of("memberOf", ImmutableList.of("cn=TestGroup,ou=Test,dc=tempto,dc=com")))
+                    .setObjectClasses(Arrays.asList("person", "inetOrgPerson"))
                             .build();
 
     private static Map<String, String> testUserAttributes()

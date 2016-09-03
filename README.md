@@ -470,7 +470,8 @@ These definitions have objects analogous to an `OpenLDAP` entry definition and s
                 LdapObjectDefinition.builder("TestUser")
                         .setDistinguishedName("uid=testuser,ou=Test,dc=tempto,dc=com")
                         .setAttributes(testUserAttributes())
-                        .addObjectClasses(Arrays.asList("person", "inetOrgPerson"))
+                        .setModificationAttributes(ImmutableMap.of("memberOf", ImmutableList.of("cn=TestGroup,ou=Test,dc=tempto,dc=com", "cn=AnotherGroup,ou=Test,dc=tempto,dc=com")))
+                        .setObjectClasses(Arrays.asList("person", "inetOrgPerson"))
                                 .build();
 
         private static Map<String, String> testUserAttributes()
