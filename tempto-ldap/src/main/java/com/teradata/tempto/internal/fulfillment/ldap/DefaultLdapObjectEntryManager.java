@@ -42,7 +42,9 @@ public class DefaultLdapObjectEntryManager
         implements LdapObjectEntryManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultLdapObjectEntryManager.class);
-    private final DirContext context;
+    private final String ldapUrl;
+    private final String ldapAdminDistinguishedName;
+    private final String ldapAdminPassword;
 
     @Inject
     public DefaultLdapObjectEntryManager(
@@ -50,35 +52,29 @@ public class DefaultLdapObjectEntryManager
             @Named("ldap.admin.dn") String ldapAdminDistinguishedName,
             @Named("ldap.admin.password") String ldapAdminPassword)
     {
-        this.context = createContext(
-                requireNonNull(ldapUrl, "ldapUrl is null"),
-                requireNonNull(ldapAdminDistinguishedName, "ldapAdminDistinguishedName is null"),
-                requireNonNull(ldapAdminPassword, "ldapAdminPassword is null"));
+        this.ldapUrl = requireNonNull(ldapUrl, "ldapUrl is null");
+        this.ldapAdminDistinguishedName = requireNonNull(ldapAdminDistinguishedName, "ldapAdminDistinguishedName is null");
+        this.ldapAdminPassword = requireNonNull(ldapAdminPassword, "ldapAdminPassword is null");
     }
 
     private DirContext createContext(String ldapUrl, String ldapAdminDistinguishedName, String ldapAdminPassword)
     {
         Hashtable<String, String> environment = new Hashtable<>();
 
-        DirContext dirContext = null;
         environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         environment.put(Context.PROVIDER_URL, ldapUrl);
         environment.put(Context.SECURITY_AUTHENTICATION, "simple");
         environment.put(Context.SECURITY_PRINCIPAL, ldapAdminDistinguishedName);
         environment.put(Context.SECURITY_CREDENTIALS, ldapAdminPassword);
         try {
-            dirContext = new InitialDirContext(environment);
+            return new InitialDirContext(environment);
         }
         catch (NamingException e) {
             throw new RuntimeException("Connection to LDAP server failed", e);
         }
-        finally {
-            closeQuietly();
-        }
-        return dirContext;
     }
 
-    private void closeQuietly()
+    private void closeQuietly(DirContext context)
     {
         try {
             if (context != null) {
@@ -90,7 +86,7 @@ public class DefaultLdapObjectEntryManager
         }
     }
 
-    private String addLdapDefinition(LdapObjectDefinition ldapObjectDefinition)
+    private String addLdapDefinition(LdapObjectDefinition ldapObjectDefinition, DirContext context)
     {
         checkNotNull(ldapObjectDefinition, "LDAP Object Definition is null");
 
@@ -125,15 +121,16 @@ public class DefaultLdapObjectEntryManager
     }
 
     @Override
-    public List<String> addLdapDefinitions(List<LdapObjectDefinition> ldapObjectDefinitions)
+    public void addLdapDefinitions(List<LdapObjectDefinition> ldapObjectDefinitions)
     {
+        DirContext context = createContext(ldapUrl, ldapAdminDistinguishedName, ldapAdminPassword);
         try {
-            return ldapObjectDefinitions.stream()
-                    .map(this::addLdapDefinition)
-                    .collect(toList());
+            for (LdapObjectDefinition ldapObjectDefinition : ldapObjectDefinitions) {
+                addLdapDefinition(ldapObjectDefinition, context);
+            }
         }
         finally {
-            closeQuietly();
+            closeQuietly(context);
         }
     }
 }

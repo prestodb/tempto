@@ -20,5 +20,5 @@ import java.util.List;
 
 interface LdapObjectEntryManager
 {
-    List<String> addLdapDefinitions(List<LdapObjectDefinition> ldapObjectDefinitions);
+    void addLdapDefinitions(List<LdapObjectDefinition> ldapObjectDefinitions);
 }
