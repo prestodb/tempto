@@ -26,6 +26,7 @@ import java.math.RoundingMode;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.initialization.RequirementsExpanderInterceptor.getMethodsCountFromContext;
+import static java.lang.System.currentTimeMillis;
 
 public class ProgressLoggingListener
         implements ITestListener
@@ -36,6 +37,7 @@ public class ProgressLoggingListener
     private int succeeded;
     private int skipped;
     private int failed;
+    private long startTime;
     private long testStartTime;
 
     private final TestMetadataReader testMetadataReader;
@@ -48,6 +50,7 @@ public class ProgressLoggingListener
     @Override
     public void onStart(ITestContext context)
     {
+        startTime = currentTimeMillis();
         LOGGER.info("Starting tests running");
     }
 
@@ -55,7 +58,7 @@ public class ProgressLoggingListener
     public void onTestStart(ITestResult testCase)
     {
         TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
-        testStartTime = System.currentTimeMillis();
+        testStartTime = currentTimeMillis();
         started++;
         int total = getMethodsCountFromContext(testCase.getTestContext());
         String testGroups = Joiner.on(", ").join(testMetadata.testGroups);
@@ -88,14 +91,19 @@ public class ProgressLoggingListener
 
     private void logTestEnd(String outcome)
     {
-        long executionTime = System.currentTimeMillis() - testStartTime;
+        long executionTime = currentTimeMillis() - testStartTime;
         if (executionTime < 1000) {
             LOGGER.info(outcome);
         }
         else {
-            BigDecimal durationSeconds = new BigDecimal(executionTime).divide(new BigDecimal(1000), 1, RoundingMode.HALF_UP);
+            BigDecimal durationSeconds = durationInSeconds(executionTime);
             LOGGER.info("{}     /    took {} seconds", outcome, durationSeconds);
         }
+    }
+
+    private static BigDecimal durationInSeconds(long millis)
+    {
+        return new BigDecimal(millis).divide(new BigDecimal(1000), 1, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -110,5 +118,9 @@ public class ProgressLoggingListener
         LOGGER.info("");
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
+        BigDecimal durationSeconds = durationInSeconds(currentTimeMillis() - startTime);
+        long minutes = durationSeconds.longValue() / 60;
+        long restSeconds = durationSeconds.longValue() % 60;
+        LOGGER.info("Tests execution took {} minutes and {} seconds", minutes, restSeconds);
     }
 }
