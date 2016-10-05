@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.convention.sql;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.assertions.QueryAssert;
 import com.teradata.tempto.configuration.Configuration;
@@ -28,11 +29,15 @@ import freemarker.template.TemplateException;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.JDBCType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +49,10 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.tempto.fulfillment.table.MutableTablesState.mutableTablesState;
-import static com.teradata.tempto.internal.convention.ConventionTestsUtils.isDisplayConventionTestResultsRequested;
+import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionTestResultsDumpPath;
 import static com.teradata.tempto.internal.convention.ProcessUtils.execute;
+import static java.nio.file.Files.newBufferedWriter;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -111,20 +118,47 @@ public class SqlQueryConventionBasedTest
             List<String> queries = splitQueries(queryDescriptor.getContent());
             checkState(!queries.isEmpty(), "At least one query must be present");
 
-
             for (String query : queries) {
                 String sql = resolveTemplates(query);
                 queryResult = queryExecutor.executeQuery(sql);
-
-                if (isDisplayConventionTestResultsRequested()) {
-                    System.out.println("Results for: " + sql);
-                    for (List<Object> row : queryResult.rows()) {
-                        System.out.println(new QueryAssert.Row(row));
-                    }
-                }
             }
+            dumpResultsIfNeeded(queryResult);
 
             return queryResult;
+        }
+    }
+
+    private void dumpResultsIfNeeded(QueryResult queryResult)
+    {
+        getConventionTestResultsDumpPath().ifPresent(path -> {
+            try {
+                dumpResults(queryResult, path);
+            }
+            catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
+        });
+    }
+
+    private void dumpResults(QueryResult queryResult, Path path)
+            throws IOException
+    {
+        if (!Files.exists(path)) {
+            Files.createDirectory(path);
+        }
+        checkState(Files.isDirectory(path), "%s have to point to the directory", path);
+        String testFileName = queryFile.getFileName().toString();
+        String resultsFileName = testFileName.substring(0, testFileName.lastIndexOf(".")) + ".result";
+
+        Path resultFilePath = Paths.get(path.toString(), resultsFileName);
+        try (BufferedWriter writer = newBufferedWriter(resultFilePath)) {
+            String types = queryResult.getColumnTypes().stream().map(JDBCType::getName).collect(joining("|"));
+            writer.write("-- delimiter: |; types: " + types);
+            writer.newLine();
+            for (List<Object> row : queryResult.rows()) {
+                writer.write(new QueryAssert.Row(row).toString());
+                writer.newLine();
+            }
         }
     }
 
@@ -167,7 +201,8 @@ public class SqlQueryConventionBasedTest
         if (queryDescriptor.getName().isPresent()) {
             fullNameBuilder.append(".");
             fullNameBuilder.append(queryDescriptor.getName().get().replaceAll("\\s", ""));
-        } else {
+        }
+        else {
             if (queriesCount > 1) {
                 fullNameBuilder.append("_");
                 fullNameBuilder.append(testNumber);

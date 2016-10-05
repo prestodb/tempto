@@ -85,9 +85,10 @@ public class TemptoRunnerOptions
             .longOpt("help")
             .build();
 
-    public static final Option DISPLAY_CONVENTION_RESULTS = Option.builder()
-            .longOpt("display-convention-results")
-            .desc("Display on standard output results of convention based test queries")
+    public static final Option DUMP_CONVENTION_RESULTS = Option.builder()
+            .longOpt("dump-convention-results")
+            .desc("Dump results of convention based test queries to directory.")
+            .hasArg()
             .build();
 
     private final Map<String, String> values;
@@ -143,9 +144,9 @@ public class TemptoRunnerOptions
         return isSet(HELP);
     }
 
-    public boolean isDisplayConventionResultsRequested()
+    public Optional<String> getConventionResultsDumpPath()
     {
-        return isSet(DISPLAY_CONVENTION_RESULTS);
+        return getValue(DUMP_CONVENTION_RESULTS.getLongOpt());
     }
 
     public Set<String> getValues(String option)

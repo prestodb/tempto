@@ -31,11 +31,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.CONVENTION_TESTS_DIR_KEY;
-import static com.teradata.tempto.internal.convention.ConventionTestsUtils.DISPLAY_CONVENTION_TESTS_RESULTS_KEY;
+import static com.teradata.tempto.internal.convention.ConventionTestsUtils.CONVENTION_TESTS_RESULTS_DUMP_PATH_KEY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_GROUPS_TO_EXCLUDE_PROPERTY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_GROUPS_TO_RUN_PROPERTY;
 import static com.teradata.tempto.internal.listeners.TestNameGroupNameMethodSelector.TEST_NAMES_TO_RUN_PROPERTY;
-import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singletonList;
 
 public class TemptoRunner
@@ -90,9 +89,7 @@ public class TemptoRunner
         testNG.setXmlSuites(singletonList(testSuite));
         testNG.setOutputDirectory(options.getReportDir());
         setupTestsFiltering(testNG);
-        if (options.isDisplayConventionResultsRequested()) {
-            System.setProperty(DISPLAY_CONVENTION_TESTS_RESULTS_KEY, TRUE.toString());
-        }
+        System.setProperty(CONVENTION_TESTS_RESULTS_DUMP_PATH_KEY, options.getConventionResultsDumpPath().orElse(""));
         testNG.run();
         if (testNG.hasFailure()) {
             System.exit(1);
