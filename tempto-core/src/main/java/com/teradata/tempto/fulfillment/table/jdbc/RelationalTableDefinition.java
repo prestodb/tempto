@@ -23,25 +23,25 @@ import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
-public class JdbcTableDefinition
+public class RelationalTableDefinition
         extends TableDefinition
 {
-    public static JdbcTableDefinition jdbcTableDefinition(String name, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    public static RelationalTableDefinition relationalTableDefinition(String name, String createTableDDLTemplate, RelationalDataSource dataSource)
     {
-        return jdbcTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
+        return relationalTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
     }
 
-    public static JdbcTableDefinition jdbcTableDefinition(TableHandle tableHandle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    public static RelationalTableDefinition relationalTableDefinition(TableHandle tableHandle, String createTableDDLTemplate, RelationalDataSource dataSource)
     {
-        return new JdbcTableDefinition(tableHandle, createTableDDLTemplate, dataSource);
+        return new RelationalTableDefinition(tableHandle, createTableDDLTemplate, dataSource);
     }
 
     private static final String NAME_MARKER = "%NAME%";
-    private final JdbcTableDataSource dataSource;
+    private final RelationalDataSource dataSource;
 
     private final String createTableDDLTemplate;
 
-    private JdbcTableDefinition(TableHandle handle, String createTableDDLTemplate, JdbcTableDataSource dataSource)
+    private RelationalTableDefinition(TableHandle handle, String createTableDDLTemplate, RelationalDataSource dataSource)
     {
         super(handle);
         ;
@@ -50,7 +50,7 @@ public class JdbcTableDefinition
         checkArgument(createTableDDLTemplate.contains(NAME_MARKER), "Create table DDL must contain %NAME% placeholder");
     }
 
-    public JdbcTableDataSource getDataSource()
+    public RelationalDataSource getDataSource()
     {
         return dataSource;
     }
@@ -72,14 +72,14 @@ public class JdbcTableDefinition
         return reflectionHashCode(this);
     }
 
-    public static JdbcTableDefinitionBuilder builder(String name)
+    public static RelationalTableDefinitionBuilder builder(String name)
     {
-        return new JdbcTableDefinitionBuilder(name);
+        return new RelationalTableDefinitionBuilder(name);
     }
 
-    public static JdbcTableDefinitionBuilder like(JdbcTableDefinition tableDefinition)
+    public static RelationalTableDefinitionBuilder like(RelationalTableDefinition tableDefinition)
     {
-        JdbcTableDefinitionBuilder builder = new JdbcTableDefinitionBuilder(tableDefinition.getName())
+        RelationalTableDefinitionBuilder builder = new RelationalTableDefinitionBuilder(tableDefinition.getName())
                 .setCreateTableDDLTemplate(tableDefinition.createTableDDLTemplate)
                 .setDataSource(tableDefinition.getDataSource());
         if (tableDefinition.getSchema().isPresent()) {
@@ -88,44 +88,44 @@ public class JdbcTableDefinition
         return builder;
     }
 
-    public static class JdbcTableDefinitionBuilder
+    public static class RelationalTableDefinitionBuilder
     {
         private TableHandle handle;
         private String createTableDDLTemplate;
-        private JdbcTableDataSource dataSource;
+        private RelationalDataSource dataSource;
 
-        private JdbcTableDefinitionBuilder(String name)
+        private RelationalTableDefinitionBuilder(String name)
         {
             this.handle = tableHandle(name);
         }
 
-        public JdbcTableDefinitionBuilder withSchema(String schema)
+        public RelationalTableDefinitionBuilder withSchema(String schema)
         {
             this.handle = handle.inSchema(schema);
             return this;
         }
 
-        public JdbcTableDefinitionBuilder withDatabase(String database)
+        public RelationalTableDefinitionBuilder withDatabase(String database)
         {
             this.handle = handle.inDatabase(database);
             return this;
         }
 
-        public JdbcTableDefinitionBuilder setCreateTableDDLTemplate(String createTableDDLTemplate)
+        public RelationalTableDefinitionBuilder setCreateTableDDLTemplate(String createTableDDLTemplate)
         {
             this.createTableDDLTemplate = createTableDDLTemplate;
             return this;
         }
 
-        public JdbcTableDefinitionBuilder setDataSource(JdbcTableDataSource dataSource)
+        public RelationalTableDefinitionBuilder setDataSource(RelationalDataSource dataSource)
         {
             this.dataSource = dataSource;
             return this;
         }
 
-        public JdbcTableDefinition build()
+        public RelationalTableDefinition build()
         {
-            return jdbcTableDefinition(handle, createTableDDLTemplate, dataSource);
+            return relationalTableDefinition(handle, createTableDDLTemplate, dataSource);
         }
     }
 }

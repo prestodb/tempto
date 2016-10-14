@@ -14,8 +14,8 @@
 
 package com.teradata.tempto.fulfillment.table
 
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition
 import com.teradata.tempto.internal.configuration.EmptyConfiguration
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
 import com.teradata.tempto.internal.fulfillment.table.jdbc.JdbcTableManager
@@ -30,15 +30,15 @@ import java.sql.ResultSetMetaData
 public class JdbcTableManagerTest
         extends Specification
 {
-  static JdbcTableDefinition tableDefinition
+  static RelationalTableDefinition tableDefinition
   static JdbcTableManager tableManager
   static String tableName
 
   def setup()
   {
     tableName = "name"
-    tableDefinition = JdbcTableDefinition.jdbcTableDefinition(tableName, "CREATE TABLE %NAME%(col1 INT)",
-            { Collections.<List<Object>>emptyList().iterator() } as JdbcTableDataSource)
+    tableDefinition = RelationalTableDefinition.relationalTableDefinition(tableName, "CREATE TABLE %NAME%(col1 INT)",
+            { Collections.<List<Object>>emptyList().iterator() } as RelationalDataSource)
 
     def mockExecutor = Mock(QueryExecutor)
     def mockConnection = Mock(Connection)

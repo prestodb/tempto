@@ -17,8 +17,8 @@ package com.teradata.tempto.internal.fulfillment.table
 import com.teradata.tempto.fulfillment.table.TableManager
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -49,11 +49,11 @@ class DefaultTableManagerDispatcherTest
     hiveTableManager1.databaseName >> 'hive1'
 
     psqlTableManager1 = Mock(TableManager)
-    psqlTableManager1.tableDefinitionClass >> JdbcTableDefinition
+    psqlTableManager1.tableDefinitionClass >> RelationalTableDefinition
     psqlTableManager1.databaseName >> 'psql1'
 
     psqlTableManager2 = Mock(TableManager)
-    psqlTableManager2.tableDefinitionClass >> JdbcTableDefinition
+    psqlTableManager2.tableDefinitionClass >> RelationalTableDefinition
     psqlTableManager2.databaseName >> 'psql2'
 
     tableManagers = [
@@ -84,7 +84,7 @@ class DefaultTableManagerDispatcherTest
     instance.getTableManagerFor(jdbcTableDefinition())
     then:
     IllegalStateException e = thrown()
-    e.message.contains('Multiple databases found for table definition class \'class com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition\'')
+    e.message.contains('Multiple databases found for table definition class \'class com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition\'')
   }
 
   def 'no database found'()
@@ -105,9 +105,9 @@ class DefaultTableManagerDispatcherTest
     e.message.contains('does not match requested table definition class')
   }
 
-  private JdbcTableDefinition jdbcTableDefinition()
+  private RelationalTableDefinition jdbcTableDefinition()
   {
-    return new JdbcTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Mock(JdbcTableDataSource))
+    return new RelationalTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Mock(RelationalDataSource))
   }
 
   private HiveTableDefinition hiveTableDefinition()

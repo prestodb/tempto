@@ -14,13 +14,13 @@
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.teradata.tempto.fulfillment.table.TableInstance;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 public class JdbcTableInstance
-        extends TableInstance<JdbcTableDefinition>
+        extends TableInstance<RelationalTableDefinition>
 {
-    public JdbcTableInstance(TableName tableName, JdbcTableDefinition tableDefinition)
+    public JdbcTableInstance(TableName tableName, RelationalTableDefinition tableDefinition)
     {
         super(tableName, tableDefinition);
     }

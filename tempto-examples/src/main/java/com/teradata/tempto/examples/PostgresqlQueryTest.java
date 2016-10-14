@@ -25,8 +25,8 @@ import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTablesState;
 import com.teradata.tempto.fulfillment.table.TableInstance;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.query.QueryExecutor;
 import org.testng.annotations.Test;
 
@@ -38,7 +38,7 @@ import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static com.teradata.tempto.fulfillment.table.ImmutableTablesState.immutableTablesState;
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
-import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
+import static com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition.relationalTableDefinition;
 
 public class PostgresqlQueryTest
         extends ProductTest
@@ -51,14 +51,14 @@ public class PostgresqlQueryTest
     @Inject
     private MutableTablesState mutableTablesState;
 
-    private static final JdbcTableDefinition TEST_TABLE_DEFINITION;
+    private static final RelationalTableDefinition TEST_TABLE_DEFINITION;
 
     static {
-        JdbcTableDataSource dataSource = () -> ImmutableList.<List<Object>>of(
+        RelationalDataSource dataSource = () -> ImmutableList.<List<Object>>of(
                 ImmutableList.of(1, "x"),
                 ImmutableList.of(2, "y")
         ).iterator();
-        TEST_TABLE_DEFINITION = jdbcTableDefinition("test_table", "CREATE TABLE %NAME% (a int, b varchar(100))", dataSource);
+        TEST_TABLE_DEFINITION = relationalTableDefinition("test_table", "CREATE TABLE %NAME% (a int, b varchar(100))", dataSource);
     }
 
     private static class ImmutableTestJdbcTables
@@ -69,8 +69,8 @@ public class PostgresqlQueryTest
         public Requirement getRequirements(Configuration configuration)
         {
             return Requirements.compose(
-                    new ImmutableTableRequirement(JdbcTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").build()),
-                    new ImmutableTableRequirement(JdbcTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").withSchema("test_schema").build())
+                    new ImmutableTableRequirement(RelationalTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").build()),
+                    new ImmutableTableRequirement(RelationalTableDefinition.like(TEST_TABLE_DEFINITION).withDatabase("psql").withSchema("test_schema").build())
             );
         }
     }

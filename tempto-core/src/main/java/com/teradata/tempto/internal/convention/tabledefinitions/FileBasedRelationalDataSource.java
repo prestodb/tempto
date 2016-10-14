@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,12 +23,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.teradata.tempto.internal.convention.tabledefinitions.JdbcDataFileDescriptor.sqlResultDescriptorFor;
 import static java.util.Collections.emptyIterator;
 
-public class FileBasedJdbcDataSource
-        implements JdbcTableDataSource
+public class FileBasedRelationalDataSource
+        implements RelationalDataSource
 {
     private final ConventionTableDefinitionDescriptor tableDefinitionDescriptor;
 
-    public FileBasedJdbcDataSource(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
+    public FileBasedRelationalDataSource(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
         this.tableDefinitionDescriptor = checkNotNull(tableDefinitionDescriptor, "tableDefinitionDescriptor is null");
     }

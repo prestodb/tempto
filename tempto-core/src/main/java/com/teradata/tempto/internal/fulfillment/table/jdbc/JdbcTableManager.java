@@ -21,8 +21,8 @@ import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
@@ -48,9 +48,9 @@ import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.Stat
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@TableManager.Descriptor(tableDefinitionClass = JdbcTableDefinition.class, type = "JDBC")
+@TableManager.Descriptor(tableDefinitionClass = RelationalTableDefinition.class, type = "JDBC")
 public class JdbcTableManager
-        extends AbstractTableManager<JdbcTableDefinition>
+        extends AbstractTableManager<RelationalTableDefinition>
 {
     private static final int BATCH_SIZE = 10000;
     private static final Logger LOGGER = getLogger(JdbcTableManager.class);
@@ -73,7 +73,7 @@ public class JdbcTableManager
     }
 
     @Override
-    public TableInstance createImmutable(JdbcTableDefinition tableDefinition, TableHandle tableHandle)
+    public TableInstance createImmutable(RelationalTableDefinition tableDefinition, TableHandle tableHandle)
     {
         TableName tableName = createImmutableTableName(tableHandle);
         LOGGER.debug("creating immutable table {}", tableName);
@@ -94,10 +94,10 @@ public class JdbcTableManager
         return new JdbcTableInstance(tableName, tableDefinition);
     }
 
-    private void createAndInsertData(JdbcTableDefinition tableDefinition, TableName tableName)
+    private void createAndInsertData(RelationalTableDefinition tableDefinition, TableName tableName)
     {
         createTable(tableDefinition, tableName);
-        JdbcTableDataSource dataSource = tableDefinition.getDataSource();
+        RelationalDataSource dataSource = tableDefinition.getDataSource();
         insertData(tableName, dataSource);
     }
 
@@ -134,7 +134,7 @@ public class JdbcTableManager
         return name;
     }
 
-    private void createTable(JdbcTableDefinition tableDefinition, TableName tableName)
+    private void createTable(RelationalTableDefinition tableDefinition, TableName tableName)
     {
         boolean skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
         if (!skipCreateSchema) {
@@ -147,7 +147,7 @@ public class JdbcTableManager
     }
 
     @Override
-    public TableInstance createMutable(JdbcTableDefinition tableDefinition, State state, TableHandle tableHandle)
+    public TableInstance createMutable(RelationalTableDefinition tableDefinition, State state, TableHandle tableHandle)
     {
         TableName tableName = createMutableTableName(tableHandle);
         LOGGER.debug("creating mutable table {}", tableName);
@@ -164,7 +164,7 @@ public class JdbcTableManager
 
         assert state == LOADED;
 
-        JdbcTableDataSource dataSource = tableDefinition.getDataSource();
+        RelationalDataSource dataSource = tableDefinition.getDataSource();
         insertData(tableName, dataSource);
         return tableInstance;
     }
@@ -178,10 +178,10 @@ public class JdbcTableManager
     @Override
     public Class<? extends TableDefinition> getTableDefinitionClass()
     {
-        return JdbcTableDefinition.class;
+        return RelationalTableDefinition.class;
     }
 
-    private void insertData(TableName tableName, JdbcTableDataSource dataSource)
+    private void insertData(TableName tableName, RelationalDataSource dataSource)
     {
         Iterator<List<Object>> dataRows = dataSource.getDataRows();
         if (!dataRows.hasNext()) {

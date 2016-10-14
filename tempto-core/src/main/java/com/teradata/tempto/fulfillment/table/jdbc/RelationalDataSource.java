@@ -18,7 +18,7 @@ import java.sql.PreparedStatement;
 import java.util.Iterator;
 import java.util.List;
 
-public interface JdbcTableDataSource
+public interface RelationalDataSource
 {
     /**
      * Returns iterator over rows to be inserted to table.

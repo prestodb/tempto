@@ -19,7 +19,7 @@ import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import org.slf4j.Logger;
 
@@ -31,9 +31,8 @@ import java.util.stream.StreamSupport;
 
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.hiveTableDefinition;
-import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
+import static com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition.relationalTableDefinition;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
-import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Collections.emptyList;
@@ -108,8 +107,8 @@ public class ConventionTableDefinitionsProvider
 
     private TableDefinition jdbcTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
-        JdbcTableDataSource dataSource = new FileBasedJdbcDataSource(tableDefinitionDescriptor);
-        return jdbcTableDefinition(
+        RelationalDataSource dataSource = new FileBasedRelationalDataSource(tableDefinitionDescriptor);
+        return relationalTableDefinition(
                 getTableHandle(tableDefinitionDescriptor),
                 tableDefinitionDescriptor.getParsedDDLFile().getContent(),
                 dataSource);
