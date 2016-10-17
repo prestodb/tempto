@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.sql;
+package com.teradata.tempto.runner.internal.convention.sql;
 
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
@@ -20,18 +20,19 @@ import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.ImmutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
+import com.teradata.tempto.runner.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.internal.ReflectionHelper;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
-import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
 import com.teradata.tempto.internal.convention.ConventionBasedTestProxyGenerator;
 import com.teradata.tempto.internal.convention.MutableTableDescriptor;
 import com.teradata.tempto.internal.convention.SqlQueryDescriptor;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.convention.SqlTestsFileUtils;
+import com.teradata.tempto.internal.convention.sql.SqlQueryConventionBasedTest;
+import com.teradata.tempto.runner.internal.convention.ConventionBasedTestFactory;
 
 import java.nio.file.Path;
 import java.util.List;

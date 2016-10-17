@@ -44,7 +44,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class ConventionBasedTestProxyGenerator
 {
-
     private static final Logger LOGGER = getLogger(ConventionBasedTestProxyGenerator.class);
 
     private final String testPackage;

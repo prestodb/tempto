@@ -19,6 +19,9 @@ apply plugin: 'groovy'
 dependencies {
   compile tempto_core
   compile libraries.commons_cli
+  compile libraries.slf4j_api
+
+  testCompile libraries.spock
 }
 
 configurations {

@@ -12,13 +12,15 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention;
+package com.teradata.tempto.runner.internal.convention;
 
 import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.internal.convention.generator.GeneratorPathTestFactory;
-import com.teradata.tempto.internal.convention.recursion.RecursionPathTestFactory;
-import com.teradata.tempto.internal.convention.sql.SqlPathTestFactory;
+import com.teradata.tempto.internal.convention.ConventionBasedTest;
+import com.teradata.tempto.internal.convention.ConventionBasedTestProxyGenerator;
+import com.teradata.tempto.runner.internal.convention.generator.GeneratorPathTestFactory;
+import com.teradata.tempto.runner.internal.convention.recursion.RecursionPathTestFactory;
+import com.teradata.tempto.runner.internal.convention.sql.SqlPathTestFactory;
 import org.slf4j.Logger;
 import org.testng.annotations.Factory;
 
@@ -28,7 +30,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-import static com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
+import static com.teradata.tempto.runner.fulfillment.table.TableDefinitionsRepository.tableDefinitionsRepository;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
 import static java.util.stream.Collectors.toList;
@@ -45,7 +47,6 @@ public class ConventionBasedTestFactory
 
     public interface PathTestFactory
     {
-
         boolean isSupportedPath(Path path);
 
         List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix, ConventionBasedTestFactory factory);

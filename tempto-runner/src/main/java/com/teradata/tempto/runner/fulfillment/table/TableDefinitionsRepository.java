@@ -11,18 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.teradata.tempto.fulfillment.table;
+package com.teradata.tempto.runner.fulfillment.table;
 
 import com.google.common.collect.MapMaker;
-import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
+import com.teradata.tempto.fulfillment.table.RepositoryTableDefinition;
+import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.internal.ReflectionHelper;
+import com.teradata.tempto.runner.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,18 +34,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class TableDefinitionsRepository
 {
-
     protected static final Logger LOGGER = LoggerFactory.getLogger(TableDefinitionsRepository.class);
-
-    /**
-     * An annotation for {@link TableDefinition} static fields
-     * that should be registered in {@link TableDefinitionsRepository}.
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface RepositoryTableDefinition
-    {
-    }
 
     private static final List<TableDefinition> SCANNED_TABLE_DEFINITIONS;
 
