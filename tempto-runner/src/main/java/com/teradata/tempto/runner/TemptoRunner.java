@@ -128,7 +128,7 @@ public class TemptoRunner
         XmlPackage testPackage = new XmlPackage(options.getTestsPackage());
         List<XmlPackage> testPackages = newArrayList(testPackage);
         test.setPackages(testPackages);
-        XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.internal.convention.ConventionBasedTestFactory");
+        XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.runner.internal.convention.ConventionBasedTestFactory");
         List<XmlClass> classes = newArrayList(conventionBasedTestsClass);
         test.setClasses(classes);
         return testSuite;

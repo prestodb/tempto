@@ -12,10 +12,12 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.fulfillment.table.hive.tpch;
+package com.teradata.tempto.runner.fulfillment.table.hive.tpch;
 
 import com.teradata.tempto.fulfillment.table.RepositoryTableDefinition;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
+import com.teradata.tempto.fulfillment.table.hive.tpch.TpchDataSource;
+import com.teradata.tempto.fulfillment.table.hive.tpch.TpchTable;
 
 // Table definitions according to: http://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v2.17.1.pdf
 // TODO: support for CHAR

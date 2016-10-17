@@ -357,7 +357,7 @@ Remark: If multiple table managers of the same type (e.g. hive) are defined in t
  * `HiveDataSource` responsible for providing table data which is saved to HDFS
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
-be found in `com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions`.
+be found in `com.teradata.tempto.runner.fulfillment.table.hive.tpch.TpchTableDefinitions`.
 
 For example this is how the nation table is built:
 
