@@ -25,7 +25,7 @@ import com.teradata.tempto.hadoop.hdfs.HdfsClient;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
-import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorageProvider;
+import com.teradata.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.teradata.tempto.internal.hadoop.hdfs.WebHdfsClient.CONF_HDFS_WEBHDFS_HOST_KEY;
-import static com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorageProvider.CONF_TESTS_HDFS_PATH_KEY;
+import static com.teradata.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage.CONF_TESTS_HDFS_PATH_KEY;
 
 @AutoModuleProvider
 public class HdfsModuleProvider
@@ -67,7 +67,7 @@ public class HdfsModuleProvider
                 install(httpRequestsExecutorModule());
 
                 bind(HdfsClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
-                bind(RevisionStorage.class).toProvider(RevisionStorageProvider.class).in(Scopes.SINGLETON);
+                bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
                 bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class).in(Scopes.SINGLETON);
 
                 expose(HdfsClient.class);
