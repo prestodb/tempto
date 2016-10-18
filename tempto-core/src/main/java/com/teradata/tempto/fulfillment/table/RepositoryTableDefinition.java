@@ -13,31 +13,17 @@
  */
 package com.teradata.tempto.fulfillment.table;
 
-import spock.lang.Specification;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class TableDefinitionsRepositoryTest
-        extends Specification
+/**
+ * An annotation for {@link TableDefinition} static fields
+ * that should be registered in TableDefinitionsRepository.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+public @interface RepositoryTableDefinition
 {
-  
-  def 'should add/get table definition to repository'()
-  {
-    setup:
-    def tableDefinition = Mock(TableDefinition)
-    tableDefinition.name >> "table1"
-
-    def repository = new TableDefinitionsRepository()
-
-    when:
-    repository.register(tableDefinition)
-
-    then:
-    repository.getForName("table1") == tableDefinition
-
-    when:
-    repository.getForName("table2")
-
-    then:
-    def e = thrown(IllegalStateException)
-    e.message == 'no table definition for: table2'
-  }
 }

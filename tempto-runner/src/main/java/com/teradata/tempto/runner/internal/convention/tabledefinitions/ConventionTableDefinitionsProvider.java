@@ -12,15 +12,17 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.tabledefinitions;
+package com.teradata.tempto.runner.internal.convention.tabledefinitions;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
-import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
+import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionDescriptor;
+import com.teradata.tempto.internal.convention.tabledefinitions.FileBasedHiveDataSource;
+import com.teradata.tempto.runner.fulfillment.table.TableDefinitionsRepository;
+import com.teradata.tempto.runner.internal.convention.ConventionBasedTestFactory;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -33,7 +35,6 @@ import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.hiveTableDefinition;
 import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
-import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Collections.emptyList;

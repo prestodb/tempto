@@ -30,7 +30,7 @@ import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getFilen
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 
-class ConventionTableDefinitionDescriptor
+public class ConventionTableDefinitionDescriptor
 {
     public static class ParsedDDLFile
             extends SqlDescriptor

@@ -12,9 +12,10 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.tabledefinitions;
+package com.teradata.tempto.runner.internal.convention.tabledefinitions;
 
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
+import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionDescriptor;
 
 import java.util.Iterator;
 import java.util.List;

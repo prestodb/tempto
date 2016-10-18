@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.recursion;
+package com.teradata.tempto.runner.internal.convention.recursion;
 
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
-import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
+import com.teradata.tempto.runner.internal.convention.ConventionBasedTestFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -12,10 +12,10 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.generator;
+package com.teradata.tempto.runner.internal.convention.generator;
 
 import com.teradata.tempto.internal.convention.ConventionBasedTest;
-import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
+import com.teradata.tempto.runner.internal.convention.ConventionBasedTestFactory;
 
 import java.io.File;
 import java.nio.file.Path;

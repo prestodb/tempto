@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.sql
+package com.teradata.tempto.runner.internal.convention.sql
 
 import com.teradata.tempto.CompositeRequirement
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.RequirementsProvider
 import com.teradata.tempto.configuration.Configuration
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository
+import TableDefinitionsRepository
 import com.teradata.tempto.internal.convention.ConventionBasedTest
 import com.teradata.tempto.internal.convention.ConventionBasedTestProxyGenerator
 import org.apache.commons.io.FilenameUtils
