@@ -34,7 +34,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class QueryRowMapper
 {
-
     private static final String NULL_STRING = "null";
 
     private final List<JDBCType> columnTypes;

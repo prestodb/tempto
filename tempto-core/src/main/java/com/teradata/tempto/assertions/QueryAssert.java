@@ -47,7 +47,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class QueryAssert
         extends AbstractAssert<QueryAssert, QueryResult>
 {
-
     private static final Logger LOGGER = getLogger(QueryExecutor.class);
 
     private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("#0.00000000000");
@@ -431,13 +430,15 @@ public class QueryAssert
                 if (value instanceof Double || value instanceof Float) {
                     msg.append(DECIMAL_FORMAT.format(value));
                 }
-                else if (value != null) {
+                else if (value == null) {
+                    msg.append("null");
+                }
+                else {
                     msg.append(value.toString());
                 }
                 msg.append('|');
             }
             return msg.toString();
         }
-
     }
 }
