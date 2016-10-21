@@ -210,7 +210,7 @@ public class AnnotatedFileParser
         private final Map<String, String> properties;
         private final List<String> contentLines;
 
-        private SectionParsingResult(Optional<String> sectionName, List<String> sectionLines, Map<String, String> properties, List<String> contentLines)
+        public SectionParsingResult(Optional<String> sectionName, List<String> sectionLines, Map<String, String> properties, List<String> contentLines)
         {
             this.sectionName = sectionName;
             this.sectionLines = sectionLines;

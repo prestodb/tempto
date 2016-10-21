@@ -14,6 +14,8 @@
 
 package com.teradata.tempto.internal.convention.sql;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.teradata.tempto.Requirement;
 import com.teradata.tempto.RequirementsProvider;
 import com.teradata.tempto.configuration.Configuration;
@@ -56,6 +58,8 @@ public class SqlPathTestFactory
     private static final String RESULT_FILE_EXTENSION = "result";
     private static final String BEFORE_SCRIPT_NAME = "before";
     private static final String AFTER_SCRIPT_NAME = "after";
+    private static final SqlResultDescriptor EMPTY_SQL_RESULT_DESCRIPTOR = new SqlResultDescriptor(
+            new SectionParsingResult(Optional.empty(), ImmutableList.of(), ImmutableMap.of(), ImmutableList.of()));
 
     private final TableDefinitionsRepository tableDefinitionsRepository;
     private final ConventionBasedTestProxyGenerator proxyGenerator;
@@ -104,11 +108,15 @@ public class SqlPathTestFactory
             SectionParsingResult querySection)
     {
         Path resultFile = changeExtension(testFile, RESULT_FILE_EXTENSION);
-        checkState(exists(resultFile) && isRegularFile(resultFile), "Could not find file: %s", resultFile.toAbsolutePath());
 
+        SqlResultDescriptor sqlResultDescriptor = EMPTY_SQL_RESULT_DESCRIPTOR;
+        if (exists(resultFile)) {
+            checkState(isRegularFile(resultFile), "Expected result at: %s", resultFile.toAbsolutePath());
+            sqlResultDescriptor = sqlResultDescriptorFor(resultFile);
+        }
         return createTestsForSections(
                 testFile, testNamePrefix, optionalBeforeScriptFile, optionalAfterScriptFile,
-                newArrayList(new SqlQueryDescriptor(querySection)), newArrayList(sqlResultDescriptorFor(resultFile)));
+                newArrayList(new SqlQueryDescriptor(querySection)), newArrayList(sqlResultDescriptor));
     }
 
     private List<ConventionBasedTest> createTestsForMultiSectionTestFile(
