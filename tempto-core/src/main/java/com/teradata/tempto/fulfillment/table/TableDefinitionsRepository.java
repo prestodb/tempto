@@ -13,9 +13,12 @@
  */
 package com.teradata.tempto.fulfillment.table;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.MapMaker;
 import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import com.teradata.tempto.internal.ReflectionHelper;
+import com.teradata.tempto.spi.Plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +26,16 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.ReflectionHelper.getFieldsAnnotatedWith;
+import static com.teradata.tempto.internal.ReflectionHelper.getSubTypesOf;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -51,6 +58,8 @@ public class TableDefinitionsRepository
 
     private static final List<TableDefinition> SCANNED_TABLE_DEFINITIONS;
 
+    private static final Map<String, Plugin> SCANNED_PLUGINS;
+
     private static final TableDefinitionsRepository TABLE_DEFINITIONS_REPOSITORY;
 
     static {
@@ -62,9 +71,26 @@ public class TableDefinitionsRepository
                             .map(ReflectionHelper::<TableDefinition>getStaticFieldValue)
                             .collect(toList());
 
+            Set<Class<? extends Plugin>> plugins = getSubTypesOf(Plugin.class);
+            ImmutableMap.Builder<String, Plugin> builder = ImmutableMap.builder();
+            for (Class<? extends Plugin> plugin : plugins) {
+                try {
+                    Constructor<? extends Plugin> constructor = plugin.getConstructor();
+                    Plugin p = constructor.newInstance();
+                    builder.put(p.getName(), p);
+                }
+                catch (NoSuchMethodException e) {
+                    LOGGER.warn("Plugin %s does not have appropriate constructor. Skipping", plugin);
+                }
+                catch (IllegalAccessException|InstantiationException|InvocationTargetException e) {
+                    LOGGER.warn("Cannot instantiate plugin %s: %s. Skipping.", plugin, e);
+                }
+            }
+            SCANNED_PLUGINS = builder.build();
+
             TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(SCANNED_TABLE_DEFINITIONS);
             // TODO: since TestNG has no listener that can be run before tests factory, this has to be initialized here
-            new ConventionTableDefinitionsProvider().registerConventionTableDefinitions(TABLE_DEFINITIONS_REPOSITORY);
+            new ConventionTableDefinitionsProvider(SCANNED_PLUGINS).registerConventionTableDefinitions(TABLE_DEFINITIONS_REPOSITORY);
         } catch (RuntimeException e){
             LOGGER.error("Error during TableDefinitionsRepository initialization", e);
             throw e;

@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
 import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
+import com.teradata.tempto.spi.convention.tabledefinitions.ConventionTableDefinitionDescriptor;
 
 import java.util.Iterator;
 import java.util.List;

@@ -79,10 +79,14 @@ public final class ReflectionHelper
     @SuppressWarnings("unchecked")
     public static <T> Set<Class<? extends T>> getAnnotatedSubTypesOf(Class<T> clazz, Class<? extends Annotation> annotation)
     {
-        Set<Class<? extends T>> subtypesOf = (Set) SUBTYPES_OF.getUnchecked(clazz);
-        return subtypesOf.stream()
+        return getSubTypesOf(clazz).stream()
                 .filter(c -> c.getAnnotation(annotation) != null)
                 .collect(toSet());
+    }
+
+    public static <T> Set<Class<? extends T>> getSubTypesOf(Class<T> clazz)
+    {
+        return (Set) SUBTYPES_OF.getUnchecked(clazz);
     }
 
     public static <T> List<? extends T> instantiate(Collection<Class<? extends T>> classes)
