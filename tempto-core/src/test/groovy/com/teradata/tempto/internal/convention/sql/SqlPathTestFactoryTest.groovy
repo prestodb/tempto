@@ -123,17 +123,16 @@ query 2 result
     ex.message == 'Unable to find specified class: not.existing.Requirement'
   }
 
-  def shouldFailNoResultsFile()
+  def shouldCreateTestWhenNoResultsFile()
   {
     setup:
     Path testPath = getPathForConventionTest("--", Optional.empty())
 
     when:
-    sqlPathTestFactory.createTestsForPath(testPath, '', null)
+    List<ConventionBasedTest> tests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
 
     then:
-    IllegalStateException e = thrown()
-    e.message == 'Could not find file: ' + new File(testPath.toString().replace('.tmp', '.result'))
+    tests.size() == 1
   }
 
   def shouldFailInvalidNumberOfSections()
