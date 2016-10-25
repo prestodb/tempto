@@ -86,8 +86,11 @@ public class TableManagerDispatcherModuleProvider
                     @Override
                     protected void configure()
                     {
-                        // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
-                        bind(QueryExecutor.class).to(Key.get(QueryExecutor.class, named(database)));
+                        // TODO: refactor this to avoid hardcoding dbname
+                        if (!database.equals("cassandra")) { // Cassandra does not provide QueryExecutor
+                            // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
+                            bind(QueryExecutor.class).to(Key.get(QueryExecutor.class, named(database)));
+                        }
                         bind(Key.get(String.class, named("databaseName"))).toInstance(database);
                         bind(tableManagerKey).to(tableManagerClass);
                         expose(tableManagerKey);

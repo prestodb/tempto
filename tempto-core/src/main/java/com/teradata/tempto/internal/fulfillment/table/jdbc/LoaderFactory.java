@@ -21,9 +21,6 @@ import java.sql.JDBCType;
 import java.sql.SQLException;
 import java.util.List;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.IntStream.range;
 import static org.slf4j.LoggerFactory.getLogger;
 
 class LoaderFactory

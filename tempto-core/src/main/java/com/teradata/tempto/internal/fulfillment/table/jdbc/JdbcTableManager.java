@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
@@ -21,8 +22,8 @@ import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
-import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
+import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
@@ -193,7 +194,7 @@ public class JdbcTableManager
             }
         }
         catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw Throwables.propagate(e);
         }
     }
 

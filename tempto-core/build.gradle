@@ -35,6 +35,7 @@ dependencies {
   compile libraries.freemarker
   compile libraries.joda
   compile libraries.jackson_databind
+  compile libraries.cassandra_driver
 
   runtime libraries.jcl_over_slf4j
 
