@@ -89,7 +89,8 @@ public class TemptoRunner
         testNG.setXmlSuites(singletonList(testSuite));
         testNG.setOutputDirectory(options.getReportDir());
         setupTestsFiltering(testNG);
-        System.setProperty(CONVENTION_TESTS_RESULTS_DUMP_PATH_KEY, options.getConventionResultsDumpPath().orElse(""));
+        options.getConventionResultsDumpPath()
+                .ifPresent(path -> System.setProperty(CONVENTION_TESTS_RESULTS_DUMP_PATH_KEY, path));
         testNG.run();
         if (testNG.hasFailure()) {
             System.exit(1);
