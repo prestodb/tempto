@@ -54,7 +54,9 @@ public class QueryExecutorModuleProvider
                 bind(JdbcConnectionsPool.class).toInstance(jdbcConnectionsPool);
                 Set<String> definedJdcbConnectionNames = jdbcConnectionsConfiguration.getDefinedJdcbConnectionNames();
                 for (String connectionName : definedJdcbConnectionNames) {
-                    bindDatabaseConnectionBeans(connectionName);
+                    if (!connectionName.equals("cassandra")) {
+                        bindDatabaseConnectionBeans(connectionName);
+                    }
                 }
             }
 

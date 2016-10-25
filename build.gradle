@@ -51,6 +51,7 @@ ext.versions = [
         freemarker   : '2.3.22',
         objenesis    : '1.4',
         jackson      : '2.4.4',
+        cassandra    : '3.0.0',
         commons_cli   : '1.3.1'
 ]
 
@@ -87,6 +88,7 @@ ext.libraries = [
         joda         : "joda-time:joda-time:2.4",
         objenesis    : "org.objenesis:objenesis:${versions.objenesis}",
         jackson_databind : "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}",
+        cassandra_driver : "com.datastax.cassandra:cassandra-driver-core:${versions.cassandra}",
         commons_cli  : "commons-cli:commons-cli:${versions.commons_cli}"
 ]
 

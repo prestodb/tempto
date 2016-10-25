@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.google.common.collect.ImmutableList;
+import com.teradata.tempto.internal.fulfillment.table.jdbc.Loader;
 import com.teradata.tempto.query.QueryExecutor;
 
 import java.sql.JDBCType;

@@ -195,7 +195,7 @@ public class QueryResult
             }
         }
 
-        QueryResultBuilder(List<JDBCType> columnTypes, List<String> columnNames)
+        public QueryResultBuilder(List<JDBCType> columnTypes, List<String> columnNames)
         {
             checkState(columnTypes.size() == columnNames.size(),
                     "inconsistent number of entries in columnTypes and columnNames lists %s != %s",
