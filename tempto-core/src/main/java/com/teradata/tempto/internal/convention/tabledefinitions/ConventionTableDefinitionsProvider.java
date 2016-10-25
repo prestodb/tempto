@@ -16,27 +16,25 @@ package com.teradata.tempto.internal.convention.tabledefinitions;
 
 import com.teradata.tempto.fulfillment.table.TableDefinition;
 import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository;
-import com.teradata.tempto.fulfillment.table.TableHandle;
-import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
-import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
-import com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDataSource;
 import com.teradata.tempto.internal.convention.ConventionBasedTestFactory;
+import com.teradata.tempto.spi.Plugin;
+import com.teradata.tempto.spi.convention.tabledefinitions.ConventionTableDefinitionDescriptor;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
-import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
-import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.hiveTableDefinition;
-import static com.teradata.tempto.fulfillment.table.jdbc.JdbcTableDefinition.jdbcTableDefinition;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.getConventionsTestsPath;
-import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
+import static java.lang.String.format;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.newDirectoryStream;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -44,6 +42,12 @@ public class ConventionTableDefinitionsProvider
 {
     public static final String DATASETS_PATH_PART = "datasets";
     private static final Logger LOGGER = getLogger(ConventionBasedTestFactory.class);
+    private final Map<String, Plugin> plugins;
+
+    public ConventionTableDefinitionsProvider(Map<String, Plugin> plugins)
+    {
+        this.plugins = requireNonNull(plugins, "plugins is null");
+    }
 
     public void registerConventionTableDefinitions(TableDefinitionsRepository tableDefinitionsRepository)
     {
@@ -87,41 +91,11 @@ public class ConventionTableDefinitionsProvider
     private TableDefinition tableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
     {
         ConventionTableDefinitionDescriptor.ParsedDDLFile parsedDDLFile = tableDefinitionDescriptor.getParsedDDLFile();
-        switch (parsedDDLFile.getTableType()) {
-            case HIVE:
-                return hiveTableDefinitionFor(tableDefinitionDescriptor);
-            case JDBC:
-                return jdbcTableDefinitionFor(tableDefinitionDescriptor);
-            default:
-                throw new IllegalArgumentException("unknown table type: " + parsedDDLFile.getTableType());
+        TableType tableType = parsedDDLFile.getTableType();
+        Plugin plugin = plugins.get(tableType.toString().toLowerCase(Locale.ENGLISH));
+        if (plugin == null) {
+            throw new IllegalStateException(format("Plugin for %s is not loaded", tableType));
         }
-    }
-
-    private HiveTableDefinition hiveTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
-    {
-        HiveDataSource dataSource = new FileBasedHiveDataSource(tableDefinitionDescriptor);
-        return hiveTableDefinition(
-                getTableHandle(tableDefinitionDescriptor),
-                tableDefinitionDescriptor.getParsedDDLFile().getContent(),
-                dataSource);
-    }
-
-    private TableDefinition jdbcTableDefinitionFor(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
-    {
-        JdbcTableDataSource dataSource = new FileBasedJdbcDataSource(tableDefinitionDescriptor);
-        return jdbcTableDefinition(
-                getTableHandle(tableDefinitionDescriptor),
-                tableDefinitionDescriptor.getParsedDDLFile().getContent(),
-                dataSource);
-    }
-
-    private TableHandle getTableHandle(ConventionTableDefinitionDescriptor tableDefinitionDescriptor)
-    {
-        TableHandle tableHandle = tableHandle(tableDefinitionDescriptor.getName());
-        Optional<String> schema = tableDefinitionDescriptor.getParsedDDLFile().getSchema();
-        if (schema.isPresent()) {
-            tableHandle = tableHandle.inSchema(schema.get());
-        }
-        return tableHandle;
+        return plugin.getConventionTableDefinition(tableDefinitionDescriptor);
     }
 }

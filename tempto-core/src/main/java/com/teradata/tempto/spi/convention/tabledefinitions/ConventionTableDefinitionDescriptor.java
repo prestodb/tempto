@@ -12,11 +12,12 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.convention.tabledefinitions;
+package com.teradata.tempto.spi.convention.tabledefinitions;
 
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.tempto.internal.convention.SqlDescriptor;
+import com.teradata.tempto.internal.convention.tabledefinitions.TableType;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -30,7 +31,7 @@ import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getFilen
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 
-class ConventionTableDefinitionDescriptor
+public class ConventionTableDefinitionDescriptor
 {
     public static class ParsedDDLFile
             extends SqlDescriptor

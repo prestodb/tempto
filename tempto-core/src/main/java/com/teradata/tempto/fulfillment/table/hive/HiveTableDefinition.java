@@ -27,7 +27,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createSameRowDataSource;
 import static com.teradata.tempto.fulfillment.table.hive.InlineDataSource.createStringDataSource;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
