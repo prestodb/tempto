@@ -53,6 +53,11 @@ public class TableName
         return nameInDatabase;
     }
 
+    public String getSchemalessNameInDatabase()
+    {
+        return nameInDatabase;
+    }
+
     public Optional<String> getSchema()
     {
         return schema;
