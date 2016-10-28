@@ -30,7 +30,7 @@ class LoaderFactory
     Loader create(QueryExecutor queryExecutor, String tableName)
             throws SQLException
     {
-        List<JDBCType> columnTypes = queryExecutor.executeQuery("SELECT * FROM " + tableName + " LIMIT 1").getColumnTypes();
+        List<JDBCType> columnTypes = queryExecutor.executeQuery("SELECT * FROM " + tableName + " WHERE 1=2").getColumnTypes();
 
         try {
             return new BatchLoader(queryExecutor, tableName, columnTypes.size());
