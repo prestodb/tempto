@@ -18,8 +18,11 @@ import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
 
 import java.sql.JDBCType;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -27,10 +30,16 @@ class LoaderFactory
 {
     private static final Logger LOGGER = getLogger(LoaderFactory.class);
 
-    Loader create(QueryExecutor queryExecutor, String tableName)
+    Loader create(QueryExecutor queryExecutor, Optional<String> schema, String tableName)
             throws SQLException
     {
-        List<JDBCType> columnTypes = queryExecutor.executeQuery("SELECT * FROM " + tableName + " LIMIT 1").getColumnTypes();
+        schema = getSchema(queryExecutor);
+        ResultSet resultSet = queryExecutor.getConnection().getMetaData().getColumns(null, schema.orElse(""), tableName, null);
+
+        List<JDBCType> columnTypes = new ArrayList<>();
+        while (resultSet.next()) {
+            columnTypes.add(JDBCType.valueOf(resultSet.getInt("DATA_TYPE")));
+        }
 
         try {
             return new BatchLoader(queryExecutor, tableName, columnTypes.size());
@@ -40,4 +49,14 @@ class LoaderFactory
             return new InsertLoader(queryExecutor, tableName, columnTypes);
         }
     }
+
+    private Optional<String> getSchema (QueryExecutor queryExecutor){
+        try {
+            return Optional.ofNullable(queryExecutor.getConnection().getSchema());
+        }
+        catch (Exception e) {
+            return Optional.empty();
+        }
+}
+
 }
