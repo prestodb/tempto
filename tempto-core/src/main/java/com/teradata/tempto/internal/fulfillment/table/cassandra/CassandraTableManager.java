@@ -58,6 +58,7 @@ public class CassandraTableManager
     private final CassandraQueryExecutor queryExecutor;
     private final String databaseName;
     private final String defaultKeySpace;
+    private final boolean skipCreateSchema;
 
     @Inject
     public CassandraTableManager(
@@ -68,7 +69,8 @@ public class CassandraTableManager
         this.tableNameGenerator = requireNonNull(tableNameGenerator, "tableNameGenerator is null");
         this.queryExecutor = new CassandraQueryExecutor(configuration);
         this.databaseName = requireNonNull(databaseName, "databaseName is null");
-        this.defaultKeySpace = configuration.getStringMandatory("databases.cassandra.default_schema");
+        this.defaultKeySpace = configuration.getStringMandatory("databases." + databaseName + ".default_schema");
+        this.skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
     }
 
     @Override
@@ -78,6 +80,9 @@ public class CassandraTableManager
         checkArgument(tableName.getSchema().isPresent(), "Cassandra requires table with schema");
 
         if (!queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase())) {
+            if (!skipCreateSchema) {
+                queryExecutor.executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
+            }
             executeQueryIgnoreTypeError(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase()));
             RelationalDataSource dataSource = tableDefinition.getDataSource();
 
