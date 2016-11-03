@@ -34,8 +34,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
@@ -77,7 +77,6 @@ public class CassandraTableManager
     public TableInstance<RelationalTableDefinition> createImmutable(RelationalTableDefinition tableDefinition, TableHandle tableHandle)
     {
         TableName tableName = createImmutableTableName(tableHandle);
-        checkArgument(tableName.getSchema().isPresent(), "Cassandra requires table with schema");
 
         if (!queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase())) {
             if (!skipCreateSchema) {
@@ -96,11 +95,11 @@ public class CassandraTableManager
 
     private void insertData(TableName tableName, RelationalDataSource dataSource)
     {
-        checkArgument(tableName.getSchema().isPresent(), "Cassandra requires table with schema");
         checkState(queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase()),
                 "table %s.%s does not exist",
                 tableName.getSchema().get(),
                 tableName.getSchemalessNameInDatabase());
+
 
         Iterator<List<Object>> dataRows = dataSource.getDataRows();
         if (!dataRows.hasNext()) {
@@ -146,8 +145,7 @@ public class CassandraTableManager
     public TableInstance<RelationalTableDefinition> createMutable(RelationalTableDefinition tableDefinition, MutableTableRequirement.State state, TableHandle tableHandle)
     {
         TableName tableName = createMutableTableName(tableHandle);
-        checkArgument(tableName.getSchema().isPresent(), "Cassandra requires table with schema");
-        if (!tableName.getSchema().equals(defaultKeySpace)) {
+        if (!tableName.getSchema().get().equals(defaultKeySpace)) {
             LOGGER.warn("Creating mutable table outside configured key space. It won't be cleaned if test fails.");
         }
 
@@ -210,7 +208,7 @@ public class CassandraTableManager
         String nameInDatabase = tableNameGenerator.generateMutableTableNameInDatabase(tableHandle.getName());
         return new TableName(
                 tableHandle.getDatabase().orElse(getDatabaseName()),
-                tableHandle.getSchema(),
+                Optional.of(tableHandle.getSchema().orElse(defaultKeySpace)),
                 tableHandle.getName(),
                 nameInDatabase
         );
@@ -220,7 +218,7 @@ public class CassandraTableManager
     {
         return new TableName(
                 tableHandle.getDatabase().orElse(getDatabaseName()),
-                tableHandle.getSchema(),
+                Optional.of(tableHandle.getSchema().orElse(defaultKeySpace)),
                 tableHandle.getName(),
                 tableHandle.getName()
         );
