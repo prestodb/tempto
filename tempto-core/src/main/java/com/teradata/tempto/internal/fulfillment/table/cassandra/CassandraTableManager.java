@@ -92,6 +92,10 @@ public class CassandraTableManager
     private void insertData(TableName tableName, RelationalDataSource dataSource)
     {
         checkArgument(tableName.getSchema().isPresent(), "Cassandra requires table with schema");
+        checkState(queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase()),
+                "table %s.%s does not exist",
+                tableName.getSchema().get(),
+                tableName.getSchemalessNameInDatabase());
 
         Iterator<List<Object>> dataRows = dataSource.getDataRows();
         if (!dataRows.hasNext()) {

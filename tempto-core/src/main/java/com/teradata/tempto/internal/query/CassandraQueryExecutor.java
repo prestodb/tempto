@@ -118,6 +118,7 @@ public class CassandraQueryExecutor
 
     public List<String> getColumnNames(String keySpace, String tableName)
     {
+        checkState(tableExists(keySpace, tableName), "table %s.%s does not exist", keySpace, tableName);
         KeyspaceMetadata keyspaceMetadata = session.getCluster().getMetadata().getKeyspace(keySpace);
         TableMetadata tableMetadata = keyspaceMetadata.getTable(tableName);
         return tableMetadata.getColumns().stream().map(ColumnMetadata::getName).collect(toList());
