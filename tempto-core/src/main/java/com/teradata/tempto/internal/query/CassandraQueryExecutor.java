@@ -23,6 +23,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.TableMetadata;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.query.QueryExecutionException;
@@ -135,6 +136,9 @@ public class CassandraQueryExecutor
     {
         Metadata clusterMetadata = cluster.getMetadata();
         KeyspaceMetadata keyspaceMetadata = clusterMetadata.getKeyspace(keySpace);
+        if (keyspaceMetadata == null) {
+            return ImmutableList.of();
+        }
         return keyspaceMetadata.getTables().stream()
                 .map(TableMetadata::getName)
                 .collect(toList());
