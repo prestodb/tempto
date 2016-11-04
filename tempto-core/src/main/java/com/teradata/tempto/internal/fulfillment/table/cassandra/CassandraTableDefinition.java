@@ -18,6 +18,7 @@ import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
+import static java.util.Objects.requireNonNull;
 
 public class CassandraTableDefinition
     extends RelationalTableDefinition
@@ -42,48 +43,49 @@ public class CassandraTableDefinition
         super(handle, createTableDDLTemplate, dataSource);
     }
 
-    public static CassandraTableDefinitionBuilder builder(String name)
+    public static CassandraTableDefinitionBuilder cassandraBuilder(String name)
     {
         return new CassandraTableDefinitionBuilder(name);
     }
 
     public static class CassandraTableDefinitionBuilder
-            extends RelationalTableDefinitionBuilder
     {
+        private TableHandle handle;
+        private String createTableDDLTemplate;
+        private RelationalDataSource dataSource;
+
         private CassandraTableDefinitionBuilder(String name)
         {
-            super(name);
+            this.handle = tableHandle(name);
         }
 
-        @Override
         public CassandraTableDefinitionBuilder withSchema(String schema)
         {
-            return (CassandraTableDefinitionBuilder) super.withSchema(schema);
+            this.handle = handle.inSchema(schema);
+            return this;
         }
 
-        @Override
         public CassandraTableDefinitionBuilder withDatabase(String database)
         {
-            return (CassandraTableDefinitionBuilder) super.withDatabase(database);
+            this.handle = handle.inDatabase(database);
+            return this;
         }
 
-        @Override
         public CassandraTableDefinitionBuilder setCreateTableDDLTemplate(String createTableDDLTemplate)
         {
-            return (CassandraTableDefinitionBuilder) super.setCreateTableDDLTemplate(createTableDDLTemplate);
+            this.createTableDDLTemplate = createTableDDLTemplate;
+            return this;
         }
 
-        @Override
         public CassandraTableDefinitionBuilder setDataSource(RelationalDataSource dataSource)
         {
-            return (CassandraTableDefinitionBuilder) super.setDataSource(dataSource);
+            this.dataSource = requireNonNull(dataSource, "dataSource is null");
+            return this;
         }
 
-
-        @Override
         public CassandraTableDefinition build()
         {
-            return (CassandraTableDefinition) super.build();
+            return cassandraTableDefinition(handle, createTableDDLTemplate, dataSource);
         }
     }
 }

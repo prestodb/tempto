@@ -1,6 +1,7 @@
 cluster:
   presto: presto-master
   hadoop: hadoop-master
+  cassandra: cassandra
   psql1: psql1
   psql2: psql2
   ssh: ssh

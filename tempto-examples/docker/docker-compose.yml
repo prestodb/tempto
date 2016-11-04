@@ -30,6 +30,13 @@ services:
       POSTGRES_USER: blah
       POSTGRES_PASSWORD: blah
 
+  cassandra:
+    hostname: cassandra
+    image: 'cassandra:2.1.15'
+    ports:
+      - '9042:9042'
+      - '9160:9160'
+
   ssh:
     hostname: ssh
     build: 'ssh'
@@ -42,6 +49,7 @@ services:
     ports: 
       - '8080:8080'
     depends_on:
+      - 'cassandra'
       - 'hadoop-master'
       - 'psql1'
       - 'psql2'

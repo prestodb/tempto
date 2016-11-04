@@ -2,6 +2,7 @@ DOCKER_MACHINE: localhost
 
 cluster:
   presto: ${DOCKER_MACHINE}
+  cassandra: ${DOCKER_MACHINE}
   hadoop: ${DOCKER_MACHINE}
   psql1: ${DOCKER_MACHINE}
   psql2: ${DOCKER_MACHINE}
@@ -54,6 +55,13 @@ databases:
     jdbc_password: blah
     jdbc_pooling: true
     table_manager_type: jdbc
+
+  cassandra:
+    host: ${cluster.cassandra}
+    port: 9042
+    default_schema: test
+    skip_create_schema: false
+    table_manager_type: cassandra
 
 tests:
   hdfs:

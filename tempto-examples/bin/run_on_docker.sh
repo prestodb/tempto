@@ -88,7 +88,7 @@ ${DOCKER_COMPOSE} pull
 
 ${DOCKER_COMPOSE} build
 ${DOCKER_COMPOSE} up -d 
-${DOCKER_COMPOSE} logs --no-color presto-master hadoop-master psql1 psql2 ssh &
+${DOCKER_COMPOSE} logs --no-color presto-master cassandra hadoop-master psql1 psql2 ssh &
 
 retry check_hive
 retry check_presto
