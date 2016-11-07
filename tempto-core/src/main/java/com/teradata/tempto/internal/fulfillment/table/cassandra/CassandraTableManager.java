@@ -149,6 +149,10 @@ public class CassandraTableManager
             LOGGER.warn("Creating mutable table outside configured key space. It won't be cleaned if test fails.");
         }
 
+        if (!skipCreateSchema) {
+            queryExecutor.executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
+        }
+
         CassandraTableInstance tableInstance = new CassandraTableInstance(tableName, tableDefinition);
         if (state == PREPARED) {
             return tableInstance;
