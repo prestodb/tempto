@@ -18,9 +18,9 @@ import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 public class CassandraTableInstance
-        extends TableInstance<RelationalTableDefinition>
+        extends TableInstance<CassandraTableDefinition>
 {
-    protected CassandraTableInstance(TableName name, RelationalTableDefinition tableDefinition)
+    protected CassandraTableInstance(TableName name, CassandraTableDefinition tableDefinition)
     {
         super(name, tableDefinition);
     }

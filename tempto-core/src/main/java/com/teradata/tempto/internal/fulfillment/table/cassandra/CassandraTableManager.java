@@ -21,7 +21,6 @@ import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.fulfillment.table.TableInstance;
 import com.teradata.tempto.fulfillment.table.TableManager;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
-import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
 import com.teradata.tempto.internal.query.CassandraQueryExecutor;
@@ -45,10 +44,10 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@TableManager.Descriptor(tableDefinitionClass = RelationalTableDefinition.class, type = "CASSANDRA")
+@TableManager.Descriptor(tableDefinitionClass = CassandraTableDefinition.class, type = "CASSANDRA")
 @Singleton
 public class CassandraTableManager
-        implements TableManager<RelationalTableDefinition>
+        implements TableManager<CassandraTableDefinition>
 {
     private static final Logger LOGGER = getLogger(CassandraTableManager.class);
 
@@ -74,7 +73,7 @@ public class CassandraTableManager
     }
 
     @Override
-    public TableInstance<RelationalTableDefinition> createImmutable(RelationalTableDefinition tableDefinition, TableHandle tableHandle)
+    public TableInstance<CassandraTableDefinition> createImmutable(CassandraTableDefinition tableDefinition, TableHandle tableHandle)
     {
         TableName tableName = createImmutableTableName(tableHandle);
 
@@ -142,7 +141,7 @@ public class CassandraTableManager
     }
 
     @Override
-    public TableInstance<RelationalTableDefinition> createMutable(RelationalTableDefinition tableDefinition, MutableTableRequirement.State state, TableHandle tableHandle)
+    public TableInstance<CassandraTableDefinition> createMutable(CassandraTableDefinition tableDefinition, MutableTableRequirement.State state, TableHandle tableHandle)
     {
         TableName tableName = createMutableTableName(tableHandle);
         if (!tableName.getSchema().get().equals(defaultKeySpace)) {
@@ -191,7 +190,7 @@ public class CassandraTableManager
     @Override
     public Class<? extends TableDefinition> getTableDefinitionClass()
     {
-        return RelationalTableDefinition.class;
+        return CassandraTableDefinition.class;
     }
 
     @Override

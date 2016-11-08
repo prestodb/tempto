@@ -41,7 +41,7 @@ public class RelationalTableDefinition
 
     private final String createTableDDLTemplate;
 
-    private RelationalTableDefinition(TableHandle handle, String createTableDDLTemplate, RelationalDataSource dataSource)
+    protected RelationalTableDefinition(TableHandle handle, String createTableDDLTemplate, RelationalDataSource dataSource)
     {
         super(handle);
         ;
@@ -94,7 +94,7 @@ public class RelationalTableDefinition
         private String createTableDDLTemplate;
         private RelationalDataSource dataSource;
 
-        private RelationalTableDefinitionBuilder(String name)
+        protected RelationalTableDefinitionBuilder(String name)
         {
             this.handle = tableHandle(name);
         }
