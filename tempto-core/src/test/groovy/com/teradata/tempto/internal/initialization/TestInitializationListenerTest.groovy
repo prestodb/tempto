@@ -23,6 +23,7 @@ import com.teradata.tempto.context.TestContextCloseCallback
 import com.teradata.tempto.fulfillment.RequirementFulfiller
 import com.teradata.tempto.fulfillment.TestStatus
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver
+import com.teradata.tempto.internal.fulfillment.table.TableManagerDispatcherModuleProvider
 import org.testng.IResultMap
 import org.testng.ITestClass
 import org.testng.ITestContext

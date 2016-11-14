@@ -110,4 +110,10 @@ public abstract class AbstractTableManager<T extends TableDefinition>
                 tableHandle.getName()
         );
     }
+
+    @Override
+    public void close()
+    {
+        queryExecutor.close();
+    }
 }

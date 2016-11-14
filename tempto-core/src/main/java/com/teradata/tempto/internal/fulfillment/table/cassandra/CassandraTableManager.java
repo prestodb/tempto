@@ -99,7 +99,6 @@ public class CassandraTableManager
                 tableName.getSchema().get(),
                 tableName.getSchemalessNameInDatabase());
 
-
         Iterator<List<Object>> dataRows = dataSource.getDataRows();
         if (!dataRows.hasNext()) {
             return;
@@ -235,5 +234,10 @@ public class CassandraTableManager
         catch (CassandraQueryExecutor.TypeNotSupportedException e) {
             LOGGER.warn(format("Execution of query (%s) failed: %s", sql, e));
         }
+    }
+
+    public void close()
+    {
+        queryExecutor.close();
     }
 }

@@ -31,19 +31,18 @@ import static com.teradata.tempto.fulfillment.TestStatus.FAILURE;
 public class MutableTablesFulfiller
         extends TableRequirementFulfiller<MutableTableRequirement>
 {
-
     private MutableTablesState mutableTablesState;
 
     @Inject
-    public MutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher) {
+    public MutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher)
+    {
         super(tableManagerDispatcher, MutableTableRequirement.class);
     }
 
     @Override
     protected TablesState createState(List<TableInstance> tables)
     {
-        mutableTablesState = new MutableTablesState(tables);
-        return mutableTablesState;
+        return mutableTablesState = new MutableTablesState(tables);
     }
 
     @Override

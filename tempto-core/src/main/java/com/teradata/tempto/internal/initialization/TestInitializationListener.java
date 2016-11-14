@@ -30,6 +30,8 @@ import com.teradata.tempto.fulfillment.RequirementFulfiller;
 import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoSuiteLevelFulfiller;
 import com.teradata.tempto.fulfillment.RequirementFulfiller.AutoTestLevelFulfiller;
 import com.teradata.tempto.fulfillment.TestStatus;
+import com.teradata.tempto.fulfillment.table.TableManager;
+import com.teradata.tempto.fulfillment.table.TableManagerDispatcher;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.initialization.TestMethodModuleProvider;
@@ -329,6 +331,12 @@ public class TestInitializationListener
             TestContext testContext = testContextStack.pop();
             testContext.close();
             runWithTestContext(testContext, () -> testContextStack.peek().getDependency(fulfillerClass).cleanup(testStatus));
+        }
+
+        if (testContextStack.size() == 1) {
+            // we are going to close last context, so we need to close TableManager's first
+            testContextStack.peek().getOptionalDependency(TableManagerDispatcher.class)
+                    .ifPresent(dispatcher -> dispatcher.getAllTableManagers().forEach(TableManager::close));
         }
 
         // remove close init test context too

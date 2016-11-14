@@ -16,6 +16,7 @@ package com.teradata.tempto.fulfillment.table;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 
+import java.io.Closeable;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,18 +29,19 @@ import static com.teradata.tempto.fulfillment.table.TableManagerDispatcher.getTa
  * Provides functionality of creating/dropping tables based on {@link TableDefinition}.
  */
 public interface TableManager<T extends TableDefinition>
+        extends Closeable
 {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE})
     @interface Descriptor
     {
-
         Class<? extends TableDefinition> tableDefinitionClass();
-        String type();
 
+        String type();
     }
 
-    default TableInstance<T> createImmutable(T tableDefinition) {
+    default TableInstance<T> createImmutable(T tableDefinition)
+    {
         return createImmutable(tableDefinition, tableDefinition.getTableHandle());
     }
 
@@ -79,4 +81,8 @@ public interface TableManager<T extends TableDefinition>
     String getDatabaseName();
 
     Class<? extends TableDefinition> getTableDefinitionClass();
+
+    default void close()
+    {
+    }
 }
