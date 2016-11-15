@@ -28,9 +28,9 @@ class TableHandleTest
     TableHandle.parse(tableHandleStr) == expectedTableHandle
 
     where:
-    tableHandleStr | expectedTableHandle
-    'table'        | tableHandle('table')
-    'db.table'     | tableHandle('table').inDatabase('db')
-    'db.sch.table' | tableHandle('table').inDatabase('db').inSchema('sch')
+    tableHandleStr    | expectedTableHandle
+    'table'           | tableHandle('table')
+    'schema.table'    | tableHandle('table').inSchema('schema')
+    'db.schema.table' | tableHandle('table').inDatabase('db').inSchema('schema')
   }
 }

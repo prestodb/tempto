@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.ReflectionHelper.getFieldsAnnotatedWith;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -106,7 +107,47 @@ public class TableDefinitionsRepository
 
     public TableDefinition get(String name)
     {
-        checkState(tableDefinitions.containsKey(name), "no table definition for: %s", name);
-        return tableDefinitions.get(name);
+        return new TableDefinitionRepositoryKey(name, Optional.empty());
+    }
+
+    private static class TableDefinitionRepositoryKey
+    {
+        private final String name;
+        private final Optional<String> schema;
+
+        public TableDefinitionRepositoryKey(String name, Optional<String> schema)
+        {
+            this.name = requireNonNull(name, "name is null");
+            this.schema = requireNonNull(schema, "schema is null");
+        }
+
+        @Override
+        public boolean equals(Object o)
+        {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            TableDefinitionRepositoryKey that = (TableDefinitionRepositoryKey) o;
+            return Objects.equals(name, that.name) &&
+                    Objects.equals(schema, that.schema);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return Objects.hash(name, schema);
+        }
+
+        @Override
+        public String toString()
+        {
+            if (schema.isPresent()) {
+                return schema.get() + "." + name;
+            }
+            return name;
+        }
     }
 }

@@ -803,7 +803,7 @@ It is possible (which is useful for testing Presto for example) to use a table w
 while sending test query to other database (e.g. Presto).
 Take a look at the example below. Here query is issued via Presto JDBC, while nation table could be created somewhere else. In order to determine
 where nation should be created (find appropriate requirements) below matching flow is used:
- - If database is specified explicitly as prefix for table name (e.g psql.nation) then requirement for
+ - If database is specified explicitly as prefix for table name (e.g psql.public.nation which means table nation in schema public in database psql) then requirement for
    table in that database will be generated. Note that database must have a table_manager with type
    matching table manager of a table or error will be thrown.
  - If no database is specified explicitly then if there is only one database with table manager
@@ -818,8 +818,8 @@ SELECT * FROM nation
 Here you have an example with an immutable table requirement from database psql.
 
 ```
--- database: presto; tables: psql.nation;
-SELECT * FROM nation
+-- database: presto; tables: psql.public.nation;
+SELECT * FROM psql.public.nation
 ```
 
 ### Generated tests

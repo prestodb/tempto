@@ -36,7 +36,7 @@ public class TableHandle
             List<String> parts = Splitter.on('.').splitToList(value);
             checkArgument(parts.size() <= 3, "Invalid table name syntax. Expected at most two occurrences of '.' in '%s'.", value);
             if (parts.size() == 2) {
-                return tableHandle(parts.get(1)).inDatabase(parts.get(0));
+                return tableHandle(parts.get(1)).inSchema(parts.get(0));
             }
             return tableHandle(parts.get(2)).inDatabase(parts.get(0)).inSchema(parts.get(1));
         }
