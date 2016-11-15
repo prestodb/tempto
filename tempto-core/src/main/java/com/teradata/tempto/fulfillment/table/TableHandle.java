@@ -135,9 +135,10 @@ public class TableHandle
         if (schema.isPresent()) {
             toStringHelper.add("schema", schema.get());
         }
-        return toStringHelper
-                .add("name", name)
-                .add("requireNoSchema", requireNoSchema)
-                .toString();
+        toStringHelper.add("name", name);
+        if (requireNoSchema) {
+            toStringHelper.addValue("requireNoSchema");
+        }
+        return toStringHelper.toString();
     }
 }
