@@ -168,13 +168,13 @@ public class SqlPathTestFactory
     {
         List<Requirement> requirements = newArrayList();
         for (TableHandle tableHandle : queryDescriptor.getTableDefinitionHandles()) {
-            TableDefinition tableDefinition = tableDefinitionsRepository.getForName(tableHandle.getName());
+            TableDefinition tableDefinition = tableDefinitionsRepository.get(tableHandle.getName());
             tableHandle = resolveTableHandle(queryDescriptor, tableHandle);
             requirements.add(new ImmutableTableRequirement(tableDefinition, tableHandle));
         }
         for (MutableTableDescriptor descriptor : queryDescriptor.getMutableTableDescriptors()) {
             TableHandle tableHandle = resolveTableHandle(queryDescriptor, descriptor.tableHandle);
-            TableDefinition tableDefinition = tableDefinitionsRepository.getForName(descriptor.tableDefinitionName);
+            TableDefinition tableDefinition = tableDefinitionsRepository.get(descriptor.tableDefinitionName);
             requirements.add(MutableTableRequirement.builder(tableDefinition)
                     .withTableHandle(tableHandle)
                     .withState(descriptor.state)

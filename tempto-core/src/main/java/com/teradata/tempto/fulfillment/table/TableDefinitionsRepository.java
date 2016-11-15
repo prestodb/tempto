@@ -76,9 +76,9 @@ public class TableDefinitionsRepository
         return tableDefinitionsRepository().register(tableDefinition);
     }
 
-    public static TableDefinition tableDefinitionForName(String name)
+    public static TableDefinition tableDefinition(String name)
     {
-        return tableDefinitionsRepository().getForName(name);
+        return tableDefinitionsRepository().get(name);
     }
 
     public static TableDefinitionsRepository tableDefinitionsRepository()
@@ -104,7 +104,7 @@ public class TableDefinitionsRepository
         return tableDefinition;
     }
 
-    public TableDefinition getForName(String name)
+    public TableDefinition get(String name)
     {
         checkState(tableDefinitions.containsKey(name), "no table definition for: %s", name);
         return tableDefinitions.get(name);
