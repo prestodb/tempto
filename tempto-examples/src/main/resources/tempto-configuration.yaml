@@ -38,7 +38,14 @@ databases:
     jdbc_user: hdfs
     jdbc_password: na
     jdbc_pooling: false
-    table_manager_type: jdbc 
+    table_manager_type: jdbc
+
+  presto_tpcds:
+    jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
+    jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/tpcds
+    jdbc_user: hdfs
+    jdbc_password: na
+    jdbc_pooling: false
 
   psql:
     jdbc_driver_class: org.postgresql.Driver
