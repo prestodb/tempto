@@ -29,6 +29,7 @@ dependencies {
   compile libraries.httpclient
   compile libraries.ioutils
   compile libraries.tpchgen
+  compile libraries.tpcdsgen
   compile libraries.bytebuddy
   compile libraries.reflections
   compile libraries.jsch
