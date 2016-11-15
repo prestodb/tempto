@@ -14,8 +14,8 @@
 package com.teradata.tempto.fulfillment.table;
 
 import com.google.common.collect.MapMaker;
-import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import com.teradata.tempto.internal.ReflectionHelper;
+import com.teradata.tempto.internal.convention.tabledefinitions.ConventionTableDefinitionsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +26,8 @@ import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.ReflectionHelper.getFieldsAnnotatedWith;
@@ -37,7 +39,6 @@ import static java.util.stream.Collectors.toList;
  */
 public class TableDefinitionsRepository
 {
-
     protected static final Logger LOGGER = LoggerFactory.getLogger(TableDefinitionsRepository.class);
 
     /**
@@ -66,7 +67,8 @@ public class TableDefinitionsRepository
             TABLE_DEFINITIONS_REPOSITORY = new TableDefinitionsRepository(SCANNED_TABLE_DEFINITIONS);
             // TODO: since TestNG has no listener that can be run before tests factory, this has to be initialized here
             new ConventionTableDefinitionsProvider().registerConventionTableDefinitions(TABLE_DEFINITIONS_REPOSITORY);
-        } catch (RuntimeException e){
+        }
+        catch (RuntimeException e) {
             LOGGER.error("Error during TableDefinitionsRepository initialization", e);
             throw e;
         }
@@ -77,9 +79,9 @@ public class TableDefinitionsRepository
         return tableDefinitionsRepository().register(tableDefinition);
     }
 
-    public static TableDefinition tableDefinition(String name)
+    public static TableDefinition tableDefinition(TableHandle tableHandle)
     {
-        return tableDefinitionsRepository().get(name);
+        return tableDefinitionsRepository().get(tableHandle);
     }
 
     public static TableDefinitionsRepository tableDefinitionsRepository()
@@ -87,7 +89,7 @@ public class TableDefinitionsRepository
         return TABLE_DEFINITIONS_REPOSITORY;
     }
 
-    private final Map<String, TableDefinition> tableDefinitions = new MapMaker().makeMap();
+    private final Map<TableDefinitionRepositoryKey, TableDefinition> tableDefinitions = new MapMaker().makeMap();
 
     public TableDefinitionsRepository()
     {
@@ -100,12 +102,30 @@ public class TableDefinitionsRepository
 
     public <T extends TableDefinition> T register(T tableDefinition)
     {
-        checkState(!tableDefinitions.containsKey(tableDefinition.getName()), "duplicated table definition: %s", tableDefinition.getName());
-        tableDefinitions.put(tableDefinition.getName(), tableDefinition);
+        TableDefinitionRepositoryKey repositoryKey = asRepositoryKey(tableDefinition.getTableHandle());
+        checkState(!tableDefinitions.containsKey(repositoryKey), "duplicated table definition: %s", repositoryKey);
+        tableDefinitions.put(repositoryKey, tableDefinition);
         return tableDefinition;
     }
 
-    public TableDefinition get(String name)
+    public TableDefinition get(TableHandle tableHandle)
+    {
+        TableDefinitionRepositoryKey tableHandleKey = asRepositoryKey(tableHandle);
+        TableDefinitionRepositoryKey nameKey = asRepositoryKey(tableHandle.getName());
+        if (tableDefinitions.containsKey(tableHandleKey)) {
+            return tableDefinitions.get(tableHandleKey);
+        } else if (tableDefinitions.containsKey(nameKey)){
+            return tableDefinitions.get(nameKey);
+        }
+        throw new IllegalStateException("no table definition for: " + tableHandleKey);
+    }
+
+    private static TableDefinitionRepositoryKey asRepositoryKey(TableHandle tableHandle)
+    {
+        return new TableDefinitionRepositoryKey(tableHandle.getName(), tableHandle.getSchema());
+    }
+
+    private static TableDefinitionRepositoryKey asRepositoryKey(String name)
     {
         return new TableDefinitionRepositoryKey(name, Optional.empty());
     }

@@ -51,7 +51,8 @@ public class TableHandle
     private final String name;
     private final boolean requireNoSchema;
 
-    private TableHandle(Optional<String> database, Optional<String> schema, String name) {
+    private TableHandle(Optional<String> database, Optional<String> schema, String name)
+    {
         this(database, schema, name, false);
     }
 
@@ -81,7 +82,7 @@ public class TableHandle
 
     public TableHandle withNoSchema()
     {
-       return new TableHandle(database, Optional.empty(), name, true);
+        return new TableHandle(database, Optional.empty(), name, true);
     }
 
     public String getName()
@@ -99,7 +100,8 @@ public class TableHandle
         return schema;
     }
 
-    public boolean noSchema() {
+    public boolean noSchema()
+    {
         return requireNoSchema;
     }
 

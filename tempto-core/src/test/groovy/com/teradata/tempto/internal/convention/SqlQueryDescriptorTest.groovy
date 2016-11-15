@@ -28,14 +28,15 @@ class SqlQueryDescriptorTest
   def 'parses immutable table properties'()
   {
     setup:
-    String fileContent = '-- tables: table1, prefix.table2'
+    String fileContent = '-- tables: table1, schema.table2, db.schema.table3'
     SectionParsingResult parsingResult = parseSection(fileContent)
     SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(parsingResult)
 
     expect:
     queryDescriptor.tableDefinitionHandles == [
             tableHandle('table1'),
-            tableHandle('table2').inDatabase('prefix')
+            tableHandle('table2').inSchema('schema'),
+            tableHandle('table3').inSchema('schema').inDatabase('db')
     ] as Set
   }
 
@@ -63,7 +64,7 @@ class SqlQueryDescriptorTest
 
     queryDescriptor.mutableTableDescriptors[3].tableDefinitionName == 'table4'
     queryDescriptor.mutableTableDescriptors[3].state == CREATED;
-    queryDescriptor.mutableTableDescriptors[3].tableHandle == tableHandle('table4_1').inDatabase('prefix')
+    queryDescriptor.mutableTableDescriptors[3].tableHandle == tableHandle('table4_1').inSchema('prefix')
   }
 
   def 'should fail duplicate mutable table name'()

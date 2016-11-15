@@ -43,6 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.Requirements.compose;
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static com.teradata.tempto.internal.convention.SqlResultDescriptor.sqlResultDescriptorFor;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static com.teradata.tempto.internal.convention.SqlTestsFileUtils.getExtension;
@@ -168,13 +169,13 @@ public class SqlPathTestFactory
     {
         List<Requirement> requirements = newArrayList();
         for (TableHandle tableHandle : queryDescriptor.getTableDefinitionHandles()) {
-            TableDefinition tableDefinition = tableDefinitionsRepository.get(tableHandle.getName());
+            TableDefinition tableDefinition = tableDefinitionsRepository.get(tableHandle);
             tableHandle = resolveTableHandle(queryDescriptor, tableHandle);
             requirements.add(new ImmutableTableRequirement(tableDefinition, tableHandle));
         }
         for (MutableTableDescriptor descriptor : queryDescriptor.getMutableTableDescriptors()) {
             TableHandle tableHandle = resolveTableHandle(queryDescriptor, descriptor.tableHandle);
-            TableDefinition tableDefinition = tableDefinitionsRepository.get(descriptor.tableDefinitionName);
+            TableDefinition tableDefinition = tableDefinitionsRepository.get(tableHandle(descriptor.tableDefinitionName));
             requirements.add(MutableTableRequirement.builder(tableDefinition)
                     .withTableHandle(tableHandle)
                     .withState(descriptor.state)

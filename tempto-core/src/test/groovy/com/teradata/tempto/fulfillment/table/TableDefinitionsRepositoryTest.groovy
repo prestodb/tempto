@@ -13,31 +13,52 @@
  */
 package com.teradata.tempto.fulfillment.table;
 
-import spock.lang.Specification;
+import spock.lang.Specification
+
+import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 
 public class TableDefinitionsRepositoryTest
         extends Specification
 {
-  
   def 'should add/get table definition to repository'()
   {
     setup:
-    def tableDefinition = Mock(TableDefinition)
-    tableDefinition.name >> "table1"
+    def tpchCustomer = Mock(TableDefinition)
+    tpchCustomer.tableHandle >> tableHandle("customer")
+    def tpcdsCustomer = Mock(TableDefinition)
+    tpcdsCustomer.tableHandle >> tableHandle("customer").inSchema('tpcds')
+    def noSchemaSample = Mock(TableDefinition)
+    noSchemaSample.tableHandle >> tableHandle("noSchemaSample")
+    def sampleInSchema  = Mock(TableDefinition)
+    sampleInSchema.tableHandle >> tableHandle("sample").inSchema('schema')
 
     def repository = new TableDefinitionsRepository()
 
     when:
-    repository.register(tableDefinition)
+    repository.register(tpchCustomer)
+    repository.register(tpcdsCustomer)
+    repository.register(noSchemaSample)
+    repository.register(sampleInSchema)
 
     then:
-    repository.getForName("table1") == tableDefinition
+    repository.get(tableHandle("noSchemaSample")) == noSchemaSample
+    repository.get(tableHandle("sample").inSchema('schema')) == sampleInSchema
+    repository.get(tableHandle("customer")) == tpchCustomer
+    repository.get(tableHandle("customer").inSchema('tpcds')) == tpcdsCustomer
+    repository.get(tableHandle("noSchemaSample").inSchema('tpcds')) == noSchemaSample
 
     when:
-    repository.getForName("table2")
+    repository.get(tableHandle("sample").inSchema('tpcds'))
 
     then:
     def e = thrown(IllegalStateException)
-    e.message == 'no table definition for: table2'
+    e.message == 'no table definition for: tpcds.sample'
+
+    when:
+    repository.get(tableHandle("sample"))
+
+    then:
+    def e2 = thrown(IllegalStateException)
+    e2.message == 'no table definition for: sample'
   }
 }
