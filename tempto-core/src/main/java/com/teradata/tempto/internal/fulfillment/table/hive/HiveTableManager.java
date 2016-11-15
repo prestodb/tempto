@@ -77,15 +77,14 @@ public class HiveTableManager
     {
         checkState(!tableDefinition.isPartitioned(), "Partitioning not supported for immutable tables");
         TableName tableName = createImmutableTableName(tableHandle);
-        String tableNameInDatabase = tableHandle.getName();
-        LOGGER.debug("creating immutable table {}", tableNameInDatabase);
+        LOGGER.debug("creating immutable table {}", tableHandle.getName());
 
         String tableDataPath = getImmutableTableHdfsPath(tableDefinition.getDataSource());
         uploadTableData(tableDataPath, tableDefinition.getDataSource());
 
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
-        markTableAsExternal(tableNameInDatabase);
+        markTableAsExternal(tableName);
 
         return new HiveTableInstance(tableName, tableDefinition);
     }
@@ -162,8 +161,8 @@ public class HiveTableManager
         queryExecutor.executeQuery(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase(), tableDataPath));
     }
 
-    private void markTableAsExternal(String tableNameInDatabase)
+    private void markTableAsExternal(TableName tableName)
     {
-        queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableNameInDatabase));
+        queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableName.getNameInDatabase()));
     }
 }
