@@ -84,7 +84,7 @@ class DefaultTableManagerDispatcherTest
     instance.getTableManagerFor(jdbcTableDefinition())
     then:
     IllegalStateException e = thrown()
-    e.message.contains('Multiple databases found for table definition class \'class com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition\'')
+    e.message.contains('Multiple databases found for table: TableHandle{name=name}, definition class \'class com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition\'. Pick a database from [psql1, psql2]')
   }
 
   def 'no database found'()
@@ -93,7 +93,7 @@ class DefaultTableManagerDispatcherTest
     instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().getTableHandle().inDatabase('unknown'))
     then:
     IllegalStateException e = thrown()
-    e.message.contains('No table manager found for database name \'unknown\'.')
+    e.message.contains('No table manager found for table: TableHandle{database=unknown, name=name}')
   }
 
   def 'wrong table definition'()

@@ -34,7 +34,6 @@ import static java.util.stream.Collectors.toList;
 public class DefaultTableManagerDispatcher<T extends TableDefinition>
         implements TableManagerDispatcher
 {
-
     private final ListMultimap<Class<? extends TableDefinition>, TableManager> classToTableManagers;
     private final Map<String, TableManager> tableManagers;
 
@@ -48,45 +47,58 @@ public class DefaultTableManagerDispatcher<T extends TableDefinition>
     }
 
     @Override
-    public TableManager<T> getTableManagerFor(TableDefinition tableDefinition, TableHandle tableHandle)
+    public TableManager getTableManagerFor(TableDefinition tableDefinition, TableHandle tableHandle)
     {
         Class<? extends TableDefinition> tableDefinitionClass = tableDefinition.getClass();
         if (!classToTableManagers.containsKey(tableDefinitionClass)) {
-            throw new IllegalStateException(format("Table manager for table definition class: %s, is not registered", tableDefinitionClass));
+            throw new IllegalStateException(format("No table manager found for table: %s", tableHandle));
         }
 
         List<TableManager> classTableManagers = classToTableManagers.get(tableDefinitionClass);
-        if (classTableManagers.size() == 1)  {
+        if (classTableManagers.size() == 1) {
             return getOnlyElement(classTableManagers);
         }
 
         Optional<String> databaseName = tableHandle.getDatabase();
         if (databaseName.isPresent()) {
             TableManager<T> tableManager = getTableManagerFor(databaseName).orElseThrow(() ->
-                            new IllegalStateException(format("No table manager found for database name '%s'.", databaseName.get()))
-            );
-            return checkTableDefinitionType(tableManager, tableDefinitionClass);
+                    new IllegalStateException(format("No table manager found for table: %s", tableHandle)));
+            return checkTableDefinitionType(tableHandle, tableManager, tableDefinitionClass);
         }
 
         if (classTableManagers.size() == 0) {
-            throw new IllegalStateException(format("No table manager found for table definition class '%s'.", tableDefinitionClass));
-        } else {
-            throw multipleTableManagersException(tableDefinitionClass, classTableManagers);
+            throw new IllegalStateException(format("No table manager found for table: %s", tableHandle));
+        }
+        else {
+            throw multipleTableManagersException(tableHandle, tableDefinitionClass, classTableManagers);
         }
     }
 
-    private TableManager<T> checkTableDefinitionType(TableManager<T> tableManager, Class<? extends TableDefinition> tableDefinitionClass)
+    private TableManager<T> checkTableDefinitionType(
+            TableHandle tableHandle,
+            TableManager<T> tableManager,
+            Class<? extends TableDefinition> tableDefinitionClass)
     {
-        checkState(tableManager.getTableDefinitionClass().equals(tableDefinitionClass),
-                "Table manager table definition class '%s', does not match requested table definition class '%s'.", tableManager.getTableDefinitionClass(), tableDefinitionClass);
+        checkState(
+                tableManager.getTableDefinitionClass().equals(tableDefinitionClass),
+                "Table manager for table: %s, definition class %s, does not match requested table definition class: %s",
+                tableHandle,
+                tableManager.getTableDefinitionClass(),
+                tableDefinitionClass);
         return tableManager;
     }
 
-    private IllegalStateException multipleTableManagersException(Class<? extends TableDefinition> tableDefinitionClass, List<TableManager> classTableManagers)
+    private IllegalStateException multipleTableManagersException(
+            TableHandle tableHandle,
+            Class<? extends TableDefinition> tableDefinitionClass,
+            List<TableManager> classTableManagers)
     {
         List<String> databaseNames = classTableManagers.stream().map(TableManager::getDatabaseName).collect(toList());
-        return new IllegalStateException(format("Multiple databases found for table definition class '%s'. Pick a database from %s",
-                tableDefinitionClass, databaseNames));
+        return new IllegalStateException(format(
+                "Multiple databases found for table: %s, definition class '%s'. Pick a database from %s",
+                tableHandle,
+                tableDefinitionClass,
+                databaseNames));
     }
 
     private Optional<TableManager<T>> getTableManagerFor(Optional<String> databaseName)
