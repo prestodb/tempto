@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,9 +72,16 @@ public class TpcdsDataSource
 
         return StreamSupport.stream(results.spliterator(), false)
                 .flatMap(rowBatch -> rowBatch.stream())
-                .map(row -> row.stream().collect(Collectors.joining("|")) + "|")
+                .map(this::formatRow)
                 .flatMap(row -> Stream.of(row, "\n"))
                 .iterator();
+    }
+
+    private String formatRow(List<String> row)
+    {
+        return row.stream()
+                .map(column -> column == null ? "\\N" : column)
+                .collect(Collectors.joining("|")) + "|";
     }
 
     @Override
