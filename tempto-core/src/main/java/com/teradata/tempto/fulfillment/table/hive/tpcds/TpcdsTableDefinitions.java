@@ -380,7 +380,7 @@ public class TpcdsTableDefinitions
                             "CREATE %EXTERNAL% TABLE %NAME%(" +
                             "    r_reason_sk BIGINT," +
                             "    r_reason_id CHAR(16)," +
-                            "    r_reason_desc CHAR(1))" +
+                            "    r_reason_desc CHAR(100))" +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpcdsDataSource(TpcdsTable.REASON, 1))
                     .inSchema("tpcds")
