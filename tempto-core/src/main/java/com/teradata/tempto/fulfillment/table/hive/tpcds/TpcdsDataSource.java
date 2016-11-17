@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.fulfillment.table.hive.tpcds;
 
+import com.google.common.base.Charsets;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tpcds.Results;
@@ -115,7 +116,7 @@ public class TpcdsDataSource
     {
         private final Iterator<String> data;
         public int position;
-        public String value;
+        public byte[] value;
 
         public StringIteratorInputStream(Iterator<String> data)
         {
@@ -129,15 +130,15 @@ public class TpcdsDataSource
             if (value == null) {
                 if (data.hasNext()) {
                     position = 0;
-                    value = data.next();
+                    value = data.next().getBytes(Charsets.UTF_8);
                 }
                 else {
                     return -1;
                 }
             }
 
-            if (position < value.length()) {
-                return value.charAt(position++);
+            if (position < value.length) {
+                return value[position++];
             }
             else {
                 value = null;
