@@ -3,7 +3,7 @@ MAINTAINER Grzegorz Kokosiński <grzegorz.kokosinksi@teradata.com>
 
 RUN yum install -y tar
 
-RUN curl -SL http://central.maven.org/maven2/com/facebook/presto/presto-server/0.151/presto-server-0.151.tar.gz \
+RUN curl -SL http://central.maven.org/maven2/com/facebook/presto/presto-server/0.157/presto-server-0.157.tar.gz \
       | tar xz \
       && mv $(find -type d -name 'presto-server*') presto-server
 
