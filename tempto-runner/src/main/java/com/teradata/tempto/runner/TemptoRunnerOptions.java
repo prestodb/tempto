@@ -91,6 +91,12 @@ public class TemptoRunnerOptions
             .hasArg()
             .build();
 
+    public static final Option THREAD_COUNT = Option.builder()
+            .longOpt("thread-count")
+            .desc("Number of threads which will execute tests.")
+            .hasArg()
+            .build();
+
     private final Map<String, String> values;
 
     public TemptoRunnerOptions(Map<String, String> values)
@@ -147,6 +153,11 @@ public class TemptoRunnerOptions
     public Optional<String> getConventionResultsDumpPath()
     {
         return getValue(DUMP_CONVENTION_RESULTS.getLongOpt());
+    }
+
+    public int getThreadCount()
+    {
+        return Integer.parseInt(getValue(THREAD_COUNT.getLongOpt()).orElse("1"));
     }
 
     public Set<String> getValues(String option)

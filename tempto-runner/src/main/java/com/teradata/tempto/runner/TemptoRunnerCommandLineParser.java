@@ -45,6 +45,7 @@ import static com.teradata.tempto.runner.TemptoRunnerOptions.HELP;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.PACKAGE;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.REPORT_DIR;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.TESTS;
+import static com.teradata.tempto.runner.TemptoRunnerOptions.THREAD_COUNT;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.requireNonNull;
 
@@ -172,6 +173,7 @@ public class TemptoRunnerCommandLineParser
             addOption(TESTS);
             addOption(HELP);
             addOption(DUMP_CONVENTION_RESULTS);
+            addOption(THREAD_COUNT);
             setReportDir("./test-reports", true);
             setConfigFile(TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION, true);
             setConfigLocalFile(TestConfigurationFactory.DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION, true);

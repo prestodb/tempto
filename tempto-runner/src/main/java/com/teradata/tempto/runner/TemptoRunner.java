@@ -83,6 +83,7 @@ public class TemptoRunner
         }
 
         XmlSuite testSuite = getXmlSuite();
+        testSuite.setThreadCount(options.getThreadCount());
         setupTestsConfiguration();
         System.setProperty(CONVENTION_TESTS_DIR_KEY, options.getConventionTestsDirectory());
         TestNG testNG = new TestNG();
@@ -132,6 +133,7 @@ public class TemptoRunner
         XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.internal.convention.ConventionBasedTestFactory");
         List<XmlClass> classes = newArrayList(conventionBasedTestsClass);
         test.setClasses(classes);
+        test.setParallel(XmlSuite.PARALLEL_METHODS);
         return testSuite;
     }
 }
