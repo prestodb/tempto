@@ -43,6 +43,11 @@ public abstract class TablesState
         this.tableDescription = requireNonNull(tableDescription, "tableDescription is null");
     }
 
+    public TableInstance get(TableDefinition tableDefinition)
+    {
+        return get(tableDefinition.getTableHandle());
+    }
+
     public TableInstance get(String name)
     {
         return get(tableHandle(name));
