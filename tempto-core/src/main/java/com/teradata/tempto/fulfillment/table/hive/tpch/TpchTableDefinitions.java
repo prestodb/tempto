@@ -22,6 +22,8 @@ import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.Reposito
 // TODO: move to separate module
 public class TpchTableDefinitions
 {
+    public static final double DEFAULT_SCALE_FACTOR = 0.01;
+
     @RepositoryTableDefinition
     public static final HiveTableDefinition NATION =
             HiveTableDefinition.builder("nation")
@@ -32,7 +34,7 @@ public class TpchTableDefinitions
                             "   n_regionkey     BIGINT," +
                             "   n_comment       VARCHAR(152)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.NATION, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.NATION, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -44,7 +46,7 @@ public class TpchTableDefinitions
                             "   r_name          VARCHAR(25)," +
                             "   r_comment       VARCHAR(152)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.REGION, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.REGION, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -62,7 +64,7 @@ public class TpchTableDefinitions
                             "   p_retailprice DECIMAL(12,2)," +
                             "   p_comment     VARCHAR(23)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.PART, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.PART, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -78,7 +80,7 @@ public class TpchTableDefinitions
                             "   s_acctbal     DECIMAL(12,2)," +
                             "   s_comment     VARCHAR(101)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.SUPPLIER, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -92,7 +94,7 @@ public class TpchTableDefinitions
                             "   ps_supplycost  DECIMAL(12,2)," +
                             "   ps_comment     VARCHAR(199)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.PART_SUPPLIER, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -109,7 +111,7 @@ public class TpchTableDefinitions
                             "   c_mktsegment  VARCHAR(10)," +
                             "   c_comment     VARCHAR(117)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.CUSTOMER, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.CUSTOMER, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -127,7 +129,7 @@ public class TpchTableDefinitions
                             "   o_shippriority   INT," +
                             "   o_comment        VARCHAR(79)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.ORDERS, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.ORDERS, DEFAULT_SCALE_FACTOR))
                     .build();
 
     @RepositoryTableDefinition
@@ -152,7 +154,7 @@ public class TpchTableDefinitions
                             "   l_shipmode      VARCHAR(10)," +
                             "   l_comment       VARCHAR(44)) " +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
-                    .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, 1.0))
+                    .setDataSource(new TpchDataSource(TpchTable.LINE_ITEM, DEFAULT_SCALE_FACTOR))
                     .build();
 
     private TpchTableDefinitions() {}

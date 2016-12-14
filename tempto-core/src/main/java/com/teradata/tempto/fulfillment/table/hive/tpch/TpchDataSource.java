@@ -29,7 +29,7 @@ public class TpchDataSource
         implements HiveDataSource
 {
 
-    private static final String DATA_REVISION = "v.1.0";
+    private static final String DATA_REVISION = "v.1.1";
 
     private final TpchTable table;
     private final double scaleFactor;
