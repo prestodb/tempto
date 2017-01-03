@@ -188,7 +188,7 @@ public class JdbcTableManager
         if (!dataRows.hasNext()) {
             return;
         }
-        try (Loader loader = new LoaderFactory().create(queryExecutor, tableName.getSchema(), tableName.getSchemalessNameInDatabase())) {
+        try (Loader loader = new LoaderFactory().create(queryExecutor, tableName.getNameInDatabase())) {
             for (List<List<Object>> batch : partitionBy(dataRows, BATCH_SIZE)) {
                 loader.load(batch);
             }
