@@ -14,8 +14,6 @@
 
 package com.teradata.tempto.query;
 
-import com.teradata.tempto.context.TestContextDsl;
-
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.JDBCType;

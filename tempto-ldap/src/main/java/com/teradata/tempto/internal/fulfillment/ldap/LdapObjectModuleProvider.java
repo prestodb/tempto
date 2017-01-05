@@ -16,7 +16,6 @@ package com.teradata.tempto.internal.fulfillment.ldap;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
-import com.google.inject.Scopes;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;

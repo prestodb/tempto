@@ -14,7 +14,6 @@
 package com.teradata.tempto.internal.convention.tabledefinitions;
 
 import com.google.common.base.Splitter;
-import com.teradata.tempto.assertions.QueryAssert.Row;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
 import com.teradata.tempto.internal.convention.SqlDescriptor;
@@ -23,14 +22,9 @@ import com.teradata.tempto.internal.query.QueryRowMapper;
 import java.nio.file.Path;
 import java.sql.JDBCType;
 import java.util.List;
-import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.io.Resources.getResource;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
