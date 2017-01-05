@@ -329,7 +329,7 @@ public class TpcdsTableDefinitions
                             "    i_class_id INT," +
                             "    i_class CHAR(50)," +
                             "    i_category_id INT," +
-                            "    i_category VARCHAR(50)," +
+                            "    i_category CHAR(50)," +
                             "    i_manufact_id INT," +
                             "    i_manufact CHAR(50)," +
                             "    i_size CHAR(20)," +
