@@ -14,8 +14,6 @@
 
 package com.teradata.tempto.examples;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.net.HostAndPort;
 import com.google.inject.Inject;
 import com.teradata.tempto.ProductTest;
 import com.teradata.tempto.process.CliProcess;

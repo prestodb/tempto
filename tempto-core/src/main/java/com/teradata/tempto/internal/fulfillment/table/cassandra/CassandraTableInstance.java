@@ -14,7 +14,6 @@
 package com.teradata.tempto.internal.fulfillment.table.cassandra;
 
 import com.teradata.tempto.fulfillment.table.TableInstance;
-import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 
 public class CassandraTableInstance

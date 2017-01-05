@@ -14,8 +14,6 @@
 
 package com.teradata.tempto.fulfillment.table;
 
-import java.util.Optional;
-
 public class TableRequirements
 {
     private TableRequirements() {}

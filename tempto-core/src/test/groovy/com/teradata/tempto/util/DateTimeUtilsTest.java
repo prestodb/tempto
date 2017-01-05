@@ -14,14 +14,10 @@
 
 package com.teradata.tempto.util;
 
-import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
-
-import java.sql.Timestamp;
 
 import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInUTC;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.*;
 
 public class DateTimeUtilsTest
 {
