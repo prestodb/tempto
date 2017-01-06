@@ -40,7 +40,7 @@ public class TpcdsTableDefinitions
                             "    cc_manager VARCHAR(40)," +
                             "    cc_mkt_id INT," +
                             "    cc_mkt_class CHAR(50)," +
-                            "    cc_mkt_desc VARCHAR(1)," +
+                            "    cc_mkt_desc VARCHAR(100)," +
                             "    cc_market_manager VARCHAR(40)," +
                             "    cc_division INT," +
                             "    cc_division_name VARCHAR(50)," +
@@ -74,8 +74,8 @@ public class TpcdsTableDefinitions
                             "    cp_department VARCHAR(50)," +
                             "    cp_catalog_number INT," +
                             "    cp_catalog_page_number INT," +
-                            "    cp_description VARCHAR(1)," +
-                            "    cp_type VARCHAR(1))" +
+                            "    cp_description VARCHAR(100)," +
+                            "    cp_type VARCHAR(100))" +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
                     .setDataSource(new TpcdsDataSource(TpcdsTable.CATALOG_PAGE, 1))
                     .inSchema("tpcds")
@@ -356,7 +356,7 @@ public class TpcdsTableDefinitions
                             "    p_item_sk BIGINT," +
                             "    p_cost DECIMAL(15,2)," +
                             "    p_response_targe INT," +
-                            "    p_promo_name VARCHAR(50)," +
+                            "    p_promo_name CHAR(50)," +
                             "    p_channel_dmail CHAR(1)," +
                             "    p_channel_email CHAR(1)," +
                             "    p_channel_catalog CHAR(1)," +
@@ -365,7 +365,7 @@ public class TpcdsTableDefinitions
                             "    p_channel_press CHAR(1)," +
                             "    p_channel_event CHAR(1)," +
                             "    p_channel_demo CHAR(1)," +
-                            "    p_channel_details VARCHAR(1)," +
+                            "    p_channel_details VARCHAR(100)," +
                             "    p_purpose CHAR(15)," +
                             "    p_discount_active CHAR(1))" +
                             "ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'")
@@ -418,8 +418,8 @@ public class TpcdsTableDefinitions
                             "    s_hours CHAR(20)," +
                             "    s_manager VARCHAR(40)," +
                             "    s_market_id INT," +
-                            "    s_geography_class VARCHAR(1)," +
-                            "    s_market_desc VARCHAR(1)," +
+                            "    s_geography_class VARCHAR(100)," +
+                            "    s_market_desc VARCHAR(100)," +
                             "    s_market_manager VARCHAR(40)," +
                             "    s_division_id INT," +
                             "    s_division_name VARCHAR(50)," +
@@ -561,7 +561,7 @@ public class TpcdsTableDefinitions
                             "    wp_access_date_sk BIGINT," +
                             "    wp_autogen_flag CHAR(1)," +
                             "    wp_customer_sk BIGINT," +
-                            "    wp_url VARCHAR(1)," +
+                            "    wp_url VARCHAR(100)," +
                             "    wp_type CHAR(50)," +
                             "    wp_char_count INT," +
                             "    wp_link_count INT," +
@@ -666,7 +666,7 @@ public class TpcdsTableDefinitions
                             "    web_manager VARCHAR(40)," +
                             "    web_mkt_id INT," +
                             "    web_mkt_class VARCHAR(50)," +
-                            "    web_mkt_desc VARCHAR(1)," +
+                            "    web_mkt_desc VARCHAR(100)," +
                             "    web_market_manager VARCHAR(40)," +
                             "    web_company_id INT," +
                             "    web_company_name CHAR(50)," +
