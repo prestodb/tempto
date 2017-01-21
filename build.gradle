@@ -30,7 +30,8 @@ ext.versions = [
         guava        : '18.0',
         guice        : '4.0',
         log4j        : '1.2.17',
-        testng       : '6.9.6',
+        testng       : '6.10',
+        junit        : '4.12',
         spock        : '1.0-groovy-2.4',
         slf4j        : '1.7.12',
         hsqldb       : '2.3.2',
@@ -63,6 +64,7 @@ ext.libraries = [
                         "com.google.inject.extensions:guice-multibindings:${versions.guice}"],
         log4j        : "log4j:log4j:${versions.log4j}",
         testng       : "org.testng:testng:${versions.testng}",
+        junit        : "junit:junit:${versions.junit}", /* TODO: remove junit dependencies */
         commons_lang3: "org.apache.commons:commons-lang3:${versions.commons_lang3}",
         commons_dbcp2: "org.apache.commons:commons-dbcp2:${versions.commons_dbcp2}",
         spock        : ["org.spockframework:spock-core:${versions.spock}",

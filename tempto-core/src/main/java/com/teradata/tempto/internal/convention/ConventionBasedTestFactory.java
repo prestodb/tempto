@@ -54,7 +54,7 @@ public class ConventionBasedTestFactory
     private List<PathTestFactory> factories;
 
     @Factory
-    public ConventionBasedTest[] createTestCases()
+    public Object[] createTestCases()
     {
         LOGGER.debug("Loading file based test cases");
         try {
