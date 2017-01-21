@@ -24,6 +24,7 @@ import org.testng.xml.XmlTest;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 public abstract class DelegateTestNGMethod
         implements ITestNGMethod
@@ -420,6 +421,24 @@ public abstract class DelegateTestNGMethod
     public Map<String, String> findMethodParameters(XmlTest test)
     {
         return delegate.findMethodParameters(test);
+    }
+
+    @Override
+    public void setMoreInvocationChecker(Callable<Boolean> moreInvocationChecker)
+    {
+        delegate.setMoreInvocationChecker(moreInvocationChecker);
+    }
+
+    @Override
+    public boolean hasMoreInvocation()
+    {
+        return delegate.hasMoreInvocation();
+    }
+
+    @Override
+    public String getQualifiedName()
+    {
+        return delegate.getQualifiedName();
     }
 
     @Override
