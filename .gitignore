@@ -18,6 +18,9 @@ out/
 # tests logging output
 tempto_logs
 
+# test reports
+test-reports/
+
 # python packaging artifacts
 dist/
 

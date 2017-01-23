@@ -23,6 +23,7 @@ apply plugin: 'java'
 dependencies {
   compile tempto_runner
   compile libraries.slf4j_api
+  compile libraries.junit
 
   runtime tempto_logging_log4j
   runtime libraries.slf4j_log4j

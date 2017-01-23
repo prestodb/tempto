@@ -133,7 +133,7 @@ public class TemptoRunner
         XmlClass conventionBasedTestsClass = new XmlClass("com.teradata.tempto.internal.convention.ConventionBasedTestFactory");
         List<XmlClass> classes = newArrayList(conventionBasedTestsClass);
         test.setClasses(classes);
-        test.setParallel(XmlSuite.PARALLEL_METHODS);
+        test.setParallel(XmlSuite.ParallelMode.METHODS);
         return testSuite;
     }
 }
