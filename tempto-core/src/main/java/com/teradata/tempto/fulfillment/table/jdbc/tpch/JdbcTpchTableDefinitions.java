@@ -17,6 +17,7 @@ package com.teradata.tempto.fulfillment.table.jdbc.tpch;
 import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import io.airlift.tpch.TpchTable;
+import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
 import java.sql.JDBCType;
 
@@ -29,8 +30,9 @@ public class JdbcTpchTableDefinitions
     public static final double DEFAULT_SCALE_FACTOR = 0.01;
     public static final ImmutableList<JDBCType> NATION_TYPES = ImmutableList.of(BIGINT, VARCHAR, BIGINT, VARCHAR);
 
-    public static final RelationalTableDefinition NATION_DDL =
-            relationalTableDefinition("nation",
+    @RepositoryTableDefinition
+    public static final RelationalTableDefinition NATION =
+            relationalTableDefinition("nation_jdbc",
                     "CREATE TABLE %NAME%(" +
                             "   n_nationkey     BIGINT," +
                             "   n_name          VARCHAR(25)," +

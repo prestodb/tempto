@@ -14,6 +14,7 @@
 package com.teradata.tempto.fulfillment.table.jdbc.tpch;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import com.teradata.tempto.internal.query.QueryRowMapper;
 import io.airlift.tpch.TpchEntity;
@@ -41,7 +42,7 @@ public class JdbcTpchDataSource
         checkArgument(scaleFactor > 0.0, "scaleFactor should be greater than zero");
 
         this.table = requireNonNull(table, "table is null");
-        this.columnTypes = columns;
+        this.columnTypes = ImmutableList.copyOf(columns);
         this.scaleFactor = scaleFactor;
     }
 
