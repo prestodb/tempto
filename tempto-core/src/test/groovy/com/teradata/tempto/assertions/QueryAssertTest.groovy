@@ -25,8 +25,10 @@ import spock.lang.Specification
 
 import java.sql.ResultSet
 
+import static com.google.common.collect.Iterables.any
 import static com.google.common.collect.Iterables.getOnlyElement
 import static com.teradata.tempto.assertions.QueryAssert.Row.row
+import static com.teradata.tempto.assertions.QueryAssert.anyOf
 import static com.teradata.tempto.assertions.QueryAssert.assertThat
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY
 import static java.sql.JDBCType.BIGINT
@@ -225,6 +227,38 @@ public class QueryAssertTest
 
     then:
     noExceptionThrown()
+  }
+
+  def 'hasRows with multiple possible values'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT)
+            .contains(
+            row(2, "ARGENTINA", "SOUTH AMERICA"),
+            row(1, "ALGERIA", anyOf("AFRICA", "MARS")),
+    )
+
+    then:
+    noExceptionThrown()
+  }
+
+  def 'hasRows with multiple possible values - no row matching'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT)
+            .contains(
+            row(2, "ARGENTINA", "SOUTH AMERICA"),
+            row(1, "ALGERIA", anyOf("SATURN", "MARS")),
+    )
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == 'Could not find rows:\n' +
+            '[1, ALGERIA, anyOf(SATURN, MARS)]\n' +
+            '\n' +
+            'actual rows:\n' +
+            '[1, ALGERIA, AFRICA]\n' +
+            '[2, ARGENTINA, SOUTH AMERICA]'
   }
 
   def 'hasRowsInOrder - different number of rows'()

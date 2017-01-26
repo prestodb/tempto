@@ -14,6 +14,8 @@
 
 package com.teradata.tempto.assertions;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
@@ -27,7 +29,9 @@ import org.slf4j.Logger;
 import java.sql.JDBCType;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +44,8 @@ import static com.teradata.tempto.query.QueryResult.fromSqlIndex;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
 import static java.lang.String.format;
 import static java.sql.JDBCType.INTEGER;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -317,14 +323,26 @@ public class QueryAssert
     private boolean rowsEqual(List<Object> expectedRow, List<Object> actualRow)
     {
         for (int i = 0; i < expectedRow.size(); ++i) {
-            Object expectedValue = expectedRow.get(i);
+            List<Object> acceptableValues = expectedRow.get(i) instanceof AcceptableValues ?
+                    ((AcceptableValues) expectedRow.get(i)).getValues()
+                    : singletonList(expectedRow.get(i));
             Object actualValue = actualRow.get(i);
 
-            if (columnComparators.get(i).compare(actualValue, expectedValue) != 0) {
+            if (!isAnyValueEqual(i, acceptableValues, actualValue)) {
                 return false;
             }
         }
         return true;
+    }
+
+    private boolean isAnyValueEqual(int column, List<Object> expectedValues, Object actualValue)
+    {
+        for (Object expectedValue : expectedValues) {
+            if (columnComparators.get(column).compare(actualValue, expectedValue) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public <T> QueryAssert column(int columnIndex, JDBCType type, ColumnValuesAssert<T> columnValuesAssert)
@@ -354,6 +372,11 @@ public class QueryAssert
         }
 
         return column(index.get(), type, columnValuesAssert);
+    }
+
+    public static AcceptableValues anyOf(Object... values)
+    {
+        return new AcceptableValues(Arrays.asList(values));
     }
 
     @FunctionalInterface
@@ -439,6 +462,27 @@ public class QueryAssert
                 msg.append('|');
             }
             return msg.toString();
+        }
+    }
+
+    public static class AcceptableValues
+    {
+        private final List<Object> values;
+
+        public AcceptableValues(List<Object> values)
+        {
+            this.values = unmodifiableList(new ArrayList<>(requireNonNull(values, "values can not be null")));
+        }
+
+        public List<Object> getValues()
+        {
+            return values;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "anyOf(" + Joiner.on(", ").join(values) + ")";
         }
     }
 }
