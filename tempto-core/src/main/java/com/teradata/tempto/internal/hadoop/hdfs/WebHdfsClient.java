@@ -151,6 +151,7 @@ public class WebHdfsClient
         String writeRedirectUri = executeAndGetRedirectUri(new HttpPut(
                 buildUri(path, "CREATE", ImmutableMap.of("overwrite", "true"))));
         HttpPut writeRequest = new HttpPut(writeRedirectUri);
+        writeRequest.addHeader("content-type", "application/octet-stream");
         writeRequest.setEntity(entity);
 
         try (CloseableHttpResponse response = httpRequestsExecutor.execute(writeRequest)) {
