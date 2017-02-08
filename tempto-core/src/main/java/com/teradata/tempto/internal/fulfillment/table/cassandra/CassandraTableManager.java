@@ -48,13 +48,12 @@ public class CassandraTableManager
 {
     private static final Logger LOGGER = getLogger(CassandraTableManager.class);
 
-    private static final int BATCH_SIZE = 10_000;
-
     private final TableNameGenerator tableNameGenerator;
     private final CassandraQueryExecutor queryExecutor;
     private final String databaseName;
     private final String defaultKeySpace;
     private final boolean skipCreateSchema;
+    private final int insertBatchRowsCount;
 
     @Inject
     public CassandraTableManager(
@@ -67,6 +66,7 @@ public class CassandraTableManager
         this.databaseName = requireNonNull(databaseName, "databaseName is null");
         this.defaultKeySpace = configuration.getStringMandatory("databases." + databaseName + ".default_schema");
         this.skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
+        this.insertBatchRowsCount = configuration.getInt("databases." + databaseName + ".insert_batch_rows_count").orElse(10);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class CassandraTableManager
 
         List<String> columnNames = queryExecutor.getColumnNames(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase());
 
-        CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.getSession(), tableName.getNameInDatabase(), columnNames, BATCH_SIZE);
+        CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.getSession(), tableName.getNameInDatabase(), columnNames, insertBatchRowsCount);
         loader.load(dataSource.getDataRows());
     }
 
