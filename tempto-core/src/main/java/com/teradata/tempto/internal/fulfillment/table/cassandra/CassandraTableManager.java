@@ -29,9 +29,6 @@ import org.slf4j.Logger;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,44 +96,10 @@ public class CassandraTableManager
                 tableName.getSchema().get(),
                 tableName.getSchemalessNameInDatabase());
 
-        Iterator<List<Object>> dataRows = dataSource.getDataRows();
-        if (!dataRows.hasNext()) {
-            return;
-        }
-
         List<String> columnNames = queryExecutor.getColumnNames(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase());
 
-        try {
-            CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.getSession(), tableName.getNameInDatabase(), columnNames);
-            for (List<List<Object>> batch : partitionBy(dataRows, BATCH_SIZE)) {
-                loader.load(batch);
-            }
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Iterable<List<List<Object>>> partitionBy(Iterator<List<Object>> dataRows, int partitionSize)
-    {
-        return () -> new Iterator<List<List<Object>>>()
-        {
-            @Override
-            public boolean hasNext()
-            {
-                return dataRows.hasNext();
-            }
-
-            @Override
-            public List<List<Object>> next()
-            {
-                List<List<Object>> batch = new ArrayList<>();
-                while (dataRows.hasNext() && batch.size() < partitionSize) {
-                    batch.add(dataRows.next());
-                }
-                return batch;
-            }
-        };
+        CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.getSession(), tableName.getNameInDatabase(), columnNames, BATCH_SIZE);
+        loader.load(dataSource.getDataRows());
     }
 
     @Override

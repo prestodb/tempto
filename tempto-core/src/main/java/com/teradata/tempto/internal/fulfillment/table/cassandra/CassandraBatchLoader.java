@@ -17,9 +17,11 @@ import com.datastax.driver.core.BatchStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
-import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -27,34 +29,30 @@ import static java.util.stream.Collectors.joining;
 public class CassandraBatchLoader
 {
     private final Session session;
-    private final String tableName;
-    private final List<String> columnNames;
+    private final String insertQuery;
+    private final int columnsCount;
+    private final int batchRowsCount;
 
-    public CassandraBatchLoader(Session session, String tableName, List<String> columnNames)
+    public CassandraBatchLoader(Session session, String tableName, List<String> columnNames, int batchRowsCount)
     {
         this.session = requireNonNull(session, "session is null");
-        this.tableName = requireNonNull(tableName, "tableName is null");
-        this.columnNames = requireNonNull(columnNames, "columnNames is null");
+        requireNonNull(tableName, "tableName is null");
+        requireNonNull(columnNames, "columnNames is null");
+        this.insertQuery = createInsertQuery(tableName, columnNames);
+        this.columnsCount = columnNames.size();
+        checkArgument(batchRowsCount > 0, "batchRowsCount must be greater then zero");
+        this.batchRowsCount = batchRowsCount;
     }
 
-    public void load(List<List<Object>> batch)
-            throws SQLException
+    private static String createInsertQuery(String tableName, List<String> columnNames)
     {
-        PreparedStatement statement = session.prepare(format("INSERT INTO %s (%s) VALUES(%s)",
+        return format("INSERT INTO %s (%s) VALUES(%s)",
                 tableName,
                 columnNames.stream().collect(joining(",")),
-                repeatPattern("?", ",", columnNames.size())));
-
-        BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
-
-        for (List<Object> row : batch) {
-            batchStatement.add(statement.bind(row.toArray()));
-        }
-
-        session.execute(batchStatement);
+                repeatPattern("?", ",", columnNames.size()));
     }
 
-    private String repeatPattern(String ch, String separator, int times)
+    private static String repeatPattern(String ch, String separator, int times)
     {
         String result = "";
 
@@ -63,5 +61,30 @@ public class CassandraBatchLoader
         }
 
         return result + ch;
+    }
+
+    public void load(Iterator<List<Object>> rows)
+    {
+        PreparedStatement statement = session.prepare(insertQuery);
+
+        BatchStatement batch = createBatchStatement();
+        while (rows.hasNext()) {
+            if (batch.size() >= batchRowsCount) {
+                session.execute(batch);
+                batch = createBatchStatement();
+            }
+            List<Object> row = rows.next();
+            checkState(row.size() == columnsCount, "values count in a row is expected to be %d, but found: %d", columnsCount, row.size());
+            batch.add(statement.bind(row.toArray()));
+        }
+
+        if (batch.size() > 0) {
+            session.execute(batch);
+        }
+    }
+
+    private static BatchStatement createBatchStatement()
+    {
+        return new BatchStatement(BatchStatement.Type.UNLOGGED);
     }
 }
