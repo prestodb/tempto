@@ -26,6 +26,7 @@ import java.math.RoundingMode;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.internal.initialization.RequirementsExpanderInterceptor.getMethodsCountFromContext;
+import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 
 public class ProgressLoggingListener
@@ -57,26 +58,24 @@ public class ProgressLoggingListener
     @Override
     public void onTestStart(ITestResult testCase)
     {
-        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         testStartTime = currentTimeMillis();
         started++;
         int total = getMethodsCountFromContext(testCase.getTestContext());
-        String testGroups = Joiner.on(", ").join(testMetadata.testGroups);
-        LOGGER.info("[{} of {}] {} (Groups: {})", started, total, testMetadata.testName, testGroups);
+        LOGGER.info("[{} of {}] {}", started, total, formatTestName(testCase));
     }
 
     @Override
     public void onTestSuccess(ITestResult testCase)
     {
         succeeded++;
-        logTestEnd("SUCCESS");
+        logTestEnd(testCase, "SUCCESS");
     }
 
     @Override
     public void onTestFailure(ITestResult testCase)
     {
         failed++;
-        logTestEnd("FAILURE");
+        logTestEnd(testCase, "FAILURE");
         if (testCase.getThrowable() != null) {
             LOGGER.error("Failure cause:", testCase.getThrowable());
         }
@@ -89,14 +88,14 @@ public class ProgressLoggingListener
         LOGGER.info("SKIPPED");
     }
 
-    private void logTestEnd(String outcome)
+    private void logTestEnd(ITestResult testCase, String outcome)
     {
         long executionTime = currentTimeMillis() - testStartTime;
         if (executionTime < 1000) {
             LOGGER.info(outcome);
         }
         else {
-            LOGGER.info("{}     /    took {}", outcome, formatDuration(executionTime));
+            LOGGER.info("{}     /    {} took {}", outcome, formatTestName(testCase), formatDuration(executionTime));
         }
     }
 
@@ -113,6 +112,13 @@ public class ProgressLoggingListener
         LOGGER.info("Completed {} tests", started);
         LOGGER.info("{} SUCCEEDED      /      {} FAILED      /      {} SKIPPED", succeeded, failed, skipped);
         LOGGER.info("Tests execution took {}", formatDuration(currentTimeMillis() - startTime));
+    }
+
+    private String formatTestName(ITestResult testCase)
+    {
+        TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
+        String testGroups = Joiner.on(", ").join(testMetadata.testGroups);
+        return format("%s (Groups: %s)", testMetadata.testName, testGroups);
     }
 
     private static String formatDuration(long durationInMillis)
