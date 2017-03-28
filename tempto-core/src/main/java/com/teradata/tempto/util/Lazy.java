@@ -37,7 +37,7 @@ public class Lazy<T>
     public synchronized T get()
     {
         if (instance == null) {
-            instance = provider.get();
+            instance = requireNonNull(provider.get());
         }
         return instance;
     }
