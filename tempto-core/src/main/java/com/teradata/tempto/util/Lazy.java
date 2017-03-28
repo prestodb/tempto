@@ -18,13 +18,13 @@ import javax.inject.Provider;
 
 import static java.util.Objects.requireNonNull;
 
-public class LazyCachingProvider<T>
+public class Lazy<T>
         implements Provider<T>
 {
     private final Provider<T> provider;
     private T instance;
 
-    public LazyCachingProvider(Provider<T> provider)
+    public Lazy(Provider<T> provider)
     {
         this.provider = requireNonNull(provider, "provider is null");
     }

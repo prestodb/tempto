@@ -15,7 +15,7 @@
 package com.teradata.tempto.internal.hadoop.hdfs.revisions;
 
 import com.teradata.tempto.hadoop.hdfs.HdfsClient;
-import com.teradata.tempto.util.LazyCachingProvider;
+import com.teradata.tempto.util.Lazy;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -41,7 +41,7 @@ public class DispatchingRevisionStorage
     @Inject
     public DispatchingRevisionStorage(HdfsClient hdfsClient, @Named(CONF_TESTS_HDFS_PATH_KEY) String testDataBasePath)
     {
-        revisionStorage = new LazyCachingProvider(new HdfsRevisionStorageProvider(hdfsClient, testDataBasePath));
+        revisionStorage = new Lazy(new HdfsRevisionStorageProvider(hdfsClient, testDataBasePath));
     }
 
     @Override
