@@ -24,6 +24,7 @@ import com.teradata.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
 import com.teradata.tempto.internal.query.CassandraQueryExecutor;
+import com.teradata.tempto.util.Lazy;
 import org.slf4j.Logger;
 
 import javax.inject.Named;
@@ -49,7 +50,7 @@ public class CassandraTableManager
     private static final Logger LOGGER = getLogger(CassandraTableManager.class);
 
     private final TableNameGenerator tableNameGenerator;
-    private final CassandraQueryExecutor queryExecutor;
+    private final Lazy<CassandraQueryExecutor> queryExecutor;
     private final String databaseName;
     private final String defaultKeySpace;
     private final boolean skipCreateSchema;
@@ -62,7 +63,7 @@ public class CassandraTableManager
             Configuration configuration)
     {
         this.tableNameGenerator = requireNonNull(tableNameGenerator, "tableNameGenerator is null");
-        this.queryExecutor = new CassandraQueryExecutor(configuration);
+        this.queryExecutor = new Lazy<>(() -> new CassandraQueryExecutor(configuration));
         this.databaseName = requireNonNull(databaseName, "databaseName is null");
         this.defaultKeySpace = configuration.getStringMandatory("databases." + databaseName + ".default_schema");
         this.skipCreateSchema = configuration.getBoolean("databases." + databaseName + ".skip_create_schema").orElse(false);
@@ -74,9 +75,9 @@ public class CassandraTableManager
     {
         TableName tableName = createImmutableTableName(tableHandle);
 
-        if (!queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase())) {
+        if (!queryExecutor.get().tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase())) {
             if (!skipCreateSchema) {
-                queryExecutor.executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
+                queryExecutor.get().executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
             }
             executeQueryIgnoreTypeError(tableDefinition.getCreateTableDDL(tableName.getNameInDatabase()));
             RelationalDataSource dataSource = tableDefinition.getDataSource();
@@ -91,14 +92,14 @@ public class CassandraTableManager
 
     private void insertData(TableName tableName, RelationalDataSource dataSource)
     {
-        checkState(queryExecutor.tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase()),
+        checkState(queryExecutor.get().tableExists(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase()),
                 "table %s.%s does not exist",
                 tableName.getSchema().get(),
                 tableName.getSchemalessNameInDatabase());
 
-        List<String> columnNames = queryExecutor.getColumnNames(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase());
+        List<String> columnNames = queryExecutor.get().getColumnNames(tableName.getSchema().get(), tableName.getSchemalessNameInDatabase());
 
-        CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.getSession(), tableName.getNameInDatabase(), columnNames, insertBatchRowsCount);
+        CassandraBatchLoader loader = new CassandraBatchLoader(queryExecutor.get().getSession(), tableName.getNameInDatabase(), columnNames, insertBatchRowsCount);
         loader.load(dataSource.getDataRows());
     }
 
@@ -111,7 +112,7 @@ public class CassandraTableManager
         }
 
         if (!skipCreateSchema) {
-            queryExecutor.executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
+            queryExecutor.get().executeQuery(format("CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}", tableName.getSchema().get()));
         }
 
         CassandraTableInstance tableInstance = new CassandraTableInstance(tableName, tableDefinition);
@@ -158,7 +159,7 @@ public class CassandraTableManager
     @Override
     public void dropStaleMutableTables()
     {
-        List<String> tableNames = queryExecutor.getTableNames(defaultKeySpace).stream()
+        List<String> tableNames = queryExecutor.get().getTableNames(defaultKeySpace).stream()
                 .filter(tableNameGenerator::isMutableTableName)
                 .map(tableName -> defaultKeySpace + "." + tableName)
                 .collect(toList());
@@ -192,7 +193,7 @@ public class CassandraTableManager
     private void executeQueryIgnoreTypeError(String sql)
     {
         try {
-            queryExecutor.executeQuery(sql);
+            queryExecutor.get().executeQuery(sql);
         }
         catch (CassandraQueryExecutor.TypeNotSupportedException e) {
             LOGGER.warn(format("Execution of query (%s) failed: %s", sql, e));
@@ -201,6 +202,6 @@ public class CassandraTableManager
 
     public void close()
     {
-        queryExecutor.close();
+        queryExecutor.lazyGet().ifPresent(CassandraQueryExecutor::close);
     }
 }

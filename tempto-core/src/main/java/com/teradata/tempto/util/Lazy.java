@@ -14,10 +14,14 @@
 
 package com.teradata.tempto.util;
 
+import javax.annotation.concurrent.ThreadSafe;
 import javax.inject.Provider;
+
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+@ThreadSafe
 public class Lazy<T>
         implements Provider<T>
 {
@@ -36,5 +40,10 @@ public class Lazy<T>
             instance = provider.get();
         }
         return instance;
+    }
+
+    public synchronized Optional<T> lazyGet()
+    {
+        return Optional.ofNullable(instance);
     }
 }
