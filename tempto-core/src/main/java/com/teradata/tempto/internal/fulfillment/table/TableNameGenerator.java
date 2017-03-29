@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.fulfillment.table;
 
-import static org.apache.commons.lang3.RandomStringUtils.random;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 public class TableNameGenerator
 {
@@ -22,7 +22,7 @@ public class TableNameGenerator
 
     public String generateMutableTableNameInDatabase(String baseTableName)
     {
-        return MUTABLE_TABLE_NAME_PREFIX + baseTableName + "_" + random(8);
+        return MUTABLE_TABLE_NAME_PREFIX + baseTableName + "_" + randomAlphanumeric(8);
     }
 
     public boolean isMutableTableName(String tableNameInDatabase)
