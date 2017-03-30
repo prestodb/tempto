@@ -22,7 +22,8 @@ public class TableNameGenerator
 
     public String generateMutableTableNameInDatabase(String baseTableName)
     {
-        return MUTABLE_TABLE_NAME_PREFIX + baseTableName + "_" + randomAlphanumeric(8);
+        String tableName = MUTABLE_TABLE_NAME_PREFIX + baseTableName + "_" + randomAlphanumeric(8);
+        return tableName.toLowerCase();
     }
 
     public boolean isMutableTableName(String tableNameInDatabase)
