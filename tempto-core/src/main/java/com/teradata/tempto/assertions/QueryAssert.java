@@ -322,6 +322,9 @@ public class QueryAssert
 
     private boolean rowsEqual(List<Object> expectedRow, List<Object> actualRow)
     {
+        if (expectedRow.size() != actualRow.size()) {
+            return false;
+        }
         for (int i = 0; i < expectedRow.size(); ++i) {
             List<Object> acceptableValues = expectedRow.get(i) instanceof AcceptableValues ?
                     ((AcceptableValues) expectedRow.get(i)).getValues()
