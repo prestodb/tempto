@@ -229,6 +229,46 @@ public class QueryAssertTest
     noExceptionThrown()
   }
 
+  def 'hasRows - missing suffix column'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT)
+            .contains(
+            row(2, "ARGENTINA"),
+            row(1, "ALGERIA"),
+    )
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == 'Could not find rows:\n' +
+            '[2, ARGENTINA]\n' +
+            '[1, ALGERIA]\n' +
+            '\n' +
+            'actual rows:\n' +
+            '[1, ALGERIA, AFRICA]\n' +
+            '[2, ARGENTINA, SOUTH AMERICA]'
+  }
+
+  def 'hasRows - missing middle column'()
+  {
+    when:
+    assertThat(NATION_JOIN_REGION_QUERY_RESULT)
+            .contains(
+            row(2, "SOUTH AMERICA"),
+            row(1,  "AFRICA"),
+    )
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == 'Could not find rows:\n' +
+            '[2, SOUTH AMERICA]\n' +
+            '[1, AFRICA]\n' +
+            '\n' +
+            'actual rows:\n' +
+            '[1, ALGERIA, AFRICA]\n' +
+            '[2, ARGENTINA, SOUTH AMERICA]'
+  }
+
   def 'hasRows with multiple possible values'()
   {
     when:
