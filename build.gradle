@@ -54,7 +54,8 @@ ext.versions = [
         objenesis    : '1.4',
         jackson      : '2.4.4',
         cassandra    : '3.0.0',
-        commons_cli   : '1.3.1'
+        commons_cli  : '1.3.1',
+        aws_java_sdk : '1.11.141'
 ]
 
 ext.libraries = [
@@ -93,7 +94,8 @@ ext.libraries = [
         objenesis    : "org.objenesis:objenesis:${versions.objenesis}",
         jackson_databind : "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}",
         cassandra_driver : "com.datastax.cassandra:cassandra-driver-core:${versions.cassandra}",
-        commons_cli  : "commons-cli:commons-cli:${versions.commons_cli}"
+        commons_cli  : "commons-cli:commons-cli:${versions.commons_cli}",
+        aws_java_sdk : "com.amazonaws:aws-java-sdk:${versions.aws_java_sdk}"
 ]
 
 ext.tempto_core = project(':tempto-core')

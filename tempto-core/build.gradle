@@ -37,6 +37,7 @@ dependencies {
   compile libraries.joda
   compile libraries.jackson_databind
   compile libraries.cassandra_driver
+  compile libraries.aws_java_sdk
 
   runtime libraries.jcl_over_slf4j
 
