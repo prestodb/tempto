@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.internal.fulfillment.table.hive;
 
+import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
@@ -30,7 +31,9 @@ import org.slf4j.Logger;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -51,6 +54,8 @@ public class HiveTableManager
     private final String testDataBasePath;
     private final String databaseName;
     private final String hiveDatabasePath;
+    private final boolean analyzeImmutableTables;
+    private final boolean analyzeMutableTables;
 
     @Inject
     public HiveTableManager(QueryExecutor queryExecutor,
@@ -58,7 +63,9 @@ public class HiveTableManager
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
-            @Named("databases.hive.path") String databasePath)
+            @Named("databases.hive.path") String databasePath,
+            @Named("databases.hive.analyze_immutable_tables") boolean analyzeImmutableTables,
+            @Named("databases.hive.analyze_mutable_tables") boolean analyzeMutableTables)
     {
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
@@ -70,6 +77,8 @@ public class HiveTableManager
             databasePath += "/";
         }
         this.hiveDatabasePath = databasePath;
+        this.analyzeImmutableTables = analyzeImmutableTables;
+        this.analyzeMutableTables = analyzeMutableTables;
     }
 
     @Override
@@ -85,6 +94,9 @@ public class HiveTableManager
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableName);
+        if (analyzeImmutableTables) {
+            analyzeTable(tableName, Optional.empty());
+        }
 
         return new HiveTableInstance(tableName, tableDefinition);
     }
@@ -117,7 +129,29 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
+        if (state == LOADED && analyzeMutableTables) {
+            Optional<List<HiveTableDefinition.PartitionDefinition>> partitionDefinitons = Optional.empty();
+            if (tableDefinition.isPartitioned()) {
+                partitionDefinitons = Optional.of(tableDefinition.getPartitionDefinitons());
+            }
+            analyzeTable(tableName, partitionDefinitons);
+        }
+
         return new HiveTableInstance(tableName, tableDefinition);
+    }
+
+    private void analyzeTable(TableName tableName, Optional<List<HiveTableDefinition.PartitionDefinition>> partitionDefinitions)
+    {
+        String partitionsPart = partitionDefinitions.map(
+                partitions -> {
+                    List<String> partitionSpecs = partitions.stream()
+                            .map(HiveTableDefinition.PartitionDefinition::getPartitionSpec)
+                            .collect(Collectors.toList());
+                    return "(" + Joiner.on(",").join(partitionSpecs) + ")";
+                })
+                .orElse("");
+        queryExecutor.executeQuery(String.format("ANALYZE TABLE %s %s COMPUTE STATISTICS", tableName.getNameInDatabase(), partitionsPart));
+        queryExecutor.executeQuery(String.format("ANALYZE TABLE %s %s COMPUTE STATISTICS FOR COLUMNS", tableName.getNameInDatabase(), partitionsPart));
     }
 
     @Override
