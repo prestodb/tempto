@@ -12,7 +12,7 @@ databases:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
     jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/default
     jdbc_user: hdfs
-    jdbc_password: na
+    jdbc_password: "***empty***"
 
 ssh:
   identity: ${IDENTITY}

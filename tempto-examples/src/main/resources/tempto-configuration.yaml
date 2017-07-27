@@ -31,14 +31,14 @@ databases:
     jdbc_password: na
     jdbc_pooling: false
     table_manager_type: hive
-    analyze_immutable_tables: true
-    analyze_mutable_tables: true
+    analyze_immutable_tables: false
+    analyze_mutable_tables: false
 
   presto:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
     jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/default
     jdbc_user: hdfs
-    jdbc_password: na
+    jdbc_password: "***empty***"
     jdbc_pooling: false
     table_manager_type: jdbc
 
@@ -46,7 +46,7 @@ databases:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
     jdbc_url: jdbc:presto://${cluster.presto}:8080/hive/tpcds
     jdbc_user: hdfs
-    jdbc_password: na
+    jdbc_password: "***empty***"
     jdbc_pooling: false
 
   psql:

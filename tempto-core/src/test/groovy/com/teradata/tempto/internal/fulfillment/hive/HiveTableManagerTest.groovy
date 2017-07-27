@@ -43,7 +43,7 @@ class HiveTableManagerTest
     connection.getSchema() >> "schema"
     queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, "database", "/user/hive/warehouse/", true, true);
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
   }
 
   def 'should create hive immutable table'()
