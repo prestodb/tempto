@@ -15,7 +15,7 @@ package com.teradata.tempto.fulfillment.table.hive.tpcds;
 
 import com.google.common.base.Charsets;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
 import com.teradata.tpcds.Results;
 import com.teradata.tpcds.Session;
 

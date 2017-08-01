@@ -24,7 +24,7 @@ import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition;
 import com.teradata.tempto.internal.fulfillment.table.AbstractTableManager;
 import com.teradata.tempto.internal.fulfillment.table.TableName;
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator;
-import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter;
+import com.teradata.tempto.internal.hadoop.FileSystemDataSourceWriter;
 import com.teradata.tempto.query.QueryExecutor;
 import org.slf4j.Logger;
 
@@ -50,7 +50,7 @@ public class HiveTableManager
     private static final Logger LOGGER = getLogger(HiveTableManager.class);
 
     private final QueryExecutor queryExecutor;
-    private final HdfsDataSourceWriter hdfsDataSourceWriter;
+    private final FileSystemDataSourceWriter fsDataSourceWriter;
     private final String testDataBasePath;
     private final String databaseName;
     private final String hiveDatabasePath;
@@ -59,7 +59,7 @@ public class HiveTableManager
 
     @Inject
     public HiveTableManager(QueryExecutor queryExecutor,
-            HdfsDataSourceWriter hdfsDataSourceWriter,
+            FileSystemDataSourceWriter fsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
@@ -70,7 +70,7 @@ public class HiveTableManager
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
-        this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
+        this.fsDataSourceWriter = checkNotNull(fsDataSourceWriter, "fsDataSourceWriter is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
         checkNotNull(databasePath, "databasePath");
         if (!databasePath.endsWith("/")) {
@@ -88,7 +88,7 @@ public class HiveTableManager
         TableName tableName = createImmutableTableName(tableHandle);
         LOGGER.debug("creating immutable table {}", tableHandle.getName());
 
-        String tableDataPath = getImmutableTableHdfsPath(tableDefinition.getDataSource());
+        String tableDataPath = getImmutableTableFileSystemPath(tableDefinition.getDataSource());
         uploadTableData(tableDataPath, tableDefinition.getDataSource());
 
         dropTableIgnoreError(tableName);
@@ -116,7 +116,7 @@ public class HiveTableManager
         if (tableDefinition.isPartitioned()) {
             int partitionId = 0;
             for (HiveTableDefinition.PartitionDefinition partitionDefinition : tableDefinition.getPartitionDefinitons()) {
-                String partitionDataPath = getMutableTableHdfsPath(tableName, Optional.of(partitionId));
+                String partitionDataPath = getMutableTableFileSystemPath(tableName, Optional.of(partitionId));
                 if (state == LOADED) {
                     uploadTableData(partitionDataPath, partitionDefinition.getDataSource());
                 }
@@ -125,7 +125,7 @@ public class HiveTableManager
             }
         }
         else if (state == LOADED) {
-            String tableDataPath = getMutableTableHdfsPath(tableName, Optional.empty());
+            String tableDataPath = getMutableTableFileSystemPath(tableName, Optional.empty());
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
@@ -168,15 +168,15 @@ public class HiveTableManager
 
     private void uploadTableData(String tableDataPath, HiveDataSource dataSource)
     {
-        hdfsDataSourceWriter.ensureDataOnHdfs(tableDataPath, dataSource);
+        fsDataSourceWriter.ensureDataOnFileSystem(tableDataPath, dataSource);
     }
 
-    private String getImmutableTableHdfsPath(HiveDataSource dataSource)
+    private String getImmutableTableFileSystemPath(HiveDataSource dataSource)
     {
         return testDataBasePath + "/" + dataSource.getPathSuffix();
     }
 
-    private String getMutableTableHdfsPath(TableName tableName, Optional<Integer> partitionId)
+    private String getMutableTableFileSystemPath(TableName tableName, Optional<Integer> partitionId)
     {
         StringBuilder sb = new StringBuilder();
         sb.append(hiveDatabasePath);

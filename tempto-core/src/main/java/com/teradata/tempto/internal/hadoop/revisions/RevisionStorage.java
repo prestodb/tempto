@@ -12,36 +12,36 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs.revisions;
+package com.teradata.tempto.internal.hadoop.revisions;
 
 import java.util.Optional;
 
 /**
- * Store revision id for particular hdfs path
+ * Store revision id for particular file system path
  */
 public interface RevisionStorage
 {
 
     /**
-     * Get current data revision for given {@code hdfsPath}
-     * @param hdfsPath Path to be examined
+     * Get current data revision for given {@code path}
+     * @param path Path to be examined
      * @return data revision
      */
-    Optional<String> get(String hdfsPath);
+    Optional<String> get(String path);
 
     /**
-     * Store data revision for {@code hdfsPath}
+     * Store data revision for {@code path}
      *
-     * @param hdfsPath Path to be affected
-     * @param revision Revision string to be associated with hdfsPath
+     * @param path Path to be affected
+     * @param revision Revision string to be associated with path
      */
-    void put(String hdfsPath, String revision);
+    void put(String path, String revision);
 
     /**
-     * Remove information about {@code hdfsPath} data revision
-     * If data revision hasn't been set or hdfsPath does not exist method will just return as regular
+     * Remove information about {@code path} data revision
+     * If data revision hasn't been set or path does not exist method will just return as regular
      *
-     * @param hdfsPath Path to be affected
+     * @param path Path to be affected
      */
-    void remove(String hdfsPath);
+    void remove(String path);
 }

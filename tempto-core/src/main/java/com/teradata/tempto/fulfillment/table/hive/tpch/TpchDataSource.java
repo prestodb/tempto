@@ -15,7 +15,7 @@
 package com.teradata.tempto.fulfillment.table.hive.tpch;
 
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.fulfillment.table.hive.tpch.TpchEntityByteSource;
 
 import java.util.Collection;
