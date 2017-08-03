@@ -54,7 +54,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TimeZone;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkState;
@@ -173,7 +172,6 @@ public class TestInitializationListener
     @Override
     public void onStart(ITestContext context)
     {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         Module suiteModule = combine(combine(getSuiteModules()), bind(suiteLevelFulfillers), bind(testMethodLevelFulfillers));
         GuiceTestContext initSuiteTestContext = new GuiceTestContext(suiteModule);
         TestContextStack<GuiceTestContext> suiteTextContextStack = new TestContextStack<>();
