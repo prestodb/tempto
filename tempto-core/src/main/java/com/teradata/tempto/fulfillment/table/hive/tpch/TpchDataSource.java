@@ -28,7 +28,6 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 public class TpchDataSource
         implements HiveDataSource
 {
-
     private static final String DATA_REVISION = "v.1.1";
 
     private final TpchTable table;
