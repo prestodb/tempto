@@ -15,6 +15,8 @@ package com.teradata.tempto.fulfillment.table.hive.tpcds;
 
 import com.google.common.base.Charsets;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
+import com.teradata.tempto.fulfillment.table.hive.statistics.TableStatistics;
+import com.teradata.tempto.fulfillment.table.hive.statistics.TableStatisticsRepository;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tpcds.Results;
 import com.teradata.tpcds.Session;
@@ -25,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -89,6 +92,13 @@ public class TpcdsDataSource
     public String revisionMarker()
     {
         return DATA_REVISION;
+    }
+
+    @Override
+    public Optional<TableStatistics> getStatistics()
+    {
+        TableStatisticsRepository tableStatisticsRepository = new TableStatisticsRepository();
+        return Optional.of(tableStatisticsRepository.load("tpcds", scaleFactor, table.name()));
     }
 
     @Override

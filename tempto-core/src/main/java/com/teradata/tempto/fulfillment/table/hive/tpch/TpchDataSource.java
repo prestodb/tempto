@@ -15,10 +15,13 @@
 package com.teradata.tempto.fulfillment.table.hive.tpch;
 
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
+import com.teradata.tempto.fulfillment.table.hive.statistics.TableStatistics;
+import com.teradata.tempto.fulfillment.table.hive.statistics.TableStatisticsRepository;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.fulfillment.table.hive.tpch.TpchEntityByteSource;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -58,6 +61,13 @@ public class TpchDataSource
     public String revisionMarker()
     {
         return DATA_REVISION;
+    }
+
+    @Override
+    public Optional<TableStatistics> getStatistics()
+    {
+        TableStatisticsRepository tableStatisticsRepository = new TableStatisticsRepository();
+        return Optional.of(tableStatisticsRepository.load("tpch", scaleFactor, table.name()));
     }
 
     @Override

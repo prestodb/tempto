@@ -31,7 +31,7 @@ public class TableStatisticsRepository
     public TableStatistics load(String benchmark, double scaleFactor, String table)
     {
         String schema = schema(scaleFactor);
-        String resourcePath = "/statistics/" + benchmark.toLowerCase(ENGLISH) + "/" + schema + "/" + table + ".json";
+        String resourcePath = "/statistics/" + benchmark.toLowerCase(ENGLISH) + "/" + schema + "/" + table.toLowerCase(ENGLISH) + ".json";
         URL resource = getClass().getResource(resourcePath);
         checkState(resource != null, "Unable to find statistics data file, trying with: %s", resourcePath);
         try {

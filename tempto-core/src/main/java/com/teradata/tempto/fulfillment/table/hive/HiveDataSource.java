@@ -14,9 +14,11 @@
 
 package com.teradata.tempto.fulfillment.table.hive;
 
+import com.teradata.tempto.fulfillment.table.hive.statistics.TableStatistics;
 import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Responsible for providing data.
@@ -41,4 +43,9 @@ public interface HiveDataSource
      * @return revision marker
      */
     String revisionMarker();
+
+    default Optional<TableStatistics> getStatistics()
+    {
+        return Optional.empty();
+    }
 }
