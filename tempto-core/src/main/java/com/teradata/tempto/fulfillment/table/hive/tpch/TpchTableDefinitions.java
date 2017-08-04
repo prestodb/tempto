@@ -22,7 +22,7 @@ import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.Reposito
 // TODO: move to separate module
 public class TpchTableDefinitions
 {
-    public static final double DEFAULT_SCALE_FACTOR = 0.01;
+    public static final double DEFAULT_SCALE_FACTOR = 1;
 
     @RepositoryTableDefinition
     public static final HiveTableDefinition NATION =
