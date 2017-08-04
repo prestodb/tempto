@@ -32,7 +32,6 @@ import static java.util.Collections.singleton;
 public abstract class InlineDataSource
         implements HiveDataSource
 {
-
     private final String tableName;
     private final String revisionMarker;
 

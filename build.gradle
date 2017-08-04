@@ -92,6 +92,7 @@ ext.libraries = [
         joda         : "joda-time:joda-time:2.4",
         objenesis    : "org.objenesis:objenesis:${versions.objenesis}",
         jackson_databind : "com.fasterxml.jackson.core:jackson-databind:${versions.jackson}",
+        jackson_datatype_jdk8 : "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${versions.jackson}",
         cassandra_driver : "com.datastax.cassandra:cassandra-driver-core:${versions.cassandra}",
         commons_cli  : "commons-cli:commons-cli:${versions.commons_cli}"
 ]
