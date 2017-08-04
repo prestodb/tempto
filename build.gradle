@@ -126,6 +126,7 @@ subprojects {
   apply plugin: 'license'
   license {
     header rootProject.file('apache_license_header.txt')
+    exclude '**/*.json'
   }
 }
 
