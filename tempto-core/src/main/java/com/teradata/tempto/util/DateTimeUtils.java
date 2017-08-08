@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.util;
 
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -43,6 +44,17 @@ public class DateTimeUtils
     public static Timestamp parseTimestampInUTC(String value)
     {
         return new Timestamp(DATE_TIME_FORMATTER.parseMillis(value));
+    }
+
+    /**
+     * Parse the input date time string (pattern: yyyy-M-d H:m:s.SSS) and interpret it in provided local time zone.
+     *
+     * @param value textual date time input
+     * @return a <code>java.sql.Timestamp</code> object representing the input date time.
+     */
+    public static Timestamp parseTimestampInLocalTime(String value, DateTimeZone timeZone)
+    {
+        return new Timestamp(DATE_TIME_FORMATTER.withZone(timeZone).parseMillis(value));
     }
 }
 

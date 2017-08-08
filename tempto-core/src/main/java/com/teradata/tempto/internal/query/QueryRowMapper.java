@@ -15,6 +15,7 @@
 package com.teradata.tempto.internal.query;
 
 import com.teradata.tempto.assertions.QueryAssert.Row;
+import org.joda.time.DateTimeZone;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -26,7 +27,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
-import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInUTC;
+import static com.teradata.tempto.util.DateTimeUtils.parseTimestampInLocalTime;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -100,7 +101,7 @@ public class QueryRowMapper
                 return Time.valueOf(value);
             case TIMESTAMP:
             case TIMESTAMP_WITH_TIMEZONE:
-                return parseTimestampInUTC(value);
+                return parseTimestampInLocalTime(value, DateTimeZone.getDefault());
             default:
                 throw unsupportedConversionException(value, expectedType);
         }
