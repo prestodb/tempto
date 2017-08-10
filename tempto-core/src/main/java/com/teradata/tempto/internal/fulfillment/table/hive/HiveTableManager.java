@@ -51,6 +51,7 @@ public class HiveTableManager
 
     private final QueryExecutor queryExecutor;
     private final FileSystemDataSourceWriter fsDataSourceWriter;
+    private final String testDataBaseFSPrefix;
     private final String testDataBasePath;
     private final String databaseName;
     private final String hiveDatabasePath;
@@ -61,6 +62,7 @@ public class HiveTableManager
     public HiveTableManager(QueryExecutor queryExecutor,
             FileSystemDataSourceWriter fsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
+            @Named("tests.hdfs.prefix") String testDataBaseFSPrefix,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("databases.hive.path") String databasePath,
@@ -71,6 +73,7 @@ public class HiveTableManager
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.fsDataSourceWriter = checkNotNull(fsDataSourceWriter, "fsDataSourceWriter is null");
+        this.testDataBaseFSPrefix = checkNotNull(testDataBaseFSPrefix, "testDataBaseFSPrefix is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
         checkNotNull(databasePath, "databasePath");
         if (!databasePath.endsWith("/")) {
@@ -168,12 +171,12 @@ public class HiveTableManager
 
     private void uploadTableData(String tableDataPath, HiveDataSource dataSource)
     {
-        fsDataSourceWriter.ensureDataOnFileSystem(tableDataPath, dataSource);
+        fsDataSourceWriter.ensureDataOnFileSystem(tableDataPath, testDataBaseFSPrefix, dataSource);
     }
 
     private String getImmutableTableFileSystemPath(HiveDataSource dataSource)
     {
-        return testDataBasePath + "/" + dataSource.getPathSuffix();
+        return testDataBaseFSPrefix + "/" + testDataBasePath + "/" + dataSource.getPathSuffix();
     }
 
     private String getMutableTableFileSystemPath(TableName tableName, Optional<Integer> partitionId)

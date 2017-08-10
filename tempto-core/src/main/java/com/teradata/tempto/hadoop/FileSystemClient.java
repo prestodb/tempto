@@ -42,6 +42,8 @@ public interface FileSystemClient
 
     void createDirectory(String path);
 
+    void deleteDirectory(String path);
+
     void delete(String path);
 
     void saveFile(String path, InputStream input, long byteLength);

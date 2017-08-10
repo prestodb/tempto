@@ -89,7 +89,7 @@ public class S3Client
     public void createDirectory(String path)
     {
         // Check to make sure directory does not already exist
-        if (exist(ensureTrailingSlashPresent(path))) {
+        if (exist(ensureStartSlashNotPresent(ensureTrailingSlashPresent(path)))) {
             return;
         }
 
@@ -114,6 +114,14 @@ public class S3Client
         return path;
     }
 
+    private String ensureStartSlashNotPresent(String path)
+    {
+        if (path.startsWith(PATH_SEPARATOR)) {
+            path = path.substring(1);
+        }
+        return path;
+    }
+
     private void createEmptyObject(String path) {
         // Create meta-data for your folder and set content-length to 0 (which indicates a folder)
         ObjectMetadata metadata = new ObjectMetadata();
@@ -128,22 +136,24 @@ public class S3Client
     }
 
     @Override
+    public void deleteDirectory(String path)
+    {
+        List<String> objects = getAllObjects(ensureStartSlashNotPresent(ensureTrailingSlashPresent(path)));
+
+        // For all objects retrieved, delete by sorted order of furthest away from path first
+        Ordering<String> ordering = Ordering
+                .from(Comparator
+                        .comparingInt(object -> -PATH_SPLITTER.splitToList(object).size()));
+        ordering.sortedCopy(objects).forEach(o -> deleteObject(o));
+
+        // Delete the folder itself
+        deleteObject(ensureStartSlashNotPresent(ensureTrailingSlashPresent(path)));
+    }
+
+    @Override
     public void delete(String path)
     {
-        if (!path.endsWith(PATH_SEPARATOR)) {
-            deleteObject(path);
-        } else {
-            List<String> objects = getAllObjects(path);
-
-            // For all objects retrieved, delete by sorted order of furthest away from path first
-            Ordering<String> ordering = Ordering
-                    .from(Comparator
-                            .comparingInt(object -> -PATH_SPLITTER.splitToList(object).size()));
-            ordering.sortedCopy(objects).forEach(o -> deleteObject(o));
-
-            // Delete the folder itself
-            deleteObject(ensureTrailingSlashPresent(path));
-        }
+        deleteObject(ensureStartSlashNotPresent(path));
     }
 
     private List<String> getAllObjects(String path)
@@ -171,7 +181,7 @@ public class S3Client
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(byteLength);
 
-        client.putObject(new PutObjectRequest(bucketName, path, input, metadata));
+        client.putObject(new PutObjectRequest(bucketName, ensureStartSlashNotPresent(path), input, metadata));
 
         logger.debug("Saved file {} to S3", path);
     }
@@ -191,14 +201,15 @@ public class S3Client
     @Override
     public void loadFile(String path, OutputStream outputStream)
     {
-        try {
-            InputStream inputStream = client.getObject(new GetObjectRequest(bucketName, path))
-                    .getObjectContent();
-            IOUtils.copy(inputStream, outputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read file " + path + " in S3", e);
+        if (exist(path)) {
+            try {
+                InputStream inputStream = client.getObject(new GetObjectRequest(bucketName, ensureStartSlashNotPresent(path)))
+                        .getObjectContent();
+                IOUtils.copy(inputStream, outputStream);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read file " + path + " in S3", e);
+            }
         }
-
     }
 
     @Override
