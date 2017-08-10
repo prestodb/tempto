@@ -63,9 +63,9 @@ public class HiveTableManager
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
-            @Named("databases.hive.path") String databasePath,
-            @Named("databases.hive.analyze_immutable_tables") boolean analyzeImmutableTables,
-            @Named("databases.hive.analyze_mutable_tables") boolean analyzeMutableTables)
+            @Named("path") String databasePath,
+            @Named("analyze_immutable_tables") boolean analyzeImmutableTables,
+            @Named("analyze_mutable_tables") boolean analyzeMutableTables)
     {
         super(queryExecutor, tableNameGenerator);
         this.databaseName = databaseName;
