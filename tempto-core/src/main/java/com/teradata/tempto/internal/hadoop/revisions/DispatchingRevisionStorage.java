@@ -31,7 +31,7 @@ public class DispatchingRevisionStorage
 {
     private static final Logger LOGGER = getLogger(DispatchingRevisionStorage.class);
 
-    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.hdfs.path";
+    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.fs.path";
 
     private static final String TEST_X_ATTR_KEY = "user.test-attr-key";
     private static final String TEST_X_ATTR_VALUE = "test-attr-value";

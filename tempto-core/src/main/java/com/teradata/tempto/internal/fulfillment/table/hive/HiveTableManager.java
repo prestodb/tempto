@@ -62,8 +62,8 @@ public class HiveTableManager
     public HiveTableManager(QueryExecutor queryExecutor,
             FileSystemDataSourceWriter fsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
-            @Named("tests.hdfs.prefix") String testDataBaseFSPrefix,
-            @Named("tests.hdfs.path") String testDataBasePath,
+            @Named("tests.fs.prefix") String testDataBaseFSPrefix,
+            @Named("tests.fs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("databases.hive.path") String databasePath,
             @Named("databases.hive.analyze_immutable_tables") boolean analyzeImmutableTables,
@@ -73,7 +73,11 @@ public class HiveTableManager
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.fsDataSourceWriter = checkNotNull(fsDataSourceWriter, "fsDataSourceWriter is null");
-        this.testDataBaseFSPrefix = checkNotNull(testDataBaseFSPrefix, "testDataBaseFSPrefix is null");
+        checkNotNull(testDataBaseFSPrefix, "testDataBaseFSPrefix is null");
+        if (testDataBaseFSPrefix.contains("***empty***")) {
+            testDataBaseFSPrefix = "";
+        }
+        this.testDataBaseFSPrefix = testDataBaseFSPrefix;
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
         checkNotNull(databasePath, "databasePath");
         if (!databasePath.endsWith("/")) {
@@ -176,6 +180,9 @@ public class HiveTableManager
 
     private String getImmutableTableFileSystemPath(HiveDataSource dataSource)
     {
+        if (testDataBaseFSPrefix.equals("")) {
+            return testDataBasePath + "/" + dataSource.getPathSuffix();
+        }
         return testDataBaseFSPrefix + "/" + testDataBasePath + "/" + dataSource.getPathSuffix();
     }
 

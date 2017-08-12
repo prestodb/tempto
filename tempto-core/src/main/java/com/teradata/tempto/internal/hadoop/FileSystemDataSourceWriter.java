@@ -44,11 +44,11 @@ public class FileSystemDataSourceWriter
 
     public void ensureDataOnFileSystem(String dataSourcePath, String fsPrefix, HiveDataSource dataSource)
     {
-        if (isDataUpToDate(dataSourcePath, dataSource)) {
+        String path = dataSourcePath.replace(fsPrefix, "");
+
+        if (isDataUpToDate(path, dataSource)) {
             return;
         }
-
-        String path = dataSourcePath.replace(fsPrefix, "");
 
         revisionStorage.remove(path);
         fsClient.deleteDirectory(path);
