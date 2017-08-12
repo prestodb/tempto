@@ -38,6 +38,8 @@ dependencies {
   compile libraries.jackson_databind
   compile libraries.jackson_datatype_jdk8
   compile libraries.cassandra_driver
+  compile libraries.hive
+  compile libraries.thrift
 
   runtime libraries.jcl_over_slf4j
 

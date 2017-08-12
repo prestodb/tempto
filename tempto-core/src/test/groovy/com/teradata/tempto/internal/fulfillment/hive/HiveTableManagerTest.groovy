@@ -35,6 +35,7 @@ class HiveTableManagerTest
   QueryExecutor queryExecutor = Mock()
   HdfsDataSourceWriter dataSourceWriter = Mock()
   TableNameGenerator tableNameGenerator = Mock()
+  HiveThriftClient hiveThriftClient = Mock()
   HiveTableManager tableManager
 
   void setup()
@@ -43,7 +44,7 @@ class HiveTableManagerTest
     connection.getSchema() >> "schema"
     queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, hiveThriftClient, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
   }
 
   def 'should create hive immutable table'()

@@ -33,6 +33,9 @@ databases:
     table_manager_type: hive
     analyze_immutable_tables: true
     analyze_mutable_tables: true
+    metastore:
+      host: ${cluster.hadoop}
+      port: 9083
 
   presto:
     jdbc_driver_class: com.facebook.presto.jdbc.PrestoDriver
