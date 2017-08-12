@@ -13,7 +13,6 @@
  */
 package com.teradata.tempto.internal.fulfillment.table.hive;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableDefinition;
@@ -31,14 +30,13 @@ import org.slf4j.Logger;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.PREPARED;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -52,22 +50,50 @@ public class HiveTableManager
     private final QueryExecutor queryExecutor;
     private final HdfsDataSourceWriter hdfsDataSourceWriter;
     private final String testDataBasePath;
+    private final HiveThriftClient hiveThriftClient;
     private final String databaseName;
     private final String hiveDatabasePath;
     private final boolean analyzeImmutableTables;
     private final boolean analyzeMutableTables;
 
     @Inject
-    public HiveTableManager(QueryExecutor queryExecutor,
+    public HiveTableManager(
+            QueryExecutor queryExecutor,
             HdfsDataSourceWriter hdfsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("path") String databasePath,
             @Named("analyze_immutable_tables") boolean analyzeImmutableTables,
-            @Named("analyze_mutable_tables") boolean analyzeMutableTables)
+            @Named("analyze_mutable_tables") boolean analyzeMutableTables,
+            @Named("metastore.host") String thriftHost,
+            @Named("metastore.port") String thriftPort)
+    {
+        this(
+                queryExecutor,
+                hdfsDataSourceWriter,
+                tableNameGenerator,
+                new HiveThriftClient(thriftHost, parseInt(thriftPort)),
+                testDataBasePath,
+                databaseName,
+                databasePath,
+                analyzeImmutableTables,
+                analyzeMutableTables);
+    }
+
+    public HiveTableManager(
+            QueryExecutor queryExecutor,
+            HdfsDataSourceWriter hdfsDataSourceWriter,
+            TableNameGenerator tableNameGenerator,
+            HiveThriftClient hiveThriftClient,
+            String testDataBasePath,
+            String databaseName,
+            String databasePath,
+            boolean analyzeImmutableTables,
+            boolean analyzeMutableTables)
     {
         super(queryExecutor, tableNameGenerator);
+        this.hiveThriftClient = hiveThriftClient;
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.hdfsDataSourceWriter = checkNotNull(hdfsDataSourceWriter, "hdfsDataSourceWriter is null");
@@ -94,8 +120,9 @@ public class HiveTableManager
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableName);
-        if (analyzeImmutableTables) {
-            analyzeTable(tableName, Optional.empty());
+        if (analyzeImmutableTables && tableDefinition.getDataSource().getStatistics().isPresent()) {
+            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
+            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
@@ -129,29 +156,12 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        if (state == LOADED && analyzeMutableTables) {
-            Optional<List<HiveTableDefinition.PartitionDefinition>> partitionDefinitons = Optional.empty();
-            if (tableDefinition.isPartitioned()) {
-                partitionDefinitons = Optional.of(tableDefinition.getPartitionDefinitons());
-            }
-            analyzeTable(tableName, partitionDefinitons);
+        if (state == LOADED && analyzeMutableTables && tableDefinition.getDataSource().getStatistics().isPresent()) {
+            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
+            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
-    }
-
-    private void analyzeTable(TableName tableName, Optional<List<HiveTableDefinition.PartitionDefinition>> partitionDefinitions)
-    {
-        String partitionsPart = partitionDefinitions.map(
-                partitions -> {
-                    List<String> partitionSpecs = partitions.stream()
-                            .map(HiveTableDefinition.PartitionDefinition::getPartitionSpec)
-                            .collect(Collectors.toList());
-                    return "(" + Joiner.on(",").join(partitionSpecs) + ")";
-                })
-                .orElse("");
-        queryExecutor.executeQuery(String.format("ANALYZE TABLE %s %s COMPUTE STATISTICS", tableName.getNameInDatabase(), partitionsPart));
-        queryExecutor.executeQuery(String.format("ANALYZE TABLE %s %s COMPUTE STATISTICS FOR COLUMNS", tableName.getNameInDatabase(), partitionsPart));
     }
 
     @Override
@@ -198,5 +208,12 @@ public class HiveTableManager
     private void markTableAsExternal(TableName tableName)
     {
         queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableName.getNameInDatabase()));
+    }
+
+    @Override
+    public void close()
+    {
+        hiveThriftClient.close();
+        super.close();
     }
 }
