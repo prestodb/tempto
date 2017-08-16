@@ -84,7 +84,7 @@ docker version
 trap termination_handler INT TERM
 ${DOCKER_COMPOSE} stop || true
 
-${DOCKER_COMPOSE} pull
+${DOCKER_COMPOSE} pull --quiet --parallel
 
 ${DOCKER_COMPOSE} build
 ${DOCKER_COMPOSE} up -d 
