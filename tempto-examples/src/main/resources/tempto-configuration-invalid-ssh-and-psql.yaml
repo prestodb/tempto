@@ -35,8 +35,8 @@ databases:
     jdbc_password: na
     jdbc_pooling: false
     table_manager_type: hive
-    analyze_immutable_tables: false
-    analyze_mutable_tables: false
+    inject_stats_for_immutable_tables: false
+    inject_stats_for_mutable_tables: false
     metastore:
       host: ${cluster.hadoop}
       port: 9083
