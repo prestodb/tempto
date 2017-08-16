@@ -64,8 +64,8 @@ public class HiveTableManager
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("path") String databasePath,
-            @Named("analyze_immutable_tables") boolean analyzeImmutableTables,
-            @Named("analyze_mutable_tables") boolean analyzeMutableTables,
+            @Named("inject_stats_for_immutable_tables") boolean analyzeImmutableTables,
+            @Named("inject_stats_for_mutable_tables") boolean analyzeMutableTables,
             @Named("metastore.host") String thriftHost,
             @Named("metastore.port") String thriftPort)
     {
