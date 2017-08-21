@@ -44,7 +44,7 @@ ext.versions = [
         tpcdsgen     : '1.2',
         commons_lang3: '3.3.2',
         commons_dbcp2: '2.1',
-        hive_jdbc    : '0.13.1-4',
+        hive_jdbc    : '0.13.1-5',
         hive         : '1.2.0-2',
         presto       : '0.181',
         reflections  : '0.9.9',
