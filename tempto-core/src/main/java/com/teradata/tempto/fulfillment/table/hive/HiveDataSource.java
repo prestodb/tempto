@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.fulfillment.table.hive;
 
-import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
 
 import java.util.Collection;
 
@@ -30,7 +30,7 @@ public interface HiveDataSource
 
     /**
      * @return collection with table files {@link RepeatableContentProducer}.
-     * For each {@link RepeatableContentProducer} separate file will be created on HDFS
+     * For each {@link RepeatableContentProducer} separate file will be created on file system (HDFS, S3, etc)
      */
     Collection<RepeatableContentProducer> data();
 
