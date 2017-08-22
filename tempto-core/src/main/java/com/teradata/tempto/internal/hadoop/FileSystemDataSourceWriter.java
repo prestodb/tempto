@@ -12,51 +12,49 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs;
+package com.teradata.tempto.internal.hadoop;
 
 import com.google.common.base.Stopwatch;
+import com.google.inject.Inject;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
-import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
+import com.teradata.tempto.hadoop.FileSystemClient;
+import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
+import com.teradata.tempto.internal.hadoop.revisions.RevisionStorage;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class DefaultHdfsDataSourceWriter
-        implements HdfsDataSourceWriter
+public class FileSystemDataSourceWriter
 {
+    private static final Logger LOGGER = getLogger(FileSystemDataSourceWriter.class);
 
-    private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
-
-    private final HdfsClient hdfsClient;
+    private final FileSystemClient fsClient;
     private final RevisionStorage revisionStorage;
 
     @Inject
-    public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient,
-            RevisionStorage revisionStorage)
+    public FileSystemDataSourceWriter(FileSystemClient fsClient,
+                                      RevisionStorage revisionStorage)
     {
-        this.hdfsClient = hdfsClient;
+        this.fsClient = fsClient;
         this.revisionStorage = revisionStorage;
     }
 
-    @Override
-    public void ensureDataOnHdfs(String dataSourcePath, HiveDataSource dataSource)
+    public void ensureDataOnFileSystem(String dataSourcePath, String fsPrefix, HiveDataSource dataSource)
     {
-        if (isDataUpToDate(dataSourcePath, dataSource)) {
+        String path = dataSourcePath.replace(fsPrefix, "");
+
+        if (isDataUpToDate(path, dataSource)) {
             return;
         }
 
-        revisionStorage.remove(dataSourcePath);
-        hdfsClient.delete(dataSourcePath);
-        hdfsClient.createDirectory(dataSourcePath);
-        storeTableFiles(dataSourcePath, dataSource);
-        revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
+        revisionStorage.remove(path);
+        fsClient.deleteDirectory(path);
+        fsClient.createDirectory(path);
+        storeTableFiles(path, dataSource);
+        revisionStorage.put(path, dataSource.revisionMarker());
     }
 
     private boolean isDataUpToDate(String dataSourcePath, HiveDataSource dataSource)
@@ -83,7 +81,7 @@ public class DefaultHdfsDataSourceWriter
         for (RepeatableContentProducer fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;
             LOGGER.debug("Saving new file {} ({})", filePath, dataSource.revisionMarker());
-            hdfsClient.saveFile(filePath, fileContent);
+            fsClient.saveFile(filePath, fileContent);
             fileIndex++;
         }
     }
