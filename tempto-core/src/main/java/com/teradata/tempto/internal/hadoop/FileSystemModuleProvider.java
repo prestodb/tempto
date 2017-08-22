@@ -24,6 +24,7 @@ import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
+import com.teradata.tempto.internal.hadoop.azure.WasbClient;
 import com.teradata.tempto.internal.hadoop.hdfs.SimpleHttpRequestsExecutor;
 import com.teradata.tempto.internal.hadoop.hdfs.SpnegoHttpRequestsExecutor;
 import com.teradata.tempto.internal.hadoop.hdfs.WebHdfsClient;
@@ -50,6 +51,7 @@ public class FileSystemModuleProvider
 
     private static final String AUTHENTICATION_SPNEGO = "SPNEGO";
     private static final String HDFS_FILE_SYSTEM = "hdfs";
+    private static final String WASB_FILE_SYSTEM = "wasb";
     private static final String DEFAULT_FILE_SYSTEM = HDFS_FILE_SYSTEM;
     private static final int NUMBER_OF_HTTP_RETRIES = 3;
 
@@ -82,7 +84,11 @@ public class FileSystemModuleProvider
                 if (testFileSystem.toLowerCase().equals(HDFS_FILE_SYSTEM)) {
                     logger.debug("Using HDFS file system");
                     bind(FileSystemClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
+                } else if (testFileSystem.toLowerCase().equals(WASB_FILE_SYSTEM)) {
+                    logger.debug("Using WASB file system");
+                    bind(FileSystemClient.class).to(WasbClient.class).in(Scopes.SINGLETON);
                 }
+
 
                 bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
                 bind(FileSystemDataSourceWriter.class).in(Scopes.SINGLETON);
