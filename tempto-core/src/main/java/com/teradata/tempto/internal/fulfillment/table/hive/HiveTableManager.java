@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
-
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -120,9 +119,8 @@ public class HiveTableManager
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableName);
-        if (analyzeImmutableTables && tableDefinition.getDataSource().getStatistics().isPresent()) {
-            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
-            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
+        if (analyzeImmutableTables) {
+            injectStatistics(tableDefinition, tableName);
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
@@ -156,9 +154,9 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        if (state == LOADED && analyzeMutableTables && tableDefinition.getDataSource().getStatistics().isPresent()) {
-            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
-            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
+        if (state == LOADED && analyzeMutableTables)
+        {
+            injectStatistics(tableDefinition, tableName);
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
@@ -208,6 +206,13 @@ public class HiveTableManager
     private void markTableAsExternal(TableName tableName)
     {
         queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableName.getNameInDatabase()));
+    }
+
+    private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName) {
+        if (tableDefinition.getDataSource().getStatistics().isPresent()) {
+            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
+            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
+        }
     }
 
     @Override
