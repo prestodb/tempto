@@ -288,13 +288,13 @@ public class QueryAssertTest
     assertThat(NATION_JOIN_REGION_QUERY_RESULT)
             .contains(
             row(2, "ARGENTINA", "SOUTH AMERICA"),
-            row(1, "ALGERIA", anyOf("SATURN", "MARS")),
+            row(1, "ALGERIA", anyOf("SATURN", null)),
     )
 
     then:
     def e = thrown(AssertionError)
     e.message == 'Could not find rows:\n' +
-            '[1, ALGERIA, anyOf(SATURN, MARS)]\n' +
+            '[1, ALGERIA, anyOf(SATURN, null)]\n' +
             '\n' +
             'actual rows:\n' +
             '[1, ALGERIA, AFRICA]\n' +

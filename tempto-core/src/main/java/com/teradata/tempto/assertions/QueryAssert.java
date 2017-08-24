@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
+import com.teradata.tempto.internal.query.QueryRowMapper;
 import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 import com.teradata.tempto.query.QueryResult;
@@ -485,7 +486,10 @@ public class QueryAssert
         @Override
         public String toString()
         {
-            return "anyOf(" + Joiner.on(", ").join(values) + ")";
+            String jointValues = Joiner.on(", ")
+                    .useForNull(QueryRowMapper.NULL_STRING)
+                    .join(values);
+            return "anyOf(" + jointValues + ")";
         }
     }
 }
