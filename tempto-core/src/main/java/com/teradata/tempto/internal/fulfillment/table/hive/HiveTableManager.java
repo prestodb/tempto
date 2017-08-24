@@ -209,8 +209,7 @@ public class HiveTableManager
     }
 
     private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName) {
-        if (tableDefinition.getDataSource().getStatistics().isPresent()) {
-            checkState(!tableDefinition.isPartitioned(), "Statisitcs are not supported for parititioned tables");
+        if (!tableDefinition.isPartitioned() && tableDefinition.getDataSource().getStatistics().isPresent()) {
             hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
         }
     }
