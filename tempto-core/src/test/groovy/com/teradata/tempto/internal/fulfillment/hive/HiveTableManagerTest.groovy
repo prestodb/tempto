@@ -17,7 +17,8 @@ package com.teradata.tempto.internal.fulfillment.table.hive
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource
 import com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition
 import com.teradata.tempto.internal.fulfillment.table.TableNameGenerator
-import com.teradata.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter
+import com.teradata.tempto.internal.hadoop.FileSystemDataSourceWriter
+
 import com.teradata.tempto.query.QueryExecutor
 import spock.lang.Specification
 
@@ -30,10 +31,11 @@ class HiveTableManagerTest
         extends Specification
 {
   String ROOT_PATH = "/tests-path"
+  String DEFAULT_PREFIX = ''
   String MUTABLE_TABLES_PATH = '/user/hive/warehouse/'
 
   QueryExecutor queryExecutor = Mock()
-  HdfsDataSourceWriter dataSourceWriter = Mock()
+  FileSystemDataSourceWriter dataSourceWriter = Mock()
   TableNameGenerator tableNameGenerator = Mock()
   HiveThriftClient hiveThriftClient = Mock()
   HiveTableManager tableManager
@@ -44,7 +46,7 @@ class HiveTableManagerTest
     connection.getSchema() >> "schema"
     queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, hiveThriftClient, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, hiveThriftClient, DEFAULT_PREFIX, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
   }
 
   def 'should create hive immutable table'()
@@ -62,7 +64,7 @@ class HiveTableManagerTest
     nationTableInstance.name == expectedTableName
     nationTableInstance.nameInDatabase == expectedTableNameInDatabase
 
-    1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
   }
 
@@ -80,7 +82,7 @@ class HiveTableManagerTest
     then:
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
-    1 * dataSourceWriter.ensureDataOnHdfs(expectedTableLocation, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
   }
 
@@ -117,8 +119,8 @@ class HiveTableManagerTest
     then:
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
-    1 * dataSourceWriter.ensureDataOnHdfs(expectedPartition0Location, _)
-    1 * dataSourceWriter.ensureDataOnHdfs(expectedPartition1Location, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition0Location, _, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition1Location, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(PARTITIONED_NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=0) LOCATION '$expectedPartition0Location'")
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=1) LOCATION '$expectedPartition1Location'")

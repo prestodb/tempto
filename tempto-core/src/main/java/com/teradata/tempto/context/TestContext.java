@@ -23,7 +23,7 @@ public interface TestContext
     /**
      * Allows obtaining runtime dependency from within test body.
      * Common types of dependencies would be State instance coming out of RequirementFulfillers
-     * and services for performing work on cluster (like QueryExecutor, HdfsClient, RemoteExecutor)
+     * and services for performing work on cluster (like QueryExecutor, FileSystemClient, RemoteExecutor)
      *
      * @param <T> template
      * @param dependencyClass Class of dependency to be obtained
