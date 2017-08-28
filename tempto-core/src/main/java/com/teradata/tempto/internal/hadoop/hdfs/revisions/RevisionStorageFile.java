@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.hadoop.hdfs.revisions;
 
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.hadoop.FileSystemClient;
 
 import java.util.Optional;
 
@@ -25,12 +25,12 @@ public class RevisionStorageFile
         implements RevisionStorage
 {
 
-    private final HdfsClient hdfsClient;
+    private final FileSystemClient fsClient;
     private final String testDataBasePath;
 
-    RevisionStorageFile(HdfsClient hdfsClient, String testDataBasePath)
+    RevisionStorageFile(FileSystemClient fsClient, String testDataBasePath)
     {
-        this.hdfsClient = hdfsClient;
+        this.fsClient = fsClient;
         this.testDataBasePath = testDataBasePath;
     }
 
@@ -39,11 +39,11 @@ public class RevisionStorageFile
     {
         String markerFilePath = markerFilePath(hdfsPath);
 
-        if (!hdfsClient.exist(markerFilePath)) {
+        if (!fsClient.exist(markerFilePath)) {
             return Optional.empty();
         }
 
-        return Optional.of(hdfsClient.loadFile(markerFilePath));
+        return Optional.of(fsClient.loadFile(markerFilePath));
     }
 
     @Override
@@ -51,14 +51,14 @@ public class RevisionStorageFile
     {
         String markerFilePath = markerFilePath(hdfsPath);
 
-        hdfsClient.delete(markerFilePath);
-        hdfsClient.saveFile(markerFilePath, revision);
+        fsClient.delete(markerFilePath);
+        fsClient.saveFile(markerFilePath, revision);
     }
 
     @Override
     public void remove(String hdfsPath)
     {
-        hdfsClient.delete(markerFilePath(hdfsPath));
+        fsClient.delete(markerFilePath(hdfsPath));
     }
 
     private String markerFilePath(String path)

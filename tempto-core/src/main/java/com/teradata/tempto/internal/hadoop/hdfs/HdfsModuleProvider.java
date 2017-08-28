@@ -21,7 +21,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.teradata.tempto.configuration.Configuration;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
 import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
@@ -66,11 +66,11 @@ public class HdfsModuleProvider
 
                 install(httpRequestsExecutorModule());
 
-                bind(HdfsClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
+                bind(FileSystemClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
                 bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
                 bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class).in(Scopes.SINGLETON);
 
-                expose(HdfsClient.class);
+                expose(FileSystemClient.class);
                 expose(RevisionStorage.class);
                 expose(HdfsDataSourceWriter.class);
             }

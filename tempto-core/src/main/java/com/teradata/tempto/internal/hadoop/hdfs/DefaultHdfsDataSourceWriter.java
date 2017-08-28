@@ -16,8 +16,8 @@ package com.teradata.tempto.internal.hadoop.hdfs;
 
 import com.google.common.base.Stopwatch;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import com.teradata.tempto.hadoop.FileSystemClient;
+import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
 import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
 import org.slf4j.Logger;
 
@@ -34,14 +34,14 @@ public class DefaultHdfsDataSourceWriter
 
     private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
 
-    private final HdfsClient hdfsClient;
+    private final FileSystemClient fsClient;
     private final RevisionStorage revisionStorage;
 
     @Inject
-    public DefaultHdfsDataSourceWriter(HdfsClient hdfsClient,
+    public DefaultHdfsDataSourceWriter(FileSystemClient fsClient,
             RevisionStorage revisionStorage)
     {
-        this.hdfsClient = hdfsClient;
+        this.fsClient = fsClient;
         this.revisionStorage = revisionStorage;
     }
 
@@ -53,8 +53,8 @@ public class DefaultHdfsDataSourceWriter
         }
 
         revisionStorage.remove(dataSourcePath);
-        hdfsClient.delete(dataSourcePath);
-        hdfsClient.createDirectory(dataSourcePath);
+        fsClient.delete(dataSourcePath);
+        fsClient.createDirectory(dataSourcePath);
         storeTableFiles(dataSourcePath, dataSource);
         revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
     }
@@ -83,7 +83,7 @@ public class DefaultHdfsDataSourceWriter
         for (RepeatableContentProducer fileContent : dataSource.data()) {
             String filePath = dataSourcePath + "/data_" + fileIndex;
             LOGGER.debug("Saving new file {} ({})", filePath, dataSource.revisionMarker());
-            hdfsClient.saveFile(filePath, fileContent);
+            fsClient.saveFile(filePath, fileContent);
             fileIndex++;
         }
     }

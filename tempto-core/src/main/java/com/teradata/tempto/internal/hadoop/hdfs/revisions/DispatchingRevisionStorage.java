@@ -14,7 +14,7 @@
 
 package com.teradata.tempto.internal.hadoop.hdfs.revisions;
 
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.util.Lazy;
 import org.slf4j.Logger;
 
@@ -39,9 +39,9 @@ public class DispatchingRevisionStorage
     private final Provider<RevisionStorage> revisionStorage;
 
     @Inject
-    public DispatchingRevisionStorage(HdfsClient hdfsClient, @Named(CONF_TESTS_HDFS_PATH_KEY) String testDataBasePath)
+    public DispatchingRevisionStorage(FileSystemClient fsClient, @Named(CONF_TESTS_HDFS_PATH_KEY) String testDataBasePath)
     {
-        revisionStorage = new Lazy(new HdfsRevisionStorageProvider(hdfsClient, testDataBasePath));
+        revisionStorage = new Lazy(new HdfsRevisionStorageProvider(fsClient, testDataBasePath));
     }
 
     @Override
@@ -65,12 +65,12 @@ public class DispatchingRevisionStorage
     private static class HdfsRevisionStorageProvider
             implements Provider<RevisionStorage>
     {
-        private final HdfsClient hdfsClient;
+        private final FileSystemClient fsClient;
         private final String testDataBasePath;
 
-        public HdfsRevisionStorageProvider(HdfsClient hdfsClient, String testDataBasePath)
+        public HdfsRevisionStorageProvider(FileSystemClient fsClient, String testDataBasePath)
         {
-            this.hdfsClient = hdfsClient;
+            this.fsClient = fsClient;
             this.testDataBasePath = testDataBasePath;
         }
 
@@ -79,21 +79,21 @@ public class DispatchingRevisionStorage
         {
             if (xAttrsSupported()) {
                 LOGGER.debug("HDFS xAttrs supported. Lets use RevisionMarkerXAttr.");
-                return new RevisionStorageXAttr(hdfsClient);
+                return new RevisionStorageXAttr(fsClient);
             }
             else {
                 LOGGER.debug("HDFS xAttrs are not supported. Lets use RevisionMarkerFile.");
-                return new RevisionStorageFile(hdfsClient, testDataBasePath);
+                return new RevisionStorageFile(fsClient, testDataBasePath);
             }
         }
 
         private boolean xAttrsSupported()
         {
             try {
-                hdfsClient.createDirectory(testDataBasePath);
-                hdfsClient.setXAttr(testDataBasePath, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
-                boolean supported = hdfsClient.getXAttr(testDataBasePath, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
-                hdfsClient.removeXAttr(testDataBasePath, TEST_X_ATTR_KEY);
+                fsClient.createDirectory(testDataBasePath);
+                fsClient.setXAttr(testDataBasePath, TEST_X_ATTR_KEY, TEST_X_ATTR_VALUE);
+                boolean supported = fsClient.getXAttr(testDataBasePath, TEST_X_ATTR_KEY).orElse("").equals(TEST_X_ATTR_VALUE);
+                fsClient.removeXAttr(testDataBasePath, TEST_X_ATTR_KEY);
                 return supported;
             }
             catch (RuntimeException e) {
