@@ -106,6 +106,12 @@ public class WebHdfsClient
     }
 
     @Override
+    public void deleteDirectory(String path)
+    {
+        delete(path);
+    }
+
+    @Override
     public void delete(String path)
     {
         HttpDelete removeFileOrDirectoryRequest = new HttpDelete(buildUri(path, "DELETE", ImmutableMap.of("recursive", "true")));

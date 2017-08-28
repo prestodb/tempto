@@ -51,7 +51,7 @@ public class FileSystemDataSourceWriter
         }
 
         revisionStorage.remove(dataSourcePath);
-        fsClient.delete(dataSourcePath);
+        fsClient.deleteDirectory(dataSourcePath);
         fsClient.createDirectory(dataSourcePath);
         storeTableFiles(dataSourcePath, dataSource);
         revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
