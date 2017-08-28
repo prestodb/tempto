@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs.revisions;
+package com.teradata.tempto.internal.hadoop.revisions;
 
 import com.teradata.tempto.hadoop.FileSystemClient;
 
@@ -35,9 +35,9 @@ public class RevisionStorageFile
     }
 
     @Override
-    public Optional<String> get(String hdfsPath)
+    public Optional<String> get(String path)
     {
-        String markerFilePath = markerFilePath(hdfsPath);
+        String markerFilePath = markerFilePath(path);
 
         if (!fsClient.exist(markerFilePath)) {
             return Optional.empty();
@@ -47,18 +47,18 @@ public class RevisionStorageFile
     }
 
     @Override
-    public void put(String hdfsPath, String revision)
+    public void put(String path, String revision)
     {
-        String markerFilePath = markerFilePath(hdfsPath);
+        String markerFilePath = markerFilePath(path);
 
         fsClient.delete(markerFilePath);
         fsClient.saveFile(markerFilePath, revision);
     }
 
     @Override
-    public void remove(String hdfsPath)
+    public void remove(String path)
     {
-        fsClient.delete(markerFilePath(hdfsPath));
+        fsClient.delete(markerFilePath(path));
     }
 
     private String markerFilePath(String path)

@@ -76,7 +76,7 @@ databases:
     table_manager_type: cassandra
 
 tests:
-  hdfs:
+  fs:
     path: /tempto
 
 ssh:

@@ -12,13 +12,13 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs;
+package com.teradata.tempto.internal.hadoop;
 
 import com.google.common.base.Stopwatch;
 import com.teradata.tempto.fulfillment.table.hive.HiveDataSource;
 import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.hadoop.FileSystemClient.RepeatableContentProducer;
-import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
+import com.teradata.tempto.internal.hadoop.revisions.RevisionStorage;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -28,25 +28,23 @@ import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class DefaultHdfsDataSourceWriter
-        implements HdfsDataSourceWriter
+public class FileSystemDataSourceWriter
 {
-
-    private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
+    private static final Logger LOGGER = getLogger(FileSystemDataSourceWriter.class);
 
     private final FileSystemClient fsClient;
     private final RevisionStorage revisionStorage;
 
     @Inject
-    public DefaultHdfsDataSourceWriter(FileSystemClient fsClient,
-            RevisionStorage revisionStorage)
+    public FileSystemDataSourceWriter(
+        FileSystemClient fsClient,
+        RevisionStorage revisionStorage)
     {
         this.fsClient = fsClient;
         this.revisionStorage = revisionStorage;
     }
 
-    @Override
-    public void ensureDataOnHdfs(String dataSourcePath, HiveDataSource dataSource)
+    public void ensureDataOnFileSystem(String dataSourcePath, HiveDataSource dataSource)
     {
         if (isDataUpToDate(dataSourcePath, dataSource)) {
             return;

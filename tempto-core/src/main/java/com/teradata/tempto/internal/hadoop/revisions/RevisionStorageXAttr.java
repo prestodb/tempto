@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs.revisions;
+package com.teradata.tempto.internal.hadoop.revisions;
 
 import com.teradata.tempto.hadoop.FileSystemClient;
 
@@ -26,7 +26,7 @@ public class RevisionStorageXAttr
 {
 
     /**
-     * XAttr name stored on HDFS for each data source file.
+     * XAttr name stored on file system for each data source file.
      */
     private static final String REVISON_XATTR_NAME = "user.test-data-revision";
 
@@ -38,22 +38,22 @@ public class RevisionStorageXAttr
     }
 
     @Override
-    public Optional<String> get(String hdfsPath)
+    public Optional<String> get(String path)
     {
-        return fsClient.getXAttr(hdfsPath, REVISON_XATTR_NAME);
+        return fsClient.getXAttr(path, REVISON_XATTR_NAME);
     }
 
     @Override
-    public void put(String hdfsPath, String revision)
+    public void put(String path, String revision)
     {
-        fsClient.setXAttr(hdfsPath, REVISON_XATTR_NAME, revision);
+        fsClient.setXAttr(path, REVISON_XATTR_NAME, revision);
     }
 
     @Override
-    public void remove(String hdfsPath)
+    public void remove(String path)
     {
-        if(get(hdfsPath).isPresent()){
-            fsClient.removeXAttr(hdfsPath, REVISON_XATTR_NAME);
+        if(get(path).isPresent()){
+            fsClient.removeXAttr(path, REVISON_XATTR_NAME);
         }
     }
 }

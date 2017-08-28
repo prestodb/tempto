@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs;
+package com.teradata.tempto.internal.hadoop;
 
 import com.google.inject.Inject;
 import com.google.inject.Module;
@@ -24,8 +24,11 @@ import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.initialization.AutoModuleProvider;
 import com.teradata.tempto.initialization.SuiteModuleProvider;
-import com.teradata.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
-import com.teradata.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage;
+import com.teradata.tempto.internal.hadoop.hdfs.SimpleHttpRequestsExecutor;
+import com.teradata.tempto.internal.hadoop.hdfs.SpnegoHttpRequestsExecutor;
+import com.teradata.tempto.internal.hadoop.hdfs.WebHdfsClient;
+import com.teradata.tempto.internal.hadoop.revisions.RevisionStorage;
+import com.teradata.tempto.internal.hadoop.revisions.DispatchingRevisionStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -36,13 +39,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.teradata.tempto.internal.hadoop.hdfs.WebHdfsClient.CONF_HDFS_WEBHDFS_HOST_KEY;
-import static com.teradata.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage.CONF_TESTS_HDFS_PATH_KEY;
+import static com.teradata.tempto.internal.hadoop.revisions.DispatchingRevisionStorage.CONF_TESTS_HDFS_PATH_KEY;
 
 @AutoModuleProvider
-public class HdfsModuleProvider
+public class FileSystemModuleProvider
         implements SuiteModuleProvider
 {
-    private static final Logger logger = LoggerFactory.getLogger(HdfsModuleProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileSystemModuleProvider.class);
 
     private static final String AUTHENTICATION_SPNEGO = "SPNEGO";
     private static final int NUMBER_OF_HTTP_RETRIES = 3;
@@ -68,11 +71,11 @@ public class HdfsModuleProvider
 
                 bind(FileSystemClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
                 bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
-                bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class).in(Scopes.SINGLETON);
+                bind(FileSystemDataSourceWriter.class).in(Scopes.SINGLETON);
 
                 expose(FileSystemClient.class);
                 expose(RevisionStorage.class);
-                expose(HdfsDataSourceWriter.class);
+                expose(FileSystemDataSourceWriter.class);
             }
 
             private Module httpRequestsExecutorModule()

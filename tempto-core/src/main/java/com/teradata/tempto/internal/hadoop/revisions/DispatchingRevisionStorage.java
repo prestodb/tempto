@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs.revisions;
+package com.teradata.tempto.internal.hadoop.revisions;
 
 import com.teradata.tempto.hadoop.FileSystemClient;
 import com.teradata.tempto.util.Lazy;
@@ -31,7 +31,7 @@ public class DispatchingRevisionStorage
 {
     private static final Logger LOGGER = getLogger(DispatchingRevisionStorage.class);
 
-    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.hdfs.path";
+    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.fs.path";
 
     private static final String TEST_X_ATTR_KEY = "user.test-attr-key";
     private static final String TEST_X_ATTR_VALUE = "test-attr-value";
@@ -41,34 +41,34 @@ public class DispatchingRevisionStorage
     @Inject
     public DispatchingRevisionStorage(FileSystemClient fsClient, @Named(CONF_TESTS_HDFS_PATH_KEY) String testDataBasePath)
     {
-        revisionStorage = new Lazy(new HdfsRevisionStorageProvider(fsClient, testDataBasePath));
+        revisionStorage = new Lazy(new FileSystemRevisionStorageProvider(fsClient, testDataBasePath));
     }
 
     @Override
-    public Optional<String> get(String hdfsPath)
+    public Optional<String> get(String fsPath)
     {
-        return revisionStorage.get().get(hdfsPath);
+        return revisionStorage.get().get(fsPath);
     }
 
     @Override
-    public void put(String hdfsPath, String revision)
+    public void put(String fsPath, String revision)
     {
-        revisionStorage.get().put(hdfsPath, revision);
+        revisionStorage.get().put(fsPath, revision);
     }
 
     @Override
-    public void remove(String hdfsPath)
+    public void remove(String fsPath)
     {
-        revisionStorage.get().remove(hdfsPath);
+        revisionStorage.get().remove(fsPath);
     }
 
-    private static class HdfsRevisionStorageProvider
+    private static class FileSystemRevisionStorageProvider
             implements Provider<RevisionStorage>
     {
         private final FileSystemClient fsClient;
         private final String testDataBasePath;
 
-        public HdfsRevisionStorageProvider(FileSystemClient fsClient, String testDataBasePath)
+        public FileSystemRevisionStorageProvider(FileSystemClient fsClient, String testDataBasePath)
         {
             this.fsClient = fsClient;
             this.testDataBasePath = testDataBasePath;
@@ -82,7 +82,7 @@ public class DispatchingRevisionStorage
                 return new RevisionStorageXAttr(fsClient);
             }
             else {
-                LOGGER.debug("HDFS xAttrs are not supported. Lets use RevisionMarkerFile.");
+                LOGGER.debug("HDFS xAttrs are not supported in file system. Lets use RevisionMarkerFile.");
                 return new RevisionStorageFile(fsClient, testDataBasePath);
             }
         }
@@ -98,7 +98,7 @@ public class DispatchingRevisionStorage
             }
             catch (RuntimeException e) {
                 if (isXAttrsWebCallRelated(e)) {
-                    LOGGER.debug("Could not get xAttr for path: " + testDataBasePath + " in hdfs; e=" + e.getMessage());
+                    LOGGER.debug("Could not get xAttr for path: " + testDataBasePath + " in file system; e=" + e.getMessage());
                     return false;
                 }
                 throw e;
