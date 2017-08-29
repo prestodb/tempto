@@ -30,6 +30,7 @@ class HiveTableManagerTest
         extends Specification
 {
   String ROOT_PATH = "/tests-path"
+  String DEFAULT_PREFIX = ''
   String MUTABLE_TABLES_PATH = '/user/hive/warehouse/'
 
   QueryExecutor queryExecutor = Mock()
@@ -44,7 +45,7 @@ class HiveTableManagerTest
     connection.getSchema() >> "schema"
     queryExecutor.getConnection() >> connection
     tableNameGenerator.generateMutableTableNameInDatabase(_) >> 'nation_randomSuffix'
-    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, hiveThriftClient, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
+    tableManager = new HiveTableManager(queryExecutor, dataSourceWriter, tableNameGenerator, hiveThriftClient, DEFAULT_PREFIX, ROOT_PATH, "database", "/user/hive/warehouse/", false, false);
   }
 
   def 'should create hive immutable table'()
@@ -62,7 +63,7 @@ class HiveTableManagerTest
     nationTableInstance.name == expectedTableName
     nationTableInstance.nameInDatabase == expectedTableNameInDatabase
 
-    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase, expectedTableLocation))
   }
 
@@ -80,7 +81,7 @@ class HiveTableManagerTest
     then:
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
-    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedTableLocation, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
   }
 
@@ -117,8 +118,8 @@ class HiveTableManagerTest
     then:
     tableInstance.nameInDatabase == expectedTableNameInDatabase
     tableInstance.name == expectedTableName
-    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition0Location, _)
-    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition1Location, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition0Location, _, _)
+    1 * dataSourceWriter.ensureDataOnFileSystem(expectedPartition1Location, _, _)
     1 * queryExecutor.executeQuery(expandDDLTemplate(PARTITIONED_NATION_DDL_TEMPLATE, expectedTableNameInDatabase))
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=0) LOCATION '$expectedPartition0Location'")
     1 * queryExecutor.executeQuery("ALTER TABLE ${expectedTableNameInDatabase} ADD PARTITION (pc=1) LOCATION '$expectedPartition1Location'")

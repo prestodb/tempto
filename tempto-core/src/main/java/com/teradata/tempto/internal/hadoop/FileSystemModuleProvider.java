@@ -48,6 +48,8 @@ public class FileSystemModuleProvider
     private static final Logger logger = LoggerFactory.getLogger(FileSystemModuleProvider.class);
 
     private static final String AUTHENTICATION_SPNEGO = "SPNEGO";
+    private static final String HDFS_FILE_SYSTEM = "hdfs";
+    private static final String DEFAULT_FILE_SYSTEM = HDFS_FILE_SYSTEM;
     private static final int NUMBER_OF_HTTP_RETRIES = 3;
 
     @Override
@@ -67,9 +69,20 @@ public class FileSystemModuleProvider
                     return;
                 }
 
+                Configuration hdfsSectionConfiguration = configuration
+                        .getSubconfiguration("tests")
+                        .getSubconfiguration("fs");
+                String testFileSystem = hdfsSectionConfiguration
+                        .getString("type")
+                        .orElse(DEFAULT_FILE_SYSTEM);
+
                 install(httpRequestsExecutorModule());
 
-                bind(FileSystemClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
+                if (testFileSystem.toLowerCase().equals(HDFS_FILE_SYSTEM)) {
+                    logger.debug("Using HDFS file system");
+                    bind(FileSystemClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
+                }
+
                 bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
                 bind(FileSystemDataSourceWriter.class).in(Scopes.SINGLETON);
 

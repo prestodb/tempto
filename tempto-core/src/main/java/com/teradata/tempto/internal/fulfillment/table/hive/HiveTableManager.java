@@ -48,6 +48,7 @@ public class HiveTableManager
 
     private final QueryExecutor queryExecutor;
     private final FileSystemDataSourceWriter fsDataSourceWriter;
+    private final String testDataBaseFSPrefix;
     private final String testDataBasePath;
     private final HiveThriftClient hiveThriftClient;
     private final String databaseName;
@@ -60,6 +61,7 @@ public class HiveTableManager
             QueryExecutor queryExecutor,
             FileSystemDataSourceWriter fsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
+            @Named("tests.fs.prefix") String testDataBaseFSPrefix,
             @Named("tests.fs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("path") String databasePath,
@@ -73,6 +75,7 @@ public class HiveTableManager
                 fsDataSourceWriter,
                 tableNameGenerator,
                 new HiveThriftClient(thriftHost, parseInt(thriftPort)),
+                testDataBaseFSPrefix,
                 testDataBasePath,
                 databaseName,
                 databasePath,
@@ -85,6 +88,7 @@ public class HiveTableManager
             FileSystemDataSourceWriter fsDataSourceWriter,
             TableNameGenerator tableNameGenerator,
             HiveThriftClient hiveThriftClient,
+            String testDataBaseFSPrefix,
             String testDataBasePath,
             String databaseName,
             String databasePath,
@@ -96,6 +100,7 @@ public class HiveTableManager
         this.databaseName = databaseName;
         this.queryExecutor = checkNotNull(queryExecutor, "queryExecutor is null");
         this.fsDataSourceWriter = checkNotNull(fsDataSourceWriter, "fsDataSourceWriter is null");
+        this.testDataBaseFSPrefix = checkNotNull(testDataBaseFSPrefix, "testDataBaseFSPrefix is null");
         this.testDataBasePath = checkNotNull(testDataBasePath, "testDataBasePath is null");
         checkNotNull(databasePath, "databasePath");
         if (!databasePath.endsWith("/")) {
@@ -176,12 +181,15 @@ public class HiveTableManager
 
     private void uploadTableData(String tableDataPath, HiveDataSource dataSource)
     {
-        fsDataSourceWriter.ensureDataOnFileSystem(tableDataPath, dataSource);
+        fsDataSourceWriter.ensureDataOnFileSystem(tableDataPath, testDataBaseFSPrefix, dataSource);
     }
 
     private String getImmutableTablePath(HiveDataSource dataSource)
     {
-        return testDataBasePath + "/" + dataSource.getPathSuffix();
+        if (testDataBaseFSPrefix.equals("")) {
+            return testDataBasePath + "/" + dataSource.getPathSuffix();
+        }
+        return testDataBaseFSPrefix + "/" + testDataBasePath + "/" + dataSource.getPathSuffix();
     }
 
     private String getMutableTablePath(TableName tableName, Optional<Integer> partitionId)

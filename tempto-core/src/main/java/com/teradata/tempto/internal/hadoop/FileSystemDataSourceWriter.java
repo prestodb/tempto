@@ -44,17 +44,19 @@ public class FileSystemDataSourceWriter
         this.revisionStorage = revisionStorage;
     }
 
-    public void ensureDataOnFileSystem(String dataSourcePath, HiveDataSource dataSource)
+    public void ensureDataOnFileSystem(String dataSourcePath, String fsPrefix, HiveDataSource dataSource)
     {
-        if (isDataUpToDate(dataSourcePath, dataSource)) {
+        String path = dataSourcePath.replace(fsPrefix, "");
+
+        if (isDataUpToDate(path, dataSource)) {
             return;
         }
 
-        revisionStorage.remove(dataSourcePath);
-        fsClient.deleteDirectory(dataSourcePath);
-        fsClient.createDirectory(dataSourcePath);
-        storeTableFiles(dataSourcePath, dataSource);
-        revisionStorage.put(dataSourcePath, dataSource.revisionMarker());
+        revisionStorage.remove(path);
+        fsClient.deleteDirectory(path);
+        fsClient.createDirectory(path);
+        storeTableFiles(path, dataSource);
+        revisionStorage.put(path, dataSource.revisionMarker());
     }
 
     private boolean isDataUpToDate(String dataSourcePath, HiveDataSource dataSource)

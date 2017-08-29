@@ -77,6 +77,8 @@ databases:
 
 tests:
   fs:
+    type: hdfs
+    prefix: ""
     path: /tempto
 
 ssh:
