@@ -54,6 +54,11 @@ public class TemptoRunnerCommandLineParser
     public static class ParsingException
             extends RuntimeException
     {
+        public ParsingException(String message)
+        {
+            super(message);
+        }
+
         public ParsingException(String message, Throwable cause)
         {
             super(message, cause);
@@ -130,6 +135,9 @@ public class TemptoRunnerCommandLineParser
     private TemptoRunnerOptions commandLineToOptions(CommandLine commandLine)
     {
         ImmutableMap.Builder<String, String> values = ImmutableMap.<String, String>builder();
+        if (!commandLine.getArgList().isEmpty()) {
+            throw new ParsingException("Extra unsupported parameters: " + commandLine.getArgList());
+        }
         for (Option option : options) {
             Optional<String> value = getOptionValue(commandLine, option);
             if (value.isPresent()) {
