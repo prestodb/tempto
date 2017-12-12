@@ -172,6 +172,8 @@ public class TestInitializationListener
     @Override
     public void onStart(ITestContext context)
     {
+        displayConfigurationToUser();
+
         Module suiteModule = combine(combine(getSuiteModules()), bind(suiteLevelFulfillers), bind(testMethodLevelFulfillers));
         GuiceTestContext initSuiteTestContext = new GuiceTestContext(suiteModule);
         TestContextStack<GuiceTestContext> suiteTextContextStack = new TestContextStack<>();
@@ -187,6 +189,14 @@ public class TestInitializationListener
         }
 
         setSuiteTestContextStack(suiteTextContextStack);
+    }
+
+    private void displayConfigurationToUser()
+    {
+        LOGGER.info("Configuration:");
+        for (String key : configuration.listKeys()) {
+            LOGGER.info(String.format("%s -> %s", key, configuration.getString(key).orElse("<NOT SET>")));
+        }
     }
 
     @Override
