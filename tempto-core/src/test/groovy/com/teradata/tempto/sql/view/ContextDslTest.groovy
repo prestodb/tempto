@@ -16,12 +16,11 @@ package com.teradata.tempto.sql.view
 
 import com.teradata.tempto.context.ContextDsl
 import com.teradata.tempto.context.ContextRunnable
-import com.teradata.tempto.internal.configuration.TestConfigurationFactory
 import com.teradata.tempto.query.QueryExecutor
 import com.teradata.tempto.query.QueryResult
 import spock.lang.Specification
 
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URIS_KEY
 import static com.teradata.tempto.query.QueryType.UPDATE
 
 class ContextDslTest
@@ -29,7 +28,7 @@ class ContextDslTest
 {
   def setupSpec()
   {
-    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml");
+    System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
   }
 
   def 'executeWithView'()

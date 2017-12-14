@@ -30,7 +30,7 @@ public class TestConfigurationFactory
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigurationFactory.class);
 
-    public static final String TEST_CONFIGURATION_URI_KEY = "tempto.configuration";
+    public static final String TEST_CONFIGURATION_URIS_KEY = "tempto.configurations";
     public static final String LOCAL_TEST_CONFIGURATION_URI_KEY = "tempto.configuration.local";
 
     public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
@@ -57,7 +57,7 @@ public class TestConfigurationFactory
 
     private static Configuration readTestConfiguration()
     {
-        String testConfigurationUris = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
+        String testConfigurationUris = System.getProperty(TEST_CONFIGURATION_URIS_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
         Configuration configuration = emptyConfiguration();
         for (String testConfigurationUri : Splitter.on(",").split(testConfigurationUris)) {
             Optional<InputStream> testConfigurationStream = getConfigurationInputStream(testConfigurationUri);

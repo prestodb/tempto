@@ -18,7 +18,7 @@ import com.teradata.tempto.configuration.Configuration
 import spock.lang.Specification
 
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URI_KEY
+import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URIS_KEY
 
 class TestConfigurationFactoryTest
         extends Specification
@@ -26,7 +26,7 @@ class TestConfigurationFactoryTest
 
   def 'read test configuration'() {
     setup:
-    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml");
+    System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
     System.setProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, "/configuration/local-configuration-tempto.yaml");
 
     when:
@@ -45,7 +45,7 @@ class TestConfigurationFactoryTest
 
   def 'read two test configurations'() {
     setup:
-    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml,/configuration/local-configuration-tempto.yaml");
+    System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml,/configuration/local-configuration-tempto.yaml");
 
     when:
     Configuration configuration = TestConfigurationFactory.createTestConfiguration()
