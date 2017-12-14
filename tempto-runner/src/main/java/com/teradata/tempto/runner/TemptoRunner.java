@@ -28,7 +28,6 @@ import org.testng.xml.XmlTest;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.LOCAL_TEST_CONFIGURATION_URI_KEY;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URIS_KEY;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.CONVENTION_TESTS_DIR_KEY;
 import static com.teradata.tempto.internal.convention.ConventionTestsUtils.CONVENTION_TESTS_RESULTS_DUMP_PATH_KEY;
@@ -101,7 +100,6 @@ public class TemptoRunner
     private void setupTestsConfiguration()
     {
         System.setProperty(TEST_CONFIGURATION_URIS_KEY, options.getConfigFiles());
-        System.setProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, options.getConfigFileLocal());
     }
 
     private void setupTestsFiltering(TestNG testNG)

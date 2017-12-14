@@ -82,14 +82,14 @@ To run product tests on MAC please do:
 
 ```
 cd tempto-examples/docker
-docker-compose runner java -jar /workspace/build/libs/tempto-examples-all.jar --config-local /workspace/docker/tempto-configuration-docker-local.yaml
+docker-compose runner java -jar /workspace/build/libs/tempto-examples-all.jar --config tempto-configuration.yaml,/workspace/docker/tempto-configuration-docker-local.yaml
 ```
 
 To run product tests in debugging mode you can:
 
 ```
 cd tempto-examples/docker
-docker-compose run -p 5005:5005 runner java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -jar /workspace/build/libs/tempto-examples-all.jar --config-local /workspace/docker/tempto-configuration-docker-local.yaml
+docker-compose run -p 5005:5005 runner java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -jar /workspace/build/libs/tempto-examples-all.jar --config tempto-configuration.yaml,/workspace/docker/tempto-configuration-docker-local.yaml
 ```
 
 then you can attach IDE to start debug session.

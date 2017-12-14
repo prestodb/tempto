@@ -37,7 +37,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILES;
-import static com.teradata.tempto.runner.TemptoRunnerOptions.CONFIG_FILE_LOCAL;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.CONVENTION_TESTS_DIR;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.DUMP_CONVENTION_RESULTS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.EXCLUDED_GROUPS;
@@ -185,7 +184,6 @@ public class TemptoRunnerCommandLineParser
             addOption(THREAD_COUNT);
             setReportDir("./test-reports", true);
             setConfigFile(TestConfigurationFactory.DEFAULT_TEST_CONFIGURATION_LOCATION, true);
-            setConfigLocalFile(TestConfigurationFactory.DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION, true);
             setConventionTestDirectory(ConventionTestsUtils.DEFAULT_CONVENTION_TESTS_DIR, true);
         }
 
@@ -209,11 +207,6 @@ public class TemptoRunnerCommandLineParser
         public Builder setConfigFile(String configFile, boolean changeable)
         {
             return setDefaultValue(CONFIG_FILES, configFile, changeable);
-        }
-
-        private Builder setConfigLocalFile(String configFile, boolean changeable)
-        {
-            return setDefaultValue(CONFIG_FILE_LOCAL, configFile, changeable);
         }
 
         public Builder setReportDir(String reportDir, boolean changeable)

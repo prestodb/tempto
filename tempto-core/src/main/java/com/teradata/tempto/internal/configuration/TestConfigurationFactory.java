@@ -15,8 +15,6 @@ package com.teradata.tempto.internal.configuration;
 
 import com.google.common.base.Splitter;
 import com.teradata.tempto.configuration.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,13 +26,9 @@ import static com.teradata.tempto.internal.configuration.EmptyConfiguration.empt
 
 public class TestConfigurationFactory
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigurationFactory.class);
-
     public static final String TEST_CONFIGURATION_URIS_KEY = "tempto.configurations";
-    public static final String LOCAL_TEST_CONFIGURATION_URI_KEY = "tempto.configuration.local";
-
     public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
-    public static final String DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION = "tempto-configuration-local.yaml";
+
     private static Configuration configuration = null;
 
     private TestConfigurationFactory() {}
@@ -51,8 +45,7 @@ public class TestConfigurationFactory
     @Deprecated
     static Configuration createTestConfiguration()
     {
-        return new ConfigurationVariableResolver()
-                .resolve(new HierarchicalConfiguration(readTestConfiguration(), readLocalConfiguration()));
+        return new ConfigurationVariableResolver().resolve(readTestConfiguration());
     }
 
     private static Configuration readTestConfiguration()
@@ -68,20 +61,6 @@ public class TestConfigurationFactory
             configuration = new HierarchicalConfiguration(configuration, parsedConfiguration);
         }
         return configuration;
-    }
-
-    private static Configuration readLocalConfiguration()
-    {
-        String configurationLocation = System.getProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, DEFAULT_LOCAL_TEST_CONFIGURATION_LOCATION);
-        Optional<InputStream> localTestConfigurationStream = getConfigurationInputStream(configurationLocation);
-        if (localTestConfigurationStream.isPresent()) {
-            InputStream testConfigurationStream = localTestConfigurationStream.get();
-            return parseConfiguration(testConfigurationStream);
-        }
-        else {
-            LOGGER.info("Default configuration is being used. Local configuration is absent: {}", configurationLocation);
-            return emptyConfiguration();
-        }
     }
 
     private static Optional<InputStream> getConfigurationInputStream(String location)

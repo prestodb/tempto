@@ -43,12 +43,6 @@ public class TemptoRunnerOptions
             .hasArg()
             .build();
 
-    public static final Option CONFIG_FILE_LOCAL = Option.builder()
-            .longOpt("config-local")
-            .desc("Path to local test configuration YAML file. If file does not exists in local file system then classpath is checked")
-            .hasArg()
-            .build();
-
     public static final Option REPORT_DIR = Option.builder("r")
             .longOpt("report-dir")
             .desc("Test reports directory")
@@ -119,11 +113,6 @@ public class TemptoRunnerOptions
     public String getConfigFiles()
     {
         return getValue(CONFIG_FILES.getLongOpt()).get();
-    }
-
-    public String getConfigFileLocal()
-    {
-        return getValue(CONFIG_FILE_LOCAL.getLongOpt()).get();
     }
 
     public Set<String> getTestGroups()
