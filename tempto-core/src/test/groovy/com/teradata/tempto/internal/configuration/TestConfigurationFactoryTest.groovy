@@ -42,4 +42,22 @@ class TestConfigurationFactoryTest
     configuration.getStringMandatory('resolve.both') == 'local'
     configuration.getStringMandatory('resolve.global') == 'global'
   }
+
+  def 'read two test configurations'() {
+    setup:
+    System.setProperty(TEST_CONFIGURATION_URI_KEY, "/configuration/global-configuration-tempto.yaml,/configuration/local-configuration-tempto.yaml");
+
+    when:
+    Configuration configuration = TestConfigurationFactory.createTestConfiguration()
+
+    then:
+    configuration.getStringMandatory('value.local') == 'local'
+    configuration.getStringMandatory('value.both') == 'local'
+    configuration.getStringMandatory('value.global') == 'global'
+    configuration.getStringMandatory('value.default') == 'default_value'
+
+    configuration.getStringMandatory('resolve.local') == 'local'
+    configuration.getStringMandatory('resolve.both') == 'local'
+    configuration.getStringMandatory('resolve.global') == 'global'
+  }
 }

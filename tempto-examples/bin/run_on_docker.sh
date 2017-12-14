@@ -41,7 +41,7 @@ function check_presto() {
 function run_product_tests() {
   ${DOCKER_COMPOSE} run --rm -T runner \
     java -jar /workspace/build/libs/tempto-examples-all.jar \
-    --config-local /workspace/docker/tempto-configuration-docker-local.yaml \
+    --config tempto-configuration.yaml,/workspace/docker/tempto-configuration-docker-local.yaml \
     $*
 }
 

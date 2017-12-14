@@ -13,6 +13,7 @@
  */
 package com.teradata.tempto.internal.configuration;
 
+import com.google.common.base.Splitter;
 import com.teradata.tempto.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +57,17 @@ public class TestConfigurationFactory
 
     private static Configuration readTestConfiguration()
     {
-        String testConfigurationUri = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
-        Optional<InputStream> testConfigurationStream = getConfigurationInputStream(testConfigurationUri);
-        if (!testConfigurationStream.isPresent()) {
-            throw new IllegalArgumentException("Unable find to configuration: " + testConfigurationUri);
+        String testConfigurationUris = System.getProperty(TEST_CONFIGURATION_URI_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
+        Configuration configuration = emptyConfiguration();
+        for (String testConfigurationUri : Splitter.on(",").split(testConfigurationUris)) {
+            Optional<InputStream> testConfigurationStream = getConfigurationInputStream(testConfigurationUri);
+            if (!testConfigurationStream.isPresent()) {
+                throw new IllegalArgumentException("Unable find to configuration: " + testConfigurationUri);
+            }
+            Configuration parsedConfiguration = parseConfiguration(testConfigurationStream.get());
+            configuration = new HierarchicalConfiguration(configuration, parsedConfiguration);
         }
-        return parseConfiguration(testConfigurationStream.get());
+        return configuration;
     }
 
     private static Configuration readLocalConfiguration()
