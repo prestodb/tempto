@@ -93,19 +93,16 @@ log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{
 
 The test execution environment is configured via a hierarchical YAML file. The YAML file
 is by default loaded from the classpath and must be named `tempto-configuration.yaml`.
-If `tempto-configuration-local.yaml` file is present on classpath it will also be loaded and will
-overwrite settings defined in `tempto-configuration.yaml` file.
 
 Configuration files locations can be overidden by using following java system properties:
  
- * `tempto.configuration` - for overriding global configuration file location
- 
- * `tempto.configuration.local` - for overriding local configuration file location  
+ * `tempto.configurations` - for overriding global configuration file locations
 
 ```
- java ... -Dtempto.configuration=classpath:my_configuration.yaml \
-          -Dtempto.configuration.local=file:/tmp/my_local_configuration.yaml
+ java ... -Dtempto.configuration=my_configuration.yaml,/tmp/my_local_configuration.yaml
 ```
+
+Configuration files are read from left to right.
 
 Configuration files can also be overridden by passing command line arguments to
 tests runner based on `TemptoRunner` Java class. See below for details.
