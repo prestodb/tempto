@@ -36,7 +36,7 @@ public class TemptoRunnerOptions
             .required()
             .build();
 
-    public static final Option CONFIG_FILE = Option.builder("f")
+    public static final Option CONFIG_FILES = Option.builder("f")
             .longOpt("config")
             .desc("Path to test configuration YAML files. If file does not exists in local file system then classpath is checked")
             .valueSeparator(',')
@@ -116,9 +116,9 @@ public class TemptoRunnerOptions
         return getValue(PACKAGE.getLongOpt()).get();
     }
 
-    public String getConfigFile()
+    public String getConfigFiles()
     {
-        return getValue(CONFIG_FILE.getLongOpt()).get();
+        return getValue(CONFIG_FILES.getLongOpt()).get();
     }
 
     public String getConfigFileLocal()

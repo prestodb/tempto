@@ -100,7 +100,7 @@ public class TemptoRunner
 
     private void setupTestsConfiguration()
     {
-        System.setProperty(TEST_CONFIGURATION_URIS_KEY, options.getConfigFile());
+        System.setProperty(TEST_CONFIGURATION_URIS_KEY, options.getConfigFiles());
         System.setProperty(LOCAL_TEST_CONFIGURATION_URI_KEY, options.getConfigFileLocal());
     }
 
