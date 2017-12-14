@@ -36,7 +36,7 @@ public class TemptoRunnerOptions
             .required()
             .build();
 
-    public static final Option CONFIG_FILE = Option.builder()
+    public static final Option CONFIG_FILE = Option.builder("f")
             .longOpt("config")
             .desc("Path to main test configuration YAML file. If file does not exists in local file system then classpath is checked")
             .hasArg()
