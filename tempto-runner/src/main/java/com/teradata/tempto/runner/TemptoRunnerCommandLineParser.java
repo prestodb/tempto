@@ -47,6 +47,7 @@ import static com.teradata.tempto.runner.TemptoRunnerOptions.REPORT_DIR;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.TESTS;
 import static com.teradata.tempto.runner.TemptoRunnerOptions.THREAD_COUNT;
 import static java.lang.Boolean.TRUE;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 public class TemptoRunnerCommandLineParser
@@ -206,7 +207,11 @@ public class TemptoRunnerCommandLineParser
 
         public Builder setConfigFile(String configFile, boolean changeable)
         {
-            return setDefaultValue(CONFIG_FILES, configFile, changeable);
+            return setConfigFiles(singletonList(configFile), changeable);
+        }
+        public Builder setConfigFiles(List<String> configFiles, boolean changeable)
+        {
+            return setDefaultValue(CONFIG_FILES, Joiner.on(",").join(configFiles), changeable);
         }
 
         public Builder setReportDir(String reportDir, boolean changeable)
