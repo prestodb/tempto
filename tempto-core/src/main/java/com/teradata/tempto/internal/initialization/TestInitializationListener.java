@@ -18,6 +18,7 @@ import com.beust.jcommander.internal.Sets;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
@@ -194,7 +195,9 @@ public class TestInitializationListener
     private void displayConfigurationToUser()
     {
         LOGGER.info("Configuration:");
-        for (String key : configuration.listKeys()) {
+        List<String> configurationKeys = Ordering.natural()
+                .sortedCopy(configuration.listKeys());
+        for (String key : configurationKeys) {
             LOGGER.info(String.format("%s -> %s", key, configuration.getString(key).orElse("<NOT SET>")));
         }
     }
