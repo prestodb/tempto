@@ -15,6 +15,8 @@ package com.teradata.tempto.internal.configuration;
 
 import com.google.common.base.Splitter;
 import com.teradata.tempto.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +28,8 @@ import static com.teradata.tempto.internal.configuration.EmptyConfiguration.empt
 
 public class TestConfigurationFactory
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigurationFactory.class);
+
     public static final String TEST_CONFIGURATION_URIS_KEY = "tempto.configurations";
     public static final String DEFAULT_TEST_CONFIGURATION_LOCATION = "tempto-configuration.yaml";
 
@@ -51,6 +55,7 @@ public class TestConfigurationFactory
     private static Configuration readTestConfiguration()
     {
         String testConfigurationUris = System.getProperty(TEST_CONFIGURATION_URIS_KEY, DEFAULT_TEST_CONFIGURATION_LOCATION);
+        LOGGER.info("Reading configuriontion from {}", testConfigurationUris);
         Configuration configuration = emptyConfiguration();
         for (String testConfigurationUri : Splitter.on(",").split(testConfigurationUris)) {
             Optional<InputStream> testConfigurationStream = getConfigurationInputStream(testConfigurationUri);
