@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.net.HostAndPort;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.hadoop.FileSystemClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
@@ -61,7 +61,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * HDFS client based on WebHDFS REST API.
  */
 public class WebHdfsClient
-        implements HdfsClient
+        implements FileSystemClient
 {
     private static final Logger logger = getLogger(WebHdfsClient.class);
 
@@ -103,6 +103,12 @@ public class WebHdfsClient
         catch (IOException e) {
             throw new RuntimeException("Could not create directory " + path + " in hdfs, user: " + username, e);
         }
+    }
+
+    @Override
+    public void deleteDirectory(String path)
+    {
+        delete(path);
     }
 
     @Override

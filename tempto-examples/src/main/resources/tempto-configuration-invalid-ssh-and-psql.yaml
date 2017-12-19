@@ -65,7 +65,9 @@ databases:
     table_manager_type: jdbc
 
 tests:
-  hdfs:
+  fs:
+    type: hdfs
+    prefix: ""
     path: /tempto
 
 ssh:

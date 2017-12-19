@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.hadoop.hdfs;
+package com.teradata.tempto.hadoop;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
@@ -27,7 +27,7 @@ import static java.nio.charset.Charset.defaultCharset;
 /**
  * HDFS client.
  */
-public interface HdfsClient
+public interface FileSystemClient
 {
     /**
      * Interface of an object that can open same input stream multiple times.
@@ -44,6 +44,8 @@ public interface HdfsClient
     }
 
     void createDirectory(String path);
+
+    void deleteDirectory(String path);
 
     void delete(String path);
 
@@ -73,7 +75,7 @@ public interface HdfsClient
 
     /**
      * @param path File to be examined
-     * @return length of a file stored in HDFS, -1 if file not exists
+     * @return length of a file stored in file system, -1 if file not exists
      */
     long getLength(String path);
 

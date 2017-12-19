@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-package com.teradata.tempto.internal.hadoop.hdfs.revisions;
+package com.teradata.tempto.internal.hadoop.revisions;
 
-import com.teradata.tempto.hadoop.hdfs.HdfsClient;
+import com.teradata.tempto.hadoop.FileSystemClient;
 
 import java.util.Optional;
 
@@ -25,40 +25,40 @@ public class RevisionStorageFile
         implements RevisionStorage
 {
 
-    private final HdfsClient hdfsClient;
+    private final FileSystemClient fsClient;
     private final String testDataBasePath;
 
-    RevisionStorageFile(HdfsClient hdfsClient, String testDataBasePath)
+    RevisionStorageFile(FileSystemClient fsClient, String testDataBasePath)
     {
-        this.hdfsClient = hdfsClient;
+        this.fsClient = fsClient;
         this.testDataBasePath = testDataBasePath;
     }
 
     @Override
-    public Optional<String> get(String hdfsPath)
+    public Optional<String> get(String path)
     {
-        String markerFilePath = markerFilePath(hdfsPath);
+        String markerFilePath = markerFilePath(path);
 
-        if (!hdfsClient.exist(markerFilePath)) {
+        if (!fsClient.exist(markerFilePath)) {
             return Optional.empty();
         }
 
-        return Optional.of(hdfsClient.loadFile(markerFilePath));
+        return Optional.of(fsClient.loadFile(markerFilePath));
     }
 
     @Override
-    public void put(String hdfsPath, String revision)
+    public void put(String path, String revision)
     {
-        String markerFilePath = markerFilePath(hdfsPath);
+        String markerFilePath = markerFilePath(path);
 
-        hdfsClient.delete(markerFilePath);
-        hdfsClient.saveFile(markerFilePath, revision);
+        fsClient.delete(markerFilePath);
+        fsClient.saveFile(markerFilePath, revision);
     }
 
     @Override
-    public void remove(String hdfsPath)
+    public void remove(String path)
     {
-        hdfsClient.delete(markerFilePath(hdfsPath));
+        fsClient.delete(markerFilePath(path));
     }
 
     private String markerFilePath(String path)
