@@ -40,7 +40,7 @@ public class RequirementsCollectorTest
   def "should list method requirements"()
   {
     expect:
-    requirementsCollector.getAnnotationBasedRequirementsFor(method).requirementsSets == expectedRequirementSets
+    requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
 
     where:
     method                                        | expectedRequirementSets

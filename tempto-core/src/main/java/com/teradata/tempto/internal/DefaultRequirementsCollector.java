@@ -46,7 +46,7 @@ public class DefaultRequirementsCollector
     }
 
     @Override
-    public CompositeRequirement getAnnotationBasedRequirementsFor(Method method)
+    public CompositeRequirement collect(Method method)
     {
         Requires methodRequiresAnnotation = method.getAnnotation(Requires.class);
         CompositeRequirement methodCompositeRequirement = getCompositeRequirement(methodRequiresAnnotation);

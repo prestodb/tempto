@@ -20,5 +20,5 @@ import java.lang.reflect.Method;
 
 public interface RequirementsCollector
 {
-    CompositeRequirement getAnnotationBasedRequirementsFor(Method method);
+    CompositeRequirement collect(Method method);
 }

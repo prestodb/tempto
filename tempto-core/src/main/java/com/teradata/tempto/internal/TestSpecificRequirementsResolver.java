@@ -39,7 +39,7 @@ public class TestSpecificRequirementsResolver
     public Set<Set<Requirement>> resolve(ITestNGMethod testMethod)
     {
         Method javaTestMethod = getJavaMethodFromTestMethod(testMethod);
-        CompositeRequirement compositeRequirement = requirementsCollector.getAnnotationBasedRequirementsFor(javaTestMethod);
+        CompositeRequirement compositeRequirement = requirementsCollector.collect(javaTestMethod);
         Optional<Requirement> providedRequirement = getExplicitRequirementsFor(testMethod.getInstance());
         if (providedRequirement.isPresent()) {
             compositeRequirement = compose(providedRequirement.get(), compositeRequirement);
