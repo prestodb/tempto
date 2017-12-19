@@ -156,7 +156,7 @@ public class JdbcQueryExecutor
         }
     }
 
-    boolean isSelect(String sql)
+    private static boolean isSelect(String sql)
     {
         sql = sql.trim().toLowerCase();
         return sql.startsWith("select") || sql.startsWith("show") || sql.startsWith("with");
