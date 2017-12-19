@@ -37,7 +37,7 @@ public class LdapObjectFulfiller<T extends LdapObjectRequirement>
     {
         requirements.stream()
                 .filter(LdapObjectRequirement.class::isInstance)
-                .map(requirement -> (T) requirement)
+                .map(LdapObjectRequirement.class::cast)
                 .map(requirement -> requirement.getLdapObjectDefinitions())
                 .distinct()
                 .forEach(ldapObjectEntryManager::addLdapDefinitions);
