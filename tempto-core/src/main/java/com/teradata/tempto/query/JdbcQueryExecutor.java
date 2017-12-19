@@ -114,7 +114,7 @@ public class JdbcQueryExecutor
 
         try {
             if (params.length == 0) {
-                return executeQueryNoParams(sql, isSelect);
+                return executeQueryNoParams(sql);
             }
             else {
                 return executeQueryWithParams(sql, isSelect, params);
@@ -125,16 +125,15 @@ public class JdbcQueryExecutor
         }
     }
 
-    private QueryResult executeQueryNoParams(String sql, boolean isSelect)
+    private QueryResult executeQueryNoParams(String sql)
             throws SQLException
     {
         try (Statement statement = getConnection().createStatement()) {
-            if (isSelect) {
-                ResultSet rs = statement.executeQuery(sql);
-                return QueryResult.forResultSet(rs);
+            if (statement.execute(sql)) {
+                return QueryResult.forResultSet(statement.getResultSet());
             }
             else {
-                return forSingleIntegerValue(statement.executeUpdate(sql));
+                return forSingleIntegerValue(statement.getUpdateCount());
             }
         }
     }
