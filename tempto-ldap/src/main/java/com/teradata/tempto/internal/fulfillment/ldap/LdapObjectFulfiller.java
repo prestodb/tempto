@@ -36,7 +36,7 @@ public class LdapObjectFulfiller<T extends LdapObjectRequirement>
     public Set<State> fulfill(Set<Requirement> requirements)
     {
         requirements.stream()
-                .filter(requirement -> requirement.getClass().isAssignableFrom(LdapObjectRequirement.class))
+                .filter(LdapObjectRequirement.class::isInstance)
                 .map(requirement -> (T) requirement)
                 .map(requirement -> requirement.getLdapObjectDefinitions())
                 .distinct()
