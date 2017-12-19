@@ -24,6 +24,6 @@ install: ./gradlew build -x test
 script:
   - ./gradlew test
   - ./tempto-examples/bin/run_on_docker.sh --thread-count 2 -x failing
-  - ./tempto-examples/bin/run_on_docker.sh --thread-count 2 --config tempto-configuration-read-only.yaml -g in_memory
-  - ./tempto-examples/bin/run_on_docker.sh --thread-count 2 --config tempto-configuration-no-db.yaml -g ssh
-  - ./tempto-examples/bin/run_on_docker.sh --thread-count 2 --config tempto-configuration-invalid-ssh-and-psql.yaml -g in_memory
+  - CONFIG_FILE=tempto-configuration-read-only.yaml ./tempto-examples/bin/run_on_docker.sh --thread-count 2 -g in_memory
+  - CONFIG_FILE=tempto-configuration-no-db.yaml ./tempto-examples/bin/run_on_docker.sh --thread-count 2 -g ssh
+  - CONFIG_FILE=tempto-configuration-invalid-ssh-and-psql.yaml ./tempto-examples/bin/run_on_docker.sh --thread-count 2 -g in_memory
