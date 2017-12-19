@@ -2,7 +2,7 @@ version: '2'
 services:
   hadoop-master:
     hostname: hadoop-master
-    image: 'teradatalabs/cdh5-hive:23'
+    image: 'prestodb/hdp2.5-hive:1'
     ports:
       - '1080:1080'
       - '8020:8020'
@@ -60,7 +60,7 @@ services:
       - 'presto-master'
 
   runner:
-    image: 'teradatalabs/centos6-java8-oracle'
+    image: 'prestodb/centos6-oj8:1'
     ports:
       - '5005:5005'
     volumes:
