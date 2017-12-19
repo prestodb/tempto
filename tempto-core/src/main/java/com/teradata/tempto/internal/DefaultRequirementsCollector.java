@@ -14,6 +14,7 @@
 
 package com.teradata.tempto.internal;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.teradata.tempto.CompositeRequirement;
 import com.teradata.tempto.Requirement;
@@ -37,52 +38,72 @@ import static java.util.Arrays.asList;
 public class DefaultRequirementsCollector
         implements RequirementsCollector
 {
-
-    private final Configuration configuration;
+    private final List<RequirementsCollector> collectors;
 
     public DefaultRequirementsCollector(Configuration configuration)
     {
-        this.configuration = configuration;
+        this.collectors = ImmutableList.of(new RequirementsFromAnnotationCollector(configuration));
     }
 
     @Override
     public CompositeRequirement collect(Method method)
     {
-        Requires methodRequiresAnnotation = method.getAnnotation(Requires.class);
-        CompositeRequirement methodCompositeRequirement = getCompositeRequirement(methodRequiresAnnotation);
-
-        Requires classRequiresAnnotation = method.getDeclaringClass().getAnnotation(Requires.class);
-        CompositeRequirement classCompositeRequirement = getCompositeRequirement(classRequiresAnnotation);
-
-        return compose(methodCompositeRequirement, classCompositeRequirement);
+        CompositeRequirement requirement = Requirements.compose();
+        for (RequirementsCollector collector : collectors) {
+            requirement = compose(requirement, collector.collect(method));
+        }
+        return requirement;
     }
 
-    private CompositeRequirement getCompositeRequirement(Requires requires)
+    private static class RequirementsFromAnnotationCollector
+            implements RequirementsCollector
     {
-        if (requires != null) {
-            checkArgument(requires.value() != null);
-            return Requirements.compose(toRequirements(requires.value()));
-        }
-        else {
-            return compose();
-        }
-    }
+        private final Configuration configuration;
 
-    private List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers)
-    {
-        return Lists.transform(asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
-            try {
-                Constructor<? extends RequirementsProvider> constructor = providerClass.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                RequirementsProvider provider = constructor.newInstance();
-                return provider.getRequirements(configuration);
+        public RequirementsFromAnnotationCollector(Configuration configuration)
+        {
+            this.configuration = configuration;
+        }
+
+        @Override
+        public CompositeRequirement collect(Method method)
+        {
+            Requires methodRequiresAnnotation = method.getAnnotation(Requires.class);
+            CompositeRequirement methodCompositeRequirement = getCompositeRequirement(methodRequiresAnnotation);
+
+            Requires classRequiresAnnotation = method.getDeclaringClass().getAnnotation(Requires.class);
+            CompositeRequirement classCompositeRequirement = getCompositeRequirement(classRequiresAnnotation);
+
+            return compose(methodCompositeRequirement, classCompositeRequirement);
+        }
+
+        private CompositeRequirement getCompositeRequirement(Requires requires)
+        {
+            if (requires != null) {
+                checkArgument(requires.value() != null);
+                return Requirements.compose(toRequirements(requires.value()));
             }
-            catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
-                throw new IllegalArgumentException("Could not instantiate provider class", e);
+            else {
+                return compose();
             }
-            catch (NoSuchMethodException e) {
-                throw new IllegalArgumentException("No parameterless constructor for " + providerClass, e);
-            }
-        });
+        }
+
+        private List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers)
+        {
+            return Lists.transform(asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
+                try {
+                    Constructor<? extends RequirementsProvider> constructor = providerClass.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    RequirementsProvider provider = constructor.newInstance();
+                    return provider.getRequirements(configuration);
+                }
+                catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+                    throw new IllegalArgumentException("Could not instantiate provider class", e);
+                }
+                catch (NoSuchMethodException e) {
+                    throw new IllegalArgumentException("No parameterless constructor for " + providerClass, e);
+                }
+            });
+        }
     }
 }
