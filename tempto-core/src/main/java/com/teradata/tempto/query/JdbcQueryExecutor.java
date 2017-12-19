@@ -82,14 +82,14 @@ public class JdbcQueryExecutor
     public QueryResult executeQuery(String sql, QueryParam... params)
             throws QueryExecutionException
     {
-        return execute(sql, isSelect(sql), params);
+        return execute(sql, params);
     }
 
     @Override
     public QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException
     {
-        return execute(sql, queryType == SELECT, params);
+        return execute(sql, params);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class JdbcQueryExecutor
         return connection;
     }
 
-    private QueryResult execute(String sql, boolean isSelect, QueryParam... params)
+    private QueryResult execute(String sql, QueryParam... params)
             throws QueryExecutionException
     {
         if (connection == null) {
@@ -117,7 +117,7 @@ public class JdbcQueryExecutor
                 return executeQueryNoParams(sql);
             }
             else {
-                return executeQueryWithParams(sql, isSelect, params);
+                return executeQueryWithParams(sql, params);
             }
         }
         catch (SQLException e) {
@@ -139,26 +139,19 @@ public class JdbcQueryExecutor
     }
 
     // TODO - remove this method as soon as Presto supports prepared statements
-    private QueryResult executeQueryWithParams(String sql, boolean isSelect, QueryParam[] params)
+    private QueryResult executeQueryWithParams(String sql, QueryParam[] params)
             throws SQLException
     {
         try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             setQueryParams(statement, params);
 
-            if (isSelect) {
-                ResultSet rs = statement.executeQuery();
-                return QueryResult.forResultSet(rs);
+            if (statement.execute(sql)) {
+                return QueryResult.forResultSet(statement.getResultSet());
             }
             else {
                 return forSingleIntegerValue(statement.executeUpdate());
             }
         }
-    }
-
-    private static boolean isSelect(String sql)
-    {
-        sql = sql.trim().toLowerCase();
-        return sql.startsWith("select") || sql.startsWith("show") || sql.startsWith("with");
     }
 
     private static void setQueryParams(PreparedStatement statement, QueryParam[] params)
