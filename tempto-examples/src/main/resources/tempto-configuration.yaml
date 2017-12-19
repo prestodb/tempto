@@ -102,3 +102,12 @@ list:
     - ala
     - ma
     - kota
+
+command:
+  suite:
+    - echo first configuraiton suite command output
+    - echo second configuraiton suite command output
+    - touch configuratioCommandTestFile
+  test:
+    - echo first configuraiton test command output
+    - echo second configuraiton test command output

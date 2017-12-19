@@ -22,6 +22,9 @@ import com.teradata.tempto.Requirements;
 import com.teradata.tempto.RequirementsProvider;
 import com.teradata.tempto.Requires;
 import com.teradata.tempto.configuration.Configuration;
+import com.teradata.tempto.fulfillment.command.Command;
+import com.teradata.tempto.fulfillment.command.SuiteCommandRequirement;
+import com.teradata.tempto.fulfillment.command.TestCommandRequirement;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -31,6 +34,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.teradata.tempto.Requirements.compose;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class gathers requirements for a given test method.
@@ -42,7 +46,9 @@ public class DefaultRequirementsCollector
 
     public DefaultRequirementsCollector(Configuration configuration)
     {
-        this.collectors = ImmutableList.of(new RequirementsFromAnnotationCollector(configuration));
+        this.collectors = ImmutableList.of(
+                new RequirementsFromAnnotationCollector(configuration),
+                new CommandRequirementsFromConfigurationCollector(configuration));
     }
 
     @Override
@@ -53,6 +59,41 @@ public class DefaultRequirementsCollector
             requirement = compose(requirement, collector.collect(method));
         }
         return requirement;
+    }
+
+    private static class CommandRequirementsFromConfigurationCollector
+            implements RequirementsCollector
+    {
+        private final Configuration configuration;
+
+        public CommandRequirementsFromConfigurationCollector(Configuration configuration)
+        {
+            this.configuration = configuration;
+        }
+
+        @Override
+        public CompositeRequirement collect(Method method)
+        {
+            CompositeRequirement requirement = compose();
+
+            List<Command> testSetupCommands = configurationListToCommands("command.test");
+            if (!testSetupCommands.isEmpty()) {
+                requirement = compose(requirement, new TestCommandRequirement(testSetupCommands));
+            }
+            List<Command> suiteSetupCommands= configurationListToCommands("command.suite");
+            if (!suiteSetupCommands.isEmpty()) {
+                requirement = compose(requirement, new SuiteCommandRequirement(suiteSetupCommands));
+            }
+
+            return requirement;
+        }
+
+        private List<Command> configurationListToCommands(String key)
+        {
+            return configuration.getStringList(key).stream()
+                    .map(Command::new)
+                    .collect(toList());
+        }
     }
 
     private static class RequirementsFromAnnotationCollector

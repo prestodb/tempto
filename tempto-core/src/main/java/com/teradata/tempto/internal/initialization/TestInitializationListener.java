@@ -41,6 +41,8 @@ import com.teradata.tempto.internal.RequirementFulfillerByPriorityComparator;
 import com.teradata.tempto.internal.TestSpecificRequirementsResolver;
 import com.teradata.tempto.internal.context.GuiceTestContext;
 import com.teradata.tempto.internal.context.TestContextStack;
+import com.teradata.tempto.internal.fulfillment.command.SuiteCommandFulfiller;
+import com.teradata.tempto.internal.fulfillment.command.TestCommandFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.ImmutableTablesFulfiller;
 import com.teradata.tempto.internal.fulfillment.table.MutableTablesFulfiller;
 import org.slf4j.Logger;
@@ -84,11 +86,13 @@ public class TestInitializationListener
     private static final Logger LOGGER = getLogger(TestInitializationListener.class);
 
     private final static List<Class<? extends RequirementFulfiller>> BUILTIN_SUITE_LEVEL_FULFILLERS = ImmutableList.of(
-            ImmutableTablesFulfiller.class
+            ImmutableTablesFulfiller.class,
+            SuiteCommandFulfiller.class
     );
 
     private static final List<Class<? extends RequirementFulfiller>> BUILTIN_TEST_METHOD_LEVEL_FULFILLERS = ImmutableList.of(
-            MutableTablesFulfiller.class
+            MutableTablesFulfiller.class,
+            TestCommandFulfiller.class
     );
 
     private final List<? extends SuiteModuleProvider> suiteModuleProviders;

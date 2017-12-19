@@ -15,15 +15,14 @@
 package com.teradata.tempto.internal
 
 import com.google.common.collect.ImmutableSet
-import com.teradata.tempto.CompositeRequirement
-import com.teradata.tempto.Requirement
-import com.teradata.tempto.Requirements
-import com.teradata.tempto.RequirementsProvider
-import com.teradata.tempto.Requires
+import com.teradata.tempto.*
 import com.teradata.tempto.configuration.Configuration
+import com.teradata.tempto.internal.configuration.YamlConfiguration
 import spock.lang.Specification
 
 import static com.teradata.tempto.Requirements.compose
+import static com.teradata.tempto.fulfillment.command.SuiteCommandRequirement.suiteCommand
+import static com.teradata.tempto.fulfillment.command.TestCommandRequirement.testCommand
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration
 import static java.util.Arrays.asList
 
@@ -69,6 +68,23 @@ public class RequirementsCollectorTest
     compose(Requirements.allOf(C, Requirements.allOf(A, B)), D)   | setOf(setOf(C, D), setOf(A, D), setOf(B, D))
 
     compose(A, Requirements.allOf(compose(B, C), D)) | setOf(setOf(A, B, C), setOf(A, D))
+  }
+
+  def "should provide command requirements from configuration"()
+  {
+    expect:
+    def requirementsCollector = new DefaultRequirementsCollector(new YamlConfiguration('''
+command:
+  test:
+    - test command
+  suite:
+    - suite command
+    '''))
+    requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
+
+    where:
+    method                                        | expectedRequirementSets
+    MethodRequirement.getMethod('method')         | setOf(setOf(A, testCommand('test command'), suiteCommand('suite command')))
   }
 
   private static Requirement req(String name)
