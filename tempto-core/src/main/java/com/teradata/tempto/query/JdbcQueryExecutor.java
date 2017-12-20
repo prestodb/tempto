@@ -145,7 +145,7 @@ public class JdbcQueryExecutor
         try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             setQueryParams(statement, params);
 
-            if (statement.execute(sql)) {
+            if (statement.execute()) {
                 return QueryResult.forResultSet(statement.getResultSet());
             }
             else {
