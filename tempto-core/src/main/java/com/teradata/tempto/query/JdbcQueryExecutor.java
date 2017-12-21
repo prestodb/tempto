@@ -140,7 +140,7 @@ public class JdbcQueryExecutor
                 return QueryResult.forResultSet(statement.getResultSet());
             }
             else {
-                return forSingleIntegerValue(statement.executeUpdate());
+                return forSingleIntegerValue(statement.getUpdateCount());
             }
         }
     }
