@@ -19,7 +19,6 @@ import com.teradata.tempto.query.QueryExecutionException;
 import com.teradata.tempto.query.QueryExecutor;
 
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
-import static com.teradata.tempto.query.QueryType.UPDATE;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,14 +54,14 @@ public class ViewContextProvider
     private void createView(String viewName)
     {
         String createViewDDL = format("CREATE VIEW %s AS %s", viewName, selectSql);
-        assertThat(queryExecutor.executeQuery(createViewDDL, UPDATE))
+        assertThat(queryExecutor.executeQuery(createViewDDL))
                 .hasRowsCount(1);
     }
 
     private void tryDropView(String viewName)
     {
         try {
-            assertThat(queryExecutor.executeQuery(format("DROP VIEW %s", viewName), UPDATE))
+            assertThat(queryExecutor.executeQuery(format("DROP VIEW %s", viewName)))
                     .hasRowsCount(1);
         }
         catch (QueryExecutionException e) {

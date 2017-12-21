@@ -109,23 +109,17 @@ public class SqlQueryConventionBasedTest
     private QueryResult runTestQuery()
     {
         QueryExecutor queryExecutor = getQueryExecutor(queryDescriptor);
-        if (queryDescriptor.getQueryType().isPresent()) {
-            String sql = resolveTemplates(queryDescriptor.getContent());
-            return queryExecutor.executeQuery(sql, queryDescriptor.getQueryType().get());
-        }
-        else {
-            QueryResult queryResult = null;
-            List<String> queries = splitQueries(queryDescriptor.getContent());
-            checkState(!queries.isEmpty(), "At least one query must be present");
+        QueryResult queryResult = null;
+        List<String> queries = splitQueries(queryDescriptor.getContent());
+        checkState(!queries.isEmpty(), "At least one query must be present");
 
-            for (String query : queries) {
-                String sql = resolveTemplates(query);
-                queryResult = queryExecutor.executeQuery(sql);
-            }
-            dumpResultsIfNeeded(queryResult);
-
-            return queryResult;
+        for (String query : queries) {
+            String sql = resolveTemplates(query);
+            queryResult = queryExecutor.executeQuery(sql);
         }
+        dumpResultsIfNeeded(queryResult);
+
+        return queryResult;
     }
 
     private void dumpResultsIfNeeded(QueryResult queryResult)

@@ -21,7 +21,6 @@ import com.teradata.tempto.query.QueryResult
 import spock.lang.Specification
 
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URIS_KEY
-import static com.teradata.tempto.query.QueryType.UPDATE
 
 class ContextDslTest
         extends Specification
@@ -38,9 +37,9 @@ class ContextDslTest
     String selectSql = "SELECT * FROM nation"
     ContextRunnable testRunnable = Mock(ContextRunnable)
     QueryExecutor queryExecutor = Mock(QueryExecutor)
-    queryExecutor.executeQuery("DROP VIEW test_view", UPDATE) >> QueryResult.forSingleIntegerValue(1)
-    queryExecutor.executeQuery("CREATE VIEW test_view AS SELECT * FROM nation", UPDATE) >> QueryResult.forSingleIntegerValue(1)
-    queryExecutor.executeQuery("DROP VIEW test_view", UPDATE) >> QueryResult.forSingleIntegerValue(1)
+    queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
+    queryExecutor.executeQuery("CREATE VIEW test_view AS SELECT * FROM nation") >> QueryResult.forSingleIntegerValue(1)
+    queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
 
     ViewContextProvider contextProvider = new ViewContextProvider(viewName, selectSql, queryExecutor)
 

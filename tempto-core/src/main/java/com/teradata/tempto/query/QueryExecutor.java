@@ -41,17 +41,6 @@ public interface QueryExecutor
     QueryResult executeQuery(String sql, QueryParam... params)
             throws QueryExecutionException;
 
-    /**
-     * Force given query to be executed as update
-     *
-     * @param queryType SELECT or UPDATE
-     * @param sql SQL query to be executed
-     * @param params Parameters to be used while executing query
-     * @return QueryResult
-     */
-    QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
-            throws QueryExecutionException;
-
     Connection getConnection();
 
     void close();
@@ -67,12 +56,6 @@ public interface QueryExecutor
             throws QueryExecutionException
     {
         return defaultQueryExecutor().executeQuery(sql, params);
-    }
-
-    static QueryResult query(String sql, QueryType queryType, QueryParam... params)
-            throws QueryExecutionException
-    {
-        return defaultQueryExecutor().executeQuery(sql, queryType, params);
     }
 
     static QueryExecutor defaultQueryExecutor()

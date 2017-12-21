@@ -22,13 +22,11 @@ import javax.inject.Inject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import static com.teradata.tempto.query.QueryResult.forSingleIntegerValue;
 import static com.teradata.tempto.query.QueryResult.toSqlIndex;
-import static com.teradata.tempto.query.QueryType.SELECT;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -80,13 +78,6 @@ public class JdbcQueryExecutor
 
     @Override
     public QueryResult executeQuery(String sql, QueryParam... params)
-            throws QueryExecutionException
-    {
-        return execute(sql, params);
-    }
-
-    @Override
-    public QueryResult executeQuery(String sql, QueryType queryType, QueryParam... params)
             throws QueryExecutionException
     {
         return execute(sql, params);

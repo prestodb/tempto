@@ -18,11 +18,9 @@ import com.google.common.base.Splitter;
 import com.teradata.tempto.fulfillment.table.MutableTableRequirement.State;
 import com.teradata.tempto.fulfillment.table.TableHandle;
 import com.teradata.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
-import com.teradata.tempto.query.QueryType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -40,7 +38,6 @@ public class SqlQueryDescriptor
     private static final String DATABASE_HEADER_PROPERTY = "database";
     private static final String TABLES_HEADER_PROPERTY = "tables";
     private static final String MUTABLE_TABLES_HEADER_PROPERTY = "mutable_tables";
-    private static final String QUERY_TYPE_HEADER_PROPERTY = "queryType";
     private static final String REQUIRES_HEADER_PROPERTY = "requires";
 
     // mutable table property format is: mutable_table_name|state|name
@@ -106,10 +103,5 @@ public class SqlQueryDescriptor
     public Set<String> getRequirementClassNames()
     {
         return getPropertyValuesSet(REQUIRES_HEADER_PROPERTY);
-    }
-
-    public Optional<QueryType> getQueryType()
-    {
-        return getPropertyValue(QUERY_TYPE_HEADER_PROPERTY).map(QueryType::valueOf);
     }
 }
