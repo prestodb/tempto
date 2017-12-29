@@ -99,7 +99,7 @@ Configuration files locations can be overidden by using following java system pr
  * `tempto.configurations` - for overriding global configuration file locations
 
 ```
- java ... -Dtempto.configuration=my_configuration.yaml,/tmp/my_local_configuration.yaml
+ java ... -Dtempto.configurations=my_configuration.yaml,/tmp/my_local_configuration.yaml
 ```
 
 Configuration files are read from left to right.
