@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
@@ -405,7 +406,7 @@ public class QueryAssert
 
             String exceptionMessage = executionException.getMessage();
             LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
-            if (!exceptionMessage.contains(expectedErrorMessage)) {
+            if (!nullToEmpty(exceptionMessage).contains(expectedErrorMessage)) {
                 throw new AssertionError(format(
                         "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
                         exceptionMessage,
