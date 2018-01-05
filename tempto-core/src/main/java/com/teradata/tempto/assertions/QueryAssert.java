@@ -398,7 +398,7 @@ public class QueryAssert
             this.executionExceptionOptional = executionExceptionOptional;
         }
 
-        public QueryExecutionAssert failsWithMessage(String... expectedErrorMessages)
+        public QueryExecutionAssert failsWithMessage(String expectedErrorMessage)
         {
 
             if (!executionExceptionOptional.isPresent()) {
@@ -409,14 +409,12 @@ public class QueryAssert
 
             String exceptionMessage = executionException.getMessage();
             LOGGER.debug("Query failed as expected with message: {}", exceptionMessage);
-            for (String expectedErrorMessage : expectedErrorMessages) {
-                if (!exceptionMessage.contains(expectedErrorMessage)) {
-                    throw new AssertionError(format(
-                            "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
-                            exceptionMessage,
-                            expectedErrorMessage
-                    ));
-                }
+            if (!exceptionMessage.contains(expectedErrorMessage)) {
+                throw new AssertionError(format(
+                        "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
+                        exceptionMessage,
+                        expectedErrorMessage
+                ));
             }
 
             return this;
