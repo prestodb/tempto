@@ -15,7 +15,6 @@
 package com.teradata.tempto.assertions;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import com.teradata.tempto.configuration.Configuration;
 import com.teradata.tempto.internal.convention.SqlResultDescriptor;
 import com.teradata.tempto.internal.query.QueryResultValueComparator;
@@ -32,7 +31,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
