@@ -408,7 +408,7 @@ public class QueryAssert
             LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
             if (!nullToEmpty(exceptionMessage).contains(expectedErrorMessage)) {
                 throw new AssertionError(format(
-                        "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
+                        "Query failed with unexpected error message: '%s' \n Expected error message to contain '%s'",
                         exceptionMessage,
                         expectedErrorMessage
                 ));

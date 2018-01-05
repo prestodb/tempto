@@ -465,7 +465,7 @@ B|ARGENTINA|SOUTH AMERICA|>; error=<For input string: "A">'''
     then:
     def e = thrown(AssertionError)
     e.message == "Query failed with unexpected error message: 'java.lang.RuntimeException: foo bar' \n" +
-            " Expected error message was 'dummy'"
+            " Expected error message to contain 'dummy'"
   }
 
   def 'QueryExecutionAssert - right error message'()
