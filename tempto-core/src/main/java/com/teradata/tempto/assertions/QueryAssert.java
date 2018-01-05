@@ -410,8 +410,7 @@ public class QueryAssert
                 throw new AssertionError(format(
                         "Query failed with unexpected error message: '%s' \n Expected error message to contain '%s'",
                         exceptionMessage,
-                        expectedErrorMessage
-                ));
+                        expectedErrorMessage));
             }
 
             return this;
