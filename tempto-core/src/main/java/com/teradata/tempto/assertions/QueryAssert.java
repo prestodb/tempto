@@ -400,12 +400,8 @@ public class QueryAssert
 
         public QueryExecutionAssert failsWithMessage(String expectedErrorMessage)
         {
-
-            if (!executionExceptionOptional.isPresent()) {
-                throw new AssertionError("Query did not fail as expected.");
-            }
-
-            QueryExecutionException executionException = executionExceptionOptional.get();
+            QueryExecutionException executionException = executionExceptionOptional
+                    .orElseThrow(() -> new AssertionError("Query did not fail as expected."));
 
             String exceptionMessage = executionException.getMessage();
             LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
