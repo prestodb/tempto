@@ -408,7 +408,7 @@ public class QueryAssert
             QueryExecutionException executionException = executionExceptionOptional.get();
 
             String exceptionMessage = executionException.getMessage();
-            LOGGER.debug("Query failed as expected with message: {}", exceptionMessage);
+            LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
             if (!exceptionMessage.contains(expectedErrorMessage)) {
                 throw new AssertionError(format(
                         "Query failed with unexpected error message: '%s' \n Expected error message was '%s'",
