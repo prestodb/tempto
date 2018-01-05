@@ -399,18 +399,37 @@ public class QueryAssert
             this.executionExceptionOptional = executionExceptionOptional;
         }
 
-        public QueryExecutionAssert failsWithMessage(String expectedErrorMessage)
+        private String getFailureMessage()
         {
             QueryExecutionException executionException = executionExceptionOptional
                     .orElseThrow(() -> new AssertionError("Query did not fail as expected."));
+            return nullToEmpty(executionException.getMessage());
+        }
 
-            String exceptionMessage = executionException.getMessage();
+        public QueryExecutionAssert failsWithMessage(String expectedErrorMessage)
+        {
+            String exceptionMessage = getFailureMessage();
             LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
-            if (!nullToEmpty(exceptionMessage).contains(expectedErrorMessage)) {
+            if (!exceptionMessage.contains(expectedErrorMessage)) {
                 throw new AssertionError(format(
                         "Query failed with unexpected error message: '%s' \n Expected error message to contain '%s'",
                         exceptionMessage,
                         expectedErrorMessage));
+            }
+
+            return this;
+        }
+
+        public QueryExecutionAssert failsWithMessageMatching(String expectedErrorMessagePattern)
+        {
+            requireNonNull(expectedErrorMessagePattern, "expectedErrorMessagePattern is null");
+            String exceptionMessage = getFailureMessage();
+            LOGGER.debug("Query failed as expected, with message: {}", exceptionMessage);
+            if (!exceptionMessage.matches(expectedErrorMessagePattern)) {
+                throw new AssertionError(format(
+                        "Query failed with unexpected error message: '%s' \n Expected error message to match '%s'",
+                        exceptionMessage,
+                        expectedErrorMessagePattern));
             }
 
             return this;

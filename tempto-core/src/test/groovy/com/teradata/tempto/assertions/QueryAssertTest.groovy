@@ -476,4 +476,24 @@ B|ARGENTINA|SOUTH AMERICA|>; error=<For input string: "A">'''
     then:
     noExceptionThrown()
   }
+
+  def 'QueryExecutionAssert - error message does not match'()
+  {
+    when:
+    assertThat({ throw new QueryExecutionException(new RuntimeException("foo bar")) }).failsWithMessageMatching("foo")
+
+    then:
+    def e = thrown(AssertionError)
+    e.message == "Query failed with unexpected error message: 'java.lang.RuntimeException: foo bar' \n" +
+            " Expected error message to match 'foo'"
+  }
+
+  def 'QueryExecutionAssert - error message matches'()
+  {
+    when:
+    assertThat({ throw new QueryExecutionException(new RuntimeException("dummy")) }).failsWithMessageMatching("^java.lang.RuntimeException: dug?(m){2,4}y\$")
+
+    then:
+    noExceptionThrown()
+  }
 }
