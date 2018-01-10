@@ -108,7 +108,7 @@ ext.tempto_runner = project(':tempto-runner')
 ext.tempto_ldap = project(':tempto-ldap')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.tempto_version = '1.41-SNAPSHOT'
-ext.tempto_group = "com.teradata.tempto"
+ext.tempto_group = "io.prestodb.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'

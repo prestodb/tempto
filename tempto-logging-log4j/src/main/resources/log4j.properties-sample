@@ -11,7 +11,7 @@ log4j.appender.CONSOLE.layout=org.apache.log4j.PatternLayout
 log4j.appender.CONSOLE.layout.conversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%c{1}:%L] [%X{test_id}] - %m%n
 log4j.appender.CONSOLE.Threshold=INFO
 
-log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.logging.TestFrameworkLoggingAppender
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=io.prestodb.tempto.logging.TestFrameworkLoggingAppender
 log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER.layout=org.apache.log4j.PatternLayout
 log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER.layout.conversionPattern=[%d{yyyy-MM-dd HH:mm:ss}] [%p] %c{10}: %m%n
 

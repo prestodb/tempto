@@ -34,7 +34,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'com.teradata.tempto.examples.TemptoExamples'
+        attributes 'Main-Class': 'io.prestodb.tempto.examples.TemptoExamples'
     }
 }
 

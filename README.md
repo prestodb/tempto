@@ -53,8 +53,8 @@ each test and suite fulfillment process to separate files. To use that configure
 
 ```
 log4j.rootLogger=INFO, TEST_FRAMEWORK_LOGGING_APPENDER
-log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=com.teradata.logging.TestFrameworkLoggingAppender
-log4j.category.com.teradata.tempto=DEBUG
+log4j.appender.TEST_FRAMEWORK_LOGGING_APPENDER=io.prestodb.tempto.logging.TestFrameworkLoggingAppender
+log4j.category.io.prestodb.tempto=DEBUG
 log4j.category.org.reflections=WARN
 ```
 
@@ -73,9 +73,9 @@ com.facebook.presto.tests.hive.TestAllDatatypesFromHiveConnector.testSelectVarch
 SUITE_2015-04-22_15-23-09
 ```
 
-If you want to override root location of logs you can use com.teradata.tempto.root.logs.dir
+If you want to override root location of logs you can use io.prestodb.tempto.root.logs.dir
 ```
-java -Dcom.teradata.tempto.root.logs.dir=/my/root/logs/dir ...
+java -Dio.prestodb.tempto.root.logs.dir=/my/root/logs/dir ...
 ```
 
 ### logging test id
@@ -233,7 +233,7 @@ tests:
 
 ### Example
 
-See com.teradata.tempto.examples.SimpleQueryTest in tempto-examples module.
+See io.prestodb.tempto.examples.SimpleQueryTest in tempto-examples module.
 
 ### Requirements
 
@@ -354,7 +354,7 @@ Remark: If multiple table managers of the same type (e.g. hive) are defined in t
  * `HiveDataSource` responsible for providing table data which is saved to HDFS
 
 Certain commonly used tables, such as those in the TPC-H benchmark, are defined as constants and can
-be found in `com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions`.
+be found in `io.prestodb.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions`.
 
 For example this is how the nation table is built:
 
@@ -877,7 +877,7 @@ By default all tests found in classpath are executed but user may limit that by 
     <tr>
         <td>--tests</td>
         <td>List of tests to be executed. For java based tests test name is just fully qualified method name
-            e.g. com.teradata.tempto.examples.SimpleQueryTest.selectCountFromNation. For sql convention based tests name
+            e.g. io.prestodb.tempto.examples.SimpleQueryTest.selectCountFromNation. For sql convention based tests name
             looks like: sql_tests.testcases.sample_table.allRows. Tests which name ends with one of patterns specified
             in --tests parameter will be executed.
         </td>

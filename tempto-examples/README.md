@@ -34,7 +34,7 @@ environment.
 
 Running tempto example product requires a testing cluster which is provisioned by docker containers and managed by docker-compose.
 
-Note that one test (`com.teradata.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
+Note that one test (`io.prestodb.tempto.examples.SimpleQueryTest.failingTest`) is made to fail on purpose.
 
 ### By automation script
 
