@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.inject.name.Names.named;
 
@@ -50,17 +49,8 @@ public class TestConfigurationModuleProvider
 
             private void bindConfigurationKeys()
             {
-                for (String key : configuration.listKeys()) {
-                    Optional<Object> value = configuration.get(key);
-                    if (value.isPresent()) {
-                        @SuppressWarnings("unchecked") Key bindingKey = getBindingKey(value.get(), key);
-
-                        LOGGER.debug("Binding {} key: {} -> {}", bindingKey, key, value.get());
-
-                        bind(bindingKey)
-                                .toInstance(value.get());
-                    }
-                }
+                configuration.listKeys().forEach(key ->
+                        configuration.get(key).ifPresent(value -> bind(getBindingKey(value, key)).toInstance(value)));
             }
 
             private  Key getBindingKey(Object configValue, String configKey)
