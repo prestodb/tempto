@@ -19,7 +19,7 @@ import spock.lang.Unroll
 
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle
 
-public class TablesStateTest
+class TablesStateTest
         extends Specification
 {
     static TableInstance db1_table1 = table('db1', 'table1')

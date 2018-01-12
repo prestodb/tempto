@@ -29,7 +29,7 @@ class DataProvidersTest
     private static class ExternalDataProviderClass
     {
         @DataProvider(name = "external_data_provider")
-        public static Object[][] externalDataProvider()
+        static Object[][] externalDataProvider()
         {
             return EXTERNAL_DATA_PROVIDER_PARAMS
         }
@@ -39,21 +39,21 @@ class DataProvidersTest
     {
 
         @DataProvider(name = "internal_data_provider")
-        public static Object[][] internalDataProvider()
+        static Object[][] internalDataProvider()
         {
             return INTERNAL_DATA_PROVIDER_PARAMS
         }
 
         @Test
-        public void testMethodWithoutDataProvider()
+        void testMethodWithoutDataProvider()
         {}
 
         @Test(dataProvider = "internal_data_provider")
-        public void testMethodWithInternalDataProvider()
+        void testMethodWithInternalDataProvider()
         {}
 
         @Test(dataProvider = "external_data_provider", dataProviderClass = ExternalDataProviderClass.class)
-        public void testMethodWithExternalDataProvider()
+        void testMethodWithExternalDataProvider()
         {}
     }
 

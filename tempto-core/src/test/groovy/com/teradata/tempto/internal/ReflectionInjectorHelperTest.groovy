@@ -29,7 +29,7 @@ import java.lang.reflect.Method
 import static com.google.inject.Guice.createInjector
 import static com.google.inject.name.Names.named
 
-public class ReflectionInjectorHelperTest
+class ReflectionInjectorHelperTest
 {
     private final ReflectionInjectorHelper reflectionInjectorHelper = new ReflectionInjectorHelper()
     private Injector injector;

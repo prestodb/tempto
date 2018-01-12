@@ -223,23 +223,23 @@ class TestInitializationListenerTest
         TestContext testContext
 
         @BeforeTestWithContext
-        public void beforeMethod()
+        void beforeMethod()
         {
             EVENTS.add(new Event("beforeMethod", this));
         }
 
         @AfterTestWithContext
-        public void afterMethod()
+        void afterMethod()
         {
             EVENTS.add(new Event("afterMethod", this));
         }
 
-        public void testMethodSuccess()
+        void testMethodSuccess()
         {
         }
 
         @Requires(CRequirement)
-        public void testMethodFailed()
+        void testMethodFailed()
         {
         }
 
@@ -254,7 +254,7 @@ class TestInitializationListenerTest
             implements RequirementsProvider
     {
         @Override
-        public Requirement getRequirements(Configuration configuration)
+        Requirement getRequirements(Configuration configuration)
         {
             return A_REQUIREMENT
         }
@@ -286,7 +286,7 @@ class TestInitializationListenerTest
             implements RequirementsProvider
     {
         @Override
-        public Requirement getRequirements(Configuration configuration)
+        Requirement getRequirements(Configuration configuration)
         {
             return C_REQUIREMENT
         }

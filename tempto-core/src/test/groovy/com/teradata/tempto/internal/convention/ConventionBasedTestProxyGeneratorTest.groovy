@@ -100,7 +100,7 @@ class ConventionBasedTestProxyGeneratorTest
         private final String testName;
         private final Set<String> testGroups;
 
-        public DummyConventionBasedTest(Requirement requirement, String testName, Set<String> testGroups)
+        DummyConventionBasedTest(Requirement requirement, String testName, Set<String> testGroups)
         {
             this.requirement = requirement
             this.testName = testName
@@ -129,7 +129,7 @@ class ConventionBasedTestProxyGeneratorTest
             return testGroups;
         }
 
-        public static DummyConventionBasedTest emptyTest(String testName)
+        static DummyConventionBasedTest emptyTest(String testName)
         {
             return new DummyConventionBasedTest(new DummyTestRequirement(), testName, emptySet());
         }
