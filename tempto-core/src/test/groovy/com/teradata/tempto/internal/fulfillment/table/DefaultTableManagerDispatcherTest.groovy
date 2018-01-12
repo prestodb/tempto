@@ -31,98 +31,99 @@ class DefaultTableManagerDispatcherTest
         extends Specification
 {
 
-  @Shared
-  TableManager hiveTableManager1;
-  @Shared
-  TableManager psqlTableManager1;
-  @Shared
-  TableManager psqlTableManager2;
-  @Shared
-  DefaultTableManagerDispatcher instance;
-  @Shared
-  Map tableManagers
+    @Shared
+    TableManager hiveTableManager1;
+    @Shared
+    TableManager psqlTableManager1;
+    @Shared
+    TableManager psqlTableManager2;
+    @Shared
+    DefaultTableManagerDispatcher instance;
+    @Shared
+    Map tableManagers
 
-  def setup()
-  {
-    hiveTableManager1 = Mock(TableManager)
-    hiveTableManager1.tableDefinitionClass >> HiveTableDefinition
-    hiveTableManager1.databaseName >> 'hive1'
+    def setup()
+    {
+        hiveTableManager1 = Mock(TableManager)
+        hiveTableManager1.tableDefinitionClass >> HiveTableDefinition
+        hiveTableManager1.databaseName >> 'hive1'
 
-    psqlTableManager1 = Mock(TableManager)
-    psqlTableManager1.tableDefinitionClass >> RelationalTableDefinition
-    psqlTableManager1.databaseName >> 'psql1'
+        psqlTableManager1 = Mock(TableManager)
+        psqlTableManager1.tableDefinitionClass >> RelationalTableDefinition
+        psqlTableManager1.databaseName >> 'psql1'
 
-    psqlTableManager2 = Mock(TableManager)
-    psqlTableManager2.tableDefinitionClass >> RelationalTableDefinition
-    psqlTableManager2.databaseName >> 'psql2'
+        psqlTableManager2 = Mock(TableManager)
+        psqlTableManager2.tableDefinitionClass >> RelationalTableDefinition
+        psqlTableManager2.databaseName >> 'psql2'
 
-    tableManagers = [
-            hive1: hiveTableManager1,
-            psql1: psqlTableManager1,
-            psql2: psqlTableManager2
-    ]
-    instance = new DefaultTableManagerDispatcher(tableManagers)
-  }
-
-  @Unroll
-  def 'test getTableMangerFor #tableHandle'()
-  {
-    expect:
-    instance.getTableManagerFor(definitionClass, tableHandle) == tableManagers[tableManager]
-
-    where:
-    definitionClass       | tableHandle                                                 | tableManager
-    hiveTableDefinition() | hiveTableDefinition().tableHandle                           | 'hive1'
-    hiveTableDefinition() | hiveTableDefinition().tableHandle.inDatabase('hive1')       | 'hive1'
-    jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql1')       | 'psql1'
-    jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql2')       | 'psql2'
-  }
-
-  def 'multiple databases for table definition class'()
-  {
-    when:
-    instance.getTableManagerFor(jdbcTableDefinition())
-    then:
-    IllegalStateException e = thrown()
-    e.message.contains('Multiple databases found for table: TableHandle{name=name}, definition class \'class com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition\'. Pick a database from [psql1, psql2]')
-  }
-
-  def 'no database found'()
-  {
-    when:
-    instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().getTableHandle().inDatabase('unknown'))
-    then:
-    IllegalStateException e = thrown()
-    e.message.contains('No table manager found for table: TableHandle{database=unknown, name=name}')
-  }
-
-  def 'wrong table definition'()
-  {
-    when:
-    instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().tableHandle.inDatabase('hive1'))
-    then:
-    IllegalStateException e = thrown()
-    e.message.contains('does not match requested table definition class')
-  }
-
-  private RelationalTableDefinition jdbcTableDefinition()
-  {
-    return new RelationalTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Mock(RelationalDataSource))
-  }
-
-  private HiveTableDefinition hiveTableDefinition()
-  {
-    return new HiveTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty())
-  }
-
-  def failWith(String message, Closure closure)
-  {
-    try {
-      closure()
-      fail('expected exception to be thrown here')
+        tableManagers = [
+                hive1: hiveTableManager1,
+                psql1: psqlTableManager1,
+                psql2: psqlTableManager2
+        ]
+        instance = new DefaultTableManagerDispatcher(tableManagers)
     }
-    catch (Exception e) {
-      assert e.message.contains(message)
+
+    @Unroll
+    def 'test getTableMangerFor #tableHandle'()
+    {
+        expect:
+        instance.getTableManagerFor(definitionClass, tableHandle) == tableManagers[tableManager]
+
+        where:
+        definitionClass       | tableHandle                                           | tableManager
+        hiveTableDefinition() | hiveTableDefinition().tableHandle                     | 'hive1'
+        hiveTableDefinition() | hiveTableDefinition().tableHandle.inDatabase('hive1') | 'hive1'
+        jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql1') | 'psql1'
+        jdbcTableDefinition() | jdbcTableDefinition().tableHandle.inDatabase('psql2') | 'psql2'
     }
-  }
+
+    def 'multiple databases for table definition class'()
+    {
+        when:
+        instance.getTableManagerFor(jdbcTableDefinition())
+        then:
+        IllegalStateException e = thrown()
+        e.message.contains(
+                'Multiple databases found for table: TableHandle{name=name}, definition class \'class com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition\'. Pick a database from [psql1, psql2]')
+    }
+
+    def 'no database found'()
+    {
+        when:
+        instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().getTableHandle().inDatabase('unknown'))
+        then:
+        IllegalStateException e = thrown()
+        e.message.contains('No table manager found for table: TableHandle{database=unknown, name=name}')
+    }
+
+    def 'wrong table definition'()
+    {
+        when:
+        instance.getTableManagerFor(jdbcTableDefinition(), jdbcTableDefinition().tableHandle.inDatabase('hive1'))
+        then:
+        IllegalStateException e = thrown()
+        e.message.contains('does not match requested table definition class')
+    }
+
+    private RelationalTableDefinition jdbcTableDefinition()
+    {
+        return new RelationalTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Mock(RelationalDataSource))
+    }
+
+    private HiveTableDefinition hiveTableDefinition()
+    {
+        return new HiveTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty())
+    }
+
+    def failWith(String message, Closure closure)
+    {
+        try {
+            closure()
+            fail('expected exception to be thrown here')
+        }
+        catch (Exception e) {
+            assert e.message.contains(message)
+        }
+    }
 }

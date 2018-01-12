@@ -39,7 +39,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 public class CassandraQueryExecutor
-    implements AutoCloseable
+        implements AutoCloseable
 {
     private static final Map<DataType, JDBCType> typeMapping;
     private final Cluster cluster;

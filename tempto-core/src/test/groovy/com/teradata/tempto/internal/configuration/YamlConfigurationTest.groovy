@@ -20,10 +20,10 @@ class YamlConfigurationTest
         extends Specification
 {
 
-  def create()
-  {
-    setup:
-    def configuration = new YamlConfiguration("""\
+    def create()
+    {
+        setup:
+        def configuration = new YamlConfiguration("""\
 a:
    b:
       d: ela\${foo}
@@ -33,11 +33,11 @@ list:
     - element1
     - element2   
 """)
-    expect:
-    configuration.listKeys() == ['a.b.d', 'x.y', 'list'] as Set
-    configuration.getInt('x.y') == Optional.of(10)
-    configuration.getString('a.b.d') == Optional.of('ela${foo}')
-    configuration.getString('x.y') == Optional.of('10')
-    configuration.getStringList('list') == ['element1', 'element2']
-  }
+        expect:
+        configuration.listKeys() == ['a.b.d', 'x.y', 'list'] as Set
+        configuration.getInt('x.y') == Optional.of(10)
+        configuration.getString('a.b.d') == Optional.of('ela${foo}')
+        configuration.getString('x.y') == Optional.of('10')
+        configuration.getStringList('list') == ['element1', 'element2']
+    }
 }

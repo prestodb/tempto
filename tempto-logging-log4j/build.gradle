@@ -16,11 +16,11 @@ apply plugin: 'java'
 apply plugin: 'groovy'
 
 dependencies {
-  compile tempto_core
-  compile libraries.ioutils
-  compile libraries.log4j
-  compile libraries.slf4j_api
-  compile libraries.reflections
+    compile tempto_core
+    compile libraries.ioutils
+    compile libraries.log4j
+    compile libraries.slf4j_api
+    compile libraries.reflections
 }
 
 // project information
@@ -29,12 +29,12 @@ archivesBaseName = artifactId
 
 // publishing to sonatype
 uploadArchives {
-  repositories {
-    mavenDeployer {
-      pom.project {
-        name artifactId
-        artifactId artifactId
-      }
+    repositories {
+        mavenDeployer {
+            pom.project {
+                name artifactId
+                artifactId artifactId
+            }
+        }
     }
-  }
 }

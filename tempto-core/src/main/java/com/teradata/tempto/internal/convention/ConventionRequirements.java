@@ -17,7 +17,6 @@ package com.teradata.tempto.internal.convention;
 public final class ConventionRequirements
 {
 
-
     private ConventionRequirements()
     {
     }

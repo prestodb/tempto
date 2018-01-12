@@ -37,90 +37,90 @@ class JdbcQueryExecutorTest
         extends Specification
 {
 
-  private static final JdbcConnectivityParamsState JDBC_STATE =
-          JdbcConnectivityParamsState.builder()
-                  .setName('connection_name')
-                  .setDriverClass('org.hsqldb.jdbc.JDBCDriver')
-                  .setUrl('jdbc:hsqldb:mem:mydb')
-                  .setUser('sa')
-                  .setPooling(true)
-                  .build();
+    private static final JdbcConnectivityParamsState JDBC_STATE =
+            JdbcConnectivityParamsState.builder()
+                    .setName('connection_name')
+                    .setDriverClass('org.hsqldb.jdbc.JDBCDriver')
+                    .setUrl('jdbc:hsqldb:mem:mydb')
+                    .setUser('sa')
+                    .setPooling(true)
+                    .build();
 
-  private static TestContext testContext = new GuiceTestContext();
-  private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool(), testContext);
+    private static TestContext testContext = new GuiceTestContext();
+    private JdbcQueryExecutor queryExecutor = new JdbcQueryExecutor(JDBC_STATE, new JdbcConnectionsPool(), testContext);
 
-  def setupSpec()
-  {
-    System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
-    registerDriver(JDBC_STATE)
-  }
-
-  def cleanupSpec()
-  {
-    testContext.close();
-  }
-
-  void setup()
-  {
-    // TODO: use try with resources when we move to groovy 2.3
-    Connection c
-    QueryRunner run = new QueryRunner()
-    try {
-      c = connection(JDBC_STATE)
-      run.update(c, 'DROP SCHEMA PUBLIC CASCADE')
-      run.update(c,
-              'CREATE TABLE  company ( \
-                comp_name varchar(100) NOT NULL, \
-                comp_id int \
-              )')
-      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (1, \'Teradata\')')
-      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (2, \'Oracle\')')
-      run.update(c, 'INSERT INTO company(comp_id, comp_name) values (3, \'Facebook\')')
+    def setupSpec()
+    {
+        System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
+        registerDriver(JDBC_STATE)
     }
-    finally {
-      if (c != null) {
-        c.close()
-      }
+
+    def cleanupSpec()
+    {
+        testContext.close();
     }
-  }
 
-  def 'test select'()
-  {
-    when:
-    QueryResult result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
+    void setup()
+    {
+        // TODO: use try with resources when we move to groovy 2.3
+        Connection c
+        QueryRunner run = new QueryRunner()
+        try {
+            c = connection(JDBC_STATE)
+            run.update(c, 'DROP SCHEMA PUBLIC CASCADE')
+            run.update(c,
+                    'CREATE TABLE  company ( \
+                      comp_name varchar(100) NOT NULL, \
+                      comp_id int \
+                    )')
+            run.update(c, 'INSERT INTO company(comp_id, comp_name) values (1, \'Teradata\')')
+            run.update(c, 'INSERT INTO company(comp_id, comp_name) values (2, \'Oracle\')')
+            run.update(c, 'INSERT INTO company(comp_id, comp_name) values (3, \'Facebook\')')
+        }
+        finally {
+            if (c != null) {
+                c.close()
+            }
+        }
+    }
 
-    then:
-    assertThat(result)
-            .hasColumns(INTEGER, VARCHAR)
-            .containsExactly(
-            row(1, 'Teradata'),
-            row(2, 'Oracle'),
-            row(3, 'Facebook'))
-  }
+    def 'test select'()
+    {
+        when:
+        QueryResult result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
 
-  def 'test update'()
-  {
-    setup:
-    QueryResult result
+        then:
+        assertThat(result)
+                .hasColumns(INTEGER, VARCHAR)
+                .containsExactly(
+                row(1, 'Teradata'),
+                row(2, 'Oracle'),
+                row(3, 'Facebook'))
+    }
 
-    when:
-    result = queryExecutor.executeQuery('UPDATE company SET comp_name=\'Teradata Kings\' WHERE comp_id=1')
+    def 'test update'()
+    {
+        setup:
+        QueryResult result
 
-    then:
-    assertThat(result)
-            .hasColumns(INTEGER)
-            .containsExactly(
-            row(1))
+        when:
+        result = queryExecutor.executeQuery('UPDATE company SET comp_name=\'Teradata Kings\' WHERE comp_id=1')
 
-    when:
-    result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
+        then:
+        assertThat(result)
+                .hasColumns(INTEGER)
+                .containsExactly(
+                row(1))
 
-    then:
-    assertThat(result)
-            .hasColumns(INTEGER, VARCHAR)
-            .containsExactly(
-            row(1, 'Teradata Kings'),
-            row(2, 'Oracle'),
-            row(3, 'Facebook'))
-  }
+        when:
+        result = queryExecutor.executeQuery('SELECT comp_id, comp_name FROM company ORDER BY comp_id')
+
+        then:
+        assertThat(result)
+                .hasColumns(INTEGER, VARCHAR)
+                .containsExactly(
+                row(1, 'Teradata Kings'),
+                row(2, 'Oracle'),
+                row(3, 'Facebook'))
+    }
 }

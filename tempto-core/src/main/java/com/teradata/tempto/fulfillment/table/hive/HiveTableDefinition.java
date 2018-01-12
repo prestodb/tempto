@@ -121,12 +121,14 @@ public class HiveTableDefinition
             handle = tableHandle(name);
         }
 
-        public HiveTableDefinitionBuilder inDatabase(String database) {
+        public HiveTableDefinitionBuilder inDatabase(String database)
+        {
             this.handle = handle.inDatabase(database);
             return this;
         }
 
-        public HiveTableDefinitionBuilder inSchema(String schema) {
+        public HiveTableDefinitionBuilder inSchema(String schema)
+        {
             this.handle = handle.inSchema(schema);
             return this;
         }
@@ -169,7 +171,8 @@ public class HiveTableDefinition
             return setDataSource(createSameRowDataSource(handle.getName(), revision, splitCount, rowsInEachSplit, rowData));
         }
 
-        public HiveTableDefinitionBuilder addPartition(String partitionSpec, HiveDataSource dataSource) {
+        public HiveTableDefinitionBuilder addPartition(String partitionSpec, HiveDataSource dataSource)
+        {
             if (!partitionDefinitions.isPresent()) {
                 partitionDefinitions = Optional.of(newArrayList());
             }

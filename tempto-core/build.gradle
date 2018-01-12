@@ -18,40 +18,40 @@ apply plugin: 'maven'
 apply plugin: 'groovy'
 
 dependencies {
-  compile libraries.assertj
-  compile libraries.guava
-  compile libraries.guice
-  compile libraries.testng
-  compile libraries.commons_lang3
-  compile libraries.commons_dbcp2
-  compile libraries.slf4j_api
-  compile libraries.snakeyaml
-  compile libraries.httpclient
-  compile libraries.ioutils
-  compile libraries.tpchgen
-  compile libraries.tpcdsgen
-  compile libraries.bytebuddy
-  compile libraries.reflections
-  compile libraries.jsch
-  compile libraries.freemarker
-  compile libraries.joda
-  compile libraries.jackson_databind
-  compile libraries.jackson_datatype_jdk8
-  compile libraries.cassandra_driver
-  compile libraries.hive
-  compile libraries.thrift
+    compile libraries.assertj
+    compile libraries.guava
+    compile libraries.guice
+    compile libraries.testng
+    compile libraries.commons_lang3
+    compile libraries.commons_dbcp2
+    compile libraries.slf4j_api
+    compile libraries.snakeyaml
+    compile libraries.httpclient
+    compile libraries.ioutils
+    compile libraries.tpchgen
+    compile libraries.tpcdsgen
+    compile libraries.bytebuddy
+    compile libraries.reflections
+    compile libraries.jsch
+    compile libraries.freemarker
+    compile libraries.joda
+    compile libraries.jackson_databind
+    compile libraries.jackson_datatype_jdk8
+    compile libraries.cassandra_driver
+    compile libraries.hive
+    compile libraries.thrift
 
-  runtime libraries.jcl_over_slf4j
+    runtime libraries.jcl_over_slf4j
 
-  testCompile libraries.spock
-  testCompile libraries.hsqldb
-  testCompile libraries.dbutils
-  testCompile libraries.mina_sshd
-  testRuntime libraries.objenesis
+    testCompile libraries.spock
+    testCompile libraries.hsqldb
+    testCompile libraries.dbutils
+    testCompile libraries.mina_sshd
+    testRuntime libraries.objenesis
 }
 
 configurations {
-  all*.exclude group: 'commons-logging', module: 'commons-logging'
+    all*.exclude group: 'commons-logging', module: 'commons-logging'
 }
 
 // project information
@@ -59,17 +59,17 @@ ext.artifactId = 'tempto-core'
 archivesBaseName = artifactId
 
 license {
-  exclude "**/convention/sample-test/**/*.sql"
+    exclude "**/convention/sample-test/**/*.sql"
 }
 
 // publishing to sonatype
 uploadArchives {
-  repositories {
-    mavenDeployer {
-      pom.project {
-        name artifactId
-        artifactId artifactId
-      }
+    repositories {
+        mavenDeployer {
+            pom.project {
+                name artifactId
+                artifactId artifactId
+            }
+        }
     }
-  }
 }

@@ -15,11 +15,7 @@
 package com.teradata.tempto.internal
 
 import com.google.common.collect.ImmutableList
-import com.google.inject.AbstractModule
-import com.google.inject.ConfigurationException
-import com.google.inject.Injector
-import com.google.inject.Key
-import com.google.inject.TypeLiteral
+import com.google.inject.*
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.fulfillment.RequirementFulfiller
 import org.junit.Before
@@ -35,86 +31,86 @@ import static com.google.inject.name.Names.named
 
 public class ReflectionInjectorHelperTest
 {
-  private final ReflectionInjectorHelper reflectionInjectorHelper = new ReflectionInjectorHelper()
-  private Injector injector;
+    private final ReflectionInjectorHelper reflectionInjectorHelper = new ReflectionInjectorHelper()
+    private Injector injector;
 
-  @Before
-  void setup()
-  {
-    injector = createInjector(new AbstractModule() {
-      @Override
-      protected void configure()
-      {
-        bind(Requirement).toInstance(new Requirement() {})
-        bind(Key.get(String, named('key'))).toInstance('value')
-        bind(Key.get(String, named('key2'))).toInstance('value2')
+    @Before
+    void setup()
+    {
+        injector = createInjector(new AbstractModule() {
+            @Override
+            protected void configure()
+            {
+                bind(Requirement).toInstance(new Requirement() {})
+                bind(Key.get(String, named('key'))).toInstance('value')
+                bind(Key.get(String, named('key2'))).toInstance('value2')
 
-        List<String> strings = ImmutableList.of('ala', 'ma', 'kota')
-        bind(new TypeLiteral<List<String>>() {}).toInstance(strings)
-      }
-    })
-  }
+                List<String> strings = ImmutableList.of('ala', 'ma', 'kota')
+                bind(new TypeLiteral<List<String>>() {}).toInstance(strings)
+            }
+        })
+    }
 
-  @Test
-  void canInjectRequirementToMethod()
-  {
-    injectAndCallMethod('useRequirement', Requirement)
-  }
+    @Test
+    void canInjectRequirementToMethod()
+    {
+        injectAndCallMethod('useRequirement', Requirement)
+    }
 
-  private void injectAndCallMethod(String methodName, Class... parameterTypes)
-  {
-    Method method = getClass().getMethod(methodName, parameterTypes)
+    private void injectAndCallMethod(String methodName, Class... parameterTypes)
+    {
+        Method method = getClass().getMethod(methodName, parameterTypes)
 
-    method.invoke(this, reflectionInjectorHelper.getMethodArguments(injector, method))
-  }
+        method.invoke(this, reflectionInjectorHelper.getMethodArguments(injector, method))
+    }
 
-  @Inject
-  void useRequirement(Requirement requirement)
-  {
-    assert requirement != null
-  }
+    @Inject
+    void useRequirement(Requirement requirement)
+    {
+        assert requirement != null
+    }
 
-  @Test
-  void canInjectNamedStringToMethod()
-  {
-    injectAndCallMethod('useKey', String)
-    injectAndCallMethod('useKey2', String)
-  }
+    @Test
+    void canInjectNamedStringToMethod()
+    {
+        injectAndCallMethod('useKey', String)
+        injectAndCallMethod('useKey2', String)
+    }
 
-  @Inject
-  void useKey(@Named('key') String key)
-  {
-    assert key == 'value';
-  }
+    @Inject
+    void useKey(@Named('key') String key)
+    {
+        assert key == 'value';
+    }
 
-  @javax.inject.Inject
-  void useKey2(@javax.inject.Named('key2') String key)
-  {
-    assert key == 'value2';
-  }
+    @javax.inject.Inject
+    void useKey2(@javax.inject.Named('key2') String key)
+    {
+        assert key == 'value2';
+    }
 
-  @Ignore
-  @Test
-  void canInjectStringListToMethod()
-  {
-    injectAndCallMethod('useStringList', List)
-  }
+    @Ignore
+    @Test
+    void canInjectStringListToMethod()
+    {
+        injectAndCallMethod('useStringList', List)
+    }
 
-  @javax.inject.Inject
-  void useStringList(List<String> stringList)
-  {
-    assert stringList.size() == 3 && stringList.containsAll(['ala', 'ma', 'kota'])
-  }
+    @javax.inject.Inject
+    void useStringList(List<String> stringList)
+    {
+        assert stringList.size() == 3 && stringList.containsAll(['ala', 'ma', 'kota'])
+    }
 
-  @Test(expected = ConfigurationException)
-  void cannotInjectRequirementFulfillerToMethod()
-  {
-    injectAndCallMethod('useFulfiller', RequirementFulfiller)
-  }
+    @Test(expected = ConfigurationException)
+    void cannotInjectRequirementFulfillerToMethod()
+    {
+        injectAndCallMethod('useFulfiller', RequirementFulfiller)
+    }
 
-  @Inject
-  void useFulfiller(RequirementFulfiller fulfiller)
-  {
-    throw new IllegalStateException('no fulfiller should be provided')
-  }
+    @Inject
+    void useFulfiller(RequirementFulfiller fulfiller)
+    {
+        throw new IllegalStateException('no fulfiller should be provided')
+    }
 }

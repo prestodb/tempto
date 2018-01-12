@@ -21,16 +21,16 @@ import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle
 class TableHandleTest
         extends Specification
 {
-  @Unroll
-  def 'parse #tableHandleStr to #expectedTableHandle'()
-  {
-    expect:
-    TableHandle.parse(tableHandleStr) == expectedTableHandle
+    @Unroll
+    def 'parse #tableHandleStr to #expectedTableHandle'()
+    {
+        expect:
+        TableHandle.parse(tableHandleStr) == expectedTableHandle
 
-    where:
-    tableHandleStr    | expectedTableHandle
-    'table'           | tableHandle('table')
-    'schema.table'    | tableHandle('table').inSchema('schema')
-    'db.schema.table' | tableHandle('table').inDatabase('db').inSchema('schema')
-  }
+        where:
+        tableHandleStr    | expectedTableHandle
+        'table'           | tableHandle('table')
+        'schema.table'    | tableHandle('table').inSchema('schema')
+        'db.schema.table' | tableHandle('table').inDatabase('db').inSchema('schema')
+    }
 }

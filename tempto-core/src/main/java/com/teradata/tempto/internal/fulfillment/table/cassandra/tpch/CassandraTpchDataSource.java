@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 public class CassandraTpchDataSource
-    implements RelationalDataSource
+        implements RelationalDataSource
 {
     private static final Splitter SPLITTER = Splitter.on('|');
 

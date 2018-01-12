@@ -24,7 +24,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * Interface for interacting with CLI processes.
  */
-public interface CliProcess extends Closeable
+public interface CliProcess
+        extends Closeable
 {
     public static List<String> trimLines(List<String> lines)
     {

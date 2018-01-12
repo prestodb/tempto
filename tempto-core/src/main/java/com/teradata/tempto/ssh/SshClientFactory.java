@@ -21,15 +21,18 @@ public interface SshClientFactory
 
     String DEFAULT_USER = "root";
 
-    default SshClient create(String host) {
+    default SshClient create(String host)
+    {
         return create(host, 22, DEFAULT_USER, Optional.empty());
     }
 
-    default SshClient create(String host, int port) {
+    default SshClient create(String host, int port)
+    {
         return create(host, port, DEFAULT_USER, Optional.empty());
     }
 
-    default SshClient create(String host, int port, String user) {
+    default SshClient create(String host, int port, String user)
+    {
         return create(host, port, user, Optional.empty());
     }
 

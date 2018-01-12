@@ -29,120 +29,120 @@ import static java.util.Arrays.asList
 public class RequirementsCollectorTest
         extends Specification
 {
-  private static final def A = req('a')
-  private static final def B = req('b')
-  private static final def C = req('c')
-  private static final def D = req('d')
+    private static final def A = req('a')
+    private static final def B = req('b')
+    private static final def C = req('c')
+    private static final def D = req('d')
 
-  def requirementsCollector = new DefaultRequirementsCollector(emptyConfiguration())
+    def requirementsCollector = new DefaultRequirementsCollector(emptyConfiguration())
 
-  def "should list method requirements"()
-  {
-    expect:
-    requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
+    def "should list method requirements"()
+    {
+        expect:
+        requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
 
-    where:
-    method                                        | expectedRequirementSets
-    MethodRequirement.getMethod('method')         | setOf(setOf(A))
-    ClassRequirement.getMethod('method')          | setOf(setOf(B))
-    MethodAndClassRequirement.getMethod('method') | setOf(setOf(A, B))
-  }
+        where:
+        method                                        | expectedRequirementSets
+        MethodRequirement.getMethod('method')         | setOf(setOf(A))
+        ClassRequirement.getMethod('method')          | setOf(setOf(B))
+        MethodAndClassRequirement.getMethod('method') | setOf(setOf(A, B))
+    }
 
-  def "should compose requirements"()
-  {
-    expect:
-    ((CompositeRequirement) requirement).requirementsSets == expectedRequirementSets
+    def "should compose requirements"()
+    {
+        expect:
+        ((CompositeRequirement) requirement).requirementsSets == expectedRequirementSets
 
-    where:
-    requirement                         | expectedRequirementSets
-    compose()                           | setOf(setOf())
+        where:
+        requirement                                                 | expectedRequirementSets
+        compose()                                                   | setOf(setOf())
 
-    compose(A, B)                       | setOf(setOf(A, B))
+        compose(A, B)                                               | setOf(setOf(A, B))
 
-    Requirements.allOf(A, B)                         | setOf(setOf(A), setOf(B))
+        Requirements.allOf(A, B)                                    | setOf(setOf(A), setOf(B))
 
-    compose(C, Requirements.allOf(A, B))             | setOf(setOf(A, C), setOf(B, C))
+        compose(C, Requirements.allOf(A, B))                        | setOf(setOf(A, C), setOf(B, C))
 
-    compose(Requirements.allOf(C, D), Requirements.allOf(A, B))   | setOf(setOf(A, C), setOf(B, C), setOf(D, A), setOf(D, B))
+        compose(Requirements.allOf(C, D), Requirements.allOf(A, B)) | setOf(setOf(A, C), setOf(B, C), setOf(D, A), setOf(D, B))
 
-    compose(Requirements.allOf(C, Requirements.allOf(A, B)), D)   | setOf(setOf(C, D), setOf(A, D), setOf(B, D))
+        compose(Requirements.allOf(C, Requirements.allOf(A, B)), D) | setOf(setOf(C, D), setOf(A, D), setOf(B, D))
 
-    compose(A, Requirements.allOf(compose(B, C), D)) | setOf(setOf(A, B, C), setOf(A, D))
-  }
+        compose(A, Requirements.allOf(compose(B, C), D))            | setOf(setOf(A, B, C), setOf(A, D))
+    }
 
-  def "should provide command requirements from configuration"()
-  {
-    expect:
-    def requirementsCollector = new DefaultRequirementsCollector(new YamlConfiguration('''
+    def "should provide command requirements from configuration"()
+    {
+        expect:
+        def requirementsCollector = new DefaultRequirementsCollector(new YamlConfiguration('''
 command:
   test:
     - test command
   suite:
     - suite command
     '''))
-    requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
+        requirementsCollector.collect(method).requirementsSets == expectedRequirementSets
 
-    where:
-    method                                        | expectedRequirementSets
-    MethodRequirement.getMethod('method')         | setOf(setOf(A, testCommand('test command'), suiteCommand('suite command')))
-  }
-
-  private static Requirement req(String name)
-  {
-    return new DummyTestRequirement(name)
-  }
-
-  private static <E> Set<E> setOf(E e)
-  {
-    ImmutableSet.of(e)
-  }
-
-  private static <E> Set<E> setOf(E... elems)
-  {
-    ImmutableSet.builder().addAll(asList(elems)).build()
-  }
-
-  private static class MethodRequirement
-  {
-    @Requires(ProviderA)
-    public void method()
-    {
+        where:
+        method                                | expectedRequirementSets
+        MethodRequirement.getMethod('method') | setOf(setOf(A, testCommand('test command'), suiteCommand('suite command')))
     }
-  }
 
-  @Requires(ProviderB)
-  private static class ClassRequirement
-  {
-    public void method()
+    private static Requirement req(String name)
     {
+        return new DummyTestRequirement(name)
     }
-  }
 
-  @Requires(ProviderA)
-  private static class MethodAndClassRequirement
-  {
+    private static <E> Set<E> setOf(E e)
+    {
+        ImmutableSet.of(e)
+    }
+
+    private static <E> Set<E> setOf(E... elems)
+    {
+        ImmutableSet.builder().addAll(asList(elems)).build()
+    }
+
+    private static class MethodRequirement
+    {
+        @Requires(ProviderA)
+        public void method()
+        {
+        }
+    }
+
     @Requires(ProviderB)
-    public void method()
+    private static class ClassRequirement
     {
+        public void method()
+        {
+        }
     }
-  }
 
-  private static class ProviderA
-          implements RequirementsProvider
-  {
-    Requirement getRequirements(Configuration configuration)
+    @Requires(ProviderA)
+    private static class MethodAndClassRequirement
     {
-      return A
+        @Requires(ProviderB)
+        public void method()
+        {
+        }
     }
-  }
 
-  private static class ProviderB
-          implements RequirementsProvider
-  {
-    @Override
-    Requirement getRequirements(Configuration configuration)
+    private static class ProviderA
+            implements RequirementsProvider
     {
-      return B
+        Requirement getRequirements(Configuration configuration)
+        {
+            return A
+        }
     }
-  }
+
+    private static class ProviderB
+            implements RequirementsProvider
+    {
+        @Override
+        Requirement getRequirements(Configuration configuration)
+        {
+            return B
+        }
+    }
 }

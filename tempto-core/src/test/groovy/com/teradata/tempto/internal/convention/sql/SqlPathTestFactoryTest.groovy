@@ -35,54 +35,54 @@ import static com.teradata.tempto.internal.configuration.EmptyConfiguration.empt
 class SqlPathTestFactoryTest
         extends Specification
 {
-  @Rule
-  TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule
+    TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @Shared
-  SqlPathTestFactory sqlPathTestFactory
+    @Shared
+    SqlPathTestFactory sqlPathTestFactory
 
-  def setup()
-  {
-    TableDefinitionsRepository tableDefinitionsRepositoryMock = Mock()
-    ConventionBasedTestProxyGenerator conventionBasedTestProxyGeneratorMock = new ConventionBasedTestProxyGenerator('test')
-    sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock, emptyConfiguration())
-  }
+    def setup()
+    {
+        TableDefinitionsRepository tableDefinitionsRepositoryMock = Mock()
+        ConventionBasedTestProxyGenerator conventionBasedTestProxyGeneratorMock = new ConventionBasedTestProxyGenerator('test')
+        sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock, emptyConfiguration())
+    }
 
-  def shouldCreateConventionTestWithRequires()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("-- requires: ${DummyRequirementsProvider1.class.name}; groups:foo")
+    def shouldCreateConventionTestWithRequires()
+    {
+        setup:
+        Path testPath = getPathForConventionTest("-- requires: ${DummyRequirementsProvider1.class.name}; groups:foo")
 
-    when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
-    String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
+        when:
+        List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+        String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
 
-    then:
-    conventionBasedTests.size() == 1
-    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
-    conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}" as String
-    conventionBasedTests.get(0).testGroups == ['foo'] as Set
-  }
+        then:
+        conventionBasedTests.size() == 1
+        containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
+        conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}" as String
+        conventionBasedTests.get(0).testGroups == ['foo'] as Set
+    }
 
-  def shouldUseSectionNameAsTestName()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("-- name:foo_boo")
+    def shouldUseSectionNameAsTestName()
+    {
+        setup:
+        Path testPath = getPathForConventionTest("-- name:foo_boo")
 
-    when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
-    String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
+        when:
+        List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+        String baseTestFileName = FilenameUtils.getBaseName(testPath.getFileName().toString());
 
-    then:
-    conventionBasedTests.size() == 1
-    conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}.foo_boo" as String
-  }
+        then:
+        conventionBasedTests.size() == 1
+        conventionBasedTests.get(0).testName == "tests.prefix.${baseTestFileName}.foo_boo" as String
+    }
 
-  def shouldCreateTestsWithMultipleSections()
-  {
-    setup:
-    Path testPath = getPathForConventionTest(
-            """
+    def shouldCreateTestsWithMultipleSections()
+    {
+        setup:
+        Path testPath = getPathForConventionTest(
+                """
 -- requires: ${DummyRequirementsProvider1.class.name}
 --! name: query_1; requires: ${DummyRequirementsProvider2.class.name}
 query 1 sql
@@ -94,120 +94,120 @@ query 2 sql
 query 2 result
 """, Optional.empty())
 
-    when:
-    List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
-    String testFileBaseName = FilenameUtils.getBaseName(testPath.getFileName().toString())
+        when:
+        List<ConventionBasedTest> conventionBasedTests = sqlPathTestFactory.createTestsForPath(testPath, 'tests.prefix', null)
+        String testFileBaseName = FilenameUtils.getBaseName(testPath.getFileName().toString())
 
-    then:
-    conventionBasedTests.size() == 2
+        then:
+        conventionBasedTests.size() == 2
 
-    conventionBasedTests.get(0).testName == "tests.prefix.${testFileBaseName}.query_1" as String
-    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
-    containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement2)
+        conventionBasedTests.get(0).testName == "tests.prefix.${testFileBaseName}.query_1" as String
+        containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement1)
+        containsRequirement(conventionBasedTests.get(0).getRequirements(), DummyRequirement2)
 
-    conventionBasedTests.get(1).testName == "tests.prefix.${testFileBaseName}.query_2" as String
-    containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement1)
-    !containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement2)
-  }
-
-  def shouldCreateConventionTestWithWrongRequires()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("-- requires: not.existing.Requirement")
-
-    when:
-    sqlPathTestFactory.createTestsForPath(testPath, '', null)
-
-    then:
-    RuntimeException ex = thrown()
-    ex.message == 'Unable to find specified class: not.existing.Requirement'
-  }
-
-  def shouldCreateTestWhenNoResultsFile()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("--", Optional.empty())
-
-    when:
-    List<ConventionBasedTest> tests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
-
-    then:
-    tests.size() == 1
-  }
-
-  def shouldFailInvalidNumberOfSections()
-  {
-    setup:
-    Path testPath = getPathForConventionTest("--\n--!", Optional.empty())
-
-    when:
-    sqlPathTestFactory.createTestsForPath(testPath, '', null)
-
-    then:
-    IllegalStateException e = thrown()
-    e.message == 'First section should contain properties, next sections should represent query and results'
-  }
-
-  private Path getPathForConventionTest(String conventionTestContent)
-  {
-    getPathForConventionTest(conventionTestContent, Optional.of(''))
-  }
-
-  private Path getPathForConventionTest(String conventionTestContent, Optional<String> resultFileContent)
-  {
-    def file = temporaryFolder.newFile()
-    file.write conventionTestContent
-    def testPath = Paths.get(file.path)
-
-    if (resultFileContent.isPresent()) {
-      File resultFile = new File(testPath.toString().replace('.tmp', '.result'))
-      resultFile.write(resultFileContent.get())
+        conventionBasedTests.get(1).testName == "tests.prefix.${testFileBaseName}.query_2" as String
+        containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement1)
+        !containsRequirement(conventionBasedTests.get(1).getRequirements(), DummyRequirement2)
     }
 
-    return testPath
-  }
+    def shouldCreateConventionTestWithWrongRequires()
+    {
+        setup:
+        Path testPath = getPathForConventionTest("-- requires: not.existing.Requirement")
 
-  private boolean containsRequirement(Requirement requirement, Class<? extends Requirement> requirementClass)
-  {
-    if (requirement instanceof CompositeRequirement) {
-      return (requirement as CompositeRequirement).requirementsSets.any {
-        it.any {
-          containsRequirement(it, requirementClass)
+        when:
+        sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+        then:
+        RuntimeException ex = thrown()
+        ex.message == 'Unable to find specified class: not.existing.Requirement'
+    }
+
+    def shouldCreateTestWhenNoResultsFile()
+    {
+        setup:
+        Path testPath = getPathForConventionTest("--", Optional.empty())
+
+        when:
+        List<ConventionBasedTest> tests = sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+        then:
+        tests.size() == 1
+    }
+
+    def shouldFailInvalidNumberOfSections()
+    {
+        setup:
+        Path testPath = getPathForConventionTest("--\n--!", Optional.empty())
+
+        when:
+        sqlPathTestFactory.createTestsForPath(testPath, '', null)
+
+        then:
+        IllegalStateException e = thrown()
+        e.message == 'First section should contain properties, next sections should represent query and results'
+    }
+
+    private Path getPathForConventionTest(String conventionTestContent)
+    {
+        getPathForConventionTest(conventionTestContent, Optional.of(''))
+    }
+
+    private Path getPathForConventionTest(String conventionTestContent, Optional<String> resultFileContent)
+    {
+        def file = temporaryFolder.newFile()
+        file.write conventionTestContent
+        def testPath = Paths.get(file.path)
+
+        if (resultFileContent.isPresent()) {
+            File resultFile = new File(testPath.toString().replace('.tmp', '.result'))
+            resultFile.write(resultFileContent.get())
         }
-      }
-    }
-    else {
-      return requirementClass.isInstance(requirement)
-    }
-  }
 
-  public static class DummyRequirementsProvider1
-          implements RequirementsProvider
-  {
-    @Override
-    Requirement getRequirements(Configuration configuration)
+        return testPath
+    }
+
+    private boolean containsRequirement(Requirement requirement, Class<? extends Requirement> requirementClass)
     {
-      return new DummyRequirement1()
+        if (requirement instanceof CompositeRequirement) {
+            return (requirement as CompositeRequirement).requirementsSets.any {
+                it.any {
+                    containsRequirement(it, requirementClass)
+                }
+            }
+        }
+        else {
+            return requirementClass.isInstance(requirement)
+        }
     }
-  }
 
-  public static class DummyRequirementsProvider2
-          implements RequirementsProvider
-  {
-    @Override
-    Requirement getRequirements(Configuration configuration)
+    public static class DummyRequirementsProvider1
+            implements RequirementsProvider
     {
-      return new DummyRequirement2()
+        @Override
+        Requirement getRequirements(Configuration configuration)
+        {
+            return new DummyRequirement1()
+        }
     }
-  }
 
-  public static class DummyRequirement1
-          implements Requirement
-  {
-  }
+    public static class DummyRequirementsProvider2
+            implements RequirementsProvider
+    {
+        @Override
+        Requirement getRequirements(Configuration configuration)
+        {
+            return new DummyRequirement2()
+        }
+    }
 
-  public static class DummyRequirement2
-          implements Requirement
-  {
-  }
+    public static class DummyRequirement1
+            implements Requirement
+    {
+    }
+
+    public static class DummyRequirement2
+            implements Requirement
+    {
+    }
 }

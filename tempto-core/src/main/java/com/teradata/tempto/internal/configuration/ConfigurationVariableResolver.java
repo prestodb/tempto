@@ -61,7 +61,7 @@ public class ConfigurationVariableResolver
             }
             else if (value instanceof List) {
                 List<String> resolvedList = new ArrayList<String>();
-                for (String entry: (List<String>)value) {
+                for (String entry : (List<String>) value) {
                     resolvedList.add(strSubstitutor.replace(entry));
                 }
                 return Pair.of(prefix, resolvedList);

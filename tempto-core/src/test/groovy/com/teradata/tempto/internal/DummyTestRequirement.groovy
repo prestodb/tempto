@@ -19,15 +19,15 @@ import com.teradata.tempto.Requirement
 public final class DummyTestRequirement
         implements Requirement
 {
-  private final String name;
+    private final String name;
 
-  DummyTestRequirement(String name)
-  {
-    this.name = name;
-  }
+    DummyTestRequirement(String name)
+    {
+        this.name = name;
+    }
 
-  public String toString()
-  {
-    return name;
-  }
+    public String toString()
+    {
+        return name;
+    }
 }

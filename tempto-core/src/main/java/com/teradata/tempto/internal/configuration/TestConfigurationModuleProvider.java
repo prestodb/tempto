@@ -53,7 +53,7 @@ public class TestConfigurationModuleProvider
                         configuration.get(key).ifPresent(value -> bind(getBindingKey(value, key)).toInstance(value)));
             }
 
-            private  Key getBindingKey(Object configValue, String configKey)
+            private Key getBindingKey(Object configValue, String configKey)
             {
                 if (configValue instanceof List) {
                     // currently only list of strings is supported
@@ -61,8 +61,6 @@ public class TestConfigurationModuleProvider
                 }
                 return Key.get(configValue.getClass(), named(configKey));
             }
-
         };
     }
-
 }

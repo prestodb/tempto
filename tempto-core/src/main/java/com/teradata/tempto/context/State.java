@@ -28,7 +28,8 @@ public interface State
      *
      * @return Name
      */
-    default Optional<String> getName() {
+    default Optional<String> getName()
+    {
         return Optional.empty();
     }
 }

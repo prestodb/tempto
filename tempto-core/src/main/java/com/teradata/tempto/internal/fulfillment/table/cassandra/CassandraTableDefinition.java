@@ -21,7 +21,7 @@ import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 import static java.util.Objects.requireNonNull;
 
 public class CassandraTableDefinition
-    extends RelationalTableDefinition
+        extends RelationalTableDefinition
 {
     public static CassandraTableDefinition cassandraTableDefinition(String name, String createTableDDLTemplate, RelationalDataSource dataSource)
     {

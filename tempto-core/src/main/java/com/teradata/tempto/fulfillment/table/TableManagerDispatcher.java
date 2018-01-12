@@ -28,7 +28,8 @@ public interface TableManagerDispatcher
         return getTableManagerFor(tableInstance.tableDefinition());
     }
 
-    default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition) {
+    default <T extends TableDefinition> TableManager<T> getTableManagerFor(T tableDefinition)
+    {
         return getTableManagerFor(tableDefinition, tableDefinition.getTableHandle());
     }
 

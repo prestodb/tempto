@@ -117,7 +117,8 @@ public abstract class AbstractConfiguration
     }
 
     @Override
-    public List<String> getStringList(String key) {
+    public List<String> getStringList(String key)
+    {
         Optional<Object> object = get(key);
         if (object.isPresent() && object.get() instanceof List) {
             return (List<String>) object.get();
@@ -126,7 +127,8 @@ public abstract class AbstractConfiguration
     }
 
     @Override
-    public List<String> getStringListMandatory(String key, String errorMessage) {
+    public List<String> getStringListMandatory(String key, String errorMessage)
+    {
         List<String> stringList = getStringList(key);
         if (stringList.isEmpty()) {
             throw new IllegalStateException(errorMessage);

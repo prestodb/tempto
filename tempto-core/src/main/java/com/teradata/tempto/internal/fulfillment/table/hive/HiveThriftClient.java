@@ -74,7 +74,8 @@ public class HiveThriftClient
             setRowsCount(tableName, tableStatistics, table);
             try {
                 setColumnStatistics(tableName, tableStatistics, table, fieldSchema -> true);
-            } catch (TException ignore) {
+            }
+            catch (TException ignore) {
                 transport.close();
                 transport.open();
                 // try to avoid date type as it not supported in hive 1.1.0
@@ -86,7 +87,8 @@ public class HiveThriftClient
         }
     }
 
-    private void setRowsCount(TableName tableName, TableStatistics tableStatistics, Table table) throws TException
+    private void setRowsCount(TableName tableName, TableStatistics tableStatistics, Table table)
+            throws TException
     {
         Map<String, String> tableParameters = table.getParameters();
         tableParameters.put("numRows", Long.toString(tableStatistics.getRowCount()));
@@ -106,7 +108,8 @@ public class HiveThriftClient
         return tableName.getSchema().orElse("default");
     }
 
-    private void setColumnStatistics(TableName tableName, TableStatistics tableStatistics, Table table, Predicate<FieldSchema> fieldsPredicate) throws TException
+    private void setColumnStatistics(TableName tableName, TableStatistics tableStatistics, Table table, Predicate<FieldSchema> fieldsPredicate)
+            throws TException
     {
         ColumnStatisticsDesc hiveColumnStatisticsDesc = new ColumnStatisticsDesc();
         hiveColumnStatisticsDesc.setIsTblLevel(false);

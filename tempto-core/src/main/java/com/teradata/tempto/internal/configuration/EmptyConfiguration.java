@@ -20,12 +20,14 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-public class EmptyConfiguration extends AbstractConfiguration
+public class EmptyConfiguration
+        extends AbstractConfiguration
 {
 
     private static final EmptyConfiguration INSTANCE = new EmptyConfiguration();
 
-    public static Configuration emptyConfiguration() {
+    public static Configuration emptyConfiguration()
+    {
         return INSTANCE;
     }
 

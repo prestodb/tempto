@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
 import static com.teradata.tempto.configuration.KeyUtils.joinKey;
+import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration;
 import static java.util.Optional.empty;
 
 /**
@@ -49,6 +49,7 @@ import static java.util.Optional.empty;
  * <p>
  * the following map structure would be created
  * </p>
+ * <pre>
  * {
  * a : {
  *  b : {
@@ -60,6 +61,7 @@ import static java.util.Optional.empty;
  *  c : 15
  *  }
  * }
+ * </pre>
  */
 public class MapConfiguration
         extends AbstractConfiguration

@@ -80,7 +80,7 @@ public class DefaultRequirementsCollector
             if (!testSetupCommands.isEmpty()) {
                 requirement = compose(requirement, new TestCommandRequirement(testSetupCommands));
             }
-            List<Command> suiteSetupCommands= configurationListToCommands("command.suite");
+            List<Command> suiteSetupCommands = configurationListToCommands("command.suite");
             if (!suiteSetupCommands.isEmpty()) {
                 requirement = compose(requirement, new SuiteCommandRequirement(suiteSetupCommands));
             }

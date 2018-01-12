@@ -37,5 +37,4 @@ public class RecursionPathTestFactory
         String newPrefix = testNamePrefix + "." + path.getFileName();
         return factory.createTestsForChildrenOfPath(path, newPrefix);
     }
-
 }

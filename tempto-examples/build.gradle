@@ -13,37 +13,37 @@
  */
 
 plugins {
-  id 'java' // or 'groovy' Must be explicitly applied
-  id 'com.github.johnrengelman.shadow' version '1.2.2'
+    id 'java' // or 'groovy' Must be explicitly applied
+    id 'com.github.johnrengelman.shadow' version '1.2.2'
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 
 dependencies {
-  compile tempto_runner
-  compile libraries.slf4j_api
-  compile libraries.junit
+    compile tempto_runner
+    compile libraries.slf4j_api
+    compile libraries.junit
 
-  runtime tempto_logging_log4j
-  runtime libraries.slf4j_log4j
-  runtime libraries.postgresql_jdbc
-  runtime libraries.presto_jdbc
-  runtime libraries.hive_jdbc
+    runtime tempto_logging_log4j
+    runtime libraries.slf4j_log4j
+    runtime libraries.postgresql_jdbc
+    runtime libraries.presto_jdbc
+    runtime libraries.hive_jdbc
 }
 
 jar {
-  manifest {
-    attributes 'Main-Class': 'com.teradata.tempto.examples.TemptoExamples'
-  }
+    manifest {
+        attributes 'Main-Class': 'com.teradata.tempto.examples.TemptoExamples'
+    }
 }
 
 shadowJar {
-  version = ''
+    version = ''
 }
 
 build.dependsOn.add([shadowJar])
 
 license {
-  exclude "sql-tests/**/*.sql"
+    exclude "sql-tests/**/*.sql"
 }

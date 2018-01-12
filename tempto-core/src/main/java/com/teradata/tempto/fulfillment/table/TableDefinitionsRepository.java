@@ -114,7 +114,8 @@ public class TableDefinitionsRepository
         TableDefinitionRepositoryKey nameKey = asRepositoryKey(tableHandle.getName());
         if (tableDefinitions.containsKey(tableHandleKey)) {
             return tableDefinitions.get(tableHandleKey);
-        } else if (tableDefinitions.containsKey(nameKey)){
+        }
+        else if (tableDefinitions.containsKey(nameKey)) {
             return tableDefinitions.get(nameKey);
         }
         throw new IllegalStateException("no table definition for: " + tableHandleKey);

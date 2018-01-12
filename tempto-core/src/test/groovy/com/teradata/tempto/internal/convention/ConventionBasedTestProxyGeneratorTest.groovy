@@ -14,12 +14,10 @@
 
 package com.teradata.tempto.internal.convention
 
-import com.google.common.collect.Iterables
 import com.teradata.tempto.Requirement
 import com.teradata.tempto.configuration.Configuration
 import com.teradata.tempto.internal.DummyTestRequirement
 import com.teradata.tempto.internal.convention.sql.SqlQueryConventionBasedTest
-import com.teradata.tempto.internal.initialization.TestInitializationListenerTest
 import org.testng.annotations.Test
 import spock.lang.Specification
 
@@ -28,113 +26,112 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import static com.google.common.collect.Iterables.getOnlyElement
-import static java.util.Arrays.asList
 import static java.util.Collections.emptySet
 import static org.assertj.core.api.Assertions.assertThat
 
 class ConventionBasedTestProxyGeneratorTest
         extends Specification
 {
-  private ConventionBasedTestProxyGenerator proxyGenerator = new ConventionBasedTestProxyGenerator("com.teradata.tempto");
+    private ConventionBasedTestProxyGenerator proxyGenerator = new ConventionBasedTestProxyGenerator("com.teradata.tempto");
 
-  def 'testGenerateProxy'()
-  {
-    when:
-    Path testFile = file("convention/sample-test/query1.sql")
-    SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(section(testFile))
-    SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(section(testFile))
-    Requirement requirement = Mock(Requirement)
-    ConventionBasedTest testInstance = new SqlQueryConventionBasedTest(
-            Optional.empty(),
-            Optional.empty(),
-            testFile,
-            "test.prefix",
-            1,
-            5,
-            queryDescriptor,
-            resultDescriptor,
-            requirement)
-
-    ConventionBasedTest proxiedTest = proxyGenerator.generateProxy(testInstance)
-    Class<ConventionBasedTest> proxiedClass = proxiedTest.getClass()
-    Method testMethod = proxiedClass.getMethod("query1_1")
-    Test testAnnotation = testMethod.getAnnotation(Test)
-
-    then:
-    assertThat(proxiedTest.getRequirements()).isSameAs(requirement)
-    assertThat(testAnnotation).isNotNull()
-    assertThat(testAnnotation.enabled()).isTrue()
-    assertThat(testAnnotation.groups()).containsOnly("tpch", "quarantine")
-  }
-
-  private file(String path)
-  {
-    Paths.get(getClass().getClassLoader().getResource(path).getPath())
-  }
-
-  private section(Path file)
-  {
-    getOnlyElement(new AnnotatedFileParser().parseFile(file))
-  }
-
-  def 'test class name and method names properly generated'()
-  {
-    setup:
-    def test = DummyConventionBasedTest.emptyTest(testName);
-    def proxy = proxyGenerator.generateProxy(test);
-    def proxyMethodNames = proxy.getClass().getMethods().collect { it.name }
-
-    expect:
-    proxy.getClass().getName() == expectedClassName;
-    proxyMethodNames.contains(expectedMethodName);
-
-    where:
-    testName                       | expectedClassName                 | expectedMethodName
-    'a.b.c.d'                      | 'com.teradata.tempto.c'           | 'd'
-    'a.b.9c.1d'                    | 'com.teradata.tempto._9c'         | '_1d'
-    'a.b.ala ma kota.a-kot-ma ale' | 'com.teradata.tempto.ala_ma_kota' | 'a_kot_ma_ale'
-  }
-
-  private static class DummyConventionBasedTest
-          extends ConventionBasedTest
-  {
-
-    private final Requirement requirement
-    private final String testName;
-    private final Set<String> testGroups;
-
-    public DummyConventionBasedTest(Requirement requirement, String testName, Set<String> testGroups)
+    def 'testGenerateProxy'()
     {
-      this.requirement = requirement
-      this.testName = testName
-      this.testGroups = testGroups
+        when:
+        Path testFile = file("convention/sample-test/query1.sql")
+        SqlQueryDescriptor queryDescriptor = new SqlQueryDescriptor(section(testFile))
+        SqlResultDescriptor resultDescriptor = new SqlResultDescriptor(section(testFile))
+        Requirement requirement = Mock(Requirement)
+        ConventionBasedTest testInstance = new SqlQueryConventionBasedTest(
+                Optional.empty(),
+                Optional.empty(),
+                testFile,
+                "test.prefix",
+                1,
+                5,
+                queryDescriptor,
+                resultDescriptor,
+                requirement)
+
+        ConventionBasedTest proxiedTest = proxyGenerator.generateProxy(testInstance)
+        Class<ConventionBasedTest> proxiedClass = proxiedTest.getClass()
+        Method testMethod = proxiedClass.getMethod("query1_1")
+        Test testAnnotation = testMethod.getAnnotation(Test)
+
+        then:
+        assertThat(proxiedTest.getRequirements()).isSameAs(requirement)
+        assertThat(testAnnotation).isNotNull()
+        assertThat(testAnnotation.enabled()).isTrue()
+        assertThat(testAnnotation.groups()).containsOnly("tpch", "quarantine")
     }
 
-    @Override
-    void test()
-    {}
-
-    @Override
-    Requirement getRequirements(Configuration configuration)
+    private file(String path)
     {
-      return requirement;
+        Paths.get(getClass().getClassLoader().getResource(path).getPath())
     }
 
-    @Override
-    String getTestName()
+    private section(Path file)
     {
-      return testName;
+        getOnlyElement(new AnnotatedFileParser().parseFile(file))
     }
 
-    @Override
-    Set<String> getTestGroups()
+    def 'test class name and method names properly generated'()
     {
-      return testGroups;
+        setup:
+        def test = DummyConventionBasedTest.emptyTest(testName);
+        def proxy = proxyGenerator.generateProxy(test);
+        def proxyMethodNames = proxy.getClass().getMethods().collect { it.name }
+
+        expect:
+        proxy.getClass().getName() == expectedClassName;
+        proxyMethodNames.contains(expectedMethodName);
+
+        where:
+        testName                       | expectedClassName                 | expectedMethodName
+        'a.b.c.d'                      | 'com.teradata.tempto.c'           | 'd'
+        'a.b.9c.1d'                    | 'com.teradata.tempto._9c'         | '_1d'
+        'a.b.ala ma kota.a-kot-ma ale' | 'com.teradata.tempto.ala_ma_kota' | 'a_kot_ma_ale'
     }
 
-    public static DummyConventionBasedTest emptyTest(String testName)
+    private static class DummyConventionBasedTest
+            extends ConventionBasedTest
     {
-      return new DummyConventionBasedTest(new DummyTestRequirement(), testName, emptySet());
+
+        private final Requirement requirement
+        private final String testName;
+        private final Set<String> testGroups;
+
+        public DummyConventionBasedTest(Requirement requirement, String testName, Set<String> testGroups)
+        {
+            this.requirement = requirement
+            this.testName = testName
+            this.testGroups = testGroups
+        }
+
+        @Override
+        void test()
+        {}
+
+        @Override
+        Requirement getRequirements(Configuration configuration)
+        {
+            return requirement;
+        }
+
+        @Override
+        String getTestName()
+        {
+            return testName;
+        }
+
+        @Override
+        Set<String> getTestGroups()
+        {
+            return testGroups;
+        }
+
+        public static DummyConventionBasedTest emptyTest(String testName)
+        {
+            return new DummyConventionBasedTest(new DummyTestRequirement(), testName, emptySet());
+        }
     }
-  }
 }

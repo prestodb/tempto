@@ -15,7 +15,6 @@
 package com.teradata.tempto.internal.fulfillment.table.jdbc;
 
 import com.google.common.collect.ImmutableList;
-import com.teradata.tempto.internal.fulfillment.table.jdbc.Loader;
 import com.teradata.tempto.query.QueryExecutor;
 
 import java.sql.JDBCType;
@@ -77,7 +76,8 @@ class InsertLoader
         return String.format("INSERT INTO %s VALUES %s", tableName, values);
     }
 
-    private String asStringValue(JDBCType jdbcType, Object o) {
+    private String asStringValue(JDBCType jdbcType, Object o)
+    {
         if (o == null) {
             return "null";
         }

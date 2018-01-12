@@ -30,34 +30,34 @@ import java.sql.ResultSetMetaData
 public class JdbcTableManagerTest
         extends Specification
 {
-  static RelationalTableDefinition tableDefinition
-  static JdbcTableManager tableManager
-  static String tableName
+    static RelationalTableDefinition tableDefinition
+    static JdbcTableManager tableManager
+    static String tableName
 
-  def setup()
-  {
-    tableName = "name"
-    tableDefinition = RelationalTableDefinition.relationalTableDefinition(tableName, "CREATE TABLE %NAME%(col1 INT)",
-            { Collections.<List<Object>>emptyList().iterator() } as RelationalDataSource)
+    def setup()
+    {
+        tableName = "name"
+        tableDefinition = RelationalTableDefinition.relationalTableDefinition(tableName, "CREATE TABLE %NAME%(col1 INT)",
+                { Collections.<List<Object>> emptyList().iterator() } as RelationalDataSource)
 
-    def mockExecutor = Mock(QueryExecutor)
-    def mockConnection = Mock(Connection)
-    def mockMetadata = Mock(DatabaseMetaData)
-    mockExecutor.connection >> mockConnection
-    mockConnection.getMetaData() >> mockMetadata
+        def mockExecutor = Mock(QueryExecutor)
+        def mockConnection = Mock(Connection)
+        def mockMetadata = Mock(DatabaseMetaData)
+        mockExecutor.connection >> mockConnection
+        mockConnection.getMetaData() >> mockMetadata
 
-    def mockResultSet = Mock(ResultSet)
-    mockMetadata.getTables(_, _, _, _) >> mockResultSet
-    mockResultSet.getMetaData() >> Mock(ResultSetMetaData)
-    tableManager = new JdbcTableManager(mockExecutor, new TableNameGenerator(), "db_name", EmptyConfiguration.emptyConfiguration())
-  }
+        def mockResultSet = Mock(ResultSet)
+        mockMetadata.getTables(_, _, _, _) >> mockResultSet
+        mockResultSet.getMetaData() >> Mock(ResultSetMetaData)
+        tableManager = new JdbcTableManager(mockExecutor, new TableNameGenerator(), "db_name", EmptyConfiguration.emptyConfiguration())
+    }
 
-  def 'table without rows does not throw'()
-  {
-    when:
-    tableManager.createImmutable(tableDefinition, TableHandle.tableHandle(tableName))
+    def 'table without rows does not throw'()
+    {
+        when:
+        tableManager.createImmutable(tableDefinition, TableHandle.tableHandle(tableName))
 
-    then:
-    noExceptionThrown()
-  }
+        then:
+        noExceptionThrown()
+    }
 }
