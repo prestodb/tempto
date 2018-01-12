@@ -181,7 +181,7 @@ query 2 result
         }
     }
 
-    public static class DummyRequirementsProvider1
+    static class DummyRequirementsProvider1
             implements RequirementsProvider
     {
         @Override
@@ -191,7 +191,7 @@ query 2 result
         }
     }
 
-    public static class DummyRequirementsProvider2
+    static class DummyRequirementsProvider2
             implements RequirementsProvider
     {
         @Override
@@ -201,12 +201,12 @@ query 2 result
         }
     }
 
-    public static class DummyRequirement1
+    static class DummyRequirement1
             implements Requirement
     {
     }
 
-    public static class DummyRequirement2
+    static class DummyRequirement2
             implements Requirement
     {
     }

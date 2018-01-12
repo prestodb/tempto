@@ -34,7 +34,7 @@ import java.time.Duration
 import static Thread.sleep
 import static java.nio.charset.StandardCharsets.UTF_8
 
-public class JSchSshClientTest
+class JSchSshClientTest
         extends Specification
 {
     private static final def HOST = 'localhost'
@@ -144,7 +144,7 @@ public class JSchSshClientTest
         sshd.setUserAuthFactories([new UserAuthPassword.Factory(), new UserAuthPublicKey.Factory()])
 
         sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
-            public boolean authenticate(String username, String password, ServerSession session)
+            boolean authenticate(String username, String password, ServerSession session)
             {
                 return USER.equals(username) && PASSWORD.equals(password);
             }

@@ -27,7 +27,7 @@ import java.sql.DatabaseMetaData
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 
-public class JdbcTableManagerTest
+class JdbcTableManagerTest
         extends Specification
 {
     static RelationalTableDefinition tableDefinition

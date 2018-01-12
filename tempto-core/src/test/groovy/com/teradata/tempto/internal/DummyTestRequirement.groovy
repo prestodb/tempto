@@ -16,7 +16,7 @@ package com.teradata.tempto.internal
 
 import com.teradata.tempto.Requirement
 
-public final class DummyTestRequirement
+final class DummyTestRequirement
         implements Requirement
 {
     private final String name;
@@ -26,7 +26,7 @@ public final class DummyTestRequirement
         this.name = name;
     }
 
-    public String toString()
+    String toString()
     {
         return name;
     }

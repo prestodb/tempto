@@ -17,7 +17,7 @@ import spock.lang.Specification
 
 import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 
-public class TableDefinitionsRepositoryTest
+class TableDefinitionsRepositoryTest
         extends Specification
 {
     def 'should add/get table definition to repository'()

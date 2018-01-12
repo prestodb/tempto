@@ -32,7 +32,7 @@ import static com.teradata.tempto.assertions.QueryAssert.assertThat
 import static com.teradata.tempto.internal.configuration.TestConfigurationFactory.TEST_CONFIGURATION_URIS_KEY
 import static java.sql.JDBCType.*
 
-public class QueryAssertTest
+class QueryAssertTest
         extends Specification
 {
 

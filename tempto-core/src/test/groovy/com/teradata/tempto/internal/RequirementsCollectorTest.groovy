@@ -26,7 +26,7 @@ import static com.teradata.tempto.fulfillment.command.TestCommandRequirement.tes
 import static com.teradata.tempto.internal.configuration.EmptyConfiguration.emptyConfiguration
 import static java.util.Arrays.asList
 
-public class RequirementsCollectorTest
+class RequirementsCollectorTest
         extends Specification
 {
     private static final def A = req('a')
@@ -105,7 +105,7 @@ command:
     private static class MethodRequirement
     {
         @Requires(ProviderA)
-        public void method()
+        void method()
         {
         }
     }
@@ -113,7 +113,7 @@ command:
     @Requires(ProviderB)
     private static class ClassRequirement
     {
-        public void method()
+        void method()
         {
         }
     }
@@ -122,7 +122,7 @@ command:
     private static class MethodAndClassRequirement
     {
         @Requires(ProviderB)
-        public void method()
+        void method()
         {
         }
     }
