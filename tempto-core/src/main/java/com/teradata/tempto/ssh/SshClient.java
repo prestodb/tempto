@@ -24,10 +24,12 @@ import java.util.List;
 /**
  * Simple SSH client.
  */
-public interface SshClient extends Closeable
+public interface SshClient
+        extends Closeable
 {
 
-    default String command(String command) {
+    default String command(String command)
+    {
         try (CliProcess cliProcess = execute(command)) {
             String output = Joiner.on("\n").join(cliProcess.readRemainingOutputLines());
             cliProcess.waitForWithTimeoutAndKill();
@@ -45,7 +47,6 @@ public interface SshClient extends Closeable
      * @return CLIProcess
      */
     CliProcess execute(String command);
-
 
     CliProcess execute(List<String> command);
 

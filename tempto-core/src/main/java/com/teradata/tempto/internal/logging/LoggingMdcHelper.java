@@ -25,14 +25,15 @@ public class LoggingMdcHelper
 
     private LoggingMdcHelper() {}
 
-    public static void setupLoggingMdcForTest(ITestResult testCase) {
+    public static void setupLoggingMdcForTest(ITestResult testCase)
+    {
         TestMetadata testMetadata = testMetadataReader.readTestMetadata(testCase);
         String testId = testMetadata.testName;
         org.slf4j.MDC.put("test_id", testId);
     }
 
-    public static void cleanLoggingMdc() {
+    public static void cleanLoggingMdc()
+    {
         org.slf4j.MDC.remove(MDC_TEST_ID_KEY);
-
     }
 }

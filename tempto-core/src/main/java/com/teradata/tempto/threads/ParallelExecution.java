@@ -55,8 +55,8 @@ public class ParallelExecution
 
     /**
      * @param timeout Milliseconds
-     * @throws InterruptedException if the thread is interrupted
      * @return true if child threads were successfully joined within given timeout.
+     * @throws InterruptedException if the thread is interrupted
      */
     public boolean joinAndRethrow(long timeout)
             throws InterruptedException

@@ -22,7 +22,7 @@ class JdbcConnectionsConfigurationTest
         extends Specification
 {
 
-  private static final def CONFIGURATION = new YamlConfiguration("""\
+    private static final def CONFIGURATION = new YamlConfiguration("""\
 databases:
   a:
     jdbc_driver_class: com.acme.ADriver
@@ -45,66 +45,66 @@ databases:
     alias: b
 """)
 
-  private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
-          JdbcConnectivityParamsState.builder()
-                  .setName('a')
-                  .setDriverClass('com.acme.ADriver')
-                  .setUrl('jdbc:a://localhost:8080')
-                  .setUser('auser')
-                  .setPassword('apassword')
-                  .build()
+    private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
+            JdbcConnectivityParamsState.builder()
+                    .setName('a')
+                    .setDriverClass('com.acme.ADriver')
+                    .setUrl('jdbc:a://localhost:8080')
+                    .setUser('auser')
+                    .setPassword('apassword')
+                    .build()
 
-  private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
-          JdbcConnectivityParamsState.builder()
-                  .setName('b')
-                  .setDriverClass('com.acme.BDriver')
-                  .setUrl('jdbc:b://localhost:8080')
-                  .setUser('buser')
-                  .setPassword('bpassword')
-                  .setJar(Optional.of('/path/to/jar.jar'))
-                  .setPrepareStatement(Optional.of('USE schema'))
-                  .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
-                  .setKerberosKeytab(Optional.of('example.keytab'))
-                  .build();
+    private static final def EXPECTED_B_JDBC_CONNECTIVITY_PARAMS =
+            JdbcConnectivityParamsState.builder()
+                    .setName('b')
+                    .setDriverClass('com.acme.BDriver')
+                    .setUrl('jdbc:b://localhost:8080')
+                    .setUser('buser')
+                    .setPassword('bpassword')
+                    .setJar(Optional.of('/path/to/jar.jar'))
+                    .setPrepareStatement(Optional.of('USE schema'))
+                    .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
+                    .setKerberosKeytab(Optional.of('example.keytab'))
+                    .build();
 
-  private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
-          JdbcConnectivityParamsState.builder()
-                  .setName('b_alias')
-                  .setDriverClass('com.acme.BDriver')
-                  .setUrl('jdbc:b://localhost:8080')
-                  .setUser('buser')
-                  .setPassword('bpassword')
-                  .setJar(Optional.of('/path/to/jar.jar'))
-                  .setPrepareStatement(Optional.of('USE schema'))
-                  .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
-                  .setKerberosKeytab(Optional.of('example.keytab'))
-                  .build();
+    private static final def EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS =
+            JdbcConnectivityParamsState.builder()
+                    .setName('b_alias')
+                    .setDriverClass('com.acme.BDriver')
+                    .setUrl('jdbc:b://localhost:8080')
+                    .setUser('buser')
+                    .setPassword('bpassword')
+                    .setJar(Optional.of('/path/to/jar.jar'))
+                    .setPrepareStatement(Optional.of('USE schema'))
+                    .setKerberosPrincipal(Optional.of('HIVE@EXAMPLE.COM'))
+                    .setKerberosKeytab(Optional.of('example.keytab'))
+                    .build();
 
-  def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
+    def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
 
-  def "list database connection configurations"()
-  {
-    expect:
-    jdbcConnectionConfiguration.getDefinedJdcbConnectionNames() == ['a', 'b', 'b_alias'] as Set
-  }
+    def "list database connection configurations"()
+    {
+        expect:
+        jdbcConnectionConfiguration.getDefinedJdcbConnectionNames() == ['a', 'b', 'b_alias'] as Set
+    }
 
-  def "get connection configuration"()
-  {
-    setup:
-    def a = jdbcConnectionConfiguration.getConnectionConfiguration('a')
-    def b = jdbcConnectionConfiguration.getConnectionConfiguration('b')
+    def "get connection configuration"()
+    {
+        setup:
+        def a = jdbcConnectionConfiguration.getConnectionConfiguration('a')
+        def b = jdbcConnectionConfiguration.getConnectionConfiguration('b')
 
-    expect:
-    a == EXPECTED_A_JDBC_CONNECTIVITY_PARAMS
-    b == EXPECTED_B_JDBC_CONNECTIVITY_PARAMS
-  }
+        expect:
+        a == EXPECTED_A_JDBC_CONNECTIVITY_PARAMS
+        b == EXPECTED_B_JDBC_CONNECTIVITY_PARAMS
+    }
 
-  def "get connection configuration for alias"()
-  {
-    setup:
-    def bAlias = jdbcConnectionConfiguration.getConnectionConfiguration('b_alias')
+    def "get connection configuration for alias"()
+    {
+        setup:
+        def bAlias = jdbcConnectionConfiguration.getConnectionConfiguration('b_alias')
 
-    expect:
-    bAlias == EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS
-  }
+        expect:
+        bAlias == EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS
+    }
 }

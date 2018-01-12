@@ -103,7 +103,7 @@ public class JSchSshClient
             Throwables.propagate(exception);
         }
         finally {
-            if (session != null) session.disconnect();
+            if (session != null) { session.disconnect(); }
         }
     }
 
@@ -154,7 +154,6 @@ public class JSchSshClient
             throws IOException
     {
     }
-
 
     private Iterable<String> quote(List<String> command)
     {

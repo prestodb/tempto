@@ -39,12 +39,12 @@ import static java.util.Optional.ofNullable;
  * So we introduce our own mechanism of tests selection.
  * This is governed by following java system properties:
  * <ul>
- *   <li>com.teradata.tempto.groups - should contain comma separated list of groups from which tests should be run
- *   <li>com.teradata.tempto.exclude_groups - should contain comma separated list of groups from which tests should be excluded
- *   <li>com.teradata.tempto.tests - should contain comma separated list of test names to be run
+ * <li>com.teradata.tempto.groups - should contain comma separated list of groups from which tests should be run
+ * <li>com.teradata.tempto.exclude_groups - should contain comma separated list of groups from which tests should be excluded
+ * <li>com.teradata.tempto.tests - should contain comma separated list of test names to be run
  * </ul>
  * <p>
- *
+ * <p>
  * TestName matching is done by verifying if value from system property is suffix of actual test name in question
  */
 public class TestNameGroupNameMethodSelector

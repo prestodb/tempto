@@ -23,35 +23,35 @@ class QueryRowMapperTest
         extends Specification
 {
 
-  @Unroll
-  def 'convert binary #value'()
-  {
-    setup:
-    QueryRowMapper rowMapper = new QueryRowMapper(ImmutableList.of(JDBCType.BINARY))
+    @Unroll
+    def 'convert binary #value'()
+    {
+        setup:
+        QueryRowMapper rowMapper = new QueryRowMapper(ImmutableList.of(JDBCType.BINARY))
 
-    expect:
-    rowMapper.mapToRow(ImmutableList.of(value)).getValues()[0] == expected
+        expect:
+        rowMapper.mapToRow(ImmutableList.of(value)).getValues()[0] == expected
 
-    where:
-    value  | expected
-    '0000' | bytes(0x00, 0x00)
-    '0ab0' | bytes(0x0a, 0xb0)
-  }
+        where:
+        value  | expected
+        '0000' | bytes(0x00, 0x00)
+        '0ab0' | bytes(0x0a, 0xb0)
+    }
 
-  def 'should fail when incorrect hex'()
-  {
-    setup:
-    QueryRowMapper rowMapper = new QueryRowMapper(ImmutableList.of(JDBCType.BINARY))
+    def 'should fail when incorrect hex'()
+    {
+        setup:
+        QueryRowMapper rowMapper = new QueryRowMapper(ImmutableList.of(JDBCType.BINARY))
 
-    when:
-    rowMapper.mapToRow(ImmutableList.of('1a0'))
+        when:
+        rowMapper.mapToRow(ImmutableList.of('1a0'))
 
-    then:
-    thrown(IllegalArgumentException)
-  }
+        then:
+        thrown(IllegalArgumentException)
+    }
 
-  private byte[] bytes(int ... bytes)
-  {
-    return bytes
-  }
+    private byte[] bytes(int ... bytes)
+    {
+        return bytes
+    }
 }

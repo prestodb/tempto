@@ -87,7 +87,8 @@ public class RequirementsExpanderInterceptor
             Optional<Object[][]> parametersForMethod = DataProviders.getParametersForMethod(newExpandedMethod.getMethod());
             if (parametersForMethod.isPresent()) {
                 seenMethodsCount += parametersForMethod.get().length;
-            } else {
+            }
+            else {
                 seenMethodsCount++;
             }
         }

@@ -25,28 +25,28 @@ import static com.teradata.tempto.internal.configuration.TestConfigurationFactor
 class ContextDslTest
         extends Specification
 {
-  def setupSpec()
-  {
-    System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
-  }
+    def setupSpec()
+    {
+        System.setProperty(TEST_CONFIGURATION_URIS_KEY, "/configuration/global-configuration-tempto.yaml");
+    }
 
-  def 'executeWithView'()
-  {
-    setup:
-    String viewName = "test_view";
-    String selectSql = "SELECT * FROM nation"
-    ContextRunnable testRunnable = Mock(ContextRunnable)
-    QueryExecutor queryExecutor = Mock(QueryExecutor)
-    queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
-    queryExecutor.executeQuery("CREATE VIEW test_view AS SELECT * FROM nation") >> QueryResult.forSingleIntegerValue(1)
-    queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
+    def 'executeWithView'()
+    {
+        setup:
+        String viewName = "test_view";
+        String selectSql = "SELECT * FROM nation"
+        ContextRunnable testRunnable = Mock(ContextRunnable)
+        QueryExecutor queryExecutor = Mock(QueryExecutor)
+        queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
+        queryExecutor.executeQuery("CREATE VIEW test_view AS SELECT * FROM nation") >> QueryResult.forSingleIntegerValue(1)
+        queryExecutor.executeQuery("DROP VIEW test_view") >> QueryResult.forSingleIntegerValue(1)
 
-    ViewContextProvider contextProvider = new ViewContextProvider(viewName, selectSql, queryExecutor)
+        ViewContextProvider contextProvider = new ViewContextProvider(viewName, selectSql, queryExecutor)
 
-    when:
-    ContextDsl.executeWith(contextProvider, testRunnable)
+        when:
+        ContextDsl.executeWith(contextProvider, testRunnable)
 
-    then:
-    1 * testRunnable.run(_)
-  }
+        then:
+        1 * testRunnable.run(_)
+    }
 }

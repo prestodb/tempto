@@ -26,163 +26,163 @@ import static com.teradata.tempto.context.ThreadLocalTestContextHolder.*
 class ThreadLocalTestContextHolderTest
         extends Specification
 {
-  void cleanup()
-  {
-    if (testContextIfSet().isPresent()) {
-      popAllTestContexts();
+    void cleanup()
+    {
+        if (testContextIfSet().isPresent()) {
+            popAllTestContexts();
+        }
     }
-  }
 
-  def "assertNotSet does not throw if unset"()
-  {
-    setup:
-    assertTestContextNotSet()
-    // works fine
-  }
-
-  def "assertNotSet throws if set"()
-  {
-    setup:
-    pushTestContext(Mock(TestContext))
-
-    when:
-    assertTestContextNotSet()
-
-    then:
-    thrown(IllegalStateException)
-  }
-
-  def "getting testContext throws if not set"()
-  {
-    when:
-    testContext()
-
-    then:
-    thrown(IllegalStateException)
-  }
-
-  def "getting testContext returns what was set"()
-  {
-    setup:
-    TestContext mockTestContext = Mock()
-    pushTestContext(mockTestContext)
-
-    expect:
-    testContext() == mockTestContext
-  }
-
-  def "empty test context should not propagate from parent to child"()
-  {
-    setup:
-    TestContext mockTestContext = Mock()
-
-    pushTestContext(mockTestContext)
-    popTestContext()
-
-    runAndJoin(new Runnable() {
-      @Override
-      void run()
-      {
+    def "assertNotSet does not throw if unset"()
+    {
+        setup:
         assertTestContextNotSet()
+        // works fine
+    }
+
+    def "assertNotSet throws if set"()
+    {
+        setup:
+        pushTestContext(Mock(TestContext))
+
+        when:
+        assertTestContextNotSet()
+
+        then:
+        thrown(IllegalStateException)
+    }
+
+    def "getting testContext throws if not set"()
+    {
+        when:
+        testContext()
+
+        then:
+        thrown(IllegalStateException)
+    }
+
+    def "getting testContext returns what was set"()
+    {
+        setup:
+        TestContext mockTestContext = Mock()
         pushTestContext(mockTestContext)
-      }
-    })
 
-    assertTestContextNotSet()
-  }
-
-  def "parent test context after child start should not propagate to child"()
-  {
-    setup:
-    TestContext mockTestContext = Mock()
-
-    CountDownLatch latch = new CountDownLatch(1)
-    def threadAndThrowables = run(new Runnable() {
-      @Override
-      void run()
-      {
-        latch.await()
-        assertTestContextNotSet()
-      }
-    })
-
-    pushTestContext(mockTestContext)
-    latch.countDown()
-
-    join(threadAndThrowables)
-  }
-
-  def "test context should propagate from parent to child"()
-  {
-    setup:
-    TestContext mockTestContext = Mock()
-    TestContext childTestContext = Mock()
-    mockTestContext.createChildContext() >> childTestContext
-
-    pushTestContext(mockTestContext)
-
-    runAndJoin(new Runnable() {
-      @Override
-      void run()
-      {
-        assert testContext() == mockTestContext
-        popTestContext()
-      }
-    })
-
-    runAndJoin(new Runnable() {
-      @Override
-      void run()
-      {
-        assert testContext() == mockTestContext
-        popTestContext()
-      }
-    })
-
-    runAndJoin(withChildTestContext(new Runnable() {
-      @Override
-      void run()
-      {
-        assert testContext() == childTestContext
-        popTestContext()
-      }
-    }))
-
-    assert testContext() == mockTestContext
-  }
-
-  def run(Runnable runnable)
-  {
-    def throwables = []
-    def thread = new Thread(new Runnable() {
-      @Override
-      void run()
-      {
-        try {
-          runnable.run()
-        }
-        catch (Throwable e) {
-          throwables.add(e)
-        }
-      }
-    })
-
-    thread.start()
-
-    return Pair.of(thread, throwables)
-  }
-
-  def join(Pair<Thread, List<Throwable>> threadAndThrowables)
-  {
-    threadAndThrowables.left.join()
-
-    if (!threadAndThrowables.right.isEmpty()) {
-      throw threadAndThrowables.right[0]
+        expect:
+        testContext() == mockTestContext
     }
-  }
 
-  def runAndJoin(Runnable runnable)
-  {
-    join(run(runnable))
-  }
+    def "empty test context should not propagate from parent to child"()
+    {
+        setup:
+        TestContext mockTestContext = Mock()
+
+        pushTestContext(mockTestContext)
+        popTestContext()
+
+        runAndJoin(new Runnable() {
+            @Override
+            void run()
+            {
+                assertTestContextNotSet()
+                pushTestContext(mockTestContext)
+            }
+        })
+
+        assertTestContextNotSet()
+    }
+
+    def "parent test context after child start should not propagate to child"()
+    {
+        setup:
+        TestContext mockTestContext = Mock()
+
+        CountDownLatch latch = new CountDownLatch(1)
+        def threadAndThrowables = run(new Runnable() {
+            @Override
+            void run()
+            {
+                latch.await()
+                assertTestContextNotSet()
+            }
+        })
+
+        pushTestContext(mockTestContext)
+        latch.countDown()
+
+        join(threadAndThrowables)
+    }
+
+    def "test context should propagate from parent to child"()
+    {
+        setup:
+        TestContext mockTestContext = Mock()
+        TestContext childTestContext = Mock()
+        mockTestContext.createChildContext() >> childTestContext
+
+        pushTestContext(mockTestContext)
+
+        runAndJoin(new Runnable() {
+            @Override
+            void run()
+            {
+                assert testContext() == mockTestContext
+                popTestContext()
+            }
+        })
+
+        runAndJoin(new Runnable() {
+            @Override
+            void run()
+            {
+                assert testContext() == mockTestContext
+                popTestContext()
+            }
+        })
+
+        runAndJoin(withChildTestContext(new Runnable() {
+            @Override
+            void run()
+            {
+                assert testContext() == childTestContext
+                popTestContext()
+            }
+        }))
+
+        assert testContext() == mockTestContext
+    }
+
+    def run(Runnable runnable)
+    {
+        def throwables = []
+        def thread = new Thread(new Runnable() {
+            @Override
+            void run()
+            {
+                try {
+                    runnable.run()
+                }
+                catch (Throwable e) {
+                    throwables.add(e)
+                }
+            }
+        })
+
+        thread.start()
+
+        return Pair.of(thread, throwables)
+    }
+
+    def join(Pair<Thread, List<Throwable>> threadAndThrowables)
+    {
+        threadAndThrowables.left.join()
+
+        if (!threadAndThrowables.right.isEmpty()) {
+            throw threadAndThrowables.right[0]
+        }
+    }
+
+    def runAndJoin(Runnable runnable)
+    {
+        join(run(runnable))
+    }
 }

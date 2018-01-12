@@ -22,120 +22,120 @@ import spock.lang.Specification
 class GuiceTestContextTest
         extends Specification
 {
-  private static final def A = 'A'
-  private static final def B = 'B'
-  private static final def C = 'C'
+    private static final def A = 'A'
+    private static final def B = 'B'
+    private static final def C = 'C'
 
-  def 'test get dependency'()
-  {
-    setup:
-    def context = new GuiceTestContext()
-    def state = new DummyState()
-
-    expect:
-    assert context.createChildContext(state).getDependency(DummyState) == state
-  }
-
-  def 'test override'()
-  {
-    setup:
-    def state1 = new DummyState(A)
-    def state2 = new DummyState(B)
-    def context1 = new GuiceTestContext(new Module() {
-      @Override
-      void configure(Binder binder)
-      {
-        binder.bind(DummyState).toInstance(state1)
-      }
-    })
-
-    def context2 = context1.createChildContext([], [new Module() {
-      @Override
-      void configure(Binder binder)
-      {
-        binder.bind(DummyState).toInstance(state2)
-      }
-    }])
-
-    expect:
-    assert context1.getDependency(DummyState) == state1
-    assert context2.getDependency(DummyState) == state2
-  }
-
-  def 'test spawning no naming'()
-  {
-    setup:
-    def context = new GuiceTestContext()
-    def state = new DummyState()
-
-    expect:
-    assert context.createChildContext(state).getDependency(DummyState) == state
-  }
-
-  def 'test spawning external naming'()
-  {
-    setup:
-    def context = new GuiceTestContext()
-    def state = new DummyState(A)
-
-    expect:
-    assert context.createChildContext(state).getDependency(DummyState, A) == state
-  }
-
-  def 'test context close'()
-  {
-    setup:
-    def context1 = new GuiceTestContext()
-    def context2 = context1.createChildContext([])
-
-    def callback1 = Mock(TestContextCloseCallback)
-    def callback2 = Mock(TestContextCloseCallback)
-
-    context1.registerCloseCallback(callback1)
-    context2.registerCloseCallback(callback2)
-
-    when:
-    context1.close()
-
-    then:
-    1 * callback2.testContextClosed(context2)
-    then:
-    1 * callback1.testContextClosed(context1)
-
-    when:
-    context2.close()
-    context1.close()
-
-    then:
-    1 * callback2.testContextClosed(context2)
-    then:
-    1 * callback1.testContextClosed(context1)
-
-    when:
-    context2.close()
-
-    then:
-    1 * callback2.testContextClosed(context2)
-  }
-
-  private class DummyState
-          implements State
-  {
-    private final Optional<String> name;
-
-    DummyState(String name = null)
+    def 'test get dependency'()
     {
-      this.name = Optional.ofNullable(name)
+        setup:
+        def context = new GuiceTestContext()
+        def state = new DummyState()
+
+        expect:
+        assert context.createChildContext(state).getDependency(DummyState) == state
     }
 
-    @Override
-    Optional<String> getName()
+    def 'test override'()
     {
-      return name
-    }
-  }
+        setup:
+        def state1 = new DummyState(A)
+        def state2 = new DummyState(B)
+        def context1 = new GuiceTestContext(new Module() {
+            @Override
+            void configure(Binder binder)
+            {
+                binder.bind(DummyState).toInstance(state1)
+            }
+        })
 
-  private static class DummyClass
-  {
-  }
+        def context2 = context1.createChildContext([], [new Module() {
+            @Override
+            void configure(Binder binder)
+            {
+                binder.bind(DummyState).toInstance(state2)
+            }
+        }])
+
+        expect:
+        assert context1.getDependency(DummyState) == state1
+        assert context2.getDependency(DummyState) == state2
+    }
+
+    def 'test spawning no naming'()
+    {
+        setup:
+        def context = new GuiceTestContext()
+        def state = new DummyState()
+
+        expect:
+        assert context.createChildContext(state).getDependency(DummyState) == state
+    }
+
+    def 'test spawning external naming'()
+    {
+        setup:
+        def context = new GuiceTestContext()
+        def state = new DummyState(A)
+
+        expect:
+        assert context.createChildContext(state).getDependency(DummyState, A) == state
+    }
+
+    def 'test context close'()
+    {
+        setup:
+        def context1 = new GuiceTestContext()
+        def context2 = context1.createChildContext([])
+
+        def callback1 = Mock(TestContextCloseCallback)
+        def callback2 = Mock(TestContextCloseCallback)
+
+        context1.registerCloseCallback(callback1)
+        context2.registerCloseCallback(callback2)
+
+        when:
+        context1.close()
+
+        then:
+        1 * callback2.testContextClosed(context2)
+        then:
+        1 * callback1.testContextClosed(context1)
+
+        when:
+        context2.close()
+        context1.close()
+
+        then:
+        1 * callback2.testContextClosed(context2)
+        then:
+        1 * callback1.testContextClosed(context1)
+
+        when:
+        context2.close()
+
+        then:
+        1 * callback2.testContextClosed(context2)
+    }
+
+    private class DummyState
+            implements State
+    {
+        private final Optional<String> name;
+
+        DummyState(String name = null)
+        {
+            this.name = Optional.ofNullable(name)
+        }
+
+        @Override
+        Optional<String> getName()
+        {
+            return name
+        }
+    }
+
+    private static class DummyClass
+    {
+    }
 }

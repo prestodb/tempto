@@ -22,82 +22,82 @@ import static com.teradata.tempto.threads.ParallelExecution.parallelExecution
 class ParallelExecutionTest
         extends Specification
 {
-  def 'should execute runnables in parallel'()
-  {
-    setup:
-    def parallelExecutionBuilder = ParallelExecution.builder()
-    def executionCount = new AtomicInteger()
+    def 'should execute runnables in parallel'()
+    {
+        setup:
+        def parallelExecutionBuilder = ParallelExecution.builder()
+        def executionCount = new AtomicInteger()
 
-    parallelExecutionBuilder.addRunnable(new Runnable() {
-      @Override
-      void run()
-      {
-        executionCount.incrementAndGet()
-      }
-    })
+        parallelExecutionBuilder.addRunnable(new Runnable() {
+            @Override
+            void run()
+            {
+                executionCount.incrementAndGet()
+            }
+        })
 
-    for (int i = 0; i < 10; i++) {
-      final int expectedThreadIndex = i
-      parallelExecutionBuilder.addRunnable(new IndexedRunnable() {
-        void run(int threadIndex)
-        {
-          assert expectedThreadIndex == threadIndex
-          executionCount.incrementAndGet()
+        for (int i = 0; i < 10; i++) {
+            final int expectedThreadIndex = i
+            parallelExecutionBuilder.addRunnable(new IndexedRunnable() {
+                void run(int threadIndex)
+                {
+                    assert expectedThreadIndex == threadIndex
+                    executionCount.incrementAndGet()
+                }
+            })
         }
-      })
+
+        def parallelExecution = parallelExecutionBuilder.build()
+
+        when:
+        parallelExecution.start()
+        parallelExecution.join()
+
+        then:
+        executionCount.get() == 11
     }
 
-    def parallelExecution = parallelExecutionBuilder.build()
+    def 'should propagate assertions from runnable'()
+    {
+        setup:
+        def parallelExecutionBuilder = ParallelExecution.builder()
 
-    when:
-    parallelExecution.start()
-    parallelExecution.join()
-
-    then:
-    executionCount.get() == 11
-  }
-
-  def 'should propagate assertions from runnable'()
-  {
-    setup:
-    def parallelExecutionBuilder = ParallelExecution.builder()
-
-    for (int i = 0; i < 2; i++) {
-      parallelExecutionBuilder.addRunnable(new Runnable() {
-        @Override
-        void run()
-        {
-          assert false
+        for (int i = 0; i < 2; i++) {
+            parallelExecutionBuilder.addRunnable(new Runnable() {
+                @Override
+                void run()
+                {
+                    assert false
+                }
+            })
         }
-      })
+
+        def parallelExecution = parallelExecutionBuilder.build()
+
+        when:
+        parallelExecution.start()
+        parallelExecution.joinAndRethrow()
+
+        then:
+        thrown(ParallelExecutionException)
     }
 
-    def parallelExecution = parallelExecutionBuilder.build()
+    def 'should fail timeout'()
+    {
+        setup:
+        def parallelExecution = parallelExecution(1, new IndexedRunnable() {
+            @Override
+            void run(int threadIndex)
+                    throws Exception
+            {
+                Thread.sleep(500000)
+            }
+        })
 
-    when:
-    parallelExecution.start()
-    parallelExecution.joinAndRethrow()
+        when:
+        parallelExecution.start()
 
-    then:
-    thrown(ParallelExecutionException)
-  }
-
-  def 'should fail timeout'()
-  {
-    setup:
-    def parallelExecution = parallelExecution(1, new IndexedRunnable() {
-      @Override
-      void run(int threadIndex)
-              throws Exception
-      {
-        Thread.sleep(500000)
-      }
-    })
-
-    when:
-    parallelExecution.start()
-
-    then:
-    !parallelExecution.join(100)
-  }
+        then:
+        !parallelExecution.join(100)
+    }
 }

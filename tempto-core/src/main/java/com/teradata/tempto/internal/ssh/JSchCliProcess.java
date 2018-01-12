@@ -38,7 +38,7 @@ class JSchCliProcess
     JSchCliProcess(Session session, ChannelExec channel)
             throws IOException
     {
-        super(channel.getInputStream(), channel.getErrStream() , channel.getOutputStream());
+        super(channel.getInputStream(), channel.getErrStream(), channel.getOutputStream());
         this.session = session;
         this.channel = channel;
     }
@@ -90,10 +90,12 @@ class JSchCliProcess
     {
         try {
             channel.disconnect();
-        } finally {
+        }
+        finally {
             try {
                 session.disconnect();
-            } finally {
+            }
+            finally {
                 super.close();
             }
         }

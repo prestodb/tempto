@@ -24,6 +24,7 @@ public interface RevisionStorage
 
     /**
      * Get current data revision for given {@code hdfsPath}
+     *
      * @param hdfsPath Path to be examined
      * @return data revision
      */

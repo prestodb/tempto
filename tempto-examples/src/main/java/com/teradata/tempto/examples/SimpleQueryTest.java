@@ -37,12 +37,12 @@ import static com.teradata.tempto.assertions.QueryAssert.Row.row;
 import static com.teradata.tempto.assertions.QueryAssert.assertThat;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContext;
 import static com.teradata.tempto.context.ThreadLocalTestContextHolder.testContextIfSet;
-import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.like;
-import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.NATION;
-import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.REGION;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.CREATED;
 import static com.teradata.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
 import static com.teradata.tempto.fulfillment.table.TableRequirements.mutableTable;
+import static com.teradata.tempto.fulfillment.table.hive.HiveTableDefinition.like;
+import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.NATION;
+import static com.teradata.tempto.fulfillment.table.hive.tpch.TpchTableDefinitions.REGION;
 import static com.teradata.tempto.query.QueryExecutor.query;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,12 +66,14 @@ public class SimpleQueryTest
     TableManager tableManager;
 
     @Before
-    public void someBefore() {
+    public void someBefore()
+    {
         // just to check if having @Before method does not break anything
     }
 
     @After
-    public void someAfter() {
+    public void someAfter()
+    {
         // just to check if having @After method does not break anything
     }
 

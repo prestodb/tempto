@@ -204,14 +204,14 @@ public class WebHdfsClient
     @SuppressWarnings("unchecked")
     public long getLength(String path)
     {
-        return ((Number) getAttributeValue (path, "length")).longValue();
+        return ((Number) getAttributeValue(path, "length")).longValue();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public String getOwner(String path)
     {
-        return ((String) getAttributeValue (path, "owner"));
+        return ((String) getAttributeValue(path, "owner"));
     }
 
     @Override

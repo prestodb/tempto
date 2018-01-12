@@ -54,7 +54,8 @@ public abstract class CommandFulfiller<T extends CommandRequirement>
         return emptySet();
     }
 
-    private void fulfill(T requirement) {
+    private void fulfill(T requirement)
+    {
         requirement.getSetupCommands().stream()
                 .map(Command::getCommand)
                 .forEach(CommandFulfiller::execute);
@@ -64,13 +65,13 @@ public abstract class CommandFulfiller<T extends CommandRequirement>
     {
         try {
             LOGGER.info("Executing command: " + command);
-                        File devNull = new File("/dev/null");
-                        int exitStatus = new ProcessBuilder(Splitter.on(" ").splitToList(command))
-                                .redirectError(devNull)
-                                .redirectOutput(devNull)
-                                .redirectInput(devNull)
-                                .start()
-                                .waitFor();
+            File devNull = new File("/dev/null");
+            int exitStatus = new ProcessBuilder(Splitter.on(" ").splitToList(command))
+                    .redirectError(devNull)
+                    .redirectOutput(devNull)
+                    .redirectInput(devNull)
+                    .start()
+                    .waitFor();
             if (exitStatus != 0) {
                 throw new RuntimeException(String.format("Command '%s' exited with no zero status '%d'", command, exitStatus));
             }

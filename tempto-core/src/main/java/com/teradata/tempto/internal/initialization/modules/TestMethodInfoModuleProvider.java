@@ -27,6 +27,7 @@ public class TestMethodInfoModuleProvider
         implements TestMethodModuleProvider
 {
     private final TestMetadataReader testMetadataReader = new TestMetadataReader();
+
     public Module getModule(Configuration configuration, ITestResult testResult)
     {
         TestMetadata testMetadata = testMetadataReader.readTestMetadata(testResult);

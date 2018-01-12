@@ -15,9 +15,9 @@
 package com.teradata.tempto.fulfillment.table.jdbc.tpch;
 
 import com.google.common.collect.ImmutableList;
+import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 import com.teradata.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import io.airlift.tpch.TpchTable;
-import com.teradata.tempto.fulfillment.table.TableDefinitionsRepository.RepositoryTableDefinition;
 
 import java.sql.JDBCType;
 

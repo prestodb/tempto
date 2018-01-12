@@ -32,7 +32,8 @@ public class RequirementsAwareTestNGMethod
         this.requirements = requirements;
     }
 
-    public Set<Requirement> getRequirements() {
+    public Set<Requirement> getRequirements()
+    {
         return requirements;
     }
 

@@ -36,7 +36,7 @@ public class OpenLdapObjectDefinitions
                     .setDistinguishedName("cn=TestGroup,ou=Test,dc=tempto,dc=com")
                     .setAttributes(testGroupAttributes())
                     .setObjectClasses(Arrays.asList("groupOfNames"))
-                            .build();
+                    .build();
 
     private static Map<String, String> testGroupAttributes()
     {
@@ -52,7 +52,7 @@ public class OpenLdapObjectDefinitions
                     .setAttributes(testUserAttributes())
                     .setModificationAttributes(ImmutableMap.of("memberOf", ImmutableList.of("cn=TestGroup,ou=Test,dc=tempto,dc=com")))
                     .setObjectClasses(Arrays.asList("person", "inetOrgPerson"))
-                            .build();
+                    .build();
 
     private static Map<String, String> testUserAttributes()
     {

@@ -52,7 +52,7 @@ public class RevisionStorageXAttr
     @Override
     public void remove(String hdfsPath)
     {
-        if(get(hdfsPath).isPresent()){
+        if (get(hdfsPath).isPresent()) {
             hdfsClient.removeXAttr(hdfsPath, REVISON_XATTR_NAME);
         }
     }

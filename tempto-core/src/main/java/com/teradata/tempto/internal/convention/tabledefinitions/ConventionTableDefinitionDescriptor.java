@@ -83,12 +83,13 @@ class ConventionTableDefinitionDescriptor
         this.ddlFile = ddlFile;
 
         Path dataFile = changeExtension(ddlFile, "data");
-        if(exists(dataFile) && isRegularFile(dataFile)) {
+        if (exists(dataFile) && isRegularFile(dataFile)) {
             Path revisionFile = changeExtension(ddlFile, "data-revision");
             checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "No revision file found: %s", revisionFile);
             this.dataFile = Optional.of(dataFile);
             this.revisionFile = Optional.of(revisionFile);
-        } else {
+        }
+        else {
             this.dataFile = Optional.empty();
             this.revisionFile = Optional.empty();
         }

@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
+
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -154,8 +155,7 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        if (state == LOADED && analyzeMutableTables)
-        {
+        if (state == LOADED && analyzeMutableTables) {
             injectStatistics(tableDefinition, tableName);
         }
 
@@ -208,7 +208,8 @@ public class HiveTableManager
         queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableName.getNameInDatabase()));
     }
 
-    private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName) {
+    private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName)
+    {
         if (!tableDefinition.isPartitioned() && tableDefinition.getDataSource().getStatistics().isPresent()) {
             hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
         }

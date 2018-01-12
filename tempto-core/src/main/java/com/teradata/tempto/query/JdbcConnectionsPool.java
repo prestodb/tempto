@@ -35,10 +35,8 @@ public class JdbcConnectionsPool
         }
 
         Connection connection = dataSources.get(jdbcParamsState).getConnection();
-        if (jdbcParamsState.prepareStatement.isPresent())
-        {
-            try (Statement statement = connection.createStatement())
-            {
+        if (jdbcParamsState.prepareStatement.isPresent()) {
+            try (Statement statement = connection.createStatement()) {
                 statement.execute(jdbcParamsState.prepareStatement.get());
             }
         }

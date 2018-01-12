@@ -23,81 +23,81 @@ import spock.lang.Specification
 class DataProvidersTest
         extends Specification
 {
-  public static final Object[] EXTERNAL_DATA_PROVIDER_PARAMS = [["ex1"].toArray(), ["ex2"].toArray()].toArray()
-  public static final Object[] INTERNAL_DATA_PROVIDER_PARAMS = [["int1"].toArray(), ["int2"].toArray()].toArray()
+    public static final Object[] EXTERNAL_DATA_PROVIDER_PARAMS = [["ex1"].toArray(), ["ex2"].toArray()].toArray()
+    public static final Object[] INTERNAL_DATA_PROVIDER_PARAMS = [["int1"].toArray(), ["int2"].toArray()].toArray()
 
-  private static class ExternalDataProviderClass
-  {
-    @DataProvider(name = "external_data_provider")
-    public static Object[][] externalDataProvider()
+    private static class ExternalDataProviderClass
     {
-      return EXTERNAL_DATA_PROVIDER_PARAMS
-    }
-  }
-
-  private static class TestClass
-  {
-
-    @DataProvider(name = "internal_data_provider")
-    public static Object[][] internalDataProvider()
-    {
-      return INTERNAL_DATA_PROVIDER_PARAMS
+        @DataProvider(name = "external_data_provider")
+        public static Object[][] externalDataProvider()
+        {
+            return EXTERNAL_DATA_PROVIDER_PARAMS
+        }
     }
 
-    @Test
-    public void testMethodWithoutDataProvider()
-    {}
+    private static class TestClass
+    {
 
-    @Test(dataProvider = "internal_data_provider")
-    public void testMethodWithInternalDataProvider()
-    {}
+        @DataProvider(name = "internal_data_provider")
+        public static Object[][] internalDataProvider()
+        {
+            return INTERNAL_DATA_PROVIDER_PARAMS
+        }
 
-    @Test(dataProvider = "external_data_provider", dataProviderClass = ExternalDataProviderClass.class)
-    public void testMethodWithExternalDataProvider()
-    {}
-  }
+        @Test
+        public void testMethodWithoutDataProvider()
+        {}
 
-  def "should return absent for method without data provider"()
-  {
-    when:
-    ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithoutDataProvider")
-    def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
+        @Test(dataProvider = "internal_data_provider")
+        public void testMethodWithInternalDataProvider()
+        {}
 
-    then:
-    !parameters.isPresent()
-  }
+        @Test(dataProvider = "external_data_provider", dataProviderClass = ExternalDataProviderClass.class)
+        public void testMethodWithExternalDataProvider()
+        {}
+    }
 
-  def "should return parameters for method with internal data provider"()
-  {
-    when:
-    ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithInternalDataProvider")
-    def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
+    def "should return absent for method without data provider"()
+    {
+        when:
+        ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithoutDataProvider")
+        def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
 
-    then:
-    parameters.isPresent()
-    parameters.get() == INTERNAL_DATA_PROVIDER_PARAMS
-  }
+        then:
+        !parameters.isPresent()
+    }
 
-  def "should return parameters for method with external data provider"()
-  {
-    when:
-    ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithExternalDataProvider")
-    def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
+    def "should return parameters for method with internal data provider"()
+    {
+        when:
+        ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithInternalDataProvider")
+        def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
 
-    then:
-    parameters.isPresent()
-    parameters.get() == EXTERNAL_DATA_PROVIDER_PARAMS
-  }
+        then:
+        parameters.isPresent()
+        parameters.get() == INTERNAL_DATA_PROVIDER_PARAMS
+    }
 
-  private ITestNGMethod mockTestNGMethod(String testMethodName)
-  {
-    ITestNGMethod mockedTestNGMethod = Mock()
-    mockedTestNGMethod.getInstance() >> new TestClass()
-    mockedTestNGMethod.getRealClass() >> TestClass.class
-    ConstructorOrMethod mockedConstructorOrMethod = new ConstructorOrMethod(TestClass.getMethod(testMethodName))
-    mockedTestNGMethod.getConstructorOrMethod() >> mockedConstructorOrMethod
-    return mockedTestNGMethod
-  }
+    def "should return parameters for method with external data provider"()
+    {
+        when:
+        ITestNGMethod mockTestNGMethod = mockTestNGMethod("testMethodWithExternalDataProvider")
+        def parameters = DataProviders.getParametersForMethod(mockTestNGMethod)
+
+        then:
+        parameters.isPresent()
+        parameters.get() == EXTERNAL_DATA_PROVIDER_PARAMS
+    }
+
+    private ITestNGMethod mockTestNGMethod(String testMethodName)
+    {
+        ITestNGMethod mockedTestNGMethod = Mock()
+        mockedTestNGMethod.getInstance() >> new TestClass()
+        mockedTestNGMethod.getRealClass() >> TestClass.class
+        ConstructorOrMethod mockedConstructorOrMethod = new ConstructorOrMethod(TestClass.getMethod(testMethodName))
+        mockedTestNGMethod.getConstructorOrMethod() >> mockedConstructorOrMethod
+        return mockedTestNGMethod
+    }
 }
 
 

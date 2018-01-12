@@ -27,11 +27,13 @@ import static java.util.Arrays.asList;
 public class TestMetadataReader
 {
 
-    public TestMetadata readTestMetadata(ITestResult testResult) {
+    public TestMetadata readTestMetadata(ITestResult testResult)
+    {
         return readTestMetadata(testResult.getMethod());
     }
 
-    public TestMetadata readTestMetadata(ITestNGMethod testMethod) {
+    public TestMetadata readTestMetadata(ITestNGMethod testMethod)
+    {
         return new TestMetadata(
                 readTestGroups(testMethod),
                 readTestName(testMethod));
@@ -52,5 +54,4 @@ public class TestMetadataReader
         }
         return method.getTestClass().getName() + "." + method.getMethodName();
     }
-
 }

@@ -20,45 +20,45 @@ import static com.teradata.tempto.fulfillment.table.TableHandle.tableHandle;
 public class TableDefinitionsRepositoryTest
         extends Specification
 {
-  def 'should add/get table definition to repository'()
-  {
-    setup:
-    def tpchCustomer = Mock(TableDefinition)
-    tpchCustomer.tableHandle >> tableHandle("customer")
-    def tpcdsCustomer = Mock(TableDefinition)
-    tpcdsCustomer.tableHandle >> tableHandle("customer").inSchema('tpcds')
-    def noSchemaSample = Mock(TableDefinition)
-    noSchemaSample.tableHandle >> tableHandle("noSchemaSample")
-    def sampleInSchema  = Mock(TableDefinition)
-    sampleInSchema.tableHandle >> tableHandle("sample").inSchema('schema')
+    def 'should add/get table definition to repository'()
+    {
+        setup:
+        def tpchCustomer = Mock(TableDefinition)
+        tpchCustomer.tableHandle >> tableHandle("customer")
+        def tpcdsCustomer = Mock(TableDefinition)
+        tpcdsCustomer.tableHandle >> tableHandle("customer").inSchema('tpcds')
+        def noSchemaSample = Mock(TableDefinition)
+        noSchemaSample.tableHandle >> tableHandle("noSchemaSample")
+        def sampleInSchema = Mock(TableDefinition)
+        sampleInSchema.tableHandle >> tableHandle("sample").inSchema('schema')
 
-    def repository = new TableDefinitionsRepository()
+        def repository = new TableDefinitionsRepository()
 
-    when:
-    repository.register(tpchCustomer)
-    repository.register(tpcdsCustomer)
-    repository.register(noSchemaSample)
-    repository.register(sampleInSchema)
+        when:
+        repository.register(tpchCustomer)
+        repository.register(tpcdsCustomer)
+        repository.register(noSchemaSample)
+        repository.register(sampleInSchema)
 
-    then:
-    repository.get(tableHandle("noSchemaSample")) == noSchemaSample
-    repository.get(tableHandle("sample").inSchema('schema')) == sampleInSchema
-    repository.get(tableHandle("customer")) == tpchCustomer
-    repository.get(tableHandle("customer").inSchema('tpcds')) == tpcdsCustomer
-    repository.get(tableHandle("noSchemaSample").inSchema('tpcds')) == noSchemaSample
+        then:
+        repository.get(tableHandle("noSchemaSample")) == noSchemaSample
+        repository.get(tableHandle("sample").inSchema('schema')) == sampleInSchema
+        repository.get(tableHandle("customer")) == tpchCustomer
+        repository.get(tableHandle("customer").inSchema('tpcds')) == tpcdsCustomer
+        repository.get(tableHandle("noSchemaSample").inSchema('tpcds')) == noSchemaSample
 
-    when:
-    repository.get(tableHandle("sample").inSchema('tpcds'))
+        when:
+        repository.get(tableHandle("sample").inSchema('tpcds'))
 
-    then:
-    def e = thrown(IllegalStateException)
-    e.message == 'no table definition for: tpcds.sample'
+        then:
+        def e = thrown(IllegalStateException)
+        e.message == 'no table definition for: tpcds.sample'
 
-    when:
-    repository.get(tableHandle("sample"))
+        when:
+        repository.get(tableHandle("sample"))
 
-    then:
-    def e2 = thrown(IllegalStateException)
-    e2.message == 'no table definition for: sample'
-  }
+        then:
+        def e2 = thrown(IllegalStateException)
+        e2.message == 'no table definition for: sample'
+    }
 }
