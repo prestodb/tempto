@@ -37,6 +37,15 @@ services:
       - '9042:9042'
       - '9160:9160'
 
+  kafka:
+    hostname: kafka
+    image: spotify/kafka
+    ports:
+      - 9092:9092
+      - 2181:2181
+    command: bash -c "sed -i 's/#delete.topic.enable=true/delete.topic.enable=true/' /opt/kafka_2.11-0.10.1.0/config/server.properties; exec supervisord -n"
+
+
   ssh:
     hostname: ssh
     build: 'ssh'
@@ -53,6 +62,7 @@ services:
       - 'hadoop-master'
       - 'psql1'
       - 'psql2'
+      - 'kafka'
 
   presto-cli:
     build: 'presto-cli'

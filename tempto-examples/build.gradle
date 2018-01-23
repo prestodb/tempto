@@ -22,6 +22,7 @@ apply plugin: 'java'
 
 dependencies {
     compile tempto_runner
+    compile tempto_kafka
     compile libraries.slf4j_api
     compile libraries.junit
 

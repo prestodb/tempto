@@ -57,6 +57,8 @@ ext.versions = [
         cassandra    : '3.4.0',
         commons_cli  : '1.3.1',
         thrift       : '0.9.1',
+        kafka        : '0.11.0.2',
+        zkclient     : '0.10'
 ]
 
 ext.libraries = [
@@ -99,6 +101,9 @@ ext.libraries = [
         cassandra_driver     : "com.datastax.cassandra:cassandra-driver-core:${versions.cassandra}",
         commons_cli          : "commons-cli:commons-cli:${versions.commons_cli}",
         thrift               : "org.apache.thrift:libthrift:${versions.thrift}",
+        kafka_clients        : "org.apache.kafka:kafka-clients:${versions.kafka}",
+        kafka                : "org.apache.kafka:kafka_2.12:${versions.kafka}",
+        zkclient             : "com.101tec:zkclient:${versions.zkclient}"
 ]
 
 ext.tempto_core = project(':tempto-core')
@@ -106,6 +111,7 @@ ext.tempto_logging_log4j = project(':tempto-logging-log4j')
 ext.tempto_examples = project(':tempto-examples')
 ext.tempto_runner = project(':tempto-runner')
 ext.tempto_ldap = project(':tempto-ldap')
+ext.tempto_kafka = project(':tempto-kafka')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.tempto_version = '1.46-SNAPSHOT'
 ext.tempto_group = "io.prestodb.tempto"
