@@ -26,6 +26,7 @@ import io.prestodb.tempto.fulfillment.table.TableManager;
 import io.prestodb.tempto.fulfillment.table.TableManagerDispatcher;
 import io.prestodb.tempto.initialization.AutoModuleProvider;
 import io.prestodb.tempto.initialization.SuiteModuleProvider;
+import io.prestodb.tempto.internal.query.JdbcConnectionsConfiguration;
 import io.prestodb.tempto.query.QueryExecutor;
 
 import java.util.Map;
@@ -62,6 +63,7 @@ public class TableManagerDispatcherModuleProvider
         {
             Configuration databasesSectionConfiguration = configuration.getSubconfiguration("databases");
             Set<String> databaseNames = databasesSectionConfiguration.listKeyPrefixes(1);
+            Set<String> jdbcDatabaseNames = new JdbcConnectionsConfiguration(configuration).getDefinedJdcbConnectionNames();
 
             if (databaseNames.isEmpty()) {
                 bind(new TypeLiteral<Map<String, TableManager>>() {}).toInstance(emptyMap());
@@ -86,8 +88,7 @@ public class TableManagerDispatcherModuleProvider
                     @Override
                     protected void configure()
                     {
-                        // TODO: refactor this to avoid hardcoding dbname
-                        if (!database.equals("cassandra")) { // Cassandra does not provide QueryExecutor
+                        if (jdbcDatabaseNames.contains(database)) {
                             // we bind matching QueryExecutor to be visible by TableManager without @Named annotation
                             bind(QueryExecutor.class).to(Key.get(QueryExecutor.class, named(database)));
                         }
