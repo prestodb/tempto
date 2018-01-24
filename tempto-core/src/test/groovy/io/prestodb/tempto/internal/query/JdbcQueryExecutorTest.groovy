@@ -36,7 +36,6 @@ import static java.sql.JDBCType.VARCHAR
 class JdbcQueryExecutorTest
         extends Specification
 {
-
     private static final JdbcConnectivityParamsState JDBC_STATE =
             JdbcConnectivityParamsState.builder()
                     .setName('connection_name')

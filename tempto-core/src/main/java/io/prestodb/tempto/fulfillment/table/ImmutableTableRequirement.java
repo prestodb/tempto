@@ -17,7 +17,6 @@ package io.prestodb.tempto.fulfillment.table;
 public class ImmutableTableRequirement
         extends TableRequirement
 {
-
     public ImmutableTableRequirement(TableDefinition tableDefinition)
     {
         this(tableDefinition, tableDefinition.getTableHandle());

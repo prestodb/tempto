@@ -26,7 +26,6 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 public class JdbcConnectionsConfiguration
 {
-
     private static final String DATABASES_CONFIGURATION_SECTION = "databases";
     private static final String JDBC_DRIVER_CLASS = "jdbc_driver_class";
     private static final String JDBC_URL_KEY = "jdbc_url";
@@ -52,7 +51,6 @@ public class JdbcConnectionsConfiguration
 
     public JdbcConnectivityParamsState getConnectionConfiguration(String connectionName)
     {
-
         Configuration connectionConfiguration = getDatabaseConnectionSubConfiguration(connectionName);
 
         return JdbcConnectivityParamsState.builder()

@@ -40,7 +40,6 @@ import static org.apache.commons.io.IOUtils.toInputStream
 class SqlResultDescriptorTest
         extends Specification
 {
-
     def 'sampleResultFile'()
     {
         setup:

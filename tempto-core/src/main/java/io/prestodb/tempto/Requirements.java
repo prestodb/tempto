@@ -65,7 +65,6 @@ public final class Requirements
     private static class SingletonCompositeRequirement
             implements CompositeRequirement
     {
-
         private final Set<Set<Requirement>> requirementsSets;
 
         public SingletonCompositeRequirement(Requirement requirement)
@@ -82,7 +81,6 @@ public final class Requirements
     private static class MultiCompositeRequirement
             implements CompositeRequirement
     {
-
         private final Set<Set<CompositeRequirement>> requirementsSetsBranches;
 
         public MultiCompositeRequirement(Set<Set<CompositeRequirement>> requirementsSetsBranches)

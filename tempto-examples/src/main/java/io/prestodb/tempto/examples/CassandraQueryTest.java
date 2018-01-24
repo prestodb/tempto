@@ -37,7 +37,6 @@ import static java.sql.JDBCType.LONGNVARCHAR;
 public class CassandraQueryTest
         extends ProductTest
 {
-
     private static final String TEST_DATABASE_NAME = "cassandra";
     private static final String TEST_SCHEMA_NAME = "test";
     private static final String TEST_TABLE_NAME = "test_table";
@@ -60,7 +59,6 @@ public class CassandraQueryTest
     private static class ImmutableTestCassandraTable
             implements RequirementsProvider
     {
-
         @Override
         public Requirement getRequirements(Configuration configuration)
         {

@@ -30,7 +30,6 @@ import static java.util.stream.Collectors.toSet;
 public abstract class AbstractConfiguration
         implements Configuration
 {
-
     @Override
     public Optional<String> getString(String key)
     {

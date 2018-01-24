@@ -23,7 +23,6 @@ import java.util.Set;
 public class EmptyConfiguration
         extends AbstractConfiguration
 {
-
     private static final EmptyConfiguration INSTANCE = new EmptyConfiguration();
 
     public static Configuration emptyConfiguration()

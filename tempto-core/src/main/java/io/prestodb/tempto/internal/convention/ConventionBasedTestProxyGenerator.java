@@ -44,7 +44,6 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class ConventionBasedTestProxyGenerator
 {
-
     private static final Logger LOGGER = getLogger(ConventionBasedTestProxyGenerator.class);
 
     private final String testPackage;
@@ -109,7 +108,6 @@ public class ConventionBasedTestProxyGenerator
     public static class ConventionBasedTestProxy
             extends ConventionBasedTest
     {
-
         private final ConventionBasedTest delegate;
 
         public ConventionBasedTestProxy(ConventionBasedTest delegate)
@@ -145,7 +143,6 @@ public class ConventionBasedTestProxyGenerator
     private static class TestAnnotationImpl
             implements Test
     {
-
         private final ConventionBasedTest conventionBasedTest;
 
         public TestAnnotationImpl(ConventionBasedTest conventionBasedTest)

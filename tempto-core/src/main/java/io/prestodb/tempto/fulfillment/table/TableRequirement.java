@@ -23,7 +23,6 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 public abstract class TableRequirement<T extends TableRequirement>
         implements Requirement
 {
-
     private final TableDefinition tableDefinition;
     private final TableHandle tableHandle;
 

@@ -27,7 +27,6 @@ import java.util.List;
 public interface SshClient
         extends Closeable
 {
-
     default String command(String command)
     {
         try (CliProcess cliProcess = execute(command)) {

@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class DateTimeUtilsTest
 {
-
     @Test
     public void shouldParseMultipleFormatsInUTC()
             throws Exception

@@ -24,7 +24,6 @@ import java.util.List;
 public class RecursionPathTestFactory
         implements ConventionBasedTestFactory.PathTestFactory
 {
-
     @Override
     public boolean isSupportedPath(Path path)
     {

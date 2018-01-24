@@ -22,7 +22,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 public final class SqlContexts
 {
-
     /**
      * Helper method designed to be used with lambda expressions containing assertions used
      * on newly created view:

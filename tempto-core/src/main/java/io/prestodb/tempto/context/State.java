@@ -21,7 +21,6 @@ import java.util.Optional;
  */
 public interface State
 {
-
     /**
      * Return name for state. If non-empty optional is
      * returned State will be bound in TestContext with name annotation.

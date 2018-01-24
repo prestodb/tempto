@@ -41,7 +41,6 @@ import static java.util.stream.StreamSupport.stream;
 public class SqlResultDescriptor
         extends SqlDescriptor
 {
-
     private static final String DEFAULT_COLUMN_DELIMITER = "|";
 
     private static final String DEFAULT_IGNORE_ORDER = "false";

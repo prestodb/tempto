@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toSet;
 public class HierarchicalConfiguration
         extends AbstractConfiguration
 {
-
     private final List<Configuration> configurations;
 
     public HierarchicalConfiguration(Configuration... configurations)

@@ -75,7 +75,6 @@ class NonPoolingJdbcDataSource
     public void setLogWriter(PrintWriter out)
             throws SQLException
     {
-
     }
 
     @Override

@@ -33,7 +33,6 @@ import static java.util.stream.Collectors.toSet;
 public class SqlQueryDescriptor
         extends SqlDescriptor
 {
-
     private static final String GROUPS_HEADER_PROPERTY = "groups";
     private static final String DATABASE_HEADER_PROPERTY = "database";
     private static final String TABLES_HEADER_PROPERTY = "tables";

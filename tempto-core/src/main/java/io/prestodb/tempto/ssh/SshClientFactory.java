@@ -18,7 +18,6 @@ import java.util.Optional;
 
 public interface SshClientFactory
 {
-
     String DEFAULT_USER = "root";
 
     default SshClient create(String host)

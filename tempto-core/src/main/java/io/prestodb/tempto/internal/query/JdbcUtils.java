@@ -56,7 +56,6 @@ public final class JdbcUtils
 
     private static DataSource createPoolingDataSource(JdbcConnectivityParamsState jdbcParamsState)
     {
-
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(jdbcParamsState.driverClass);
         dataSource.setUrl(jdbcParamsState.url);

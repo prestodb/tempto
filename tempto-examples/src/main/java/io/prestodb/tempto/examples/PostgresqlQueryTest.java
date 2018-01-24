@@ -43,7 +43,6 @@ import static io.prestodb.tempto.fulfillment.table.jdbc.RelationalTableDefinitio
 public class PostgresqlQueryTest
         extends ProductTest
 {
-
     @Inject
     @Named("psql")
     private QueryExecutor queryExecutor;
@@ -64,7 +63,6 @@ public class PostgresqlQueryTest
     private static class ImmutableTestJdbcTables
             implements RequirementsProvider
     {
-
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
@@ -78,7 +76,6 @@ public class PostgresqlQueryTest
     private static class MutableTestJdbcTables
             implements RequirementsProvider
     {
-
         @Override
         public Requirement getRequirements(Configuration configuration)
         {

@@ -28,7 +28,6 @@ import java.util.List;
 public class ImmutableTablesFulfiller
         extends TableRequirementFulfiller<ImmutableTableRequirement>
 {
-
     @Inject
     public ImmutableTablesFulfiller(TableManagerDispatcher tableManagerDispatcher)
     {

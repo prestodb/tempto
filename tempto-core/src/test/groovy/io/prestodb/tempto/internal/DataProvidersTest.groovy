@@ -37,7 +37,6 @@ class DataProvidersTest
 
     private static class TestClass
     {
-
         @DataProvider(name = "internal_data_provider")
         static Object[][] internalDataProvider()
         {

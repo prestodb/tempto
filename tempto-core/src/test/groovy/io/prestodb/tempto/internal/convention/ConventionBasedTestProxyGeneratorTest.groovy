@@ -95,7 +95,6 @@ class ConventionBasedTestProxyGeneratorTest
     private static class DummyConventionBasedTest
             extends ConventionBasedTest
     {
-
         private final Requirement requirement
         private final String testName;
         private final Set<String> testGroups;

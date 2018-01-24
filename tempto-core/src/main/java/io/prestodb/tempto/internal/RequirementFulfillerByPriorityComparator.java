@@ -23,7 +23,6 @@ import static io.prestodb.tempto.internal.RequirementFulfillerPriorityHelper.get
 public class RequirementFulfillerByPriorityComparator
         implements Comparator<Class<? extends RequirementFulfiller>>
 {
-
     @Override
     public int compare(Class<? extends RequirementFulfiller> o1, Class<? extends RequirementFulfiller> o2)
     {

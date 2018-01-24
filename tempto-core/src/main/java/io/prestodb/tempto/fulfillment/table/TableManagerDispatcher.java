@@ -22,7 +22,6 @@ import static io.prestodb.tempto.context.ThreadLocalTestContextHolder.testContex
  */
 public interface TableManagerDispatcher
 {
-
     default <T extends TableDefinition> TableManager<T> getTableManagerFor(TableInstance<T> tableInstance)
     {
         return getTableManagerFor(tableInstance.tableDefinition());

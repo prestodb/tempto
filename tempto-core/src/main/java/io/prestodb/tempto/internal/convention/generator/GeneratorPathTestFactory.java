@@ -30,7 +30,6 @@ import static io.prestodb.tempto.internal.convention.SqlTestsFileUtils.makeExecu
 public class GeneratorPathTestFactory
         implements ConventionBasedTestFactory.PathTestFactory
 {
-
     private static final String GENERATOR_SCRIPT_EXTENSION = "generator";
 
     @Override

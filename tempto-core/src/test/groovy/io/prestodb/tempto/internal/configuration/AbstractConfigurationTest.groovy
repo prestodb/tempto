@@ -19,7 +19,6 @@ import spock.lang.Specification
 class AbstractConfigurationTest
         extends Specification
 {
-
     public static final String KEY = 'a.b.c'
     def configuration = Spy(AbstractConfiguration)
 

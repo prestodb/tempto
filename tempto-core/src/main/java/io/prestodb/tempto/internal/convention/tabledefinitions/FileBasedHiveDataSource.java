@@ -29,7 +29,6 @@ import static java.nio.file.Files.readAllBytes;
 public class FileBasedHiveDataSource
         implements HiveDataSource
 {
-
     private final ConventionTableDefinitionDescriptor tableDefinitionDescriptor;
     private String revisionMarker;
 

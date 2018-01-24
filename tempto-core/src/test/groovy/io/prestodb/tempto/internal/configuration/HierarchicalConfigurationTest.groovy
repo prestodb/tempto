@@ -22,7 +22,6 @@ import static com.google.common.collect.Sets.newHashSet
 class HierarchicalConfigurationTest
         extends Specification
 {
-
     def testHierarchicalConfiguration()
     {
         setup:

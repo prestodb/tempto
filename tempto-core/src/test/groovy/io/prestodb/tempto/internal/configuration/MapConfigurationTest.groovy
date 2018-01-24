@@ -21,7 +21,6 @@ import static io.prestodb.tempto.internal.configuration.EmptyConfiguration.empty
 class MapConfigurationTest
         extends Specification
 {
-
     def configuration = new MapConfiguration(
             [
                     'a'    : [

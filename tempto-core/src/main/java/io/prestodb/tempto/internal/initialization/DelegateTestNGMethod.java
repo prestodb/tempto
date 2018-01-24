@@ -29,7 +29,6 @@ import java.util.concurrent.Callable;
 public abstract class DelegateTestNGMethod
         implements ITestNGMethod
 {
-
     protected final ITestNGMethod delegate;
 
     public DelegateTestNGMethod(ITestNGMethod delegate)
