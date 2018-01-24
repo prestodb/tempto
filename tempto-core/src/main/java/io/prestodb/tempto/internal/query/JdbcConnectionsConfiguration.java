@@ -18,8 +18,11 @@ import io.prestodb.tempto.configuration.Configuration;
 import io.prestodb.tempto.configuration.KeyUtils;
 import io.prestodb.tempto.query.JdbcConnectivityParamsState;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 public class JdbcConnectionsConfiguration
 {
@@ -42,17 +45,15 @@ public class JdbcConnectionsConfiguration
 
     public Set<String> getDefinedJdcbConnectionNames()
     {
-        return configuration.getSubconfiguration(DATABASES_CONFIGURATION_SECTION).listKeyPrefixes(1);
+        return configuration.getSubconfiguration(DATABASES_CONFIGURATION_SECTION).listKeyPrefixes(1).stream()
+                .filter(databaseName -> getDatabaseConnectionSubConfiguration(databaseName).getString(JDBC_DRIVER_CLASS).isPresent())
+                .collect(toImmutableSet());
     }
 
     public JdbcConnectivityParamsState getConnectionConfiguration(String connectionName)
     {
 
         Configuration connectionConfiguration = getDatabaseConnectionSubConfiguration(connectionName);
-        Optional<String> alias = connectionConfiguration.getString(ALIAS_KEY);
-        if (alias.isPresent()) {
-            connectionConfiguration = getDatabaseConnectionSubConfiguration(alias.get());
-        }
 
         return JdbcConnectivityParamsState.builder()
                 .setName(connectionName)
@@ -70,6 +71,21 @@ public class JdbcConnectionsConfiguration
 
     private Configuration getDatabaseConnectionSubConfiguration(String connectionName)
     {
-        return configuration.getSubconfiguration(KeyUtils.joinKey(DATABASES_CONFIGURATION_SECTION, connectionName));
+        Set<String> visited = new HashSet<>();
+        String currentAlias = connectionName;
+        while (true) {
+            if (visited.contains(currentAlias)) {
+                throw new IllegalStateException("Cannot resolve database configuration for alias '" + currentAlias + "'");
+            }
+            visited.add(currentAlias);
+            Configuration connectionConfiguration = configuration.getSubconfiguration(KeyUtils.joinKey(DATABASES_CONFIGURATION_SECTION, currentAlias));
+            Optional<String> nextAlias = connectionConfiguration.getString(ALIAS_KEY);
+            if (nextAlias.isPresent()) {
+                currentAlias = nextAlias.get();
+            }
+            else {
+                return connectionConfiguration;
+            }
+        }
     }
 }
