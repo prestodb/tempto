@@ -27,7 +27,7 @@ plugins.withType(JavaPlugin) {
 
 ext.versions = [
         assertj      : '2.0.0',
-        guava        : '18.0',
+        guava        : '21.0',
         guice        : '4.0',
         log4j        : '1.2.17',
         testng       : '6.10',
