@@ -31,7 +31,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class DefaultHdfsDataSourceWriter
         implements HdfsDataSourceWriter
 {
-
     private static final Logger LOGGER = getLogger(DefaultHdfsDataSourceWriter.class);
 
     private final HdfsClient hdfsClient;

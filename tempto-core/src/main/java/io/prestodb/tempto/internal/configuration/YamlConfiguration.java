@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class YamlConfiguration
         extends DelegateConfiguration
 {
-
     private final MapConfiguration mapConfiguration;
 
     public YamlConfiguration(String yamlString)

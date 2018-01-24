@@ -25,7 +25,6 @@ import java.util.Set;
 
 public interface RequirementFulfiller
 {
-
     int DEFAULT_PRIORITY = 0;
 
     /**

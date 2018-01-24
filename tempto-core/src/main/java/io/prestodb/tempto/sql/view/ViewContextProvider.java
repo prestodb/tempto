@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ViewContextProvider
         implements ContextProvider<View>
 {
-
     private final String viewName;
     private final String selectSql;
     private final QueryExecutor queryExecutor;

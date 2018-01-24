@@ -21,7 +21,6 @@ import static io.prestodb.tempto.context.ThreadLocalTestContextHolder.testContex
 public class ImmutableTablesState
         extends TablesState
 {
-
     public static ImmutableTablesState immutableTablesState()
     {
         return testContext().getDependency(ImmutableTablesState.class);

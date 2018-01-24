@@ -30,7 +30,6 @@ import static junit.framework.TestCase.fail
 class DefaultTableManagerDispatcherTest
         extends Specification
 {
-
     @Shared
     TableManager hiveTableManager1;
     @Shared

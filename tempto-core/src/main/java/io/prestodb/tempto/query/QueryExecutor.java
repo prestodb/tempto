@@ -27,7 +27,6 @@ import static io.prestodb.tempto.context.ThreadLocalTestContextHolder.testContex
 public interface QueryExecutor
         extends Closeable
 {
-
     String DEFAULT_DB_NAME = "default";
 
     /**

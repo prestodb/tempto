@@ -19,7 +19,6 @@ import spock.lang.Specification
 class YamlConfigurationTest
         extends Specification
 {
-
     def create()
     {
         setup:

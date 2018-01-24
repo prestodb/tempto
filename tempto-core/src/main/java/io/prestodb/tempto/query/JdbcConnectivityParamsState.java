@@ -95,7 +95,6 @@ public class JdbcConnectivityParamsState
 
     public static class Builder
     {
-
         private String name;
         private String driverClass;
         private String url;

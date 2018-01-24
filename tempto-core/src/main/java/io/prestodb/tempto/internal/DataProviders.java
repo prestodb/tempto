@@ -28,7 +28,6 @@ import static java.util.Arrays.asList;
  */
 public class DataProviders
 {
-
     private DataProviders() {}
 
     /**

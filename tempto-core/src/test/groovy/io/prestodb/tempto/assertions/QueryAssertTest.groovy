@@ -37,7 +37,6 @@ import static java.sql.JDBCType.VARCHAR
 class QueryAssertTest
         extends Specification
 {
-
     private final QueryResult NATION_JOIN_REGION_QUERY_RESULT = new QueryResult(
             [BIGINT, VARCHAR, VARCHAR],
             HashBiMap.create([

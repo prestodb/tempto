@@ -28,7 +28,6 @@ import static java.sql.JDBCType.VARCHAR;
 
 public class ExampleQueryAssertTest
 {
-
     @Test(enabled = false)
     public void testHasColumnName()
     {

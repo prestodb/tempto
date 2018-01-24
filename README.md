@@ -256,7 +256,6 @@ Here's an example implementation of the `RequirementProvider` interface:
 private final class SimpleTestRequirements
         implements RequirementsProvider
 {
-
     @Override
     public Requirement getRequirements()
     {
@@ -291,7 +290,6 @@ returned by the implemented `getRequirements` method will be applied to all test
 private final class MyTestClass
         implements RequirementsProvider
 {
-
     @Override
     public Requirement getRequirements()
     {

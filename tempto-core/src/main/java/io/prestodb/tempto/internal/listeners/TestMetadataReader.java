@@ -26,7 +26,6 @@ import static java.util.Arrays.asList;
 
 public class TestMetadataReader
 {
-
     public TestMetadata readTestMetadata(ITestResult testResult)
     {
         return readTestMetadata(testResult.getMethod());

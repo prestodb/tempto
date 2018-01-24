@@ -25,7 +25,6 @@ import spock.lang.Unroll
 class TestNameGroupNameMethodSelectorTest
         extends Specification
 {
-
     private TestMetadataReader metadataReader = Mock()
 
     @Unroll

@@ -24,7 +24,6 @@ import static java.util.Objects.requireNonNull;
 public class MapBasedNameService
         implements NameService
 {
-
     private final Map<String, String> hosts;
 
     public MapBasedNameService(Map<String, String> hosts)

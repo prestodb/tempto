@@ -32,7 +32,6 @@ import static com.google.inject.name.Names.named;
 public class TestConfigurationModuleProvider
         implements SuiteModuleProvider
 {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(TestConfigurationModuleProvider.class);
 
     @Override

@@ -20,12 +20,10 @@ package io.prestodb.tempto.context;
  */
 public final class ContextDsl
 {
-
     public static <T> void executeWith(ContextProvider<T> provider, ContextRunnable<T> runnable)
     {
         T context = provider.setup();
         try {
-
             runnable.run(context);
         }
         finally {

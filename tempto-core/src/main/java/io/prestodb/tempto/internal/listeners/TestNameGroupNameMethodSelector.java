@@ -50,7 +50,6 @@ import static java.util.Optional.ofNullable;
 public class TestNameGroupNameMethodSelector
         implements IMethodSelector
 {
-
     public static final String TEST_NAMES_TO_RUN_PROPERTY = "io.prestodb.tempto.tests";
     public static final String TEST_GROUPS_TO_RUN_PROPERTY = "io.prestodb.tempto.groups";
     public static final String TEST_GROUPS_TO_EXCLUDE_PROPERTY = "io.prestodb.tempto.exclude_groups";

@@ -46,7 +46,6 @@ import static java.sql.JDBCType.VARCHAR
 class QueryResultValueComparatorTest
         extends Specification
 {
-
     @Unroll
     def 'queryResultValueComparator(#type).compare(#actual,#expected) = #result'()
     {

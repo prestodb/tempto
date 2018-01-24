@@ -21,7 +21,6 @@ import java.util.Optional;
  */
 public interface RevisionStorage
 {
-
     /**
      * Get current data revision for given {@code hdfsPath}
      *

@@ -49,11 +49,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SimpleQueryTest
         extends ProductTest
 {
-
     private static class SimpleTestRequirements
             implements RequirementsProvider
     {
-
         @Override
         public Requirement getRequirements(Configuration configuration)
         {
@@ -120,7 +118,6 @@ public class SimpleQueryTest
     private static class MultipleTablesTestRequirements
             implements RequirementsProvider
     {
-
         @Override
         public Requirement getRequirements(Configuration configuration)
         {

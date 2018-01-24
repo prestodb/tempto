@@ -391,7 +391,6 @@ public class QueryAssert
 
     public static class QueryExecutionAssert
     {
-
         private Optional<QueryExecutionException> executionExceptionOptional;
 
         public QueryExecutionAssert(Optional<QueryExecutionException> executionExceptionOptional)

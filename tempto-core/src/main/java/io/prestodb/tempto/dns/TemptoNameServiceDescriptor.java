@@ -24,7 +24,6 @@ import static io.prestodb.tempto.internal.configuration.TestConfigurationFactory
 public class TemptoNameServiceDescriptor
         implements NameServiceDescriptor
 {
-
     public static final String PROVIDER_NAME = "map_based";
     public static final String TYPE = "dns";
 

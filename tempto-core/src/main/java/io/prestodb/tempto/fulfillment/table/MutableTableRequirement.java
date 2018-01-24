@@ -22,7 +22,6 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 public class MutableTableRequirement
         extends TableRequirement
 {
-
     public enum State
     {
         /**

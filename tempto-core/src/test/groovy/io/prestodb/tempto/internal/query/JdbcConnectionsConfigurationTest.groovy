@@ -21,7 +21,6 @@ import spock.lang.Specification
 class JdbcConnectionsConfigurationTest
         extends Specification
 {
-
     private static final def CONFIGURATION = new YamlConfiguration("""\
 databases:
   a:

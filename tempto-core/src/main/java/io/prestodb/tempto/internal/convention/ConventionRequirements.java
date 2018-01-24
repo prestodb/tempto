@@ -16,7 +16,6 @@ package io.prestodb.tempto.internal.convention;
 
 public final class ConventionRequirements
 {
-
     private ConventionRequirements()
     {
     }

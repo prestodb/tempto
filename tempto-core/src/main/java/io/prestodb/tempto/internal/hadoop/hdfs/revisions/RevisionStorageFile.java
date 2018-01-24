@@ -24,7 +24,6 @@ import java.util.Optional;
 public class RevisionStorageFile
         implements RevisionStorage
 {
-
     private final HdfsClient hdfsClient;
     private final String testDataBasePath;
 

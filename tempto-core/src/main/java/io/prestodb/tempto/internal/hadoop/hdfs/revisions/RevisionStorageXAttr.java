@@ -24,7 +24,6 @@ import java.util.Optional;
 public class RevisionStorageXAttr
         implements RevisionStorage
 {
-
     /**
      * XAttr name stored on HDFS for each data source file.
      */

@@ -24,7 +24,6 @@ import java.util.Set;
 public abstract class DelegateConfiguration
         implements Configuration
 {
-
     protected abstract Configuration getDelegate();
 
     @Override

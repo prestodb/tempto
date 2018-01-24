@@ -71,7 +71,6 @@ public class LdapObjectDefinition
 
     public static class LdapObjectDefinitionBuilder
     {
-
         private String id;
         private String distinguishedName;
         private List<String> objectClasses;

@@ -45,7 +45,6 @@ public class ConventionBasedTestFactory
 
     public interface PathTestFactory
     {
-
         boolean isSupportedPath(Path path);
 
         List<ConventionBasedTest> createTestsForPath(Path path, String testNamePrefix, ConventionBasedTestFactory factory);

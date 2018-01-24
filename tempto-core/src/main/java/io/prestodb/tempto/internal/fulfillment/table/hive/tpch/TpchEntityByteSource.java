@@ -31,7 +31,6 @@ import java.util.Iterator;
 public class TpchEntityByteSource<T extends TpchEntity>
         extends ByteSource
 {
-
     private final IterableTpchEntityInputStream<T> inputStream;
 
     public TpchEntityByteSource(Iterable<T> iterable)
@@ -49,7 +48,6 @@ public class TpchEntityByteSource<T extends TpchEntity>
     private static class IterableTpchEntityInputStream<T extends TpchEntity>
             extends InputStream
     {
-
         private final Iterator<T> rowIterator;
         private CharSequence currentLine;
         private int currentReadLineIndex;

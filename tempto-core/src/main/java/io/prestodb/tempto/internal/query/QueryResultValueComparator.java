@@ -42,7 +42,6 @@ import static java.util.Objects.requireNonNull;
 public class QueryResultValueComparator
         implements Comparator<Object>
 {
-
     public static final String FLOAT_TOLERANCE_CONFIGURATION_KEY = "tests.assert.float_tolerance";
 
     private final JDBCType type;

@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class KerberosJdbcDataSource
         implements DataSource
 {
-
     private final Driver driver;
     private final KerberosAuthentication kerberosAuthentication;
     private final String jdbcUrl;
@@ -86,14 +85,12 @@ public class KerberosJdbcDataSource
     public void setLogWriter(PrintWriter out)
             throws SQLException
     {
-
     }
 
     @Override
     public void setLoginTimeout(int seconds)
             throws SQLException
     {
-
     }
 
     @Override

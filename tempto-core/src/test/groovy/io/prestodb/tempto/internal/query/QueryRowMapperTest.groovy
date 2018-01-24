@@ -22,7 +22,6 @@ import java.sql.JDBCType
 class QueryRowMapperTest
         extends Specification
 {
-
     @Unroll
     def 'convert binary #value'()
     {

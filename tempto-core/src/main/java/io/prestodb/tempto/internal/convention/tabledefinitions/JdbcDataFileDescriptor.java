@@ -31,7 +31,6 @@ import static java.util.stream.StreamSupport.stream;
 public class JdbcDataFileDescriptor
         extends SqlDescriptor
 {
-
     private static final String DEFAULT_COLUMN_DELIMITER = "|";
     private static final String DEFAULT_TRIM_VALUES = "false";
     private static final Splitter TYPES_SPLITTER = Splitter.on('|');
