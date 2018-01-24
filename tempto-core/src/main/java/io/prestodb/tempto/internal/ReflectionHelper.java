@@ -29,12 +29,10 @@ import java.util.Set;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static org.reflections.util.ClasspathHelper.forPackage;
+import static org.reflections.util.ClasspathHelper.forJavaClassPath;
 
 public final class ReflectionHelper
 {
-    private static final String PACKAGES_PREFIX = "io";
-
     private static final LoadingCache<Class<? extends Annotation>, Set<Field>> FIELDS_ANNOTATED_WITH = CacheBuilder.newBuilder()
             .build(new CacheLoader<Class<? extends Annotation>, Set<Field>>()
             {
@@ -42,7 +40,7 @@ public final class ReflectionHelper
                 public Set<Field> load(Class<? extends Annotation> key)
                         throws Exception
                 {
-                    Reflections reflections = new Reflections(forPackage(PACKAGES_PREFIX),
+                    Reflections reflections = new Reflections(forJavaClassPath(),
                             new FieldAnnotationsScanner(), ReflectionHelper.class.getClassLoader());
                     return unmodifiableSet(reflections.getFieldsAnnotatedWith(key));
                 }
@@ -56,7 +54,7 @@ public final class ReflectionHelper
                 public Set<Class> load(Class key)
                         throws Exception
                 {
-                    Reflections reflections = new Reflections(PACKAGES_PREFIX);
+                    Reflections reflections = new Reflections(forJavaClassPath());
                     return reflections.getSubTypesOf(key);
                 }
             });
