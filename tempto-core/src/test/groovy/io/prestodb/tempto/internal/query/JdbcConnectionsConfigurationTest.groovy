@@ -43,6 +43,24 @@ databases:
 
   b_alias:
     alias: b
+
+  non_jdbc_db:
+    blah: true
+""")
+
+    private static final def BAD_CONFIGURATION = new YamlConfiguration("""\
+databases:
+  a:
+    alias: b
+
+  b:
+    alias: c
+
+  c:
+    alias: a
+
+  d:
+    alias: blah
 """)
 
     private static final def EXPECTED_A_JDBC_CONNECTIVITY_PARAMS =
@@ -81,6 +99,7 @@ databases:
                     .build();
 
     def jdbcConnectionConfiguration = new JdbcConnectionsConfiguration(CONFIGURATION)
+    def jdbcBadConnectionConfiguration = new JdbcConnectionsConfiguration(BAD_CONFIGURATION)
 
     def "list database connection configurations"()
     {
@@ -106,5 +125,23 @@ databases:
 
         expect:
         bAlias == EXPECTED_B_ALIAS_JDBC_CONNECTIVITY_PARAMS
+    }
+
+    def "get connection configuration for unresolvable alias"()
+    {
+        when:
+        jdbcBadConnectionConfiguration.getConnectionConfiguration('d')
+
+        then:
+        thrown(IllegalStateException)
+    }
+
+    def "get connection configuration for looping alias"()
+    {
+        when:
+        jdbcBadConnectionConfiguration.getConnectionConfiguration('a')
+
+        then:
+        thrown(IllegalStateException)
     }
 }
