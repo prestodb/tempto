@@ -32,6 +32,7 @@ import javax.inject.Singleton;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.prestodb.tempto.fulfillment.table.MutableTableRequirement.State.LOADED;
@@ -120,8 +121,8 @@ public class HiveTableManager
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableName);
-        if (injectStatsForImmutableTables) {
-            injectStatistics(tableDefinition, tableName);
+        if (tableDefinition.getInjectStats().orElse(injectStatsForImmutableTables)) {
+            injectStatistics(tableDefinition, tableName, tableDefinition.getInjectStats().orElse(false));
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
@@ -155,8 +156,8 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        if (state == LOADED && injectStatsForMutableTables) {
-            injectStatistics(tableDefinition, tableName);
+        if (state == LOADED && tableDefinition.getInjectStats().orElse(injectStatsForMutableTables)) {
+            injectStatistics(tableDefinition, tableName, tableDefinition.getInjectStats().orElse(false));
         }
 
         return new HiveTableInstance(tableName, tableDefinition);
@@ -208,11 +209,13 @@ public class HiveTableManager
         queryExecutor.executeQuery(format("ALTER TABLE %s SET TBLPROPERTIES('EXTERNAL'='TRUE')", tableName.getNameInDatabase()));
     }
 
-    private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName)
+    private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName, boolean mustInject)
     {
-        if (!tableDefinition.isPartitioned() && tableDefinition.getDataSource().getStatistics().isPresent()) {
-            hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
+        if (tableDefinition.isPartitioned() || !tableDefinition.getDataSource().getStatistics().isPresent()) {
+            checkArgument(mustInject, "Injecting statistics requested, but injecting is not possible");
+            return;
         }
+        hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
     }
 
     @Override
