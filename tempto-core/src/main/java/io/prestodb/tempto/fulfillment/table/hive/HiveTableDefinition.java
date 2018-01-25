@@ -27,6 +27,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.prestodb.tempto.fulfillment.table.TableHandle.tableHandle;
 import static io.prestodb.tempto.fulfillment.table.hive.InlineDataSource.createSameRowDataSource;
 import static io.prestodb.tempto.fulfillment.table.hive.InlineDataSource.createStringDataSource;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
@@ -42,14 +43,21 @@ public class HiveTableDefinition
     private final Optional<HiveDataSource> dataSource;
     private final Optional<List<PartitionDefinition>> partitionDefinitions;
     private final String createTableDDLTemplate;
+    private final Optional<Boolean> injectStats;
 
-    private HiveTableDefinition(TableHandle handle, String createTableDDLTemplate, Optional<HiveDataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
+    private HiveTableDefinition(
+            TableHandle handle,
+            String createTableDDLTemplate,
+            Optional<HiveDataSource> dataSource,
+            Optional<List<PartitionDefinition>> partitionDefinitions,
+            Optional<Boolean> injectStats)
     {
         super(handle);
         checkArgument(dataSource.isPresent() != partitionDefinitions.isPresent(), "either dataSource or partitionDefinitions must be set (but not both)");
         this.dataSource = dataSource;
         this.partitionDefinitions = partitionDefinitions;
         this.createTableDDLTemplate = createTableDDLTemplate;
+        this.injectStats = requireNonNull(injectStats, "injectStats is null");
 
         checkArgument(createTableDDLTemplate.contains(NAME_MARKER), "Create table DDL must contain %NAME% placeholder");
     }
@@ -83,6 +91,11 @@ public class HiveTableDefinition
         return ddl.replace(EXTERNAL_MARKER, external);
     }
 
+    public Optional<Boolean> getInjectStats()
+    {
+        return injectStats;
+    }
+
     public static HiveTableDefinition hiveTableDefinition(String name, String createTableDDLTemplate, HiveDataSource dataSource)
     {
         return hiveTableDefinition(tableHandle(name), createTableDDLTemplate, dataSource);
@@ -90,7 +103,7 @@ public class HiveTableDefinition
 
     public static HiveTableDefinition hiveTableDefinition(TableHandle handle, String createTableDDLTemplate, HiveDataSource dataSource)
     {
-        return new HiveTableDefinition(handle, createTableDDLTemplate, Optional.of(dataSource), Optional.empty());
+        return new HiveTableDefinition(handle, createTableDDLTemplate, Optional.of(dataSource), Optional.empty(), Optional.empty());
     }
 
     public static HiveTableDefinitionBuilder builder(String name)
@@ -115,6 +128,7 @@ public class HiveTableDefinition
         private String createTableDDLTemplate;
         private Optional<HiveDataSource> dataSource = Optional.empty();
         private Optional<List<PartitionDefinition>> partitionDefinitions = Optional.empty();
+        private Optional<Boolean> injectStats = Optional.empty();
 
         private HiveTableDefinitionBuilder(String name)
         {
@@ -180,9 +194,18 @@ public class HiveTableDefinition
             return this;
         }
 
+        /**
+         * Whether the table statistics should be loaded after table creation. If not set, configurable global default will be used.
+         */
+        public HiveTableDefinitionBuilder injectStats(boolean injectStats)
+        {
+            this.injectStats = Optional.of(injectStats);
+            return this;
+        }
+
         public HiveTableDefinition build()
         {
-            return new HiveTableDefinition(handle, createTableDDLTemplate, dataSource, partitionDefinitions);
+            return new HiveTableDefinition(handle, createTableDDLTemplate, dataSource, partitionDefinitions, injectStats);
         }
     }
 
