@@ -111,6 +111,11 @@ public class HiveTableDefinition
         return new HiveTableDefinitionBuilder(name);
     }
 
+    public static HiveTableDefinitionBuilder from(HiveTableDefinition initialDefinition)
+    {
+        return new HiveTableDefinitionBuilder(initialDefinition);
+    }
+
     public static HiveTableDefinitionBuilder like(HiveTableDefinition hiveTableDefinition)
     {
         HiveTableDefinitionBuilder hiveTableDefinitionBuilder = new HiveTableDefinitionBuilder(hiveTableDefinition.getName());
@@ -129,6 +134,16 @@ public class HiveTableDefinition
         private Optional<HiveDataSource> dataSource = Optional.empty();
         private Optional<List<PartitionDefinition>> partitionDefinitions = Optional.empty();
         private Optional<Boolean> injectStats = Optional.empty();
+
+        private HiveTableDefinitionBuilder(HiveTableDefinition initialDefinition)
+        {
+            requireNonNull(initialDefinition, "initialDefinition is null");
+            this.handle = initialDefinition.handle;
+            this.createTableDDLTemplate = initialDefinition.createTableDDLTemplate;
+            this.dataSource = initialDefinition.dataSource;
+            this.partitionDefinitions = initialDefinition.partitionDefinitions;
+            this.injectStats = initialDefinition.injectStats;
+        }
 
         private HiveTableDefinitionBuilder(String name)
         {
