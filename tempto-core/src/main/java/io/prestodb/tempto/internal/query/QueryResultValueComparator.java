@@ -64,7 +64,7 @@ public class QueryResultValueComparator
         if (isNull(actual) && isNull(expected)) {
             return 0;
         }
-        if (isNull(actual) ^ isNull(expected)) {
+        if (isNull(actual) != isNull(expected)) {
             return -1;
         }
         switch (type) {
