@@ -60,7 +60,7 @@ public class HiveTableDefinition
         return dataSource.get();
     }
 
-    public List<PartitionDefinition> getPartitionDefinitons()
+    public List<PartitionDefinition> getPartitionDefinitions()
     {
         checkState(isPartitioned(), "not supported for not partitioned table");
         return partitionDefinitions.get();

@@ -141,7 +141,7 @@ public class HiveTableManager
 
         if (tableDefinition.isPartitioned()) {
             int partitionId = 0;
-            for (HiveTableDefinition.PartitionDefinition partitionDefinition : tableDefinition.getPartitionDefinitons()) {
+            for (HiveTableDefinition.PartitionDefinition partitionDefinition : tableDefinition.getPartitionDefinitions()) {
                 String partitionDataPath = getMutableTableHdfsPath(tableName, Optional.of(partitionId));
                 if (state == LOADED) {
                     uploadTableData(partitionDataPath, partitionDefinition.getDataSource());
