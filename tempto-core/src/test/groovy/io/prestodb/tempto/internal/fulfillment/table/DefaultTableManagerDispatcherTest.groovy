@@ -112,7 +112,7 @@ class DefaultTableManagerDispatcherTest
 
     private HiveTableDefinition hiveTableDefinition()
     {
-        return new HiveTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty())
+        return new HiveTableDefinition(tableHandle('name'), 'ddl %NAME% %LOCATION%', Optional.of(Mock(HiveDataSource)), empty(), empty())
     }
 
     def failWith(String message, Closure closure)
