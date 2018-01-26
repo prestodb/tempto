@@ -46,7 +46,7 @@ public class HiveTableDefinition
     private HiveTableDefinition(TableHandle handle, String createTableDDLTemplate, Optional<HiveDataSource> dataSource, Optional<List<PartitionDefinition>> partitionDefinitions)
     {
         super(handle);
-        checkArgument(dataSource.isPresent() ^ partitionDefinitions.isPresent(), "either dataSource or partitionDefinitions must be set");
+        checkArgument(dataSource.isPresent() ^ partitionDefinitions.isPresent(), "either dataSource or partitionDefinitions must be set (but not both)");
         this.dataSource = dataSource;
         this.partitionDefinitions = partitionDefinitions;
         this.createTableDDLTemplate = createTableDDLTemplate;
