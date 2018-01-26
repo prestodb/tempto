@@ -212,7 +212,7 @@ public class HiveTableManager
     private void injectStatistics(HiveTableDefinition tableDefinition, TableName tableName, boolean mustInject)
     {
         if (tableDefinition.isPartitioned() || !tableDefinition.getDataSource().getStatistics().isPresent()) {
-            checkArgument(mustInject, "Injecting statistics requested, but injecting is not possible");
+            checkArgument(!mustInject, "Injecting statistics requested, but injecting is not possible");
             return;
         }
         hiveThriftClient.setStatistics(tableName, tableDefinition.getDataSource().getStatistics().get());
