@@ -53,8 +53,8 @@ public class HiveTableManager
     private final HiveThriftClient hiveThriftClient;
     private final String databaseName;
     private final String hiveDatabasePath;
-    private final boolean analyzeImmutableTables;
-    private final boolean analyzeMutableTables;
+    private final boolean injectStatsForImmutableTables;
+    private final boolean injectStatsForMutableTables;
 
     @Inject
     public HiveTableManager(
@@ -64,8 +64,8 @@ public class HiveTableManager
             @Named("tests.hdfs.path") String testDataBasePath,
             @Named("databaseName") String databaseName,
             @Named("path") String databasePath,
-            @Named("inject_stats_for_immutable_tables") boolean analyzeImmutableTables,
-            @Named("inject_stats_for_mutable_tables") boolean analyzeMutableTables,
+            @Named("inject_stats_for_immutable_tables") boolean injectStatsForImmutableTables,
+            @Named("inject_stats_for_mutable_tables") boolean injectStatsForMutableTables,
             @Named("metastore.host") String thriftHost,
             @Named("metastore.port") String thriftPort)
     {
@@ -77,8 +77,8 @@ public class HiveTableManager
                 testDataBasePath,
                 databaseName,
                 databasePath,
-                analyzeImmutableTables,
-                analyzeMutableTables);
+                injectStatsForImmutableTables,
+                injectStatsForMutableTables);
     }
 
     public HiveTableManager(
@@ -89,8 +89,8 @@ public class HiveTableManager
             String testDataBasePath,
             String databaseName,
             String databasePath,
-            boolean analyzeImmutableTables,
-            boolean analyzeMutableTables)
+            boolean injectStatsForImmutableTables,
+            boolean injectStatsForMutableTables)
     {
         super(queryExecutor, tableNameGenerator);
         this.hiveThriftClient = hiveThriftClient;
@@ -103,8 +103,8 @@ public class HiveTableManager
             databasePath += "/";
         }
         this.hiveDatabasePath = databasePath;
-        this.analyzeImmutableTables = analyzeImmutableTables;
-        this.analyzeMutableTables = analyzeMutableTables;
+        this.injectStatsForImmutableTables = injectStatsForImmutableTables;
+        this.injectStatsForMutableTables = injectStatsForMutableTables;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class HiveTableManager
         dropTableIgnoreError(tableName);
         createTable(tableDefinition, tableName, Optional.of(tableDataPath));
         markTableAsExternal(tableName);
-        if (analyzeImmutableTables) {
+        if (injectStatsForImmutableTables) {
             injectStatistics(tableDefinition, tableName);
         }
 
@@ -155,7 +155,7 @@ public class HiveTableManager
             uploadTableData(tableDataPath, tableDefinition.getDataSource());
         }
 
-        if (state == LOADED && analyzeMutableTables) {
+        if (state == LOADED && injectStatsForMutableTables) {
             injectStatistics(tableDefinition, tableName);
         }
 
