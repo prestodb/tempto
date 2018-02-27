@@ -323,7 +323,7 @@ public class WebHdfsClient
             }
             URIBuilder uriBuilder = new URIBuilder()
                     .setScheme("http")
-                    .setHost(namenode.getHostText())
+                    .setHost(namenode.getHost())
                     .setPort(namenode.getPort())
                     .setPath("/webhdfs/v1" + checkNotNull(path))
                     .setParameter("op", checkNotNull(operation));
