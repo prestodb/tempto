@@ -57,7 +57,7 @@ public class KafkaQueryTest
                                     contentsBuilder().appendUTF8("jasio,1").build(),
                                     contentsBuilder().appendUTF8("ania,2").build()),
                             new KafkaMessage(
-                                    contentsBuilder().appendUTF8("stas,3").build(),
+                                    contentsBuilder().appendUTF8("piotr,3").build(),
                                     contentsBuilder().appendUTF8("kasia,4").build()))),
                     1,
                     1));
