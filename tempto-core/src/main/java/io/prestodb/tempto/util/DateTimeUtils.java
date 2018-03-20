@@ -36,17 +36,6 @@ public class DateTimeUtils
     private DateTimeUtils() {}
 
     /**
-     * Parse the input date time string (pattern: yyyy-M-d H:m:s.SSS) and interpret it in UTC.
-     *
-     * @param value textual date time input
-     * @return a <code>java.sql.Timestamp</code> object representing the input date time.
-     */
-    public static Timestamp parseTimestampInUTC(String value)
-    {
-        return new Timestamp(DATE_TIME_FORMATTER.parseMillis(value));
-    }
-
-    /**
      * Parse the input date time string (pattern: yyyy-M-d H:m:s.SSS) and interpret it in provided local time zone.
      *
      * @param value textual date time input
