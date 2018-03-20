@@ -22,7 +22,9 @@ import org.joda.time.format.DateTimeParser;
 import org.joda.time.format.DateTimePrinter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
+@Deprecated
 public class DateTimeUtils
 {
     private static DateTimeParser[] timestampWithoutTimeZoneParser = {
@@ -40,7 +42,9 @@ public class DateTimeUtils
      *
      * @param value textual date time input
      * @return a <code>java.sql.Timestamp</code> object representing the input date time.
+     * @deprecated This method is hard to reason about. If you really need to construct {@link java.sql.Timestamp}, use {@link java.sql.Timestamp#valueOf(LocalDateTime)} instead.
      */
+    @Deprecated
     public static Timestamp parseTimestampInLocalTime(String value, DateTimeZone timeZone)
     {
         return new Timestamp(DATE_TIME_FORMATTER.withZone(timeZone).parseMillis(value));
