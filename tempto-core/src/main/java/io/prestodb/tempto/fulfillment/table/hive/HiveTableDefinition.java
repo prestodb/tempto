@@ -85,7 +85,12 @@ public class HiveTableDefinition
         String external = "";
         if (location.isPresent()) {
             external = " EXTERNAL ";
-            ddl += " LOCATION '" + location.get() + "'";
+            if (ddl.contains(LOCATION_MARKER)) {
+                ddl = ddl.replace(LOCATION_MARKER, location.get());
+            }
+            else {
+                ddl += " LOCATION '" + location.get() + "'";
+            }
         }
 
         return ddl.replace(EXTERNAL_MARKER, external);
