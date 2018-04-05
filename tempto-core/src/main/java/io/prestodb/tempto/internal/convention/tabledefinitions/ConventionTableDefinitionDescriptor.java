@@ -16,8 +16,11 @@ package io.prestodb.tempto.internal.convention.tabledefinitions;
 
 import io.prestodb.tempto.internal.convention.AnnotatedFileParser;
 import io.prestodb.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult;
+import io.prestodb.tempto.internal.convention.ProcessUtils;
 import io.prestodb.tempto.internal.convention.SqlDescriptor;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.prestodb.tempto.internal.convention.SqlTestsFileUtils.changeExtension;
 import static io.prestodb.tempto.internal.convention.SqlTestsFileUtils.getFilenameWithoutExtension;
+import static io.prestodb.tempto.internal.convention.SqlTestsFileUtils.makeExecutable;
 import static java.nio.file.Files.exists;
 import static java.nio.file.Files.isRegularFile;
 
@@ -83,6 +87,13 @@ class ConventionTableDefinitionDescriptor
         this.ddlFile = ddlFile;
 
         Path dataFile = changeExtension(ddlFile, "data");
+        Path dataGeneratorFile = changeExtension(ddlFile, "data-generator");
+        if (exists(dataGeneratorFile)) {
+            checkArgument(!exists(dataFile), "Expected no data file when data-generator file is present");
+            makeExecutable(dataGeneratorFile);
+            ProcessUtils.execute(process -> feed(dataFile, process), dataGeneratorFile.toString());
+        }
+
         if (exists(dataFile) && isRegularFile(dataFile)) {
             Path revisionFile = changeExtension(ddlFile, "data-revision");
             checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "No revision file found: %s", revisionFile);
@@ -92,6 +103,16 @@ class ConventionTableDefinitionDescriptor
         else {
             this.dataFile = Optional.empty();
             this.revisionFile = Optional.empty();
+        }
+    }
+
+    private long feed(Path dataFile, Process process)
+    {
+        try {
+            return Files.copy(process.getInputStream(), dataFile);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

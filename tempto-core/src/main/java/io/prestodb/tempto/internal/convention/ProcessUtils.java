@@ -14,6 +14,7 @@
 package io.prestodb.tempto.internal.convention;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -23,10 +24,16 @@ public final class ProcessUtils
 
     public static void execute(String... cmdarray)
     {
+        execute(process -> {}, cmdarray);
+    }
+
+    public static void execute(Consumer<Process> processConsumer, String... cmdarray)
+    {
         checkState(cmdarray.length > 0);
 
         try {
             Process process = Runtime.getRuntime().exec(cmdarray);
+            processConsumer.accept(process);
             process.waitFor();
             checkState(process.exitValue() == SUCCESS_EXIT_CODE, "%s exited with status code: %s", cmdarray[0], process.exitValue());
         }
