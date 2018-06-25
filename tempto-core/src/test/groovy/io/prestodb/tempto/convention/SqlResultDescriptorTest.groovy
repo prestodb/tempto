@@ -23,9 +23,9 @@ import spock.lang.Specification
 
 import java.sql.Date
 import java.sql.Time
+import java.sql.Timestamp
 
 import static com.google.common.collect.Iterables.getOnlyElement
-import static io.prestodb.tempto.util.DateTimeUtils.parseTimestampInLocalTime
 import static java.sql.JDBCType.BINARY
 import static java.sql.JDBCType.BIT
 import static java.sql.JDBCType.DATE
@@ -56,7 +56,7 @@ B|abcd|1|10|20.0|30.0|2015-11-01|10:55:25|2016-11-01 10:55:25|'''
         List<QueryAssert.Row> rows = resultDescriptor.getRows(expectedTypes)
         rows.size() == 2
         rows.get(0).getValues() == ['A', [0xab, 0xcd] as byte[], true, 10, Double.valueOf(20.0), new BigDecimal("30.0"), Date.valueOf('2015-11-01'),
-                                    Time.valueOf('10:55:25'), parseTimestampInLocalTime('2016-11-01 10:55:25', DateTimeZone.getDefault())]
+                                    Time.valueOf('10:55:25'), Timestamp.valueOf('2016-11-01 10:55:25')]
     }
 
     def 'sampleResultFileWithoutExplicitExpectedTypes'()
