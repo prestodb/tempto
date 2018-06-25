@@ -15,7 +15,6 @@
 package io.prestodb.tempto.internal.query;
 
 import io.prestodb.tempto.assertions.QueryAssert.Row;
-import org.joda.time.DateTimeZone;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -23,11 +22,11 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.JDBCType;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.prestodb.tempto.assertions.QueryAssert.Row.row;
-import static io.prestodb.tempto.util.DateTimeUtils.parseTimestampInLocalTime;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -101,7 +100,7 @@ public class QueryRowMapper
                 return Time.valueOf(value);
             case TIMESTAMP:
             case TIMESTAMP_WITH_TIMEZONE:
-                return parseTimestampInLocalTime(value, DateTimeZone.getDefault());
+                return Timestamp.valueOf(value);
             default:
                 throw unsupportedConversionException(value, expectedType);
         }
