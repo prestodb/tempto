@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class TableDefinitionsRepository
 {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(TableDefinitionsRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TableDefinitionsRepository.class);
 
     /**
      * An annotation for {@link TableDefinition} static fields
