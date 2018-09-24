@@ -24,5 +24,4 @@ import org.testng.annotations.Listeners;
 @Listeners({RequirementsExpanderInterceptor.class, TestInitializationListener.class, ProgressLoggingListener.class})
 public class ProductTest
 {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(ProductTest.class);
 }
