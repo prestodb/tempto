@@ -33,17 +33,15 @@ public abstract class InlineDataSource
         implements HiveDataSource
 {
     private final String tableName;
-    private final String revisionMarker;
 
-    private InlineDataSource(String tableName, String revisionMarker)
+    private InlineDataSource(String tableName)
     {
         this.tableName = tableName;
-        this.revisionMarker = revisionMarker;
     }
 
-    public static HiveDataSource createResourceDataSource(String tableName, String revisionMarker, String dataResource)
+    public static HiveDataSource createResourceDataSource(String tableName, String dataResource)
     {
-        return new InlineDataSource(tableName, revisionMarker)
+        return new InlineDataSource(tableName)
         {
             @Override
             public Collection<RepeatableContentProducer> data()
@@ -53,9 +51,9 @@ public abstract class InlineDataSource
         };
     }
 
-    public static HiveDataSource createStringDataSource(String tableName, String revisionMarker, String data)
+    public static HiveDataSource createStringDataSource(String tableName, String data)
     {
-        return new InlineDataSource(tableName, revisionMarker)
+        return new InlineDataSource(tableName)
         {
             @Override
             public Collection<RepeatableContentProducer> data()
@@ -65,9 +63,9 @@ public abstract class InlineDataSource
         };
     }
 
-    public static HiveDataSource createSameRowDataSource(String tableName, String revisionMarker, int splitCount, int rowsInEachSplit, String rowData)
+    public static HiveDataSource createSameRowDataSource(String tableName, int splitCount, int rowsInEachSplit, String rowData)
     {
-        return new InlineDataSource(tableName, revisionMarker)
+        return new InlineDataSource(tableName)
         {
             @Override
             public Collection<RepeatableContentProducer> data()
@@ -97,11 +95,5 @@ public abstract class InlineDataSource
     {
         // {TESTS_PATH}/datasets/{dataSetName}
         return format("inline-tables/%s", tableName);
-    }
-
-    @Override
-    public String revisionMarker()
-    {
-        return revisionMarker;
     }
 }

@@ -77,7 +77,6 @@ class ConventionTableDefinitionDescriptor
     private final Path ddlFile;
     private ParsedDDLFile parsedDDLFile;
     private final Optional<Path> dataFile;
-    private final Optional<Path> revisionFile;
 
     public ConventionTableDefinitionDescriptor(Path ddlFile)
     {
@@ -95,14 +94,10 @@ class ConventionTableDefinitionDescriptor
         }
 
         if (exists(dataFile) && isRegularFile(dataFile)) {
-            Path revisionFile = changeExtension(ddlFile, "data-revision");
-            checkArgument(exists(revisionFile) && isRegularFile(revisionFile), "No revision file found: %s", revisionFile);
             this.dataFile = Optional.of(dataFile);
-            this.revisionFile = Optional.of(revisionFile);
         }
         else {
             this.dataFile = Optional.empty();
-            this.revisionFile = Optional.empty();
         }
     }
 
@@ -134,11 +129,6 @@ class ConventionTableDefinitionDescriptor
         return parsedDDLFile;
     }
 
-    public Optional<Path> getRevisionFile()
-    {
-        return revisionFile;
-    }
-
     @Override
     public String toString()
     {
@@ -146,7 +136,6 @@ class ConventionTableDefinitionDescriptor
                 .add("name", name)
                 .add("ddlFile", ddlFile)
                 .add("dataFile", dataFile)
-                .add("revisionFile", revisionFile)
                 .toString();
     }
 }

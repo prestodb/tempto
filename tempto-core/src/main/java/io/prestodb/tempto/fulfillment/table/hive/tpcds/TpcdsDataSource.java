@@ -41,8 +41,6 @@ import static java.util.Objects.requireNonNull;
 public class TpcdsDataSource
         implements HiveDataSource
 {
-    private static final String DATA_REVISION = "v.1.0";
-
     private final TpcdsTable table;
     private final int scaleFactor;
 
@@ -86,12 +84,6 @@ public class TpcdsDataSource
         return row.stream()
                 .map(column -> column == null ? "\\N" : column)
                 .collect(Collectors.joining("|")) + "|";
-    }
-
-    @Override
-    public String revisionMarker()
-    {
-        return DATA_REVISION;
     }
 
     @Override

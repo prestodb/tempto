@@ -18,13 +18,11 @@ import com.google.common.collect.ImmutableSet;
 import io.prestodb.tempto.fulfillment.table.hive.HiveDataSource;
 import io.prestodb.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
 import static java.lang.String.format;
 import static java.nio.file.Files.newInputStream;
-import static java.nio.file.Files.readAllBytes;
 
 public class FileBasedHiveDataSource
         implements HiveDataSource
@@ -56,23 +54,5 @@ public class FileBasedHiveDataSource
     private RepeatableContentProducer asRepeatableContentProducer(Path dataFile)
     {
         return () -> newInputStream(dataFile);
-    }
-
-    @Override
-    public String revisionMarker()
-    {
-        return tableDefinitionDescriptor.getRevisionFile()
-                .map(revisionFile -> {
-                    try {
-                        if (revisionMarker == null) {
-                            revisionMarker = new String(readAllBytes(revisionFile));
-                        }
-                        return revisionMarker;
-                    }
-                    catch (IOException e) {
-                        throw new IllegalStateException("Could not read revision file: " + tableDefinitionDescriptor.getRevisionFile());
-                    }
-                })
-                .orElse("");
     }
 }
