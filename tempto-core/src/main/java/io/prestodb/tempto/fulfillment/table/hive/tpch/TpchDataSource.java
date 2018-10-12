@@ -31,8 +31,6 @@ import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCod
 public class TpchDataSource
         implements HiveDataSource
 {
-    private static final String DATA_REVISION = "v.1.2";
-
     private final TpchTable table;
     private final double scaleFactor;
 
@@ -55,12 +53,6 @@ public class TpchDataSource
         @SuppressWarnings("unchecked")
         Iterable<? extends io.airlift.tpch.TpchEntity> tableDataGenerator = table.getTpchTableEntity().createGenerator(scaleFactor, 1, 1);
         return singleton(() -> new TpchEntityByteSource<>(tableDataGenerator).openStream());
-    }
-
-    @Override
-    public String revisionMarker()
-    {
-        return DATA_REVISION;
     }
 
     @Override

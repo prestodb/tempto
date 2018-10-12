@@ -37,7 +37,6 @@ public class HiveTableDefinition
     private static final String NAME_MARKER = "%NAME%";
     private static final String LOCATION_MARKER = "%LOCATION%";
     private static final String PARTITION_SPEC_MARKER = "%PARTITION_SPEC%";
-    private static final String NO_DATA_REVISION = "NO_DATA_REVISION";
     private static final String EXTERNAL_MARKER = "%EXTERNAL%";
 
     private final Optional<HiveDataSource> dataSource;
@@ -187,22 +186,22 @@ public class HiveTableDefinition
 
         public HiveTableDefinitionBuilder setNoData()
         {
-            return setDataSource(createStringDataSource(handle.getName(), NO_DATA_REVISION, ""));
+            return setDataSource(createStringDataSource(handle.getName(), ""));
         }
 
         public HiveTableDefinitionBuilder setData(String revision, String data)
         {
-            return setDataSource(createStringDataSource(handle.getName(), revision, data));
+            return setDataSource(createStringDataSource(handle.getName(), data));
         }
 
         public HiveTableDefinitionBuilder setRows(String revision, int rowsCount, String rowData)
         {
-            return setDataSource(createSameRowDataSource(handle.getName(), revision, 1, rowsCount, rowData));
+            return setDataSource(createSameRowDataSource(handle.getName(), 1, rowsCount, rowData));
         }
 
         public HiveTableDefinitionBuilder setRows(String revision, int splitCount, int rowsInEachSplit, String rowData)
         {
-            return setDataSource(createSameRowDataSource(handle.getName(), revision, splitCount, rowsInEachSplit, rowData));
+            return setDataSource(createSameRowDataSource(handle.getName(), splitCount, rowsInEachSplit, rowData));
         }
 
         public HiveTableDefinitionBuilder addPartition(String partitionSpec, HiveDataSource dataSource)

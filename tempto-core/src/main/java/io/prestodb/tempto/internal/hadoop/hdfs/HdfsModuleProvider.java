@@ -24,8 +24,6 @@ import io.prestodb.tempto.configuration.Configuration;
 import io.prestodb.tempto.hadoop.hdfs.HdfsClient;
 import io.prestodb.tempto.initialization.AutoModuleProvider;
 import io.prestodb.tempto.initialization.SuiteModuleProvider;
-import io.prestodb.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage;
-import io.prestodb.tempto.internal.hadoop.hdfs.revisions.RevisionStorage;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -36,13 +34,14 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.prestodb.tempto.internal.hadoop.hdfs.WebHdfsClient.CONF_HDFS_WEBHDFS_HOST_KEY;
-import static io.prestodb.tempto.internal.hadoop.hdfs.revisions.DispatchingRevisionStorage.CONF_TESTS_HDFS_PATH_KEY;
 
 @AutoModuleProvider
 public class HdfsModuleProvider
         implements SuiteModuleProvider
 {
     private static final Logger logger = LoggerFactory.getLogger(HdfsModuleProvider.class);
+
+    public static final String CONF_TESTS_HDFS_PATH_KEY = "tests.hdfs.path";
 
     private static final String AUTHENTICATION_SPNEGO = "SPNEGO";
     private static final int NUMBER_OF_HTTP_RETRIES = 3;
@@ -67,11 +66,9 @@ public class HdfsModuleProvider
                 install(httpRequestsExecutorModule());
 
                 bind(HdfsClient.class).to(WebHdfsClient.class).in(Scopes.SINGLETON);
-                bind(RevisionStorage.class).to(DispatchingRevisionStorage.class).in(Scopes.SINGLETON);
                 bind(HdfsDataSourceWriter.class).to(DefaultHdfsDataSourceWriter.class).in(Scopes.SINGLETON);
 
                 expose(HdfsClient.class);
-                expose(RevisionStorage.class);
                 expose(HdfsDataSourceWriter.class);
             }
 

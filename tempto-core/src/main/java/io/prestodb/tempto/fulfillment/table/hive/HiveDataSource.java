@@ -36,14 +36,6 @@ public interface HiveDataSource
      */
     Collection<RepeatableContentProducer> data();
 
-    /**
-     * Revision marker is used to determine if data should be regenerated. This
-     * method should be fast.
-     *
-     * @return revision marker
-     */
-    String revisionMarker();
-
     default Optional<TableStatistics> getStatistics()
     {
         return Optional.empty();
