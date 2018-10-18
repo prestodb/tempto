@@ -67,6 +67,7 @@ public class AnnotatedFileParser
     private static final String COMMENT_PREFIX = "---";
     private static final String SECTION_PREFIX = "--!";
     private static final String SECTION_NAME_KEY = "name";
+    private static final String NEW_LINE_LITERAL = "\\n";
 
     private static final Splitter.MapSplitter COMMENT_PROPERTIES_SPLITTER = Splitter.on(';')
             .omitEmptyStrings()
@@ -143,11 +144,11 @@ public class AnnotatedFileParser
      */
     private List<String> filterContent(List<String> contentLines)
     {
-        contentLines = contentLines.stream()
+        return contentLines.stream()
                 .filter(s -> !(isSpecialLine(s) || isBlank(s)))
                 .map(AnnotatedFileParser::unescapeLine)
+                .map(line -> line.replace(NEW_LINE_LITERAL, "\n"))
                 .collect(toList());
-        return contentLines;
     }
 
     private static String unescapeLine(String s)
