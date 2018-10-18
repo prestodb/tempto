@@ -107,6 +107,21 @@ class AnnotatedFileParserTest
         sections[1].sectionName.get() == 'section2'
     }
 
+    def 'handles line end escapes'()
+    {
+        String fileContent = '--! name: section1\n' +
+                'line\\n1\n' + 
+                'line2\n' +
+                '--! name: section2'
+        def sections = fileParser.parseFile(toInputStream(fileContent))
+
+        expect:
+        sections.size() == 2
+        sections[0].sectionName.get() == 'section1'
+        sections[0].contentLines == ["line\n1", "line2"]
+        sections[1].sectionName.get() == 'section2'
+    }
+
     def parseOnlySection(String fileContent)
     {
         getOnlyElement(fileParser.parseFile(toInputStream(fileContent)))
