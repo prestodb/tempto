@@ -31,7 +31,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.nio.file.Files.newInputStream;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -157,6 +157,8 @@ public class JSchSshClient
 
     private Iterable<String> quote(List<String> command)
     {
-        return transform(command, (String s) -> "\"" + s + "\"");
+        return command.stream()
+                .map((String s) -> "\"" + s + "\"")
+                .collect(toImmutableList());
     }
 }

@@ -15,9 +15,7 @@
 package io.prestodb.tempto.internal.initialization;
 
 import com.beust.jcommander.internal.Sets;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -57,9 +55,11 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.beust.jcommander.internal.Lists.newArrayList;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.inject.util.Modules.combine;
 import static io.prestodb.tempto.context.TestContextDsl.runWithTestContext;
@@ -371,18 +371,15 @@ public class TestInitializationListener
         return testMethodModuleProviders
                 .stream()
                 .map(provider -> provider.getModule(configuration, testResult))
-                .collect(toList());
+                .collect(toImmutableList());
     }
 
     private <T> Module bind(List<Class<? extends T>> classes)
     {
-        List<Module> modules = Lists.transform(classes, new Function<Class<? extends T>, Module>()
-        {
-            public Module apply(Class<? extends T> clazz)
-            {
-                return (Binder binder) -> binder.bind(clazz).in(Singleton.class);
-            }
-        });
+        Function<Class<? extends T>, Module> bindToModule = clazz -> (Binder binder) -> binder.bind(clazz).in(Singleton.class);
+        List<Module> modules = classes.stream()
+                .map(bindToModule)
+                .collect(toImmutableList());
         return combine(modules);
     }
 

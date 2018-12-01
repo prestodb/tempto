@@ -20,8 +20,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.copyOf;
-import static com.google.common.collect.Lists.transform;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 
@@ -47,19 +48,21 @@ public final class Requirements
 
     public static CompositeRequirement allOf(List<Requirement> requirements)
     {
-        return new MultiCompositeRequirement(copyOf(transform(wrapAsCompositeRequirements(requirements), ImmutableSet::<CompositeRequirement>of)));
+        return new MultiCompositeRequirement(wrapAsCompositeRequirements(requirements).stream()
+                .map(ImmutableSet::of)
+                .collect(toImmutableSet()));
     }
 
     private static List<CompositeRequirement> wrapAsCompositeRequirements(List<Requirement> requirements)
     {
-        return transform(requirements, (Requirement requirement) -> {
-            if (requirement instanceof CompositeRequirement) {
-                return (CompositeRequirement) requirement;
-            }
-            else {
-                return new SingletonCompositeRequirement(requirement);
-            }
-        });
+        return requirements.stream()
+                .map((Requirement requirement) -> {
+                    if (requirement instanceof CompositeRequirement) {
+                        return (CompositeRequirement) requirement;
+                    } else {
+                        return new SingletonCompositeRequirement(requirement);
+                    }
+                }).collect(toImmutableList());
     }
 
     private static class SingletonCompositeRequirement

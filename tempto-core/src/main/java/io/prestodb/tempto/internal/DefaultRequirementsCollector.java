@@ -15,7 +15,6 @@
 package io.prestodb.tempto.internal;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import io.prestodb.tempto.CompositeRequirement;
 import io.prestodb.tempto.Requirement;
 import io.prestodb.tempto.Requirements;
@@ -29,11 +28,12 @@ import io.prestodb.tempto.fulfillment.command.TestCommandRequirement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.prestodb.tempto.Requirements.compose;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -92,7 +92,7 @@ public class DefaultRequirementsCollector
         {
             return configuration.getStringList(key).stream()
                     .map(Command::new)
-                    .collect(toList());
+                    .collect(toImmutableList());
         }
     }
 
@@ -131,7 +131,7 @@ public class DefaultRequirementsCollector
 
         private List<Requirement> toRequirements(Class<? extends RequirementsProvider>[] providers)
         {
-            return Lists.transform(asList(providers), (Class<? extends RequirementsProvider> providerClass) -> {
+            return Arrays.stream(providers).map((Class<? extends RequirementsProvider> providerClass) -> {
                 try {
                     Constructor<? extends RequirementsProvider> constructor = providerClass.getDeclaredConstructor();
                     constructor.setAccessible(true);
@@ -144,7 +144,7 @@ public class DefaultRequirementsCollector
                 catch (NoSuchMethodException e) {
                     throw new IllegalArgumentException("No parameterless constructor for " + providerClass, e);
                 }
-            });
+            }).collect(toImmutableList());
         }
     }
 }
