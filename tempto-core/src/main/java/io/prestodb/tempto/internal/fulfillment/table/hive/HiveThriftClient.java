@@ -210,6 +210,6 @@ public class HiveThriftClient
     {
         double value = ((Number) objectValue).doubleValue();
         BigInteger bigInteger = BigInteger.valueOf(Math.round(value * scale));
-        return new Decimal(ByteBuffer.wrap(bigInteger.toByteArray()), checkedCast(scale));
+        return new Decimal(checkedCast(scale), ByteBuffer.wrap(bigInteger.toByteArray()));
     }
 }
