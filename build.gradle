@@ -30,7 +30,7 @@ ext.versions = [
         guava        : '21.0',
         guice        : '4.0',
         log4j        : '1.2.17',
-        testng       : '6.10',
+        testng       : '6.14.3',
         junit        : '4.12',
         spock        : '1.0-groovy-2.4',
         slf4j        : '1.7.12',
