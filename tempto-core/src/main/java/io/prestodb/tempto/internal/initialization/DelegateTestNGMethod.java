@@ -441,12 +441,6 @@ public abstract class DelegateTestNGMethod
     }
 
     @Override
-    public int compareTo(Object o)
-    {
-        return delegate.compareTo(o);
-    }
-
-    @Override
     public String toString()
     {
         return delegate.toString();
