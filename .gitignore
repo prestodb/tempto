@@ -8,6 +8,8 @@ build/
 out/
 *.iml
 *.eml
+*.ipr
+*.iws
 
 *.pyc
 

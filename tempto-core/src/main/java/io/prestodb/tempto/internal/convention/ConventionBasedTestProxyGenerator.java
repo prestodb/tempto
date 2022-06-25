@@ -25,6 +25,7 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodCall;
 import org.slf4j.Logger;
+import org.testng.annotations.CustomAttribute;
 import org.testng.annotations.Test;
 
 import java.lang.annotation.Annotation;
@@ -164,12 +165,6 @@ public class ConventionBasedTestProxyGenerator
         }
 
         @Override
-        public String[] parameters()
-        {
-            return new String[0];
-        }
-
-        @Override
         public String[] dependsOnGroups()
         {
             return new String[0];
@@ -260,9 +255,9 @@ public class ConventionBasedTestProxyGenerator
         }
 
         @Override
-        public boolean sequential()
+        public CustomAttribute[] attributes()
         {
-            return false;
+            return new CustomAttribute[0];
         }
 
         @Override

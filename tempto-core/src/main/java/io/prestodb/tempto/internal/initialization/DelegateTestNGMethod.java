@@ -15,13 +15,16 @@
 package io.prestodb.tempto.internal.initialization;
 
 import org.testng.IClass;
+import org.testng.IDataProviderMethod;
 import org.testng.IRetryAnalyzer;
 import org.testng.ITestClass;
 import org.testng.ITestNGMethod;
+import org.testng.ITestResult;
+import org.testng.annotations.CustomAttribute;
 import org.testng.internal.ConstructorOrMethod;
+import org.testng.internal.IParameterInfo;
 import org.testng.xml.XmlTest;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -55,23 +58,9 @@ public abstract class DelegateTestNGMethod
     }
 
     @Override
-    @Deprecated
-    public Method getMethod()
-    {
-        return delegate.getMethod();
-    }
-
-    @Override
     public String getMethodName()
     {
         return delegate.getMethodName();
-    }
-
-    @Override
-    @Deprecated
-    public Object[] getInstances()
-    {
-        return delegate.getInstances();
     }
 
     @Override
@@ -225,12 +214,6 @@ public abstract class DelegateTestNGMethod
     }
 
     @Override
-    public int getTotalInvocationCount()
-    {
-        return delegate.getTotalInvocationCount();
-    }
-
-    @Override
     public int getSuccessPercentage()
     {
         return delegate.getSuccessPercentage();
@@ -324,18 +307,6 @@ public abstract class DelegateTestNGMethod
     public int getParameterInvocationCount()
     {
         return delegate.getParameterInvocationCount();
-    }
-
-    @Override
-    public IRetryAnalyzer getRetryAnalyzer()
-    {
-        return delegate.getRetryAnalyzer();
-    }
-
-    @Override
-    public void setRetryAnalyzer(IRetryAnalyzer retryAnalyzer)
-    {
-        delegate.setRetryAnalyzer(retryAnalyzer);
     }
 
     @Override
@@ -448,4 +419,76 @@ public abstract class DelegateTestNGMethod
 
     @Override
     abstract public ITestNGMethod clone();
+
+    @Override
+    public boolean hasBeforeGroupsConfiguration()
+    {
+        return delegate.hasBeforeGroupsConfiguration();
+    }
+
+    @Override
+    public boolean hasAfterGroupsConfiguration()
+    {
+        return delegate.hasAfterGroupsConfiguration();
+    }
+
+    @Override
+    public boolean isDataDriven()
+    {
+        return delegate.isDataDriven();
+    }
+
+    @Override
+    public IParameterInfo getFactoryMethodParamsInfo()
+    {
+        return delegate.getFactoryMethodParamsInfo();
+    }
+
+    @Override
+    public CustomAttribute[] getAttributes()
+    {
+        return delegate.getAttributes();
+    }
+
+    @Override
+    public IDataProviderMethod getDataProviderMethod()
+    {
+        return delegate.getDataProviderMethod();
+    }
+
+    @Override
+    public Class<?>[] getParameterTypes()
+    {
+        return delegate.getParameterTypes();
+    }
+
+    @Override
+    public IRetryAnalyzer getRetryAnalyzer(ITestResult result)
+    {
+        return delegate.getRetryAnalyzer(result);
+    }
+
+    @Override
+    public void setRetryAnalyzerClass(Class<? extends IRetryAnalyzer> clazz)
+    {
+        delegate.setRetryAnalyzerClass(clazz);
+    }
+
+    @Override
+    public Class<? extends IRetryAnalyzer> getRetryAnalyzerClass()
+    {
+        return delegate.getRetryAnalyzerClass();
+    }
+
+    @Override
+    public int getInterceptedPriority()
+    {
+        return delegate.getInterceptedPriority();
+    }
+
+    @Override
+    public void setInterceptedPriority(int priority)
+    {
+        delegate.setInterceptedPriority(priority);
+    }
 }
