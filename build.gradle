@@ -30,7 +30,7 @@ ext.versions = [
         guava        : '21.0',
         guice        : '4.0',
         log4j        : '1.2.17',
-        testng       : '6.14.3',
+        testng       : '7.5',
         junit        : '4.12',
         spock        : '1.0-groovy-2.4',
         slf4j        : '1.7.12',
@@ -113,7 +113,7 @@ ext.tempto_runner = project(':tempto-runner')
 ext.tempto_ldap = project(':tempto-ldap')
 ext.tempto_kafka = project(':tempto-kafka')
 ext.expected_result_generator = project(':expected-result-generator')
-ext.tempto_version = '1.52-SNAPSHOT'
+ext.tempto_version = '1.52'
 ext.tempto_group = "io.prestodb.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
