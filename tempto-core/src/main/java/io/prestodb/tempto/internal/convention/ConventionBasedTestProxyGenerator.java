@@ -25,8 +25,10 @@ import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.implementation.MethodCall;
 import org.slf4j.Logger;
+import org.testng.IRetryAnalyzer;
 import org.testng.annotations.CustomAttribute;
 import org.testng.annotations.Test;
+import org.testng.internal.annotations.DisabledRetryAnalyzer;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -267,9 +269,9 @@ public class ConventionBasedTestProxyGenerator
         }
 
         @Override
-        public Class retryAnalyzer()
+        public Class<? extends IRetryAnalyzer> retryAnalyzer()
         {
-            return Class.class;
+            return DisabledRetryAnalyzer.class;
         }
 
         @Override
