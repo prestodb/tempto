@@ -16,7 +16,9 @@ package io.prestodb.tempto.process;
 import io.prestodb.tempto.internal.process.CliProcessBase;
 
 import java.time.Duration;
+import java.util.OptionalInt;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
@@ -26,11 +28,18 @@ public class LocalCliProcess
         extends CliProcessBase
 {
     private final Process process;
+    private final OptionalInt expectedExitValue;
 
-    public LocalCliProcess(Process process)
+    public LocalCliProcess(Process process, OptionalInt expectedExitValue)
     {
         super(process.getInputStream(), process.getErrorStream(), process.getOutputStream());
         this.process = process;
+        this.expectedExitValue = requireNonNull(expectedExitValue, "expectedExitValue is null");
+    }
+
+    public LocalCliProcess(Process process)
+    {
+        this(process, OptionalInt.empty());
     }
 
     @Override
@@ -43,7 +52,7 @@ public class LocalCliProcess
         }
 
         int exitValue = process.exitValue();
-        if (exitValue != 0) {
+        if (exitValue != 0 && exitValue != expectedExitValue.orElse(0)) {
             throw new RuntimeException("Child process exited with non-zero code: " + exitValue);
         }
     }
