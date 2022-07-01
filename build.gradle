@@ -113,7 +113,7 @@ ext.tempto_runner = project(':tempto-runner')
 ext.tempto_ldap = project(':tempto-ldap')
 ext.tempto_kafka = project(':tempto-kafka')
 ext.expected_result_generator = project(':expected-result-generator')
-ext.tempto_version = '1.53-SNAPSHOT'
+ext.tempto_version = '1.53'
 ext.tempto_group = "io.prestodb.tempto"
 ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
