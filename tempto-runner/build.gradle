@@ -13,12 +13,11 @@
  */
 apply plugin: 'java'
 apply plugin: 'signing'
-apply plugin: 'maven'
 apply plugin: 'groovy'
 
 dependencies {
-    compile tempto_core
-    compile libraries.commons_cli
+    implementation tempto_core
+    implementation libraries.commons_cli
 }
 
 configurations {
@@ -30,13 +29,11 @@ ext.artifactId = 'tempto-runner'
 archivesBaseName = artifactId
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
+publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId artifactId
                 artifactId artifactId
             }
         }
-    }
 }
