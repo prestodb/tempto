@@ -15,7 +15,6 @@
 package io.prestodb.tempto.internal.convention;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import io.prestodb.tempto.Requirement;
 import io.prestodb.tempto.configuration.Configuration;
@@ -66,7 +65,7 @@ public class ConventionBasedTestProxyGenerator
             DynamicType.Unloaded<ConventionBasedTestProxy> dynamicType = new ByteBuddy()
                     .subclass(ConventionBasedTestProxy.class)
                     .name(className)
-                    .defineMethod(methodName, void.class, ImmutableList.of(), Visibility.PUBLIC)
+                    .defineMethod(methodName, void.class, Visibility.PUBLIC)
                     .intercept(MethodCall.invoke(ConventionBasedTestProxy.class.getMethod("test")))
                     .annotateMethod(testAnnotationImpl)
                     .make();
@@ -87,7 +86,13 @@ public class ConventionBasedTestProxyGenerator
     private String generatedClassName(ConventionBasedTest conventionBasedTest)
     {
         List<String> testNameParts = Splitter.on('.').splitToList(conventionBasedTest.getTestName());
-        return testPackage + "." + toJavaSymbol(testNameParts.get(testNameParts.size() - 2));
+        String javaSymbol = toJavaSymbol(testNameParts.get(testNameParts.size() - 2));
+        if (javaSymbol.isEmpty()) {
+            return testPackage;
+        }
+        else {
+            return testPackage + "." + javaSymbol;
+        }
     }
 
     private String generatedMethodName(ConventionBasedTest conventionBasedTest)
