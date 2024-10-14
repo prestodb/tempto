@@ -13,7 +13,7 @@
  */
 
 plugins {
-    id "com.github.hierynomus.license" version "0.11.0"
+    id "com.github.hierynomus.license" version "0.16.1"
     id 'signing'
     id 'maven-publish'
 }
