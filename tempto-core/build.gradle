@@ -40,6 +40,7 @@ dependencies {
     implementation libraries.cassandra_driver
     implementation libraries.hive
     implementation libraries.thrift
+    implementation 'javax.xml.bind:jaxb-api:2.2.4'
 
     runtimeOnly libraries.jcl_over_slf4j
 
@@ -50,6 +51,13 @@ dependencies {
     testRuntimeOnly libraries.objenesis
 }
 
+// This does not work as expected - https://github.com/gradle/gradle/issues/1461
+// tasks.compileJava {
+//    options.forkOptions.jvmArgs += [
+//            '--add-opens java.base/sun.net.spi=ALL-UNNAMED'
+//    ]
+//    options.fork = true
+//}
 
 configurations {
     all*.exclude group: 'commons-logging', module: 'commons-logging'

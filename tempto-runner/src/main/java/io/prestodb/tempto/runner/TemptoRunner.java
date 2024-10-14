@@ -15,7 +15,7 @@
 package io.prestodb.tempto.runner;
 
 import com.google.common.base.Joiner;
-import io.prestodb.tempto.dns.TemptoNameServiceDescriptor;
+import io.prestodb.tempto.dns.TemptoInetAddressResolverProvider;
 import io.prestodb.tempto.internal.listeners.TestNameGroupNameMethodSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import static java.util.Collections.singletonList;
 public class TemptoRunner
 {
     static {
-        TemptoNameServiceDescriptor.enableHostMapping();
+        TemptoInetAddressResolverProvider.enableHostMapping();
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(TemptoRunner.class);
