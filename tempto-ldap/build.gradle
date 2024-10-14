@@ -16,6 +16,10 @@ apply plugin: 'java'
 
 dependencies {
     implementation tempto_core
+    implementation libraries.guava
+    implementation libraries.commons_lang3
+    implementation libraries.guice
+    implementation libraries.slf4j_api
 }
 
 // project information

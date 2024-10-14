@@ -19,6 +19,7 @@ dependencies {
     implementation libraries.kafka
     implementation libraries.zkclient
     implementation libraries.guava
+    implementation libraries.guice
 }
 
 // project information

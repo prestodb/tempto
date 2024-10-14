@@ -21,6 +21,7 @@ dependencies {
     implementation libraries.log4j
     implementation libraries.slf4j_api
     implementation libraries.reflections
+    implementation libraries.guice
 }
 
 // project information

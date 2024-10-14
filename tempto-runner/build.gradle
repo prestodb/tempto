@@ -18,6 +18,14 @@ apply plugin: 'groovy'
 dependencies {
     implementation tempto_core
     implementation libraries.commons_cli
+    implementation libraries.guava
+    implementation libraries.commons_lang3
+    implementation libraries.slf4j_api
+    implementation libraries.testng
+
+
+    runtimeOnly tempto_logging_log4j
+    runtimeOnly libraries.slf4j_log4j
 }
 
 configurations {

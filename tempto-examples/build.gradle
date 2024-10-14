@@ -21,16 +21,26 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 
 dependencies {
+    implementation tempto_core
     implementation tempto_runner
     implementation tempto_kafka
     implementation libraries.slf4j_api
     implementation libraries.junit
+    implementation libraries.guava
+    implementation 'javax.xml.bind:jaxb-api:2.2.4'
+    implementation libraries.testng
+    implementation libraries.assertj
+    implementation libraries.guice
 
     runtimeOnly tempto_logging_log4j
     runtimeOnly libraries.slf4j_log4j
     runtimeOnly libraries.postgresql_jdbc
     runtimeOnly libraries.presto_jdbc
     runtimeOnly libraries.hive_jdbc
+}
+
+license {
+    exclude "**/*.yaml"
 }
 
 jar {
