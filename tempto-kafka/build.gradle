@@ -18,6 +18,7 @@ dependencies {
     implementation tempto_core
     implementation libraries.kafka
     implementation libraries.zkclient
+    implementation libraries.guava
 }
 
 // project information

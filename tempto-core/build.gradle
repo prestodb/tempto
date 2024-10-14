@@ -69,6 +69,7 @@ archivesBaseName = artifactId
 
 license {
     exclude "**/convention/sample-test/**/*.sql"
+    exclude "**/*.yaml"
 }
 
 // publishing to sonatype
