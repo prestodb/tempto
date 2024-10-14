@@ -23,8 +23,8 @@ apply plugin: 'java'
 apply plugin: 'groovy'
 
 plugins.withType(JavaPlugin) {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 22
+    targetCompatibility = 22
 }
 
 ext.versions = [
