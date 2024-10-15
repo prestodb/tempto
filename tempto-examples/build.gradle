@@ -14,23 +14,33 @@
 
 plugins {
     id 'java' // or 'groovy' Must be explicitly applied
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 
 dependencies {
-    compile tempto_runner
-    compile tempto_kafka
-    compile libraries.slf4j_api
-    compile libraries.junit
+    implementation tempto_core
+    implementation tempto_runner
+    implementation tempto_kafka
+    implementation libraries.slf4j_api
+    implementation libraries.junit
+    implementation libraries.guava
+    implementation 'javax.xml.bind:jaxb-api:2.2.4'
+    implementation libraries.testng
+    implementation libraries.assertj
+    implementation libraries.guice
 
-    runtime tempto_logging_log4j
-    runtime libraries.slf4j_log4j
-    runtime libraries.postgresql_jdbc
-    runtime libraries.presto_jdbc
-    runtime libraries.hive_jdbc
+    runtimeOnly tempto_logging_log4j
+    runtimeOnly libraries.slf4j_log4j
+    runtimeOnly libraries.postgresql_jdbc
+    runtimeOnly libraries.presto_jdbc
+    runtimeOnly libraries.hive_jdbc
+}
+
+license {
+    exclude "**/*.yaml"
 }
 
 jar {
@@ -41,6 +51,7 @@ jar {
 
 shadowJar {
     version = ''
+    zip64 true
 }
 
 build.dependsOn.add([shadowJar])

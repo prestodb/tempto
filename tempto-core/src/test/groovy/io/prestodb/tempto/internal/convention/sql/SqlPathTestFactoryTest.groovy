@@ -36,7 +36,7 @@ class SqlPathTestFactoryTest
         extends Specification
 {
     @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder();
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     @Shared
     SqlPathTestFactory sqlPathTestFactory
@@ -46,6 +46,7 @@ class SqlPathTestFactoryTest
         TableDefinitionsRepository tableDefinitionsRepositoryMock = Mock()
         ConventionBasedTestProxyGenerator conventionBasedTestProxyGeneratorMock = new ConventionBasedTestProxyGenerator('test')
         sqlPathTestFactory = new SqlPathTestFactory(tableDefinitionsRepositoryMock, conventionBasedTestProxyGeneratorMock, emptyConfiguration())
+        temporaryFolder.create()
     }
 
     def shouldCreateConventionTestWithRequires()
