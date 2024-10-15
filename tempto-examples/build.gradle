@@ -51,6 +51,7 @@ jar {
 
 shadowJar {
     version = ''
+    zip64 true
 }
 
 build.dependsOn.add([shadowJar])
