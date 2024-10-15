@@ -75,12 +75,13 @@ license {
 
 // publishing to sonatype
 publishing {
-        publications {
-            maven(MavenPublication) {
-                groupId artifactId
-                artifactId artifactId
-            }
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.aaneja.tempto'
+            artifactId artifactId
+            version 'jdk17_snapshot'
         }
+    }
 }
 
 test {

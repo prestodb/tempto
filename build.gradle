@@ -121,7 +121,7 @@ ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
 ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
-ext.skipSigning = false
+ext.skipSigning = true // temp change
 
 
 subprojects {
@@ -178,9 +178,9 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     publishing {
         publications {
             maven(MavenPublication) {
-                groupId = 'com.prestodb.tempto'
-                artifactId = 'tempto'
-                version = project.version
+                groupId 'com.github.aaneja.tempto'
+                artifactId artifactId
+                version 'jdk17_snapshot'
 
                 from components.java
 

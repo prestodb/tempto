@@ -40,8 +40,9 @@ archivesBaseName = artifactId
 publishing {
         publications {
             maven(MavenPublication) {
-                groupId artifactId
+                groupId 'com.github.aaneja.tempto'
                 artifactId artifactId
+                version 'jdk17_snapshot'
             }
         }
 }
