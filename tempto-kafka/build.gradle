@@ -16,8 +16,7 @@ apply plugin: 'java'
 
 dependencies {
     compile tempto_core
-    compile libraries.kafka
-    compile libraries.zkclient
+    compile libraries.kafka_clients
 }
 
 // project information
