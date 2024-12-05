@@ -49,7 +49,7 @@ ext.versions = [
         presto       : '0.181',
         reflections  : '0.9.9',
         bytebuddy    : '0.7-rc2',
-        jsch         : '0.1.52',
+        jsch         : '0.1.55',
         mina_sshd    : '0.14.0',
         freemarker   : '2.3.22',
         objenesis    : '1.4',
@@ -170,6 +170,7 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 
     // publishing to sonatype
+
     uploadArchives {
         repositories {
             mavenDeployer {
