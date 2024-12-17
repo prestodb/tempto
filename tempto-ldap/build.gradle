@@ -15,21 +15,23 @@
 apply plugin: 'java'
 
 dependencies {
-    compile tempto_core
+    implementation tempto_core
+    implementation libraries.guava
+    implementation libraries.commons_lang3
+    implementation libraries.guice
+    implementation libraries.slf4j_api
 }
 
 // project information
 ext.artifactId = 'tempto-ldap'
-archivesBaseName = artifactId
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
-                artifactId artifactId
-            }
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.aaneja.tempto'
+            artifactId artifactId
+            version 'jdk8_snapshot'
         }
     }
 }

@@ -13,16 +13,18 @@
  */
 
 plugins {
-    id "com.github.hierynomus.license" version "0.11.0"
+    id "com.github.hierynomus.license" version "0.16.1"
+    id 'signing'
+    id 'maven-publish'
 }
 
 apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'groovy'
 
-plugins.withType(JavaPlugin) {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 ext.versions = [
@@ -32,7 +34,7 @@ ext.versions = [
         log4j        : '1.2.17',
         testng       : '7.5',
         junit        : '4.12',
-        spock        : '1.0-groovy-2.4',
+        spock        : '2.3-groovy-4.0',
         slf4j        : '1.7.12',
         hsqldb       : '2.3.2',
         dbutils      : '1.6',
@@ -48,7 +50,7 @@ ext.versions = [
         hive         : '3.0.0-2',
         presto       : '0.181',
         reflections  : '0.9.9',
-        bytebuddy    : '0.7-rc2',
+        bytebuddy    : '1.15.4',
         jsch         : '0.1.55',
         mina_sshd    : '0.14.0',
         freemarker   : '2.3.22',
@@ -119,7 +121,7 @@ ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
 ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
-ext.skipSigning = false
+ext.skipSigning = true // temp change
 
 
 subprojects {
@@ -141,24 +143,26 @@ subprojects {
 configure(subprojects - expected_result_generator - tempto_examples) {
     apply plugin: 'signing'
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
 
     // plugins configuration
     javadoc {
         failOnError = true
     }
 
-    // javadoc.jar generation
+   // Javadoc.jar generation
     task javadocJar(type: Jar) {
-        classifier = 'javadoc'
-        from javadoc
+        archiveClassifier.set('javadoc')
+        from(javadoc)
     }
 
-    // sources.jar generation
+
+    // Sources.jar generation
     task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allJava
+        archiveClassifier.set('sources')
+        from(sourceSets.main.allJava)
     }
+
 
     signing {
         required { isReleaseVersion && !skipSigning }
@@ -170,44 +174,46 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 
     // publishing to sonatype
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: nexusUsername, password: nexusPassword)
-                }
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'com.github.aaneja.tempto'
+                artifactId artifactId
+                version 'jdk8_snapshot'
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: nexusUsername, password: nexusPassword)
-                }
+                from components.java
 
-                pom.project {
+                pom {
                     packaging 'jar'
                     description 'Tempto - test framework'
-                    url 'https://github.com/prestodb/tempto'
-                    scm {
-                        url 'git@github.com:prestodb/tempto.git'
-                        connection 'scm:git:git@github.com:prestodb/tempto.git'
-                        developerConnection 'scm:git:git@github.com:prestodb/tempto.git'
-                    }
-                    licenses {
-                        license {
-                            name 'The Apache Software License, Version 2.0'
-                            url 'http://www.apache.org/license/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id 'thc'
-                            name 'Teradata Hadoop Center'
-                            email 'EB230060 aat teradata doot com'
-                        }
-                    }
+
+                    // fix scm and licenses and developers
                 }
             }
         }
+
+        repositories {
+            maven {
+                url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
+                credentials {
+                    username = System.getenv('NEXUS_USERNAME')
+                    password = System.getenv('NEXUS_PASSWORD')
+                }
+            }
+
+            maven {
+                url = uri('https://oss.sonatype.org/content/repositories/snapshots/')
+                credentials {
+                    username = System.getenv('NEXUS_USERNAME')
+                    password = System.getenv('NEXUS_PASSWORD')
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.maven
     }
 }
 

@@ -13,12 +13,19 @@
  */
 apply plugin: 'java'
 apply plugin: 'signing'
-apply plugin: 'maven'
 apply plugin: 'groovy'
 
 dependencies {
-    compile tempto_core
-    compile libraries.commons_cli
+    implementation tempto_core
+    implementation libraries.commons_cli
+    implementation libraries.guava
+    implementation libraries.commons_lang3
+    implementation libraries.slf4j_api
+    implementation libraries.testng
+
+
+    runtimeOnly tempto_logging_log4j
+    runtimeOnly libraries.slf4j_log4j
 }
 
 configurations {
@@ -27,16 +34,14 @@ configurations {
 
 // project information
 ext.artifactId = 'tempto-runner'
-archivesBaseName = artifactId
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
+publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'com.github.aaneja.tempto'
                 artifactId artifactId
+                version 'jdk8_snapshot'
             }
         }
-    }
 }

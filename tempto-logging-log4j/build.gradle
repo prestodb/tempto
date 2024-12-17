@@ -16,25 +16,24 @@ apply plugin: 'java'
 apply plugin: 'groovy'
 
 dependencies {
-    compile tempto_core
-    compile libraries.ioutils
-    compile libraries.log4j
-    compile libraries.slf4j_api
-    compile libraries.reflections
+    implementation tempto_core
+    implementation libraries.ioutils
+    implementation libraries.log4j
+    implementation libraries.slf4j_api
+    implementation libraries.reflections
+    implementation libraries.guice
 }
 
 // project information
 ext.artifactId = 'tempto-logging-log4j'
-archivesBaseName = artifactId
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
-                artifactId artifactId
-            }
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.aaneja.tempto'
+            artifactId artifactId
+            version 'jdk8_snapshot'
         }
     }
 }

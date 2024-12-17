@@ -15,23 +15,23 @@
 apply plugin: 'java'
 
 dependencies {
-    compile tempto_core
-    compile libraries.kafka
-    compile libraries.zkclient
+    implementation tempto_core
+    implementation libraries.kafka
+    implementation libraries.zkclient
+    implementation libraries.guava
+    implementation libraries.guice
 }
 
 // project information
 ext.artifactId = 'tempto-kafka'
-archivesBaseName = artifactId
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
-                artifactId artifactId
-            }
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.aaneja.tempto'
+            artifactId artifactId
+            version 'jdk8_snapshot'
         }
     }
 }

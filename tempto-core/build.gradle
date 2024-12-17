@@ -14,41 +14,51 @@
 
 apply plugin: 'java'
 apply plugin: 'signing'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'groovy'
 
 dependencies {
-    compile libraries.assertj
-    compile libraries.guava
-    compile libraries.guice
-    compile libraries.testng
-    compile libraries.commons_lang3
-    compile libraries.commons_dbcp2
-    compile libraries.slf4j_api
-    compile libraries.snakeyaml
-    compile libraries.httpclient
-    compile libraries.ioutils
-    compile libraries.tpchgen
-    compile libraries.tpcdsgen
-    compile libraries.bytebuddy
-    compile libraries.reflections
-    compile libraries.jsch
-    compile libraries.freemarker
-    compile libraries.joda
-    compile libraries.jackson_databind
-    compile libraries.jackson_datatype_jdk8
-    compile libraries.cassandra_driver
-    compile libraries.hive
-    compile libraries.thrift
+    implementation libraries.assertj
+    implementation libraries.junit
+    implementation libraries.guava
+    implementation libraries.guice
+    implementation libraries.testng
+    implementation libraries.commons_lang3
+    implementation libraries.commons_dbcp2
+    implementation libraries.slf4j_api
+    implementation libraries.snakeyaml
+    implementation libraries.httpclient
+    implementation libraries.ioutils
+    implementation libraries.tpchgen
+    implementation libraries.tpcdsgen
+    implementation libraries.bytebuddy
+    implementation libraries.reflections
+    implementation libraries.jsch
+    implementation libraries.freemarker
+    implementation libraries.joda
+    implementation libraries.jackson_databind
+    implementation libraries.jackson_datatype_jdk8
+    implementation libraries.cassandra_driver
+    implementation libraries.hive
+    implementation libraries.thrift
+    implementation 'javax.xml.bind:jaxb-api:2.2.4'
 
-    runtime libraries.jcl_over_slf4j
+    runtimeOnly libraries.jcl_over_slf4j
 
-    testCompile libraries.spock
-    testCompile libraries.hsqldb
-    testCompile libraries.dbutils
-    testCompile libraries.mina_sshd
-    testRuntime libraries.objenesis
+    testImplementation libraries.spock
+    testImplementation libraries.hsqldb
+    testImplementation libraries.dbutils
+    testImplementation libraries.mina_sshd
+    testRuntimeOnly libraries.objenesis
 }
+
+// This does not work as expected - https://github.com/gradle/gradle/issues/1461
+// tasks.compileJava {
+//    options.forkOptions.jvmArgs += [
+//            '--add-opens java.base/sun.net.spi=ALL-UNNAMED'
+//    ]
+//    options.fork = true
+//}
 
 configurations {
     all*.exclude group: 'commons-logging', module: 'commons-logging'
@@ -56,20 +66,25 @@ configurations {
 
 // project information
 ext.artifactId = 'tempto-core'
-archivesBaseName = artifactId
 
 license {
     exclude "**/convention/sample-test/**/*.sql"
+    exclude "**/*.yaml"
 }
 
 // publishing to sonatype
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.project {
-                name artifactId
-                artifactId artifactId
-            }
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.github.aaneja.tempto'
+            artifactId artifactId
+            version 'jdk8_snapshot'
         }
     }
+}
+
+test {
+    useJUnitPlatform()
+
+    // Other test task configurations...
 }
