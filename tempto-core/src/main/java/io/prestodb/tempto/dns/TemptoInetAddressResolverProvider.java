@@ -13,16 +13,14 @@
  */
 package io.prestodb.tempto.dns;
 
-import io.prestodb.tempto.configuration.Configuration;
-import sun.net.spi.nameservice.NameService;
-import sun.net.spi.nameservice.NameServiceDescriptor;
-
+import java.net.spi.InetAddressResolver;
+import java.net.spi.InetAddressResolverProvider;
 import java.util.Map;
 
 import static io.prestodb.tempto.internal.configuration.TestConfigurationFactory.testConfiguration;
 
-public class TemptoNameServiceDescriptor
-        implements NameServiceDescriptor
+public class TemptoInetAddressResolverProvider
+        extends InetAddressResolverProvider
 {
     public static final String PROVIDER_NAME = "map_based";
     public static final String TYPE = "dns";
@@ -34,23 +32,16 @@ public class TemptoNameServiceDescriptor
     }
 
     @Override
-    public NameService createNameService()
-            throws Exception
+    public InetAddressResolver get(Configuration configuration)
     {
-        Configuration configuration = testConfiguration();
-        Map hosts = configuration.getSubconfiguration("hosts").asMap();
-        return new MapBasedNameService(hosts);
+       io.prestodb.tempto.configuration.Configuration temptoConfiguration = testConfiguration();
+        Map hosts = temptoConfiguration.getSubconfiguration("hosts").asMap();
+        return new MapBasedAddressResolver(hosts);
     }
 
     @Override
-    public String getProviderName()
+    public String name()
     {
-        return PROVIDER_NAME;
-    }
-
-    @Override
-    public String getType()
-    {
-        return TYPE;
+        return TemptoInetAddressResolverProvider.class.getName();
     }
 }

@@ -13,36 +13,37 @@
  */
 package io.prestodb.tempto.dns;
 
-import sun.net.spi.nameservice.NameService;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.spi.InetAddressResolver;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
-public class MapBasedNameService
-        implements NameService
+public class MapBasedAddressResolver
+        implements InetAddressResolver
 {
+
     private final Map<String, String> hosts;
 
-    public MapBasedNameService(Map<String, String> hosts)
+    public MapBasedAddressResolver(Map<String, String> hosts)
     {
         this.hosts = requireNonNull(hosts, "hosts is null");
     }
 
     @Override
-    public InetAddress[] lookupAllHostAddr(String host)
+    public Stream<InetAddress> lookupByName(String host, InetAddressResolver.LookupPolicy lookupPolicy)
             throws UnknownHostException
     {
         if (hosts.containsKey(host)) {
-            return InetAddress.getAllByName(hosts.get(host));
+            return Stream.of(InetAddress.getAllByName(hosts.get(host)));
         }
         throw new UnknownHostException();
     }
 
     @Override
-    public String getHostByAddr(byte[] bytes)
+    public String lookupByAddress(byte[] addr)
             throws UnknownHostException
     {
         throw new UnknownHostException();
