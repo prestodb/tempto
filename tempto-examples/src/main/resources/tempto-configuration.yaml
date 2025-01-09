@@ -79,9 +79,6 @@ databases:
     broker:
       host: kafka
       port: 9092
-    zookeeper:
-      host: kafka
-      port: 2181
     presto_database_name: presto
     presto_kafka_catalog: kafka
     table_manager_type: kafka

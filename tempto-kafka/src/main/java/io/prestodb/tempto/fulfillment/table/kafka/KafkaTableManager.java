@@ -13,6 +13,7 @@
  */
 package io.prestodb.tempto.fulfillment.table.kafka;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -24,12 +25,8 @@ import io.prestodb.tempto.fulfillment.table.TableManager;
 import io.prestodb.tempto.internal.fulfillment.table.TableName;
 import io.prestodb.tempto.query.QueryExecutor;
 import io.prestodb.tempto.query.QueryResult;
-import kafka.admin.AdminUtils;
-import kafka.admin.RackAwareMode;
-import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.ZkConnection;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -38,10 +35,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
@@ -55,16 +55,12 @@ public class KafkaTableManager
     private final String brokerHost;
     private final Integer brokerPort;
     private final String prestoKafkaCatalog;
-    private final String zookeeperHost;
-    private final Integer zookeeperPort;
 
     @Inject
     public KafkaTableManager(
             @Named("databaseName") String databaseName,
             @Named("broker.host") String brokerHost,
             @Named("broker.port") int brokerPort,
-            @Named("zookeeper.host") String zookeeperHost,
-            @Named("zookeeper.port") int zookeeperPort,
             @Named("presto_database_name") String prestoDatabaseName,
             @Named("presto_kafka_catalog") String prestoKafkaCatalog,
             Injector injector)
@@ -72,8 +68,6 @@ public class KafkaTableManager
         this.databaseName = requireNonNull(databaseName, "databaseName is null");
         this.brokerHost = requireNonNull(brokerHost, "brokerHost is null");
         this.brokerPort = brokerPort;
-        this.zookeeperHost = requireNonNull(zookeeperHost, "zookeeperHost is null");
-        this.zookeeperPort = zookeeperPort;
         requireNonNull(injector, "injector is null");
         requireNonNull(prestoDatabaseName, "prestoDatabaseName is null");
         this.prestoQueryExecutor = injector.getInstance(Key.get(QueryExecutor.class, Names.named(prestoDatabaseName)));
@@ -106,32 +100,51 @@ public class KafkaTableManager
 
     private void deleteTopic(String topic)
     {
-        withZookeeper(zkUtils -> {
-            if (AdminUtils.topicExists(zkUtils, topic)) {
-                AdminUtils.deleteTopic(zkUtils, topic);
 
-                for (int checkTry = 0; checkTry < 5; ++checkTry) {
-                    if (!AdminUtils.topicExists(zkUtils, topic)) {
-                        return;
-                    }
-                    try {
-                        Thread.sleep(1_000);
-                    }
-                    catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("could not delete topic " + topic);
-                    }
+        withAdminClient(adminClient -> {
+            Supplier<Boolean> topicExists = () -> {
+                try {
+                    return adminClient.listTopics()
+                            .names()
+                            .get()
+                            .stream()
+                            .anyMatch(topic::equals);
                 }
-                throw new RuntimeException("could not delete topic " + topic);
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+
+            if (topicExists.get()) {
+                adminClient.deleteTopics(Collections.singletonList(topic));
+            }
+            for (int checkTry = 0; checkTry < 5; ++checkTry) {
+                if (!topicExists.get()) {
+                    return;
+                }
+                try {
+                    Thread.sleep(1_000);
+                }
+                catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("could not delete topic " + topic);
+                }
             }
         });
     }
 
     private void createTopic(String topic, int partitionsCount, int replicationLevel)
     {
-        withZookeeper(zkUtils -> {
+        withAdminClient(adminClient -> {
             Properties topicConfiguration = new Properties();
-            AdminUtils.createTopic(zkUtils, topic, partitionsCount, replicationLevel, topicConfiguration, RackAwareMode.Disabled$.MODULE$);
+            adminClient.createTopics(Collections.singletonList(
+                    new NewTopic(topic, partitionsCount, (short) replicationLevel)
+                            .configs(topicConfiguration.stringPropertyNames()
+                                    .stream().collect(
+                                            toImmutableMap(
+                                                    key -> key,
+                                                    topicConfiguration::getProperty)
+                                    ))));
         });
     }
 
@@ -164,22 +177,21 @@ public class KafkaTableManager
         }
     }
 
-    private void withZookeeper(Consumer<ZkUtils> routine)
+    private void withAdminClient(Consumer<AdminClient> routine)
     {
         int sessionTimeOutInMs = 15_000;
         int connectionTimeOutInMs = 10_000;
-        String zookeeperHosts = zookeeperHost + ":" + zookeeperPort;
 
-        ZkClient zkClient = new ZkClient(zookeeperHosts,
-                sessionTimeOutInMs,
-                connectionTimeOutInMs,
-                ZKStringSerializer$.MODULE$);
-        try {
-            ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(zookeeperHosts), false);
-            routine.accept(zkUtils);
-        }
-        finally {
-            zkClient.close();
+        String bootstrapHosts = brokerHost + ":" + brokerPort;
+        Properties clientConfig = new Properties();
+        clientConfig.putAll(ImmutableMap.of(
+                "bootstrap.servers", bootstrapHosts,
+                "request.timeout.ms", String.valueOf(sessionTimeOutInMs),
+                "connections.max.idle.ms", String.valueOf(connectionTimeOutInMs)
+        ));
+
+        try (AdminClient adminClient = AdminClient.create(clientConfig)) {
+            routine.accept(adminClient);
         }
     }
 
