@@ -1,0 +1,98 @@
+name: Create tempto release branch
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  build-and-branch-out:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        java-version:
+          - 8
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v4
+        with:
+          show-progress: false
+          fetch-depth: 0
+          ref: master
+
+      # Step to set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: gradle
+
+      # Step to set up gradle.properties
+      - name: Set up gradle.properties
+        run: |
+          echo "skipSigning=false" >> gradle.properties
+
+      # Step to run Gradle build
+      - name: Test Gradle Build
+        run: ./gradlew build
+
+      # Step to get the latest tag
+      - name: Get latest release tag
+        id: get_latest_tag
+        run: |
+          # Get the latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0")
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Advance release version
+        id: advance_version          
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          # Parse the version number (e.g., 1.52)
+          major=$(echo $latest_tag | cut -d. -f1)
+          minor=$(echo $latest_tag | cut -d. -f2)
+          # Increment the minor version
+          new_minor=$((minor + 1))
+          new_tag="$major.$new_minor"
+          echo "New tag: $new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_ENV
+
+      - name: Generate changelog
+        id: generate_changelog
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          # Get commits between the latest tag and HEAD
+          changelog=$(git log $latest_tag..HEAD --oneline --pretty=format:"- %s")
+          echo "Generating CHANGELOG.md"
+          echo -e "## Changelog for ${{ env.new_tag }}\n\n$changelog\n" > CHANGELOG.md
+          echo "$changelog" > changelog_temp
+          # Display the generated changelog
+          cat CHANGELOG.md
+
+      - name: Create release branch
+        run: |
+          # Configure git user
+          git config --global --add safe.directory ${{github.workspace}}
+          git config --global user.email "oss-release-bot@prestodb.io"
+          git config --global user.name "oss-release-bot"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git config pull.rebase false
+          git checkout -b release-${{ env.new_tag }}
+
+      - name: Push changelog to release branch
+        run: |
+          # Add and commit the changelog
+          git add CHANGELOG.md
+          if [ -s changelog_temp ]; then
+            git commit -m "Update CHANGELOG.md for version ${{ env.new_tag }}"
+          else
+            echo "No new changes to include in the changelog."
+          fi
+          # Push the changelog
+          git push origin release-${{ env.new_tag }}
+
