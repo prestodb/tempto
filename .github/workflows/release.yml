@@ -1,0 +1,112 @@
+name: Publish tempto release
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    environment: release
+    strategy:
+      fail-fast: true
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Check branch
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "Invalid branch. This action can only be run on the master branch." && exit 1
+
+      - name: Checkout tempto source
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRESTODB_CI_TOKEN }}
+          show-progress: false
+          fetch-depth: 0
+          ref: master
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 8
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up gradle.properties
+        run: |
+          echo "skipSigning=false" >> gradle.properties
+
+      - name: Test Gradle Build
+        run: ./gradlew build
+
+      - name: Get latest release tag
+        id: get_latest_tag
+        run: |
+          # Get the latest tag
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0")
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+
+      - name: Advance release version
+        id: advance_version          
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          # Parse the version number (e.g., 1.52)
+          major=$(echo $latest_tag | cut -d. -f1)
+          minor=$(echo $latest_tag | cut -d. -f2)
+          # Increment the minor version
+          new_minor=$((minor + 1))
+          new_tag="$major.$new_minor"
+          echo "New tag: $new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_ENV
+
+      - name: Generate CHANGELOG.md
+        id: generate_changelog
+        run: |
+          latest_tag=${{ env.latest_tag }}
+          # Get commits between the latest tag and HEAD, excluding changelog commits
+          changelog=$(git log $latest_tag..HEAD --oneline --pretty=format:"- %s" | grep -v "Update CHANGELOG.md for version")
+          echo "Generating CHANGELOG.md"
+          echo -e "## Changelog for ${{ env.new_tag }}\n\n$changelog\n" > CHANGELOG.md
+          # Display the generated changelog
+          cat CHANGELOG.md
+
+      - name: Update version in build.gradle
+        run: |
+          # Update the version in build.gradle
+          sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.new_tag }}'/" build.gradle
+
+      - name: Add release tag
+        run: |
+          # Configure git user
+          git config --global --add safe.directory ${{github.workspace}}
+          git config --global user.email "ci@lists.prestodb.io"
+          git config --global user.name "prestodb-ci"
+          git config pull.rebase false
+          git tag -a ${{ env.new_tag }} -m "Release ${{ env.new_tag }}"
+
+      - name: Commit changes
+        run: |
+          git add CHANGELOG.md build.gradle
+          git commit -m "Update CHANGELOG.md and build.gradle for version ${{ env.new_tag }}"
+
+      - name: Set up gradle.properties
+        run: |
+          cat << EOF > gradle.properties
+          skipSigning=false
+          signing.keyId=${{ secrets.SIGNING_KEY_ID }}
+          signing.password=${{ secrets.SIGNING_PASSWORD }}
+          signing.secretKeyRingFile=${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
+          nexusUsername=${{ secrets.NEXUS_USERNAME }}
+          nexusPassword=${{ secrets.NEXUS_PASSWORD }}
+          EOF
+
+      - name: Publish release
+        run: |
+          # TODO: remove echo after testing
+          echo ./gradlew publish
+      
+      - name: Push changes and tags
+        run: |
+          git push origin master --tags
