@@ -66,13 +66,13 @@ jobs:
         run: |
           latest_tag=${{ env.latest_tag }}
           # Get commits between the latest tag and HEAD, excluding changelog commits
-          changelog=$(git log $latest_tag..HEAD --oneline --pretty=format:"- %s" | grep -v "Update CHANGELOG.md for version")
+          changelog=$(git log $latest_tag..HEAD --oneline --pretty=format:"- %s" | grep -v "Update CHANGELOG.md and gradle.properties")
           echo "Generating CHANGELOG.md"
           echo -e "## Changelog for ${{ env.new_tag }}\n\n$changelog\n" > CHANGELOG.md
           # Display the generated changelog
           cat CHANGELOG.md
 
-      - name: Update version in build.gradle
+      - name: Update release version in build.gradle
         run: |
           # Update the version in build.gradle
           sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.new_tag }}'/" build.gradle
@@ -91,21 +91,26 @@ jobs:
           git add CHANGELOG.md build.gradle
           git commit -m "Update CHANGELOG.md and build.gradle for version ${{ env.new_tag }}"
 
-      - name: Set up gradle.properties
+      - name: Set up GPG key
         run: |
-          cat << EOF > gradle.properties
-          skipSigning=false
-          signing.keyId=${{ secrets.SIGNING_KEY_ID }}
-          signing.password=${{ secrets.SIGNING_PASSWORD }}
-          signing.secretKeyRingFile=${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
-          nexusUsername=${{ secrets.NEXUS_USERNAME }}
-          nexusPassword=${{ secrets.NEXUS_PASSWORD }}
-          EOF
+          echo "${{ secrets.GPG_SECRET }}" > ${{ github.workspace }}/secret-key.gpg
+          chmod 600 ${{ github.workspace }}/secret-key.gpg
+
+      - name: Set up gradle.properties for publishing
+        run: |
+          echo "skipSigning=false" > gradle.properties
+          echo "signing.keyId=${{ secrets.GPG_KEYID }}" >> gradle.properties
+          echo "signing.password=${{ secrets.GPG_PASSPHRASE }}" >> gradle.properties
+          echo "signing.secretKeyRingFile=${{ github.workspace }}/secret-key.gpg" >> gradle.properties
+          echo "nexusUsername=${{ vars.NEXUS_USERNAME }}" >> gradle.properties
+          echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
 
       - name: Publish release
         run: |
-          # TODO: remove echo after testing
-          echo ./gradlew publish
+          cat gradle.properties
+          export NEXUS_USERNAME=${{ vars.NEXUS_USERNAME }}
+          export NEXUS_PASSWORD=${{ secrets.NEXUS_PASSWORD }}
+          ./gradlew publish
       
       - name: Push changes and tags
         run: |
