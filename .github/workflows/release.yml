@@ -101,13 +101,13 @@ jobs:
           echo "signing.keyId=${{ secrets.GPG_KEYID }}" >> gradle.properties
           echo "signing.password=${{ secrets.GPG_PASSPHRASE }}" >> gradle.properties
           echo "signing.secretKeyRingFile=${{ github.workspace }}/secret-key.gpg" >> gradle.properties
-          echo "nexusUsername=${{ vars.NEXUS_USERNAME }}" >> gradle.properties
+          echo "nexusUsername=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
           echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
 
       - name: Publish release
         run: |
           cat gradle.properties
-          export NEXUS_USERNAME=${{ vars.NEXUS_USERNAME }}
+          export NEXUS_USERNAME=${{ secrets.NEXUS_USERNAME }}
           export NEXUS_PASSWORD=${{ secrets.NEXUS_PASSWORD }}
           ./gradlew publish
       
