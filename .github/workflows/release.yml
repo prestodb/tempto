@@ -60,6 +60,10 @@ jobs:
           # Parse the version number (e.g., 1.52)
           major=$(echo $release_version | cut -d. -f1)
           minor=$(echo $release_version | cut -d. -f2)
+          if [ "$minor" -eq "0" ]; then
+            echo "Warning: This action does not handle a new major version."
+            exit 1
+          fi
           # Increment the minor version
           last_minor=$((minor - 1))
           last_version="$major.$last_minor"
