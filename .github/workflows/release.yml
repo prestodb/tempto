@@ -1,0 +1,127 @@
+name: Publish tempto release
+
+on:
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    environment: release
+    strategy:
+      fail-fast: true
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Check branch
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "Invalid branch. This action can only be run on the master branch." && exit 1
+
+      - name: Checkout tempto source
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRESTODB_CI_TOKEN }}
+          show-progress: false
+          fetch-depth: 0
+          ref: master
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 8
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up git
+        run: |
+          git config --global --add safe.directory ${{github.workspace}}
+          git config --global user.email "ci@lists.prestodb.io"
+          git config --global user.name "prestodb-ci"
+          git config pull.rebase false
+
+      - name: Run gradle build
+        run: |
+          echo "skipSigning=false" > gradle.properties
+          ./gradlew build
+
+      - name: Get release version
+        id: get_release_version
+        run: |
+          release_version=$(grep "^ext.tempto_version" build.gradle | cut -d"'" -f2 | sed 's/-SNAPSHOT//')
+          echo "release_version=$release_version"
+          echo "release_version=$release_version" >> $GITHUB_ENV
+          echo "next_release_msg=Update build.gradle to next development version" >> $GITHUB_ENV
+
+      - name: Get last release version
+        id: advance_version          
+        run: |
+          release_version=${{ env.release_version }}
+          # Parse the version number (e.g., 1.52)
+          major=$(echo $release_version | cut -d. -f1)
+          minor=$(echo $release_version | cut -d. -f2)
+          if [ "$minor" -eq "0" ]; then
+            echo "Warning: This action does not handle a new major version."
+            exit 1
+          fi
+          # Increment the minor version
+          last_minor=$((minor - 1))
+          last_version="$major.$last_minor"
+          echo "last_version=$last_version" >> $GITHUB_ENV
+          next_minor=$((minor + 1))
+          next_version="$major.$next_minor-SNAPSHOT"
+          echo "next_version=$next_version" >> $GITHUB_ENV
+          echo "last_version=$last_version"
+          echo "next_version=$next_version"
+
+      - name: Generate CHANGELOG.md
+        id: generate_changelog
+        run: |
+          # Get commits between the latest version and HEAD, excluding changelog commits
+          changelog=$(git log $last_version..HEAD --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H) %s" | grep -v "${{ env.next_release_msg }}")
+          echo "Generating CHANGELOG.md"
+          echo -e "## Changelog for ${{ env.release_version }}\n\n$changelog\n" > CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Update release version and commit
+        run: |
+          # Update the version in build.gradle
+          sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.release_version }}'/" build.gradle
+          git add CHANGELOG.md build.gradle
+          git commit -m "Update CHANGELOG.md and build.gradle for version ${{ env.release_version }}"
+
+      - name: Add release tag
+        run: |
+          git tag -a ${{ env.release_version }} -m "Release ${{ env.release_version }}"
+
+      - name: Set up GPG key
+        run: |
+          echo "${{ secrets.GPG_SECRET }}" > ${{ github.workspace }}/secret-key.gpg
+          chmod 600 ${{ github.workspace }}/secret-key.gpg
+
+      - name: Set up gradle.properties for publishing
+        run: |
+          echo "skipSigning=false" > gradle.properties
+          echo "signing.keyId=${{ secrets.GPG_KEYID }}" >> gradle.properties
+          echo "signing.password=${{ secrets.GPG_PASSPHRASE }}" >> gradle.properties
+          echo "signing.secretKeyRingFile=${{ github.workspace }}/secret-key.gpg" >> gradle.properties
+          echo "nexusUsername=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
+          echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
+
+      - name: Publish release
+        run: |
+          cat gradle.properties
+          export NEXUS_USERNAME=${{ secrets.NEXUS_USERNAME }}
+          export NEXUS_PASSWORD=${{ secrets.NEXUS_PASSWORD }}
+          ./gradlew publish
+      
+      - name: Update release version in build.gradle
+        run: |
+          # Update the version in build.gradle
+          sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.next_version}}'/" build.gradle
+          git add build.gradle
+          git commit -m "${{ env.next_release_msg }}"
+
+      - name: Push changes and tags
+        run: |
+          git push origin master --tags
