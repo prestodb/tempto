@@ -111,8 +111,8 @@ jobs:
       - name: Publish release
         run: |
           cat gradle.properties
-          export NEXUS_USERNAME=${{ secrets.NEXUS_USERNAME }}
-          export NEXUS_PASSWORD=${{ secrets.NEXUS_PASSWORD }}
+          export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
+          export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
           ./gradlew publish
       
       - name: Update release version in build.gradle
