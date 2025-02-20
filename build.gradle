@@ -196,14 +196,6 @@ configure(subprojects - expected_result_generator - tempto_examples) {
                     password = System.getenv('NEXUS_PASSWORD')
                 }
             }
-
-            maven {
-                url = uri('https://oss.sonatype.org/content/repositories/snapshots/')
-                credentials {
-                    username = System.getenv('NEXUS_USERNAME')
-                    password = System.getenv('NEXUS_PASSWORD')
-                }
-            }
         }
     }
 }
