@@ -143,31 +143,18 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
-    // plugins configuration
     javadoc {
         failOnError = true
     }
 
-   // javadoc.jar generation
-    task javadocJar(type: Jar) {
-        archiveClassifier.set('javadoc')
-        from(javadoc)
-    }
-
-
-    // sources.jar generation
-    task sourcesJar(type: Jar) {
-        archiveClassifier.set('sources')
-        from(sourceSets.main.allJava)
+    java {
+        withJavadocJar()
+        withSourcesJar()
     }
 
     signing {
         required { isReleaseVersion && !skipSigning }
         sign configurations.archives
-    }
-
-    artifacts {
-        archives javadocJar, sourcesJar
     }
 
     // publishing to sonatype
