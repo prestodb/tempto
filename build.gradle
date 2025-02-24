@@ -115,11 +115,9 @@ ext.tempto_kafka = project(':tempto-kafka')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.tempto_version = '1.54-SNAPSHOT'
 ext.tempto_group = "io.prestodb.tempto"
-ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
 ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
-ext.skipSigning = false
 
 
 subprojects {
@@ -153,8 +151,8 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 
     signing {
-        required { isReleaseVersion && !skipSigning }
-        sign configurations.archives
+        sign publishing.publications
+        useGpgCmd() //Use system provide GPG
     }
 
     // publishing to sonatype
@@ -171,6 +169,25 @@ configure(subprojects - expected_result_generator - tempto_examples) {
                     packaging = 'jar'
                     description = 'Tempto - test framework'
                     url = 'https://github.com/prestodb/tempto'
+
+                    licenses {
+                        license {
+                            name = "The Apache License, Version 2.0"
+                            url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'prestodb'
+                            name = 'PrestoDb'
+                            email = 'noreply@prestodb.io'
+                        }
+                    }
+                    scm {
+                        url = 'git@github.com:prestodb/tempto.git'
+                        connection = 'scm:git:git@github.com:prestodb/tempto.git'
+                        developerConnection = 'scm:git:git@github.com:prestodb/tempto.git'
+                    }
                 }
             }
         }
