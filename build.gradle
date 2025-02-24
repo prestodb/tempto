@@ -12,6 +12,9 @@
  * limitations under the License.
  */
 
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id "com.github.hierynomus.license" version "0.16.1"
     id 'signing'
@@ -151,8 +154,18 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 
     signing {
+        def skipSigning = project.findProperty('skipSigning')?.toBoolean() != false
+        if (!skipSigning) {
+            def secretKeyRingFilePath = project.findProperty("signing.secretKeyRingFile")?.with { it.isEmpty()? null : it }
+            def signingKeyId = project.findProperty("signing.keyId")?.with { it.isEmpty() ? null : it }
+            def signingPassword = project.findProperty("signing.password")?.with { it.isEmpty()? null : it }
+            def keyFile = secretKeyRingFilePath ? Paths.get(secretKeyRingFilePath) : null
+            if (keyFile && Files.exists(keyFile) && !Files.isDirectory(keyFile)) {
+                def secretKey = new String(Files.readAllBytes(keyFile), "UTF-8")
+                useInMemoryPgpKeys(signingKeyId, secretKey, signingPassword)
+            }
+        }
         sign publishing.publications
-        useGpgCmd() //Use system provide GPG
     }
 
     // publishing to sonatype
