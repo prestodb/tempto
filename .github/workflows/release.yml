@@ -12,6 +12,8 @@ jobs:
     permissions:
       contents: write
       packages: write
+    env:
+      GPG_KEY_FILE: ${{ github.workspace }}/secret-key.gpg
 
     steps:
       - name: Check branch
@@ -96,15 +98,19 @@ jobs:
 
       - name: Set up GPG key
         run: |
-          echo "${{ secrets.GPG_SECRET }}" > ${{ github.workspace }}/secret-key.gpg
-          chmod 600 ${{ github.workspace }}/secret-key.gpg
+          echo "${{ secrets.GPG_SECRET }}" > ${{ env.GPG_KEY_FILE }}
+          chmod 600 ${{ env.GPG_KEY_FILE }}
+          gpg --import --batch ${{ env.GPG_KEY_FILE }}
+          touch /tmp/dummy.txt && gpg --batch --yes --pinentry-mode loopback --passphrase "${{ secrets.GPG_PASSPHRASE }}" --sign /tmp/dummy.txt
+        env:
+          GPG_TTY: $(tty)
 
       - name: Set up gradle.properties for publishing
         run: |
           echo "skipSigning=false" > gradle.properties
           echo "signing.keyId=${{ secrets.GPG_KEYID }}" >> gradle.properties
           echo "signing.password=${{ secrets.GPG_PASSPHRASE }}" >> gradle.properties
-          echo "signing.secretKeyRingFile=${{ github.workspace }}/secret-key.gpg" >> gradle.properties
+          echo "signing.secretKeyRingFile=${{ env.GPG_KEY_FILE }}" >> gradle.properties
           echo "nexusUsername=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
           echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
 
@@ -114,6 +120,8 @@ jobs:
           export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
           export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
           ./gradlew sign publish
+        env:
+          GPG_TTY: $(tty)
       
       - name: Update release version in build.gradle
         run: |
