@@ -115,9 +115,11 @@ ext.tempto_kafka = project(':tempto-kafka')
 ext.expected_result_generator = project(':expected-result-generator')
 ext.tempto_version = '1.54-SNAPSHOT'
 ext.tempto_group = "io.prestodb.tempto"
+ext.isReleaseVersion = !tempto_version.endsWith("SNAPSHOT")
 
 ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
 ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
+ext.skipSigning = false
 
 
 subprojects {
@@ -151,6 +153,7 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 
     signing {
+        required { isReleaseVersion && !skipSigning }
         sign publishing.publications
         useGpgCmd() //Use system provide GPG
     }
