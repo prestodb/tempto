@@ -15,8 +15,7 @@
 package io.prestodb.tempto.internal.fulfillment.command;
 
 import io.prestodb.tempto.fulfillment.command.TestCommandRequirement;
-
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class TestCommandFulfiller
         extends CommandFulfiller<TestCommandRequirement>

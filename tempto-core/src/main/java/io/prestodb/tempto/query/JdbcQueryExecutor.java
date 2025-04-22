@@ -16,9 +16,8 @@ package io.prestodb.tempto.query;
 
 import com.google.common.base.Throwables;
 import io.prestodb.tempto.context.TestContext;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

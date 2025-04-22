@@ -20,9 +20,8 @@ import io.prestodb.tempto.BeforeTestWithContext;
 import io.prestodb.tempto.ProductTest;
 import io.prestodb.tempto.fulfillment.table.ImmutableTablesState;
 import io.prestodb.tempto.fulfillment.table.MutableTablesState;
+import jakarta.inject.Named;
 import org.testng.annotations.Test;
-
-import javax.inject.Named;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

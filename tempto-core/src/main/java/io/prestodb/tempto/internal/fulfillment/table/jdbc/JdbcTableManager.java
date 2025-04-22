@@ -30,9 +30,8 @@ import io.prestodb.tempto.internal.fulfillment.table.TableNameGenerator;
 import io.prestodb.tempto.query.QueryExecutionException;
 import io.prestodb.tempto.query.QueryExecutor;
 import io.prestodb.tempto.query.QueryResult;
+import jakarta.inject.Named;
 import org.slf4j.Logger;
-
-import javax.inject.Named;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

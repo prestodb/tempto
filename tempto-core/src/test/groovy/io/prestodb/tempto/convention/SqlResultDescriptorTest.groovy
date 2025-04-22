@@ -18,7 +18,6 @@ import io.prestodb.tempto.assertions.QueryAssert
 import io.prestodb.tempto.internal.convention.AnnotatedFileParser
 import io.prestodb.tempto.internal.convention.AnnotatedFileParser.SectionParsingResult
 import io.prestodb.tempto.internal.convention.SqlResultDescriptor
-import org.joda.time.DateTimeZone
 import spock.lang.Specification
 
 import java.sql.Date

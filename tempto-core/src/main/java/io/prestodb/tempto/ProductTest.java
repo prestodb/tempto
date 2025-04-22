@@ -17,8 +17,6 @@ package io.prestodb.tempto;
 import io.prestodb.tempto.internal.initialization.RequirementsExpanderInterceptor;
 import io.prestodb.tempto.internal.initialization.TestInitializationListener;
 import io.prestodb.tempto.internal.listeners.ProgressLoggingListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.Listeners;
 
 @Listeners({RequirementsExpanderInterceptor.class, TestInitializationListener.class, ProgressLoggingListener.class})

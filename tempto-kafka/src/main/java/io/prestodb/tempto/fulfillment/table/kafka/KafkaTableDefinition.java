@@ -13,7 +13,6 @@
  */
 package io.prestodb.tempto.fulfillment.table.kafka;
 
-import com.google.common.base.Preconditions;
 import io.prestodb.tempto.fulfillment.table.TableDefinition;
 import io.prestodb.tempto.fulfillment.table.TableHandle;
 

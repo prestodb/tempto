@@ -25,10 +25,9 @@ import io.prestodb.tempto.internal.fulfillment.table.TableName;
 import io.prestodb.tempto.internal.fulfillment.table.TableNameGenerator;
 import io.prestodb.tempto.internal.hadoop.hdfs.HdfsDataSourceWriter;
 import io.prestodb.tempto.query.QueryExecutor;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import java.util.Optional;
 

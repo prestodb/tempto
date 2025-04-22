@@ -28,8 +28,7 @@ import io.prestodb.tempto.query.JdbcConnectivityParamsState;
 import io.prestodb.tempto.query.JdbcQueryExecutor;
 import io.prestodb.tempto.query.QueryExecutor;
 import io.prestodb.tempto.query.QueryExecutorDispatcher;
-
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.util.Map;
 import java.util.Set;

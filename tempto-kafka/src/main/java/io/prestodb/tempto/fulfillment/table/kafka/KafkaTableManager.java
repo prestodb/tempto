@@ -25,15 +25,14 @@ import io.prestodb.tempto.fulfillment.table.TableManager;
 import io.prestodb.tempto.internal.fulfillment.table.TableName;
 import io.prestodb.tempto.query.QueryExecutor;
 import io.prestodb.tempto.query.QueryResult;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import java.util.Collections;
 import java.util.Iterator;

@@ -22,12 +22,12 @@ import com.google.inject.Key
 import com.google.inject.TypeLiteral
 import io.prestodb.tempto.Requirement
 import io.prestodb.tempto.fulfillment.RequirementFulfiller
+import jakarta.inject.Inject
+import jakarta.inject.Named
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 
-import javax.inject.Inject
-import javax.inject.Named
 import java.lang.reflect.Method
 
 import static com.google.inject.Guice.createInjector
@@ -87,8 +87,8 @@ class ReflectionInjectorHelperTest
         assert key == 'value';
     }
 
-    @javax.inject.Inject
-    void useKey2(@javax.inject.Named('key2') String key)
+    @jakarta.inject.Inject
+    void useKey2(@jakarta.inject.Named('key2') String key)
     {
         assert key == 'value2';
     }
@@ -100,7 +100,7 @@ class ReflectionInjectorHelperTest
         injectAndCallMethod('useStringList', List)
     }
 
-    @javax.inject.Inject
+    @jakarta.inject.Inject
     void useStringList(List<String> stringList)
     {
         assert stringList.size() == 3 && stringList.containsAll(['ala', 'ma', 'kota'])

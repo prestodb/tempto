@@ -19,9 +19,8 @@ import io.prestodb.tempto.ProductTest;
 import io.prestodb.tempto.process.CliProcess;
 import io.prestodb.tempto.ssh.SshClient;
 import io.prestodb.tempto.ssh.SshClientFactory;
+import jakarta.inject.Named;
 import org.testng.annotations.Test;
-
-import javax.inject.Named;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

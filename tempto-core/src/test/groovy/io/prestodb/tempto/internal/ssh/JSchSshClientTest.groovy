@@ -15,14 +15,17 @@ package io.prestodb.tempto.internal.ssh
 
 import com.google.common.io.Files
 import io.prestodb.tempto.process.CliProcess
-import org.apache.sshd.SshServer
-import org.apache.sshd.server.Command
-import org.apache.sshd.server.CommandFactory
-import org.apache.sshd.server.PasswordAuthenticator
-import org.apache.sshd.server.PublickeyAuthenticator
-import org.apache.sshd.server.auth.UserAuthPassword
-import org.apache.sshd.server.auth.UserAuthPublicKey
-import org.apache.sshd.server.command.ScpCommandFactory
+import org.apache.sshd.common.io.nio2.Nio2ServiceFactoryFactory
+import org.apache.sshd.scp.server.ScpCommandFactory
+import org.apache.sshd.server.SshServer
+import org.apache.sshd.server.auth.UserAuthFactory
+import org.apache.sshd.server.auth.password.PasswordAuthenticator
+import org.apache.sshd.server.auth.password.UserAuthPasswordFactory
+import org.apache.sshd.server.auth.pubkey.PublickeyAuthenticator
+import org.apache.sshd.server.auth.pubkey.UserAuthPublicKeyFactory
+import org.apache.sshd.server.channel.ChannelSession
+import org.apache.sshd.server.command.Command
+import org.apache.sshd.server.command.CommandFactory
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider
 import org.apache.sshd.server.session.ServerSession
 import spock.lang.Shared
@@ -31,7 +34,6 @@ import spock.lang.Specification
 import java.security.PublicKey
 import java.time.Duration
 
-import static Thread.sleep
 import static java.nio.charset.StandardCharsets.UTF_8
 
 class JSchSshClientTest
@@ -141,12 +143,15 @@ class JSchSshClientTest
 
     private void setupAuthentication()
     {
-        sshd.setUserAuthFactories([new UserAuthPassword.Factory(), new UserAuthPublicKey.Factory()])
+        List<UserAuthFactory> userAuthFactories = new ArrayList<>();
+        userAuthFactories.add(new UserAuthPasswordFactory())
+        userAuthFactories.add(new UserAuthPublicKeyFactory())
+        sshd.setUserAuthFactories(userAuthFactories)
 
         sshd.setPasswordAuthenticator(new PasswordAuthenticator() {
             boolean authenticate(String username, String password, ServerSession session)
             {
-                return USER.equals(username) && PASSWORD.equals(password);
+                return USER == username && PASSWORD == password;
             }
         });
 
@@ -163,7 +168,8 @@ class JSchSshClientTest
     {
         CommandFactory delegateFactory = new CommandFactory() {
             @Override
-            Command createCommand(String command)
+            Command createCommand(ChannelSession channelSession, String command)
+                    throws IOException
             {
                 if (command == '"echo" "hello world"') {
                     return new TestCommand('hello world\n', 0)
@@ -177,7 +183,10 @@ class JSchSshClientTest
                 }
             }
         }
-        sshd.setCommandFactory(new ScpCommandFactory(delegateFactory))
+        sshd.setIoServiceFactoryFactory(new Nio2ServiceFactoryFactory())
+        sshd.setCommandFactory(new ScpCommandFactory.Builder()
+            .withDelegate(delegateFactory)
+            .build())
     }
 
     def cleanupSpec()

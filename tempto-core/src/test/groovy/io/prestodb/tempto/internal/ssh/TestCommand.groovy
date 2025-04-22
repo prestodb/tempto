@@ -13,56 +13,60 @@
  */
 package io.prestodb.tempto.internal.ssh
 
-import org.apache.sshd.server.Command
 import org.apache.sshd.server.Environment
 import org.apache.sshd.server.ExitCallback
+import org.apache.sshd.server.channel.ChannelSession
+import org.apache.sshd.server.command.Command
 
 class TestCommand
         implements Command
 {
-    private final String response;
-    private final int errorCode;
+  private final String response;
+  private final int errorCode;
 
-    private InputStream input;
-    private OutputStream output;
-    private OutputStream error;
-    private ExitCallback callback;
+  private InputStream input;
+  private OutputStream output;
+  private OutputStream error;
+  private ExitCallback callback;
 
-    TestCommand(String response, int errorCode)
-    {
-        this.response = response;
-        this.errorCode = errorCode;
-    }
+  TestCommand(String response, int errorCode)
+  {
+    this.response = response;
+    this.errorCode = errorCode;
+  }
 
-    void setInputStream(InputStream input)
-    {
-        this.input = input;
-    }
+  void setInputStream(InputStream input)
+  {
+    this.input = input;
+  }
 
-    void setOutputStream(OutputStream out)
-    {
-        this.output = out;
-    }
+  void setOutputStream(OutputStream out)
+  {
+    this.output = out;
+  }
 
-    void setErrorStream(OutputStream err)
-    {
-        this.error = err;
-    }
+  void setErrorStream(OutputStream err)
+  {
+    this.error = err;
+  }
 
-    void setExitCallback(ExitCallback callback)
-    {
-        this.callback = callback;
-    }
+  void setExitCallback(ExitCallback callback)
+  {
+    this.callback = callback;
+  }
 
-    void start(Environment env)
-            throws IOException
-    {
-        output.write(response.getBytes());
-        output.flush();
-        callback.onExit(errorCode, response);
-    }
+  @Override
+  void start(ChannelSession channelSession, Environment environment)
+          throws IOException
+  {
+    output.write(response.getBytes());
+    output.flush();
+    callback.onExit(errorCode, response);
+  }
 
-    void destroy()
-    {
-    }
+  @Override
+  void destroy(ChannelSession channelSession)
+          throws Exception
+  {
+  }
 }

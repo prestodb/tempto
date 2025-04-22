@@ -34,7 +34,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.prestodb.tempto.Requirements.compose;
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class gathers requirements for a given test method.
