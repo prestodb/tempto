@@ -15,9 +15,8 @@ package io.prestodb.tempto.fulfillment.table;
 
 import com.google.inject.Inject;
 import io.prestodb.tempto.internal.fulfillment.table.TableName;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 
 /**
  * Table manager for read only databases.

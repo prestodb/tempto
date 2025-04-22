@@ -17,9 +17,8 @@ package io.prestodb.tempto.internal.hadoop.hdfs;
 import io.prestodb.tempto.fulfillment.table.hive.HiveDataSource;
 import io.prestodb.tempto.hadoop.hdfs.HdfsClient;
 import io.prestodb.tempto.hadoop.hdfs.HdfsClient.RepeatableContentProducer;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
-
-import javax.inject.Inject;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

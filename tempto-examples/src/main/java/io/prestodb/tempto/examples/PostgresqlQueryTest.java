@@ -28,9 +28,8 @@ import io.prestodb.tempto.fulfillment.table.TableInstance;
 import io.prestodb.tempto.fulfillment.table.jdbc.RelationalDataSource;
 import io.prestodb.tempto.fulfillment.table.jdbc.RelationalTableDefinition;
 import io.prestodb.tempto.query.QueryExecutor;
+import jakarta.inject.Named;
 import org.testng.annotations.Test;
-
-import javax.inject.Named;
 
 import java.util.List;
 

@@ -25,10 +25,9 @@ import io.prestodb.tempto.internal.fulfillment.table.TableName;
 import io.prestodb.tempto.internal.fulfillment.table.TableNameGenerator;
 import io.prestodb.tempto.internal.query.CassandraQueryExecutor;
 import io.prestodb.tempto.util.Lazy;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
-
-import javax.inject.Named;
-import javax.inject.Singleton;
 
 import java.util.List;
 import java.util.Optional;

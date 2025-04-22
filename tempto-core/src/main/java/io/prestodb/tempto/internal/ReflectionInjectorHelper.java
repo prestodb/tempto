@@ -49,7 +49,7 @@ public class ReflectionInjectorHelper
     private boolean isAnnotatedWithInject(Method method)
     {
         return method.getAnnotation(Inject.class) != null ||
-                method.getAnnotation(javax.inject.Inject.class) != null;
+                method.getAnnotation(jakarta.inject.Inject.class) != null;
     }
 
     private Object createInstanceWithFields(Parameter[] parameters)
@@ -95,7 +95,7 @@ public class ReflectionInjectorHelper
         @Override
         public Class<? extends Annotation> annotationType()
         {
-            return javax.inject.Inject.class;
+            return jakarta.inject.Inject.class;
         }
     }
 }

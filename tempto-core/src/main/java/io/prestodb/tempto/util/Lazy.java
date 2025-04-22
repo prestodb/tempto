@@ -14,14 +14,12 @@
 
 package io.prestodb.tempto.util;
 
-import javax.annotation.concurrent.ThreadSafe;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
-@ThreadSafe
 public class Lazy<T>
         implements Provider<T>
 {
