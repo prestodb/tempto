@@ -2,6 +2,15 @@ name: Publish tempto release
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        type: choice
+        options:
+          - snapshot
+          - release
+        default: 'snapshot'
 
 jobs:
   publish-release:
@@ -16,9 +25,13 @@ jobs:
       GPG_KEY_FILE: ${{ github.workspace }}/secret-key.gpg
 
     steps:
-      - name: Check branch
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: echo "Invalid branch. This action can only be run on the master branch." && exit 1
+      - name: Validate release type
+        run: |
+          echo "Release type: ${{ github.event.inputs.release_type }}"
+          if [[ "${{ github.event.inputs.release_type }}" != "snapshot" && "${{ github.event.inputs.release_type }}" != "release" ]]; then
+            echo "Invalid release type. Must be 'snapshot' or 'release'."
+            exit 1
+          fi
 
       - name: Checkout tempto source
         uses: actions/checkout@v4
@@ -26,7 +39,6 @@ jobs:
           token: ${{ secrets.PRESTODB_CI_TOKEN }}
           show-progress: false
           fetch-depth: 0
-          ref: master
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -50,13 +62,22 @@ jobs:
       - name: Get release version
         id: get_release_version
         run: |
-          release_version=$(grep "^ext.tempto_version" build.gradle | cut -d"'" -f2 | sed 's/-SNAPSHOT//')
-          echo "release_version=$release_version"
-          echo "release_version=$release_version" >> $GITHUB_ENV
-          echo "next_release_msg=Update build.gradle to next development version" >> $GITHUB_ENV
+          current_version=$(grep "^ext.tempto_version" build.gradle | cut -d"'" -f2)
+          echo "current_version=$current_version"
+          echo "current_version=$current_version" >> $GITHUB_ENV
+
+          if [[ "${{ github.event.inputs.release_type }}" == "release" ]]; then
+            release_version=$(echo $current_version | sed 's/-SNAPSHOT//')
+            echo "release_version=$release_version"
+            echo "release_version=$release_version" >> $GITHUB_ENV
+            echo "next_release_msg=Update build.gradle to next development version" >> $GITHUB_ENV
+          else
+            echo "release_version=$current_version" >> $GITHUB_ENV
+          fi
 
       - name: Get last release version
-        id: advance_version          
+        if: ${{ github.event.inputs.release_type == 'release' }}
+        id: advance_version
         run: |
           release_version=${{ env.release_version }}
           # Parse the version number (e.g., 1.52)
@@ -77,6 +98,7 @@ jobs:
           echo "next_version=$next_version"
 
       - name: Generate CHANGELOG.md
+        if: ${{ github.event.inputs.release_type == 'release' }}
         id: generate_changelog
         run: |
           # Get commits between the latest version and HEAD, excluding changelog commits
@@ -86,6 +108,7 @@ jobs:
           cat CHANGELOG.md
 
       - name: Update release version and commit
+        if: ${{ github.event.inputs.release_type == 'release' }}
         run: |
           # Update the version in build.gradle
           sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.release_version }}'/" build.gradle
@@ -93,6 +116,7 @@ jobs:
           git commit -m "Update CHANGELOG.md and build.gradle for version ${{ env.release_version }}"
 
       - name: Add release tag
+        if: ${{ github.event.inputs.release_type == 'release' }}
         run: |
           git tag -a ${{ env.release_version }} -m "Release ${{ env.release_version }}"
 
@@ -114,16 +138,28 @@ jobs:
           echo "nexusUsername=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
           echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
 
-      - name: Sign and publish release
+      - name: Publish and release to Maven Central
+        if: ${{ github.event.inputs.release_type == 'release' }}
         run: |
           cat gradle.properties
           export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
           export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
-          ./gradlew sign publish
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
         env:
           GPG_TTY: $(tty)
-      
+
+      - name: Publish snapshot to Maven Central
+        if: ${{ github.event.inputs.release_type == 'snapshot' }}
+        run: |
+          cat gradle.properties
+          export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
+          export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+        env:
+          GPG_TTY: $(tty)
+
       - name: Update release version in build.gradle
+        if: ${{ github.event.inputs.release_type == 'release' }}
         run: |
           # Update the version in build.gradle
           sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.next_version}}'/" build.gradle
@@ -131,5 +167,6 @@ jobs:
           git commit -m "${{ env.next_release_msg }}"
 
       - name: Push changes and tags
+        if: ${{ github.event.inputs.release_type == 'release' }}
         run: |
           git push origin master --tags

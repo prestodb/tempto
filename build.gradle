@@ -16,6 +16,7 @@ plugins {
     id "com.github.hierynomus.license" version "0.16.1"
     id 'signing'
     id 'maven-publish'
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 apply plugin: 'idea'
@@ -124,6 +125,7 @@ ext.nexusUsername = 'setup_nexusUsername_in_gradle.properties'
 ext.nexusPassword = 'setup_nexusPassword_in_gradle.properties'
 ext.skipSigning = false
 
+group = tempto_group
 
 subprojects {
     // project information
@@ -133,6 +135,14 @@ subprojects {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven {
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+            mavenContent {
+                snapshotsOnly()
+                includeGroupAndSubgroups(tempto_group)
+            }
+        }
     }
     apply plugin: 'license'
     license {
@@ -197,16 +207,17 @@ configure(subprojects - expected_result_generator - tempto_examples) {
                 }
             }
         }
-
-        repositories {
-            maven {
-                url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
-                credentials {
-                    username = System.getenv('NEXUS_USERNAME')
-                    password = System.getenv('NEXUS_PASSWORD')
-                }
-            }
-        }
     }
 }
 
+// Configure Nexus publishing - must be after subprojects configuration
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username = System.getenv('NEXUS_USERNAME')
+            password = System.getenv('NEXUS_PASSWORD')
+        }
+    }
+}
