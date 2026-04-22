@@ -25,6 +25,7 @@ import org.apache.hadoop.hive.metastore.api.Decimal;
 import org.apache.hadoop.hive.metastore.api.DecimalColumnStatsData;
 import org.apache.hadoop.hive.metastore.api.DoubleColumnStatsData;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.hadoop.hive.metastore.api.GetTableRequest;
 import org.apache.hadoop.hive.metastore.api.LongColumnStatsData;
 import org.apache.hadoop.hive.metastore.api.StringColumnStatsData;
 import org.apache.hadoop.hive.metastore.api.Table;
@@ -56,8 +57,8 @@ public class HiveThriftClient
 
     public HiveThriftClient(String thriftHost, int thriftPort)
     {
-        transport = new TSocket(thriftHost, thriftPort);
         try {
+            transport = new TSocket(thriftHost, thriftPort);
             transport.open();
         }
         catch (TTransportException e) {
@@ -70,7 +71,10 @@ public class HiveThriftClient
     void setStatistics(TableName tableName, TableStatistics tableStatistics)
     {
         try {
-            Table table = client.get_table(getSchema(tableName), tableName.getSchemalessNameInDatabase());
+            GetTableRequest getTableRequest = new GetTableRequest(
+                    getSchema(tableName), tableName.getSchemalessNameInDatabase());
+
+            Table table = client.get_table_req(getTableRequest).getTable();
             setRowsCount(tableName, tableStatistics, table);
             try {
                 setColumnStatistics(tableName, tableStatistics, table, fieldSchema -> true);
