@@ -197,10 +197,10 @@ configure(subprojects - expected_result_generator - tempto_examples) {
                 }
             }
         }
-
         repositories {
             maven {
-                url = uri('https://oss.sonatype.org/service/local/staging/deploy/maven2/')
+                name = 'ossrh-staging-api'
+                url = 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
                 credentials {
                     username = System.getenv('NEXUS_USERNAME')
                     password = System.getenv('NEXUS_PASSWORD')
@@ -210,3 +210,34 @@ configure(subprojects - expected_result_generator - tempto_examples) {
     }
 }
 
+tasks.register('publishToMavenCentral') {
+    group = 'publishing'
+    description = 'Publishes all Maven publications produced by this project to Maven Central.'
+    dependsOn subprojects.collect { it.tasks.matching { it.name == 'publish' } }.flatten()
+    doLast {
+        def username = System.getenv('NEXUS_USERNAME')
+        def password = System.getenv('NEXUS_PASSWORD')
+        def namespace = System.getenv('NEXUS_NAMESPACE') ?: "io.prestodb"
+        def credentials = "${username}:${password}"
+        def token = credentials.bytes.encodeBase64().toString()
+
+        def url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${namespace}?publishing_type=automatic"
+        def connection = new URL(url).openConnection()
+        connection.setRequestMethod('POST')
+        connection.setRequestProperty('Authorization', "Bearer ${token}")
+        connection.setRequestProperty('Content-Type', 'application/json')
+        connection.setRequestProperty('Accept', 'application/json')
+        connection.setDoOutput(true)
+
+        def responseCode = connection.getResponseCode()
+        def responseBody = responseCode < 400 ?
+            connection.getInputStream().text :
+            connection.getErrorStream().text
+
+        if (responseCode < 400) {
+            logger.lifecycle("Successfully triggered automatic Maven Central publishing: ${responseBody}")
+        } else {
+            throw new org.gradle.api.GradleException("Failed to publish to Maven Central. HTTP ${responseCode}: ${responseBody}")
+        }
+    }
+}
