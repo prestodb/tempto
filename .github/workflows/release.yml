@@ -16,10 +16,6 @@ jobs:
       GPG_KEY_FILE: ${{ github.workspace }}/secret-key.gpg
 
     steps:
-      - name: Check branch
-        if: ${{ github.ref != 'refs/heads/master' }}
-        run: echo "Invalid branch. This action can only be run on the master branch." && exit 1
-
       - name: Checkout tempto source
         uses: actions/checkout@v4
         with:
@@ -122,8 +118,3 @@ jobs:
           ./gradlew sign publish
         env:
           GPG_TTY: $(tty)
-
-      - name: Push changes and tags
-        run: |
-          git checkout master
-          git push origin master --tags

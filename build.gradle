@@ -220,7 +220,7 @@ configure(subprojects - expected_result_generator - tempto_examples) {
             def credentials = "${username}:${password}"
             def token = credentials.bytes.encodeBase64().toString()
 
-            def url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${namespace}?publishing_type=automatic"
+            def url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${namespace}?publishing_type=user_managed"
             def connection = new URL(url).openConnection()
             connection.setRequestMethod('POST')
             connection.setRequestProperty('Authorization', "Bearer ${token}")
