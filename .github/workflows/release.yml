@@ -53,7 +53,6 @@ jobs:
           release_version=$(grep "^ext.tempto_version" build.gradle | cut -d"'" -f2 | sed 's/-SNAPSHOT//')
           echo "release_version=$release_version"
           echo "release_version=$release_version" >> $GITHUB_ENV
-          echo "next_release_msg=Update build.gradle to next development version" >> $GITHUB_ENV
 
       - name: Get last release version
         id: advance_version          
@@ -76,25 +75,26 @@ jobs:
           echo "last_version=$last_version"
           echo "next_version=$next_version"
 
-      - name: Generate CHANGELOG.md
-        id: generate_changelog
-        run: |
-          # Get commits between the latest version and HEAD, excluding changelog commits
-          changelog=$(git log $last_version..HEAD --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%H) %s" | grep -v "${{ env.next_release_msg }}")
-          echo "Generating CHANGELOG.md"
-          echo -e "## Changelog for ${{ env.release_version }}\n\n$changelog\n" > CHANGELOG.md
-          cat CHANGELOG.md
-
       - name: Update release version and commit
         run: |
           # Update the version in build.gradle
           sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.release_version }}'/" build.gradle
-          git add CHANGELOG.md build.gradle
-          git commit -m "Update CHANGELOG.md and build.gradle for version ${{ env.release_version }}"
+          git add build.gradle
+          git commit -m "[release-action] release version ${{ env.release_version }}"
 
       - name: Add release tag
         run: |
+          git checkout -b release-${{ env.release_version }}
           git tag -a ${{ env.release_version }} -m "Release ${{ env.release_version }}"
+
+      - name: Update release version in build.gradle
+        run: |
+          git checkout master
+          # Update the version in build.gradle
+          sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.next_version}}'/" build.gradle
+          git add build.gradle
+          git commit -m "[release-action] prepare for next development iteration"
+          git checkout release-${{ env.release_version }}
 
       - name: Set up GPG key
         run: |
@@ -119,17 +119,11 @@ jobs:
           cat gradle.properties
           export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
           export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
-          ./gradlew sign publish
+          ./gradlew sign publish publishToMavenCentral
         env:
           GPG_TTY: $(tty)
-      
-      - name: Update release version in build.gradle
-        run: |
-          # Update the version in build.gradle
-          sed -i "s/ext.tempto_version = '.*'/ext.tempto_version = '${{ env.next_version}}'/" build.gradle
-          git add build.gradle
-          git commit -m "${{ env.next_release_msg }}"
 
       - name: Push changes and tags
         run: |
+          git checkout master
           git push origin master --tags
