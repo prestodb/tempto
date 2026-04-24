@@ -217,12 +217,21 @@ tasks.register('publishToMavenCentral') {
     doLast {
         def username = System.getenv('NEXUS_USERNAME')
         def password = System.getenv('NEXUS_PASSWORD')
+
+        if (!username || !password) {
+            throw new org.gradle.api.GradleException(
+                "NEXUS_USERNAME and NEXUS_PASSWORD environment variables must be set to publish to Maven Central."
+            )
+        }
+
         def namespace = System.getenv('NEXUS_NAMESPACE') ?: "io.prestodb"
         def credentials = "${username}:${password}"
         def token = credentials.bytes.encodeBase64().toString()
 
         def url = "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${namespace}?publishing_type=automatic"
         def connection = new URL(url).openConnection()
+        connection.connectTimeout = 30_000
+        connection.readTimeout = 30_000
         connection.setRequestMethod('POST')
         connection.setRequestProperty('Authorization', "Bearer ${token}")
         connection.setRequestProperty('Content-Type', 'application/json')
