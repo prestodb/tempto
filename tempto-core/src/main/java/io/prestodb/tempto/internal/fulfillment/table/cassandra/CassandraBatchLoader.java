@@ -13,11 +13,9 @@
  */
 package io.prestodb.tempto.internal.fulfillment.table.cassandra;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.BatchStatement;
-import com.datastax.oss.driver.api.core.cql.BatchStatementBuilder;
-import com.datastax.oss.driver.api.core.cql.DefaultBatchType;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.driver.core.BatchStatement;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.Session;
 
 import java.util.Iterator;
 import java.util.List;
@@ -30,12 +28,12 @@ import static java.util.stream.Collectors.joining;
 
 public class CassandraBatchLoader
 {
-    private final CqlSession session;
+    private final Session session;
     private final String insertQuery;
     private final int columnsCount;
     private final int batchRowsCount;
 
-    public CassandraBatchLoader(CqlSession session, String tableName, List<String> columnNames, int batchRowsCount)
+    public CassandraBatchLoader(Session session, String tableName, List<String> columnNames, int batchRowsCount)
     {
         this.session = requireNonNull(session, "session is null");
         requireNonNull(tableName, "tableName is null");
@@ -69,28 +67,24 @@ public class CassandraBatchLoader
     {
         PreparedStatement statement = session.prepare(insertQuery);
 
-        BatchStatementBuilder batchBuilder = createBatchStatementBuilder();
-        int currentBatchSize = 0;
-        
+        BatchStatement batch = createBatchStatement();
         while (rows.hasNext()) {
-            if (currentBatchSize >= batchRowsCount) {
-                session.execute(batchBuilder.build());
-                batchBuilder = createBatchStatementBuilder();
-                currentBatchSize = 0;
+            if (batch.size() >= batchRowsCount) {
+                session.execute(batch);
+                batch = createBatchStatement();
             }
             List<Object> row = rows.next();
             checkState(row.size() == columnsCount, "values count in a row is expected to be %d, but found: %d", columnsCount, row.size());
-            batchBuilder.addStatement(statement.bind(row.toArray()));
-            currentBatchSize++;
+            batch.add(statement.bind(row.toArray()));
         }
 
-        if (currentBatchSize > 0) {
-            session.execute(batchBuilder.build());
+        if (batch.size() > 0) {
+            session.execute(batch);
         }
     }
 
-    private static BatchStatementBuilder createBatchStatementBuilder()
+    private static BatchStatement createBatchStatement()
     {
-        return BatchStatement.builder(DefaultBatchType.UNLOGGED);
+        return new BatchStatement(BatchStatement.Type.UNLOGGED);
     }
 }
