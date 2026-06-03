@@ -157,7 +157,12 @@ configure(subprojects - expected_result_generator - tempto_examples) {
 
     signing {
         required { isReleaseVersion && !skipSigning }
-        sign publishing.publications
+        // Only attach signatures when we actually sign (release builds). For SNAPSHOT / JitPack
+        // builds signing is skipped, and registering the signature artifacts unconditionally would
+        // make publishToMavenLocal fail looking for a non-existent .asc file.
+        if (isReleaseVersion && !skipSigning) {
+            sign publishing.publications
+        }
         useGpgCmd() //Use system provide GPG
     }
 
