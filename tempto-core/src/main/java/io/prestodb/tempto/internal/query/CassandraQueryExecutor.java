@@ -168,7 +168,7 @@ public class CassandraQueryExecutor
     @Override
     public void close()
     {
-        if (session != null && !session.isClosed()) {
+        if (!session.isClosed()) {
             session.close();
         }
     }

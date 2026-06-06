@@ -58,7 +58,7 @@ ext.versions = [
         freemarker        : '2.3.22',
         objenesis         : '1.4',
         jackson           : '2.4.4',
-        cassandra         : '4.19.2',
+        cassandra         : '4.19.3',
         commons_cli       : '1.3.1',
         thrift            : '0.16.0',
         kafka             : '3.9.0',
