@@ -71,6 +71,7 @@ databases:
   cassandra:
     host: ${cluster.cassandra}
     port: 9042
+    datacenter: datacenter1
     default_schema: test
     skip_create_schema: false
     table_manager_type: cassandra
