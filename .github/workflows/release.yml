@@ -114,12 +114,12 @@ jobs:
           echo "nexusUsername=${{ secrets.NEXUS_USERNAME }}" >> gradle.properties
           echo "nexusPassword=${{ secrets.NEXUS_PASSWORD }}" >> gradle.properties
 
-      - name: publish release
+      - name: Sign and publish release
         run: |
           cat gradle.properties
           export NEXUS_USERNAME="${{ secrets.NEXUS_USERNAME }}"
           export NEXUS_PASSWORD="${{ secrets.NEXUS_PASSWORD }}"
-          ./gradlew publish publishToMavenCentral
+          ./gradlew sign publish publishToMavenCentral
         env:
           GPG_TTY: $(tty)
 
